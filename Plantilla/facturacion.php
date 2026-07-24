@@ -1,0 +1,170 @@
+<?php
+session_start();
+include('conexion.php');
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Facturación y Recibos - Clínica</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { 
+            background: url('fondo-clinica.jpg') no-repeat center center fixed; 
+            background-size: cover;
+        }
+        .seccion-bloque { 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 12px; 
+            padding: 25px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); 
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm">
+        <h2 class="m-0"><i class="fa-solid fa-file-invoice-dollar text-success me-2"></i>Facturación y Recibos</h2>
+        <a href="menu.php" class="btn btn-secondary fw-bold"><i class="fa-solid fa-arrow-left me-1"></i> Volver al Menú</a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Formulario para Emitir Recibo -->
+        <div class="col-md-5">
+            <div class="seccion-bloque border-top border-success border-4">
+                <h4 class="fw-bold text-success mb-3"><i class="fa-solid fa-cash-register me-2"></i>Nuevo Recibo / Factura</h4>
+                <form id="formFactura">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">N° Recibo:</label>
+                            <input type="text" name="numero_recibo" class="form-control" placeholder="Ej: REC-001">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Fecha Emisión:*</label>
+                            <input type="date" name="fecha_emision" class="form-control" required value="<?php echo date('Y-m-d'); ?>">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Identidad Paciente:*</label>
+                            <input type="text" name="identidad_paciente" class="form-control" required placeholder="0000-0000-00000">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">RTN Cliente:</label>
+                            <input type="text" name="rtn_cliente" class="form-control" placeholder="RTN o N/A">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Concepto:*</label>
+                        <textarea name="concepto" class="form-control" rows="2" required placeholder="Detalle del servicio..."></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Suma Neta:</label>
+                            <input type="number" step="0.01" name="suma_neta" id="suma_neta" class="form-control" value="0.00" oninput="calcularTotal()">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Honorarios:</label>
+                            <input type="number" step="0.01" name="total_honorarios" id="total_honorarios" class="form-control" value="0.00" oninput="calcularTotal()">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Retenido:</label>
+                            <input type="number" step="0.01" name="total_retenido" id="total_retenido" class="form-control" value="0.00" oninput="calcularTotal()">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-success">Neto Recibido:*</label>
+                            <input type="number" step="0.01" name="total_neto_recibido" id="total_neto_recibido" class="form-control fw-bold text-success" required value="0.00">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Método de Pago:*</label>
+                        <select name="metodo_pago" class="form-select">
+                            <option value="Efectivo" selected>Efectivo</option>
+                            <option value="Transferencia">Transferencia</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 fw-bold"><i class="fa-solid fa-save me-2"></i>Guardar Recibo</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Historial y Tabla de Facturación -->
+        <div class="col-md-7">
+            <div class="seccion-bloque">
+                <h4 class="fw-bold text-primary mb-3"><i class="fa-solid fa-receipt me-2"></i>Historial de Recibos</h4>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha / Recibo</th>
+                                <th>Identidad</th>
+                                <th>Concepto</th>
+                                <th>Método</th>
+                                <th>Neto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $resultado = $conexion->query("SELECT * FROM facturacion_recibos ORDER BY fecha_emision DESC, id_factura DESC");
+                            if ($resultado && $resultado->num_rows > 0) {
+                                while ($row = $resultado->fetch_assoc()) {
+                                    $recibo = !empty($row['numero_recibo']) ? $row['numero_recibo'] : 'S/N';
+                                    echo "<tr>
+                                        <td><small class='text-muted'>{$row['fecha_emision']}</small><br><strong>{$recibo}</strong></td>
+                                        <td><code>{$row['identidad_paciente']}</code></td>
+                                        <td>{$row['concepto']}</td>
+                                        <td><span class='badge bg-secondary'>{$row['metodo_pago']}</span></td>
+                                        <td class='text-success fw-bold'>L. " . number_format($row['total_neto_recibido'], 2) . "</td>
+                                    </tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='5' class='text-center text-muted py-4'>No hay recibos registrados aún.</td></tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function calcularTotal() {
+    let neta = parseFloat(document.getElementById('suma_neta').value) || 0;
+    let honorarios = parseFloat(document.getElementById('total_honorarios').value) || 0;
+    let retenido = parseFloat(document.getElementById('total_retenido').value) || 0;
+    let total = (neta + honorarios) - retenido;
+    document.getElementById('total_neto_recibido').value = total.toFixed(2);
+}
+
+document.getElementById('formFactura').addEventListener('submit', function(e) {
+    e.preventDefault();
+    let formData = new FormData(this);
+
+    fetch('guardar_factura_ajax.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.mensaje);
+        if (data.exito) {
+            this.reset();
+            location.reload();
+        }
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        alert("Error de conexión al intentar guardar el recibo.");
+    });
+});
+</script>
+</body>
+</html>

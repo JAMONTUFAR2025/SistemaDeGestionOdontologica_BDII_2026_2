@@ -1,0 +1,125 @@
+<?php
+session_start();
+include('conexion.php');
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Control de Egresos y Gastos - Clínica</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { 
+            background: url('fondo-clinica.jpg') no-repeat center center fixed; 
+            background-size: cover;
+        }
+        .seccion-bloque { 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 12px; 
+            padding: 25px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); 
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm">
+        <h2 class="m-0"><i class="fa-solid fa-wallet text-danger me-2"></i>Control de Egresos y Gastos</h2>
+        <a href="menu.php" class="btn btn-secondary fw-bold"><i class="fa-solid fa-arrow-left me-1"></i> Volver al Menú</a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Formulario para Registrar Gasto -->
+        <div class="col-md-4">
+            <div class="seccion-bloque border-top border-danger border-4">
+                <h4 class="fw-bold text-danger mb-3"><i class="fa-solid fa-plus-circle me-2"></i>Registrar Nuevo Gasto</h4>
+                <form id="formEgreso">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descripción / Concepto:*</label>
+                        <textarea name="descripcion" class="form-control" rows="2" required placeholder="Ej: Compra de guantes y mascarillas"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Monto (Lps):*</label>
+                        <input type="number" step="0.01" name="monto" class="form-control" required placeholder="0.00">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Fecha del Gasto:*</label>
+                        <input type="date" name="fecha" class="form-control" required value="<?php echo date('Y-m-d'); ?>">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">N° Comprobante / Factura:</label>
+                        <input type="text" name="numero_comprobante_factura" class="form-control" placeholder="Ej: FAC-00123">
+                    </div>
+                    <button type="submit" class="btn btn-danger w-100 fw-bold"><i class="fa-solid fa-save me-2"></i>Guardar Egreso</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Historial y Tabla de Egresos -->
+        <div class="col-md-8">
+            <div class="seccion-bloque">
+                <h4 class="fw-bold text-primary mb-3"><i class="fa-solid fa-list-ul me-2"></i>Historial de Gastos Registrados</h4>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Descripción</th>
+                                <th>N° Factura</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $resultado = $conexion->query("SELECT * FROM egresos_gastos ORDER BY fecha DESC, id_egreso DESC");
+                            if ($resultado && $resultado->num_rows > 0) {
+                                while ($row = $resultado->fetch_assoc()) {
+                                    $factura = !empty($row['numero_comprobante_factura']) ? $row['numero_comprobante_factura'] : 'N/A';
+                                    echo "<tr>
+                                        <td>{$row['fecha']}</td>
+                                        <td><strong>{$row['descripcion']}</strong></td>
+                                        <td><span class='badge bg-secondary'>{$factura}</span></td>
+                                        <td class='text-danger fw-bold'>L. " . number_format($row['monto'], 2) . "</td>
+                                    </tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='4' class='text-center text-muted py-4'>No hay egresos registrados aún.</td></tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.getElementById('formEgreso').addEventListener('submit', function(e) {
+    e.preventDefault();
+    let formData = new FormData(this);
+
+    fetch('guardar_egreso_ajax.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.mensaje);
+        if (data.exito) {
+            this.reset();
+            location.reload();
+        }
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        alert("Error de conexión al intentar guardar el egreso.");
+    });
+});
+</script>
+</body>
+</html>
