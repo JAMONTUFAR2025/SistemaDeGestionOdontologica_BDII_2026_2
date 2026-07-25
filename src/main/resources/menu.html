@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Principal - SOE Odontología</title>
+
+    <!-- Librería de iconos FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('fondo-clinica.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            max-width: 900px;
+            margin: 10px auto 30px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            color: #007bf0;
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .header p {
+            color: #555;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        /* Contenedor de las tarjetas de módulos */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Estilo de cada tarjeta / módulo */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 123, 240, 0.3);
+        }
+
+        /* Ajuste de color y tamaño para los iconos profesionales */
+        .card .icon {
+            font-size: 45px;
+            margin-bottom: 15px;
+            color: #007bf0;
+        }
+
+        .card h3 {
+            margin: 10px 0 5px 0;
+            color: #007bf0;
+        }
+
+        .card p {
+            font-size: 13px;
+            color: #666;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Clínica Odontológica SOE</h1>
+        <p>Sistema de Gestión Médica y Administrativa</p>
+        <p style="color: #007bf0; font-weight: bold;">
+            Bienvenido(a): Dr. Usuario (Administrador)
+            | <a href="login.html" style="color: #dc3545; text-decoration: none;">Cerrar Sesión</a>
+        </p>
+    </div>
+
+    <!-- Panel de Citas del Día -->
+    <div
+        style="max-width: 900px; margin: 0 auto 30px auto; background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+        <h3 style="color: #007bf0; margin-top: 0;"><i class="fas fa-bell"></i> Citas Programadas para Hoy</h3>
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">
+            <thead>
+                <tr style="background: #007bf0; color: white; text-align: left;">
+                    <th style="padding: 10px;">Hora</th>
+                    <th style="padding: 10px;">Paciente</th>
+                    <th style="padding: 10px;">Motivo</th>
+                    <th style="padding: 10px;">Teléfono</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 10px; font-weight: bold; color: #007bf0;">08:00 AM</td>
+                    <td style="padding: 10px;">Ejemplo Paciente</td>
+                    <td style="padding: 10px;">Limpieza General</td>
+                    <td style="padding: 10px;">+504 0000-0000</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="dashboard-grid">
+
+        <!-- Módulo: Registrar Paciente -->
+        <a href="registrar_paciente.html" class="card">
+            <div class="icon"><i class="fas fa-user-plus"></i></div>
+            <h3>Registrar Paciente</h3>
+            <p>Ingresar un nuevo paciente al sistema</p>
+        </a>
+
+        <!-- Módulo: Agenda / Citas -->
+        <a href="agendar_cita.html" class="card">
+            <div class="icon"><i class="fas fa-calendar-alt"></i></div>
+            <h3>Agenda y Citas</h3>
+            <p>Programar y gestionar citas médicas</p>
+        </a>
+
+        <!-- Módulo: Historia Clínica -->
+        <a href="historia_clinica.html" class="card">
+            <div class="icon"><i class="fas fa-notes-medical"></i></div>
+            <h3>Historia Clínica</h3>
+            <p>Odontograma y diagnósticos</p>
+        </a>
+
+        <!-- Módulo: Facturación -->
+        <a href="facturacion.html" class="card">
+            <div class="icon"><i class="fas fa-file-invoice-dollar"></i></div>
+            <h3>Facturación</h3>
+            <p>Cobros, recibos del SAR y pagos</p>
+        </a>
+
+        <!-- Módulo: Control de Egresos -->
+        <a href="egresos.html" class="card">
+            <div class="icon"><i class="fas fa-chart-line"></i></div>
+            <h3>Egresos y Gastos</h3>
+            <p>Registro de compras e insumos</p>
+        </a>
+
+        <!-- Módulo: Personal Médico -->
+        <a href="registrar_medico.html" class="card">
+            <div class="icon"><i class="fas fa-user-md"></i></div>
+            <h3>Personal Médico</h3>
+            <p>Gestión de doctores, usuarios y roles</p>
+        </a>
+
+    </div>
+
+</body>
+
+</html>
