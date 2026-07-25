@@ -16,7 +16,7 @@
 }
         .container { 
     max-width: 800px; 
-    margin: 30px auto; 
+    margin: 30px auto;
     background: rgba(255, 255, 255, 0.95); 
     padding: 25px; 
     border-radius: 8px; 
