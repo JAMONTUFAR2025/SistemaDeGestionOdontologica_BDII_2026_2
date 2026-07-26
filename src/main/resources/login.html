@@ -111,7 +111,7 @@
         <!-- SECCIÓN 1: INICIO DE SESIÓN -->
         <div id="login-section">
             <h2>SOE Odontología</h2>
-            <form onsubmit="event.preventDefault(); window.location.href='menu.html';">
+            <form onsubmit="intentarLogin(event)">
                 <div class="input-group">
                     <label for="usuario">Usuario o Correo</label>
                     <input type="text" id="usuario" required placeholder="Ingrese su usuario">
@@ -131,31 +131,183 @@
         <div id="recovery-section" class="hidden">
             <h2>Recuperar Cuenta</h2>
             <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
-                Ingresa tu correo electrónico o número de teléfono registrado para enviarte las instrucciones.
+                Ingresa tu correo electrónico registrado para enviarte un código de seguridad.
             </p>
-            <form onsubmit="event.preventDefault(); alert('Instrucciones enviadas con éxito.'); mostrarLogin();">
+            <form onsubmit="intentarRecuperacion(event)">
                 <div class="input-group">
-                    <label for="recovery-input">Correo o Teléfono</label>
-                    <input type="text" id="recovery-input" required placeholder="ejemplo@correo.com o +504...">
+                    <label for="recovery-input">Correo Electrónico</label>
+                    <input type="email" id="recovery-input" required placeholder="ejemplo@correo.com">
                 </div>
-                <button type="submit" class="btn" style="background-color: #3498db;">Enviar Enlace</button>
+                <button type="submit" class="btn" style="background-color: #3498db;">Enviar Código</button>
             </form>
             <div class="form-footer">
                 <a onclick="mostrarLogin()">Regresar al inicio de sesión</a>
             </div>
         </div>
+
+        <!-- SECCIÓN 3: VERIFICAR CÓDIGO -->
+        <div id="code-section" class="hidden">
+            <h2>Verificar Código</h2>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
+                Hemos enviado un código de 6 dígitos a tu correo. Ingrésalo a continuación.
+            </p>
+            <form onsubmit="intentarVerificarCodigo(event)">
+                <div class="input-group">
+                    <label for="code-input">Código de Seguridad</label>
+                    <input type="text" id="code-input" required placeholder="Ej: 123456" maxlength="6" style="text-align: center; font-size: 18px; letter-spacing: 5px;">
+                </div>
+                <button type="submit" class="btn" style="background-color: #2ecc71;">Verificar Código</button>
+            </form>
+            <div class="form-footer">
+                <a onclick="mostrarLogin()">Cancelar</a>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 4: NUEVA CONTRASEÑA -->
+        <div id="new-password-section" class="hidden">
+            <h2>Nueva Contraseña</h2>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
+                Ingresa tu nueva contraseña para acceder al sistema.
+            </p>
+            <form onsubmit="intentarCambiarContrasenia(event)">
+                <div class="input-group">
+                    <label for="new-password">Nueva Contraseña</label>
+                    <input type="password" id="new-password" required placeholder="Mínimo 6 caracteres" minlength="6">
+                </div>
+                <div class="input-group">
+                    <label for="confirm-password">Confirmar Contraseña</label>
+                    <input type="password" id="confirm-password" required placeholder="Repite la contraseña">
+                </div>
+                <button type="submit" class="btn" style="background-color: #9b59b6;">Guardar Contraseña</button>
+            </form>
+            <div class="form-footer">
+                <a onclick="mostrarLogin()">Cancelar</a>
+            </div>
+        </div>
     </div>
 
     <script>
-        function mostrarRecuperacion() {
+        // Variables globales para guardar el estado del proceso
+        var correoUsuarioActual = "";
+        var codigoRecuperacionActual = "";
+
+        function ocultarTodasLasSecciones() {
             document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('recovery-section').classList.add('hidden');
+            document.getElementById('code-section').classList.add('hidden');
+            document.getElementById('new-password-section').classList.add('hidden');
+        }
+
+        function mostrarRecuperacion() {
+            ocultarTodasLasSecciones();
             document.getElementById('recovery-section').classList.remove('hidden');
         }
 
         function mostrarLogin() {
-            document.getElementById('recovery-section').classList.add('hidden');
+            ocultarTodasLasSecciones();
             document.getElementById('login-section').classList.remove('hidden');
+            // Limpiamos los campos y variables
+            correoUsuarioActual = "";
+            codigoRecuperacionActual = "";
+            document.getElementById('recovery-input').value = "";
+            document.getElementById('code-input').value = "";
+            document.getElementById('new-password').value = "";
+            document.getElementById('confirm-password').value = "";
         }
+        
+        function intentarLogin(event) {
+            event.preventDefault();
+            var correo = document.getElementById('usuario').value;
+            var pass = document.getElementById('password').value;
+            
+            if (window.javaConnector) {
+                var exito = window.javaConnector.login(correo, pass);
+                if (exito) {
+                    window.location.href = 'menu.html';
+                } else {
+                    alert("Credenciales incorrectas o usuario inactivo.");
+                }
+            } else {
+                alert("Error: El puente con Java no está inicializado.");
+            }
+        }
+        
+        function intentarRecuperacion(event) {
+            event.preventDefault();
+            var correo = document.getElementById('recovery-input').value;
+            
+            if (window.javaConnector) {
+                // Notificar al usuario que estamos cargando (puede tardar un par de segundos en enviar el correo)
+                document.querySelector('#recovery-section button').innerText = "Enviando...";
+                document.querySelector('#recovery-section button').disabled = true;
+
+                setTimeout(function() {
+                    var respuesta = window.javaConnector.enviarCodigoRecuperacion(correo);
+                    var partes = respuesta.split("|");
+                    alert(partes[1]);
+                    
+                    document.querySelector('#recovery-section button').innerText = "Enviar Código";
+                    document.querySelector('#recovery-section button').disabled = false;
+
+                    if (partes[0] === "OK") {
+                        correoUsuarioActual = correo; // Guardamos el correo en memoria
+                        ocultarTodasLasSecciones();
+                        document.getElementById('code-section').classList.remove('hidden');
+                    }
+                }, 100); // Pequeño delay para que la UI se actualice a "Enviando..."
+            } else {
+                alert("Error: El puente con Java no está inicializado.");
+            }
+        }
+
+        function intentarVerificarCodigo(event) {
+            event.preventDefault();
+            var codigo = document.getElementById('code-input').value;
+
+            if (window.javaConnector) {
+                var respuesta = window.javaConnector.verificarCodigo(correoUsuarioActual, codigo);
+                var partes = respuesta.split("|");
+                
+                if (partes[0] === "OK") {
+                    codigoRecuperacionActual = codigo; // Guardamos el codigo validado
+                    ocultarTodasLasSecciones();
+                    document.getElementById('new-password-section').classList.remove('hidden');
+                } else {
+                    alert(partes[1]); // Mostrar el error
+                }
+            }
+        }
+
+        function intentarCambiarContrasenia(event) {
+            event.preventDefault();
+            var pass1 = document.getElementById('new-password').value;
+            var pass2 = document.getElementById('confirm-password').value;
+
+            if (pass1 !== pass2) {
+                alert("Las contraseñas no coinciden. Por favor, verifícalas.");
+                return;
+            }
+
+            if (window.javaConnector) {
+                var respuesta = window.javaConnector.restablecerContrasenia(correoUsuarioActual, codigoRecuperacionActual, pass1);
+                var partes = respuesta.split("|");
+                alert(partes[1]);
+
+                if (partes[0] === "OK") {
+                    mostrarLogin(); // Lo regresamos al login para que entre con su nueva contraseña
+                }
+            }
+        }
+
+        // Filtro para el codigo (solo numeros)
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputCode = document.getElementById('code-input');
+            if (inputCode) {
+                inputCode.addEventListener('input', function(e) {
+                    this.value = this.value.replace(/\D/g, ''); // Quita todo lo que no sea numero
+                });
+            }
+        });
     </script>
 
 </body>

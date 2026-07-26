@@ -99,7 +99,7 @@
         <h2>Registro de Nuevo Paciente</h2>
 
         <!-- El formulario ya no usa un action de PHP, se preparó para conectarse con JavaScript/Java -->
-        <form id="registroPacienteForm">
+        <form id="registroPacienteForm" onsubmit="registrarPaciente(event)">
 
             <div class="section-title">Datos Personales</div>
 
@@ -110,14 +110,14 @@
                 </div>
                 <div class="col form-group">
                     <label for="nombre_completo">Nombre Completo:</label>
-                    <input type="text" id="nombre_completo" name="nombre_completo" required>
+                    <input type="text" id="nombre_completo" name="nombreCompleto" required>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col form-group">
                     <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
-                    <input type="date" id="fecha_nacimiento" name="fecha_nacimiento">
+                    <input type="text" id="fecha_nacimiento" name="fechaNacimiento" placeholder="DD-MM-AAAA">
                 </div>
                 <div class="col form-group">
                     <label for="genero">Género:</label>
@@ -149,11 +149,11 @@
             <div class="row">
                 <div class="col form-group">
                     <label for="persona_responsable">Nombre del Responsable:</label>
-                    <input type="text" id="persona_responsable" name="persona_responsable">
+                    <input type="text" id="persona_responsable" name="personaResponsable">
                 </div>
                 <div class="col form-group">
                     <label for="telefono_responsable">Teléfono del Responsable:</label>
-                    <input type="text" id="telefono_responsable" name="telefono_responsable">
+                    <input type="text" id="telefono_responsable" name="telefonoResponsable">
                 </div>
             </div>
 
@@ -161,6 +161,101 @@
         </form>
     </div>
 
+    <script>
+        function registrarPaciente(event) {
+            event.preventDefault(); // Evitar que recargue la página
+            
+            // Recopilamos los datos del formulario
+            const form = document.getElementById('registroPacienteForm');
+            const formData = new FormData(form);
+            const paciente = Object.fromEntries(formData.entries());
+            
+            // Convertimos a JSON
+            const jsonStr = JSON.stringify(paciente);
+            
+            if (window.javaConnector) {
+                // Llamamos a Java
+                const respuesta = window.javaConnector.registrarPaciente(jsonStr);
+                const partes = respuesta.split("|");
+                alert(partes[1]);
+                
+                if (partes[0] === "OK") {
+                    form.reset(); // Limpiar el formulario si se guardó bien
+                }
+            } else {
+                alert("Error: El puente con Java no está inicializado.");
+            }
+        }
+
+        // --- Funciones para autocompletar guiones ---
+        
+        function formatIdentidad(e) {
+            let val = e.target.value.replace(/\D/g, ''); // Quita todo lo que no sea numero
+            let newVal = '';
+            if (val.length > 0) {
+                newVal += val.substring(0, 4);
+            }
+            if (val.length >= 5) {
+                newVal += '-' + val.substring(4, 8);
+            }
+            if (val.length >= 9) {
+                newVal += '-' + val.substring(8, 13);
+            }
+            e.target.value = newVal;
+        }
+
+        function formatTelefono(e) {
+            let val = e.target.value.replace(/\D/g, '');
+            let newVal = '';
+            if (val.length > 0) {
+                newVal += val.substring(0, 4);
+            }
+            if (val.length >= 5) {
+                newVal += '-' + val.substring(4, 8);
+            }
+            e.target.value = newVal;
+        }
+
+        function formatFecha(e) {
+            let val = e.target.value.replace(/\D/g, ''); // Quita todo lo que no sea numero
+            let newVal = '';
+            if (val.length > 0) {
+                newVal += val.substring(0, 2); // Dia
+            }
+            if (val.length >= 3) {
+                newVal += '-' + val.substring(2, 4); // Mes
+            }
+            if (val.length >= 5) {
+                newVal += '-' + val.substring(4, 8); // Año
+            }
+            e.target.value = newVal;
+        }
+
+        // Agregar los eventos a los inputs cuando cargue la pagina
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputIdentidad = document.getElementById('identidad');
+            const inputTelefono = document.getElementById('telefono');
+            const inputTelefonoResp = document.getElementById('telefono_responsable');
+            const inputFecha = document.getElementById('fecha_nacimiento');
+
+            if (inputIdentidad) {
+                inputIdentidad.addEventListener('input', formatIdentidad);
+                inputIdentidad.maxLength = 15; // 13 numeros + 2 guiones
+            }
+            if (inputTelefono) {
+                inputTelefono.addEventListener('input', formatTelefono);
+                inputTelefono.maxLength = 9; // 8 numeros + 1 guion
+            }
+            if (inputTelefonoResp) {
+                inputTelefonoResp.addEventListener('input', formatTelefono);
+                inputTelefonoResp.maxLength = 9; 
+            }
+            if (inputFecha) {
+                inputFecha.addEventListener('input', formatFecha);
+                inputFecha.maxLength = 10; // DD-MM-AAAA (8 numeros + 2 guiones)
+            }
+        });
+    </script>
 </body>
 
 </html>

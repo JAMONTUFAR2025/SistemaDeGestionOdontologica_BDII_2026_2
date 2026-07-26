@@ -18,6 +18,15 @@ public class Main extends Application {
             throw new RuntimeException("No se encontró el archivo '/login.html' en src/main/resources/");
         }
         String urlHtml = resource.toExternalForm();
+        
+        // Configurar el puente de Java a Javascript
+        webView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == javafx.concurrent.Worker.State.SUCCEEDED) {
+                netscape.javascript.JSObject window = (netscape.javascript.JSObject) webView.getEngine().executeScript("window");
+                window.setMember("javaConnector", new application.controller.JavaConnector());
+            }
+        });
+        
         webView.getEngine().load(urlHtml);
 
         // 3. Configurar la ventana

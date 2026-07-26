@@ -211,3 +211,12 @@ ADD COLUMN fecha_inactivacion DATETIME NULL AFTER fecha_registro;
 
 ALTER TABLE Facturacion_Recibos
 ADD COLUMN fecha_inactivacion DATETIME NULL AFTER metodo_pago;
+
+-- ========================================== 
+-- USUARIO ADMINISTRADOR POR DEFECTO 
+-- INSTRUCCIONES: Cambia 'INGRESA_TU_CORREO_AQUI' por tu correo real de Gmail.
+-- Esto te servira para probar la recuperacion de contrasenia.
+-- ==========================================
+INSERT INTO Usuarios_Login (correo, contrasenia, rol_sistema, estado) 
+VALUES ('INGRESA_TU_CORREO_AQUI', 'admin123', 'Administrador', 'Activo');
+
