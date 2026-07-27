@@ -108,7 +108,7 @@
             position: relative;
             width: 100%;
         }
-        
+
         .autocomplete-items {
             position: absolute;
             border: 1px solid #cbd5e1;
@@ -120,9 +120,9 @@
             right: 0;
             background-color: #fff;
             border-radius: 0 0 6px 6px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
+
         .autocomplete-items div {
             padding: 10px;
             cursor: pointer;
@@ -130,7 +130,7 @@
             border-bottom: 1px solid #cbd5e1;
             font-size: 13px;
         }
-        
+
         .autocomplete-items div:hover {
             background-color: #e9e9e9;
         }
@@ -142,6 +142,9 @@
     <div class="login-container">
         <!-- SECCIÓN 1: INICIO DE SESIÓN -->
         <div id="login-section">
+            <div class="text-center mb-3">
+                <img src="Logo.png" alt="Logo Clínica SOE" style="max-width: 90px; height: auto;">
+            </div>
             <h2>SOE Odontología</h2>
             <form onsubmit="intentarLogin(event)">
                 <div class="input-group">
@@ -191,7 +194,8 @@
             <form onsubmit="intentarVerificarCodigo(event)">
                 <div class="input-group">
                     <label for="code-input">Código de Seguridad</label>
-                    <input type="text" id="code-input" required placeholder="Ej: 123456" maxlength="6" style="text-align: center; font-size: 18px; letter-spacing: 5px;">
+                    <input type="text" id="code-input" required placeholder="Ej: 123456" maxlength="6"
+                        style="text-align: center; font-size: 18px; letter-spacing: 5px;">
                 </div>
                 <button type="submit" class="btn" style="background-color: #2ecc71;">Verificar Código</button>
             </form>
@@ -251,12 +255,12 @@
             document.getElementById('new-password').value = "";
             document.getElementById('confirm-password').value = "";
         }
-        
+
         function intentarLogin(event) {
             event.preventDefault();
             var correo = document.getElementById('usuario').value;
             var pass = document.getElementById('password').value;
-            
+
             if (window.javaConnector) {
                 var exito = window.javaConnector.login(correo, pass);
                 if (exito) {
@@ -268,21 +272,21 @@
                 alert("Error: El puente con Java no está inicializado.");
             }
         }
-        
+
         function intentarRecuperacion(event) {
             event.preventDefault();
             var correo = document.getElementById('recovery-input').value;
-            
+
             if (window.javaConnector) {
                 // Notificar al usuario que estamos cargando (puede tardar un par de segundos en enviar el correo)
                 document.querySelector('#recovery-section button').innerText = "Enviando...";
                 document.querySelector('#recovery-section button').disabled = true;
 
-                setTimeout(function() {
+                setTimeout(function () {
                     var respuesta = window.javaConnector.enviarCodigoRecuperacion(correo);
                     var partes = respuesta.split("|");
                     alert(partes[1]);
-                    
+
                     document.querySelector('#recovery-section button').innerText = "Enviar Código";
                     document.querySelector('#recovery-section button').disabled = false;
 
@@ -304,7 +308,7 @@
             if (window.javaConnector) {
                 var respuesta = window.javaConnector.verificarCodigo(correoUsuarioActual, codigo);
                 var partes = respuesta.split("|");
-                
+
                 if (partes[0] === "OK") {
                     codigoRecuperacionActual = codigo; // Guardamos el codigo validado
                     ocultarTodasLasSecciones();
@@ -340,7 +344,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const inputCode = document.getElementById('code-input');
             if (inputCode) {
-                inputCode.addEventListener('input', function(e) {
+                inputCode.addEventListener('input', function (e) {
                     this.value = this.value.replace(/\D/g, ''); // Quita todo lo que no sea numero
                 });
             }
@@ -357,23 +361,23 @@
 
         function autocomplete(inp) {
             if (!inp) return;
-            inp.addEventListener("input", function(e) {
+            inp.addEventListener("input", function (e) {
                 var a, b, i, val = this.value;
                 closeAllLists();
                 if (!val) { return false; }
-                
+
                 a = document.createElement("DIV");
                 a.setAttribute("id", this.id + "autocomplete-list");
                 a.setAttribute("class", "autocomplete-items");
                 this.parentNode.appendChild(a);
-                
+
                 for (i = 0; i < correosGuardados.length; i++) {
                     if (correosGuardados[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
                         b = document.createElement("DIV");
                         b.innerHTML = "<strong>" + correosGuardados[i].substr(0, val.length) + "</strong>";
                         b.innerHTML += correosGuardados[i].substr(val.length);
                         b.innerHTML += "<input type='hidden' value='" + correosGuardados[i] + "'>";
-                        b.addEventListener("click", function(e) {
+                        b.addEventListener("click", function (e) {
                             inp.value = this.getElementsByTagName("input")[0].value;
                             closeAllLists();
                         });
@@ -383,7 +387,7 @@
             });
 
             // Si dan clic para ver sugerencias aunque no hayan escrito nada
-            inp.addEventListener("click", function(e) {
+            inp.addEventListener("click", function (e) {
                 if (this.value == "") {
                     closeAllLists();
                     var a = document.createElement("DIV");
@@ -394,7 +398,7 @@
                         var b = document.createElement("DIV");
                         b.innerHTML = correosGuardados[i];
                         b.innerHTML += "<input type='hidden' value='" + correosGuardados[i] + "'>";
-                        b.addEventListener("click", function(e) {
+                        b.addEventListener("click", function (e) {
                             inp.value = this.getElementsByTagName("input")[0].value;
                             closeAllLists();
                         });
