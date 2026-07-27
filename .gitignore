@@ -44,6 +44,3 @@ buildNumber.properties
 .settings/
 .classpath
 .factorypath
-
-# Custom configurations
-database.properties
