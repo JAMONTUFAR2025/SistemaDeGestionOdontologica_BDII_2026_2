@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Personal Médico - SOE Odontología</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('fondo-clinica.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 30px 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: #007bf0;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input,
+        select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bf0;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 25px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: #007bf0;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Nuevo estilo para separar secciones */
+        .section-title {
+            grid-column: span 2;
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            color: #495057;
+            border-left: 4px solid #007bf0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div style="margin-bottom: 15px;">
+            <a href="menu.html" class="back-link">← Volver al Menú Principal</a>
+        </div>
+
+        <h2>Registro de Personal y Usuario</h2>
+
+        <!-- Formulario listo para Java/JavaScript -->
+        <form id="registroMedicoForm">
+            <div class="form-grid">
+
+                <!-- SECCIÓN 1: DATOS DEL PERSONAL MÉDICO -->
+                <div class="section-title">Datos del Personal de la Clínica</div>
+
+                <div class="form-group full-width">
+                    <label for="nombre_completo">Nombre Completo:*</label>
+                    <input type="text" id="nombre_completo" name="nombre_completo" placeholder="Ej: Dr. Carlos Mendoza"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="identidad">Identidad (DNI):*</label>
+                    <input type="text" id="identidad" name="identidad" placeholder="0801-1995-12345" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono">Teléfono:*</label>
+                    <input type="text" id="telefono" name="telefono" placeholder="9999-9999" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="rol">Rol en Clínica:*</label>
+                    <!-- Ajustado a los ENUM de la tabla Personal_Medico -->
+                    <select id="rol" name="rol" required>
+                        <option value="Operativo">Operativo</option>
+                        <option value="Asistente">Asistente</option>
+                        <option value="Administrador">Administrador</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_especialidad">ID Especialidad:*</label>
+                    <!-- Ajustado a tipo número porque es INT (llave foránea) -->
+                    <input type="number" id="id_especialidad" name="id_especialidad" placeholder="Ej: 1" required>
+                </div>
+
+                <!-- SECCIÓN 2: DATOS DE ACCESO AL SISTEMA (LOGIN) -->
+                <div class="section-title">Datos de Acceso al Sistema</div>
+
+                <div class="form-group full-width">
+                    <label for="correo">Correo Electrónico (Login):*</label>
+                    <input type="email" id="correo" name="correo" placeholder="doctor@soe.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="contrasenia">Contraseña de Acceso:*</label>
+                    <!-- Cambiado de contrasena a contrasenia para igualar a la BD -->
+                    <input type="password" id="contrasenia" name="contrasenia" placeholder="••••••••" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="rol_sistema">Permisos del Sistema:*</label>
+                    <!-- Ajustado a los ENUM de la tabla Usuarios_Login -->
+                    <select id="rol_sistema" name="rol_sistema" required>
+                        <option value="Medico">Médico</option>
+                        <option value="Recepcionista">Recepcionista</option>
+                        <option value="Administrador">Administrador</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="estado">Estado del Usuario:*</label>
+                    <select id="estado" name="estado" required>
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button type="submit">Guardar Personal y Crear Usuario</button>
+        </form>
+    </div>
+
+</body>
+
+</html>

@@ -218,5 +218,5 @@ ADD COLUMN fecha_inactivacion DATETIME NULL AFTER metodo_pago;
 -- Esto te servira para probar la recuperacion de contrasenia.
 -- ==========================================
 INSERT INTO Usuarios_Login (correo, contrasenia, rol_sistema, estado) 
-VALUES ('INGRESA_TU_CORREO_AQUI', 'admin123', 'Administrador', 'Activo');
+VALUES ('erickfernandochavezcardona@gmail.com', 'admin123', 'Administrador', 'Activo');
 
