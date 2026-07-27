@@ -102,6 +102,38 @@
         .hidden {
             display: none;
         }
+
+        /* Autocomplete customizado */
+        .autocomplete-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #cbd5e1;
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #fff;
+            border-radius: 0 0 6px 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom: 1px solid #cbd5e1;
+            font-size: 13px;
+        }
+        
+        .autocomplete-items div:hover {
+            background-color: #e9e9e9;
+        }
     </style>
 </head>
 
@@ -114,7 +146,9 @@
             <form onsubmit="intentarLogin(event)">
                 <div class="input-group">
                     <label for="usuario">Usuario o Correo</label>
-                    <input type="text" id="usuario" required placeholder="Ingrese su usuario">
+                    <div class="autocomplete-wrapper">
+                        <input type="text" id="usuario" required placeholder="Ingrese su usuario">
+                    </div>
                 </div>
                 <div class="input-group">
                     <label for="password">Contraseña</label>
@@ -136,10 +170,13 @@
             <form onsubmit="intentarRecuperacion(event)">
                 <div class="input-group">
                     <label for="recovery-input">Correo Electrónico</label>
-                    <input type="email" id="recovery-input" required placeholder="ejemplo@correo.com">
+                    <div class="autocomplete-wrapper">
+                        <input type="email" id="recovery-input" required placeholder="ejemplo@correo.com">
+                    </div>
                 </div>
                 <button type="submit" class="btn" style="background-color: #3498db;">Enviar Código</button>
             </form>
+
             <div class="form-footer">
                 <a onclick="mostrarLogin()">Regresar al inicio de sesión</a>
             </div>
@@ -307,6 +344,77 @@
                     this.value = this.value.replace(/\D/g, ''); // Quita todo lo que no sea numero
                 });
             }
+
+            // Iniciar Autocomplete
+            autocomplete(document.getElementById("usuario"));
+            autocomplete(document.getElementById("recovery-input"));
+        });
+
+        // ==========================================
+        // Lógica de Autocompletado (Sugerencias)
+        // ==========================================
+        var correosGuardados = ["anneralessandroteruelpineda@gmail.com", "admin@clinica.com"];
+
+        function autocomplete(inp) {
+            if (!inp) return;
+            inp.addEventListener("input", function(e) {
+                var a, b, i, val = this.value;
+                closeAllLists();
+                if (!val) { return false; }
+                
+                a = document.createElement("DIV");
+                a.setAttribute("id", this.id + "autocomplete-list");
+                a.setAttribute("class", "autocomplete-items");
+                this.parentNode.appendChild(a);
+                
+                for (i = 0; i < correosGuardados.length; i++) {
+                    if (correosGuardados[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+                        b = document.createElement("DIV");
+                        b.innerHTML = "<strong>" + correosGuardados[i].substr(0, val.length) + "</strong>";
+                        b.innerHTML += correosGuardados[i].substr(val.length);
+                        b.innerHTML += "<input type='hidden' value='" + correosGuardados[i] + "'>";
+                        b.addEventListener("click", function(e) {
+                            inp.value = this.getElementsByTagName("input")[0].value;
+                            closeAllLists();
+                        });
+                        a.appendChild(b);
+                    }
+                }
+            });
+
+            // Si dan clic para ver sugerencias aunque no hayan escrito nada
+            inp.addEventListener("click", function(e) {
+                if (this.value == "") {
+                    closeAllLists();
+                    var a = document.createElement("DIV");
+                    a.setAttribute("id", this.id + "autocomplete-list");
+                    a.setAttribute("class", "autocomplete-items");
+                    this.parentNode.appendChild(a);
+                    for (var i = 0; i < correosGuardados.length; i++) {
+                        var b = document.createElement("DIV");
+                        b.innerHTML = correosGuardados[i];
+                        b.innerHTML += "<input type='hidden' value='" + correosGuardados[i] + "'>";
+                        b.addEventListener("click", function(e) {
+                            inp.value = this.getElementsByTagName("input")[0].value;
+                            closeAllLists();
+                        });
+                        a.appendChild(b);
+                    }
+                }
+            });
+        }
+
+        function closeAllLists(elmnt) {
+            var x = document.getElementsByClassName("autocomplete-items");
+            for (var i = 0; i < x.length; i++) {
+                if (elmnt != x[i] && elmnt != document.getElementById("usuario") && elmnt != document.getElementById("recovery-input")) {
+                    x[i].parentNode.removeChild(x[i]);
+                }
+            }
+        }
+
+        document.addEventListener("click", function (e) {
+            closeAllLists(e.target);
         });
     </script>
 
