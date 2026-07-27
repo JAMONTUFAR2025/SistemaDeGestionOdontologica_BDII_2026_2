@@ -9,6 +9,7 @@ public class Paciente {
     private String nombreCompleto;
     private LocalDate fechaNacimiento;
     private String genero;
+    private String estadoCivil;
     private String ocupacion;
     private String domicilio;
     private String telefono;
@@ -21,11 +22,12 @@ public class Paciente {
     public Paciente() {
     }
 
-    public Paciente(String identidad, String nombreCompleto, LocalDate fechaNacimiento, String genero, String ocupacion, String domicilio, String telefono, String personaResponsable, String telefonoResponsable, LocalDateTime fechaRegistro, String estado, LocalDateTime fechaInactivacion) {
+    public Paciente(String identidad, String nombreCompleto, LocalDate fechaNacimiento, String genero, String estadoCivil, String ocupacion, String domicilio, String telefono, String personaResponsable, String telefonoResponsable, LocalDateTime fechaRegistro, String estado, LocalDateTime fechaInactivacion) {
         this.identidad = identidad;
         this.nombreCompleto = nombreCompleto;
         this.fechaNacimiento = fechaNacimiento;
         this.genero = genero;
+        this.estadoCivil = estadoCivil;
         this.ocupacion = ocupacion;
         this.domicilio = domicilio;
         this.telefono = telefono;
@@ -66,6 +68,14 @@ public class Paciente {
 
     public void setGenero(String genero) {
         this.genero = genero;
+    }
+
+    public String getEstadoCivil() {
+        return estadoCivil;
+    }
+
+    public void setEstadoCivil(String estadoCivil) {
+        this.estadoCivil = estadoCivil;
     }
 
     public String getOcupacion() {

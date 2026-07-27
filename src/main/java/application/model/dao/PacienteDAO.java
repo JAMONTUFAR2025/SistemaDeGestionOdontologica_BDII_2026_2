@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public class PacienteDAO {
 
     public boolean registrar(Paciente p) {
-        String query = "INSERT INTO Pacientes (identidad, nombre_completo, fecha_nacimiento, genero, ocupacion, domicilio, telefono, persona_responsable, telefono_responsable) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO Pacientes (identidad, nombre_completo, fecha_nacimiento, genero, estado_civil, ocupacion, domicilio, telefono, persona_responsable, telefono_responsable) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -24,18 +24,19 @@ public class PacienteDAO {
                 if (p.getFechaNacimiento() != null) {
                     stmt.setDate(3, Date.valueOf(p.getFechaNacimiento()));
                 } else {
-                stmt.setNull(3, java.sql.Types.DATE);
-            }
+                    stmt.setNull(3, java.sql.Types.DATE);
+                }
             
-            stmt.setString(4, p.getGenero());
-            stmt.setString(5, p.getOcupacion());
-            stmt.setString(6, p.getDomicilio());
-            stmt.setString(7, p.getTelefono());
-            stmt.setString(8, p.getPersonaResponsable());
-            stmt.setString(9, p.getTelefonoResponsable());
+                stmt.setString(4, p.getGenero());
+                stmt.setString(5, p.getEstadoCivil());
+                stmt.setString(6, p.getOcupacion());
+                stmt.setString(7, p.getDomicilio());
+                stmt.setString(8, p.getTelefono());
+                stmt.setString(9, p.getPersonaResponsable());
+                stmt.setString(10, p.getTelefonoResponsable());
             
-            int filasAfectadas = stmt.executeUpdate();
-            return filasAfectadas > 0;
+                int filasAfectadas = stmt.executeUpdate();
+                return filasAfectadas > 0;
             }
         } catch (SQLException e) {
             System.err.println("Error al registrar paciente: " + e.getMessage());

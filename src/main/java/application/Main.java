@@ -7,6 +7,9 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
+    // Strong reference to prevent Garbage Collection by JavaFX WebEngine
+    private application.controller.JavaConnector javaConnector = new application.controller.JavaConnector();
+
     @Override
     public void start(Stage primaryStage) {
         // 1. Crear el navegador interno (WebView)
@@ -23,8 +26,17 @@ public class Main extends Application {
         webView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue == javafx.concurrent.Worker.State.SUCCEEDED) {
                 netscape.javascript.JSObject window = (netscape.javascript.JSObject) webView.getEngine().executeScript("window");
-                window.setMember("javaConnector", new application.controller.JavaConnector());
+                window.setMember("javaConnector", javaConnector);
             }
+        });
+        
+        // Habilitar alert() de JavaScript para que se muestre como ventana emergente en JavaFX
+        webView.getEngine().setOnAlert(event -> {
+            javafx.scene.control.Alert alerta = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+            alerta.setTitle("SOE Odontología");
+            alerta.setHeaderText(null);
+            alerta.setContentText(event.getData());
+            alerta.showAndWait();
         });
         
         webView.getEngine().load(urlHtml);

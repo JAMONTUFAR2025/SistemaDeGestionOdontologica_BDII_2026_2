@@ -235,3 +235,5 @@ INSERT INTO Especialidades (nombre_especialidad) VALUES
 ('Odontopediatra'),
 ('Prostodoncia / Rehabilitacion Oral');
 
+ALTER TABLE Pacientes
+ADD COLUMN estado_civil varchar(30);

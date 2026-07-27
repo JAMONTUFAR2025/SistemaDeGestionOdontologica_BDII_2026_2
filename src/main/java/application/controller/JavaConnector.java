@@ -10,7 +10,7 @@ import com.google.gson.JsonSyntaxException;
 import java.time.LocalDate;
 
 public class JavaConnector {
-
+    // Force VS Code to recompile
     private UserDAO userDAO;
     private PacienteDAO pacienteDAO;
     private Gson gson;
@@ -193,6 +193,71 @@ public class JavaConnector {
         } catch (Exception e) {
             e.printStackTrace();
             return "ERR|Error procesando datos: " + e.getMessage();
+        }
+    }
+
+    // Registrar solo un usuario (sin médico vinculado)
+    public String registrarUsuarioSolo(String jsonUsuario) {
+        System.out.println("-> Peticion de registro de usuario en Java: " + jsonUsuario);
+        System.out.flush();
+        try {
+            com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonUsuario).getAsJsonObject();
+            String correo = obj.get("correo").getAsString();
+            String contrasenia = obj.get("contrasenia").getAsString();
+            String rolSistema = obj.get("rol_sistema").getAsString();
+            String estado = obj.get("estado").getAsString();
+            
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            boolean exito = pmDAO.registrarUsuarioSolo(correo, contrasenia, rolSistema, estado);
+            if (exito) {
+                return "OK|Usuario registrado exitosamente.";
+            } else {
+                return "ERR|No se pudo registrar. Es posible que el correo ya exista.";
+            }
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en registrarUsuarioSolo: " + t.getClass().getName() + " - " + t.getMessage());
+            t.printStackTrace();
+            System.err.flush();
+            return "ERR|Error procesando datos: " + t.getMessage();
+        }
+    }
+
+    // Obtener usuarios que aún no tienen médico vinculado
+    public String obtenerUsuariosSinMedico() {
+        try {
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            java.util.List<java.util.Map<String, String>> lista = pmDAO.obtenerUsuariosSinMedico();
+            return gson.toJson(lista);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en obtenerUsuariosSinMedico: " + t.getClass().getName() + " - " + t.getMessage());
+            t.printStackTrace();
+            System.err.flush();
+            return "[]";
+        }
+    }
+
+    // Registrar médico y vincularlo a un usuario existente
+    public String registrarMedicoConUsuario(String jsonMedico) {
+        System.out.println("-> Peticion de registro de medico vinculado en Java: " + jsonMedico);
+        System.out.flush();
+        try {
+            com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonMedico).getAsJsonObject();
+            int idUsuario = obj.get("id_usuario").getAsInt();
+            
+            application.model.dao.PersonalMedico pm = gson.fromJson(jsonMedico, application.model.dao.PersonalMedico.class);
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            
+            boolean exito = pmDAO.registrarPersonalYVincular(pm, idUsuario);
+            if (exito) {
+                return "OK|Médico registrado y vinculado al usuario exitosamente.";
+            } else {
+                return "ERR|Error al registrar. Verifica que la identidad no exista ya.";
+            }
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en registrarMedicoConUsuario: " + t.getClass().getName() + " - " + t.getMessage());
+            t.printStackTrace();
+            System.err.flush();
+            return "ERR|Error procesando datos: " + t.getMessage();
         }
     }
 }

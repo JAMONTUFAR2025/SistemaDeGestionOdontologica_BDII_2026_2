@@ -18,7 +18,7 @@
 
         .container {
             background: rgba(255, 255, 255, 0.95);
-            max-width: 700px;
+            max-width: 750px;
             margin: 0 auto;
             padding: 30px;
             border-radius: 12px;
@@ -54,8 +54,7 @@
             color: #333;
         }
 
-        input,
-        select {
+        input, select {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
@@ -63,7 +62,7 @@
             box-sizing: border-box;
         }
 
-        button {
+        .btn-primary {
             background-color: #007bf0;
             color: white;
             border: none;
@@ -73,13 +72,25 @@
             width: 100%;
             font-size: 16px;
             font-weight: bold;
-            margin-top: 25px;
+            margin-top: 20px;
             transition: background 0.3s;
         }
+        .btn-primary:hover { background-color: #0056b3; }
 
-        button:hover {
-            background-color: #0056b3;
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background 0.3s;
         }
+        .btn-success:hover { background-color: #1e7e34; }
 
         .back-link {
             text-decoration: none;
@@ -88,7 +99,6 @@
             font-size: 14px;
         }
 
-        /* Nuevo estilo para separar secciones */
         .section-title {
             grid-column: span 2;
             background: #e9ecef;
@@ -100,6 +110,57 @@
             color: #495057;
             border-left: 4px solid #007bf0;
         }
+
+        .section-title-green {
+            grid-column: span 2;
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 25px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            border: 2px solid #ddd;
+            background: #f8f9fa;
+            color: #666;
+            transition: all 0.3s;
+        }
+        .tab-btn:first-child { border-radius: 8px 0 0 8px; }
+        .tab-btn:last-child { border-radius: 0 8px 8px 0; }
+        .tab-btn.active-blue {
+            background: #007bf0;
+            color: white;
+            border-color: #007bf0;
+        }
+        .tab-btn.active-green {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        hr.divider {
+            border: none;
+            border-top: 2px dashed #ddd;
+            margin: 30px 0;
+        }
     </style>
 </head>
 
@@ -110,94 +171,280 @@
             <a href="menu.html" class="back-link">← Volver al Menú Principal</a>
         </div>
 
-        <h2>Registro de Personal y Usuario</h2>
+        <h2>Gestión de Personal y Usuarios</h2>
 
-        <!-- Formulario listo para Java/JavaScript -->
-        <form id="registroMedicoForm" onsubmit="enviarFormulario(event)">
-            <div class="form-grid">
+        <!-- TABS -->
+        <div class="tabs">
+            <div class="tab-btn active-blue" onclick="mostrarTab('tabUsuario', this, 'blue')">👤 Paso 1: Crear Usuario</div>
+            <div class="tab-btn" onclick="mostrarTab('tabMedico', this, 'green')">🩺 Paso 2: Registrar Médico</div>
+        </div>
 
-                <!-- SECCIÓN 1: DATOS DEL PERSONAL MÉDICO -->
-                <div class="section-title">Datos del Personal de la Clínica</div>
+        <!-- ============================== -->
+        <!-- TAB 1: REGISTRAR USUARIO       -->
+        <!-- ============================== -->
+        <div id="tabUsuario" class="tab-content active">
+            <form id="formUsuario">
+                <div class="form-grid">
+                    <div class="section-title">Datos de Acceso al Sistema</div>
 
-                <div class="form-group full-width">
-                    <label for="nombre_completo">Nombre Completo:*</label>
-                    <input type="text" id="nombre_completo" name="nombre_completo" placeholder="Ej: Dr. Carlos Mendoza"
-                        required>
+                    <div class="form-group full-width">
+                        <label for="usu_correo">Correo Electrónico (Login):*</label>
+                        <input type="email" id="usu_correo" placeholder="ejemplo@clinica.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="usu_contrasenia">Contraseña:*</label>
+                        <input type="password" id="usu_contrasenia" placeholder="••••••••">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="usu_rol_sistema">Permisos del Sistema:*</label>
+                        <select id="usu_rol_sistema">
+                            <option value="Medico">Médico</option>
+                            <option value="Recepcionista">Recepcionista</option>
+                            <option value="Administrador">Administrador</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="usu_estado">Estado:*</label>
+                        <select id="usu_estado">
+                            <option value="Activo">Activo</option>
+                            <option value="Inactivo">Inactivo</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="identidad">Identidad (DNI):*</label>
-                    <input type="text" id="identidad" name="identidad" placeholder="0801-1995-12345" required>
+                <button type="button" class="btn-primary" onclick="guardarUsuario()">Crear Usuario de Acceso</button>
+            </form>
+
+            <p style="margin-top:15px; font-size:12px; color:#888; text-align:center;">
+                💡 Este usuario podrá iniciar sesión en el sistema. Si necesita vincularlo a un médico, pasa al Paso 2.
+            </p>
+        </div>
+
+        <!-- ======================================= -->
+        <!-- TAB 2: REGISTRAR MÉDICO (vincula usuario) -->
+        <!-- ======================================= -->
+        <div id="tabMedico" class="tab-content">
+            <form id="formMedico">
+                <div class="form-grid">
+
+                    <div class="section-title-green">Vincular con un Usuario Existente</div>
+
+                    <div class="form-group full-width">
+                        <label for="med_id_usuario">Seleccionar Usuario (sin médico asignado):*</label>
+                        <select id="med_id_usuario">
+                            <option value="">Cargando usuarios...</option>
+                        </select>
+                    </div>
+
+                    <div class="section-title-green">Datos del Personal de la Clínica</div>
+
+                    <div class="form-group full-width">
+                        <label for="med_nombre">Nombre Completo:*</label>
+                        <input type="text" id="med_nombre" placeholder="Ej: Dr. Carlos Mendoza">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="med_identidad">Identidad (DNI):*</label>
+                        <input type="text" id="med_identidad" placeholder="0801-1995-12345">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="med_telefono">Teléfono:*</label>
+                        <input type="text" id="med_telefono" placeholder="9999-9999">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="med_rol">Rol en Clínica:*</label>
+                        <select id="med_rol">
+                            <option value="Operativo">Operativo</option>
+                            <option value="Asistente">Asistente</option>
+                            <option value="Administrador">Administrador</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="med_especialidad">Especialidad Médica:*</label>
+                        <select id="med_especialidad">
+                            <option value="">Cargando especialidades...</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="telefono">Teléfono:*</label>
-                    <input type="text" id="telefono" name="telefono" placeholder="9999-9999" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="rol">Rol en Clínica:*</label>
-                    <!-- Ajustado a los ENUM de la tabla Personal_Medico -->
-                    <select id="rol" name="rol" required>
-                        <option value="Operativo">Operativo</option>
-                        <option value="Asistente">Asistente</option>
-                        <option value="Administrador">Administrador</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="id_especialidad">Especialidad Médica:*</label>
-                    <select id="id_especialidad" name="id_especialidad" required>
-                        <option value="">Cargando especialidades...</option>
-                    </select>
-                </div>
-
-                <!-- SECCIÓN 2: DATOS DE ACCESO AL SISTEMA (LOGIN) -->
-                <div class="section-title">Datos de Acceso al Sistema</div>
-
-                <div class="form-group full-width">
-                    <label for="correo">Correo Electrónico (Login):*</label>
-                    <input type="email" id="correo" name="correo" placeholder="doctor@soe.com" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="contrasenia">Contraseña de Acceso:*</label>
-                    <!-- Cambiado de contrasena a contrasenia para igualar a la BD -->
-                    <input type="password" id="contrasenia" name="contrasenia" placeholder="••••••••" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="rol_sistema">Permisos del Sistema:*</label>
-                    <!-- Ajustado a los ENUM de la tabla Usuarios_Login -->
-                    <select id="rol_sistema" name="rol_sistema" required>
-                        <option value="Medico">Médico</option>
-                        <option value="Recepcionista">Recepcionista</option>
-                        <option value="Administrador">Administrador</option>
-                    </select>
-                </div>
-
-                <div class="form-group full-width">
-                    <label for="estado">Estado del Usuario:*</label>
-                    <select id="estado" name="estado" required>
-                        <option value="Activo">Activo</option>
-                        <option value="Inactivo">Inactivo</option>
-                    </select>
-                </div>
-
-            </div>
-
-            <button type="submit">Guardar Personal y Crear Usuario</button>
-        </form>
+                <button type="button" class="btn-success" onclick="guardarMedico()">Registrar Médico y Vincular Usuario</button>
+            </form>
+        </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        // ==========================================
+        // TABS
+        // ==========================================
+        function mostrarTab(tabId, btn, color) {
+            // Ocultar todos los tabs
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active-blue', 'active-green');
+            });
+
+            // Mostrar el tab seleccionado
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add(color === 'green' ? 'active-green' : 'active-blue');
+
+            // Si es el tab de médico, cargar usuarios sin médico
+            if (tabId === 'tabMedico') {
+                cargarUsuariosSinMedico();
+            }
+        }
+
+        // ==========================================
+        // CARGA DE DATOS DINÁMICOS
+        // ==========================================
+        function intentarCargarEspecialidades() {
+            if (window.javaConnector) {
+                try {
+                    var json = window.javaConnector.obtenerEspecialidades();
+                    var especialidades = JSON.parse(json);
+                    var select = document.getElementById("med_especialidad");
+                    select.innerHTML = '<option value="">Seleccione una especialidad</option>';
+                    especialidades.forEach(function(esp) {
+                        var option = document.createElement("option");
+                        option.value = esp.idEspecialidad;
+                        option.text = esp.nombreEspecialidad;
+                        select.appendChild(option);
+                    });
+                } catch(e) {
+                    console.error("Error al cargar especialidades:", e);
+                }
+            } else {
+                setTimeout(intentarCargarEspecialidades, 100);
+            }
+        }
+
+        function cargarUsuariosSinMedico() {
+            if (window.javaConnector) {
+                try {
+                    var json = window.javaConnector.obtenerUsuariosSinMedico();
+                    var usuarios = JSON.parse(json);
+                    var select = document.getElementById("med_id_usuario");
+                    select.innerHTML = '<option value="">-- Seleccionar usuario --</option>';
+                    
+                    if (usuarios.length === 0) {
+                        select.innerHTML = '<option value="">No hay usuarios disponibles. Crea uno primero.</option>';
+                    } else {
+                        usuarios.forEach(function(u) {
+                            var option = document.createElement("option");
+                            option.value = u.id_usuario;
+                            option.text = u.correo + " (" + u.rol_sistema + ")";
+                            select.appendChild(option);
+                        });
+                    }
+                } catch(e) {
+                    console.error("Error al cargar usuarios:", e);
+                }
+            } else {
+                setTimeout(cargarUsuariosSinMedico, 100);
+            }
+        }
+
+        // ==========================================
+        // GUARDAR USUARIO (Paso 1)
+        // ==========================================
+        function guardarUsuario() {
+            if (!window.javaConnector) {
+                alert("Error: Puente Java no inicializado.");
+                return;
+            }
+
+            var correo = document.getElementById('usu_correo').value.trim();
+            var contrasenia = document.getElementById('usu_contrasenia').value;
+            var rolSistema = document.getElementById('usu_rol_sistema').value;
+            var estado = document.getElementById('usu_estado').value;
+
+            if (!correo) { alert("Por favor, ingresa el correo electrónico."); return; }
+            if (!contrasenia) { alert("Por favor, ingresa la contraseña."); return; }
+
+            var data = {
+                correo: correo,
+                contrasenia: contrasenia,
+                rol_sistema: rolSistema,
+                estado: estado
+            };
+
+            var respuesta = window.javaConnector.registrarUsuarioSolo(JSON.stringify(data));
+            if (!respuesta) {
+                alert("Error: Java no devolvió respuesta.");
+                return;
+            }
+            var partes = respuesta.split("|");
+            alert(partes[1]);
+
+            if (partes[0] === "OK") {
+                document.getElementById('formUsuario').reset();
+            }
+        }
+
+        // ==========================================
+        // GUARDAR MÉDICO (Paso 2)
+        // ==========================================
+        function guardarMedico() {
+            if (!window.javaConnector) {
+                alert("Error: Puente Java no inicializado.");
+                return;
+            }
+
+            var idUsuario = document.getElementById('med_id_usuario').value;
+            var nombre = document.getElementById('med_nombre').value.trim();
+            var identidad = document.getElementById('med_identidad').value.trim();
+            var telefono = document.getElementById('med_telefono').value.trim();
+            var rol = document.getElementById('med_rol').value;
+            var especialidad = document.getElementById('med_especialidad').value;
+
+            if (!idUsuario) { alert("Por favor, selecciona un usuario para vincular."); return; }
+            if (!nombre) { alert("Por favor, ingresa el nombre completo."); return; }
+            if (!identidad) { alert("Por favor, ingresa la identidad (DNI)."); return; }
+            if (!telefono) { alert("Por favor, ingresa el teléfono."); return; }
+            if (!especialidad) { alert("Por favor, selecciona la especialidad."); return; }
+
+            // Obtener el correo del usuario seleccionado
+            var selectUsuario = document.getElementById('med_id_usuario');
+            var correoUsuario = selectUsuario.options[selectUsuario.selectedIndex].text.split(" (")[0];
+
+            var data = {
+                id_usuario: parseInt(idUsuario),
+                nombre_completo: nombre,
+                identidad: identidad,
+                telefono: telefono,
+                rol: rol,
+                id_especialidad: parseInt(especialidad),
+                correo: correoUsuario
+            };
+
+            var respuesta = window.javaConnector.registrarMedicoConUsuario(JSON.stringify(data));
+            if (!respuesta) {
+                alert("Error: Java no devolvió respuesta.");
+                return;
+            }
+            var partes = respuesta.split("|");
+            alert(partes[1]);
+
+            if (partes[0] === "OK") {
+                document.getElementById('formMedico').reset();
+                cargarUsuariosSinMedico(); // Refrescar la lista
+            }
+        }
+
+        // ==========================================
+        // INICIALIZACIÓN
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function() {
             intentarCargarEspecialidades();
 
             // Formatear DNI automáticamente (XXXX-XXXX-XXXXX)
-            const inputDNI = document.getElementById('identidad');
-            inputDNI.addEventListener('input', function (e) {
-                let val = this.value.replace(/\D/g, ''); // Solo números
+            document.getElementById('med_identidad').addEventListener('input', function() {
+                var val = this.value.replace(/\D/g, '');
                 if (val.length > 4 && val.length <= 8) {
                     val = val.substring(0, 4) + '-' + val.substring(4);
                 } else if (val.length > 8) {
@@ -207,74 +454,14 @@
             });
 
             // Formatear Teléfono automáticamente (XXXX-XXXX)
-            const inputTel = document.getElementById('telefono');
-            inputTel.addEventListener('input', function (e) {
-                let val = this.value.replace(/\D/g, ''); // Solo números
+            document.getElementById('med_telefono').addEventListener('input', function() {
+                var val = this.value.replace(/\D/g, '');
                 if (val.length > 4) {
                     val = val.substring(0, 4) + '-' + val.substring(4, 8);
                 }
                 this.value = val;
             });
         });
-
-        function intentarCargarEspecialidades() {
-            if (window.javaConnector) {
-                try {
-                    var jsonEspecialidades = window.javaConnector.obtenerEspecialidades();
-                    var especialidades = JSON.parse(jsonEspecialidades);
-                    
-                    var selectElement = document.getElementById("id_especialidad");
-                    selectElement.innerHTML = '<option value="">Seleccione una especialidad</option>'; // Limpiar "cargando"
-                    
-                    especialidades.forEach(function(esp) {
-                        var option = document.createElement("option");
-                        option.value = esp.idEspecialidad;
-                        option.text = esp.nombreEspecialidad;
-                        selectElement.appendChild(option);
-                    });
-                } catch(e) {
-                    console.error("Error al cargar especialidades:", e);
-                }
-            } else {
-                // Java no ha inyectado el conector aún, intentar en 100ms
-                setTimeout(intentarCargarEspecialidades, 100);
-            }
-        }
-
-        function enviarFormulario(event) {
-            event.preventDefault(); // Evitar que recargue la página
-
-            if (!window.javaConnector) {
-                alert("Error: El puente con Java no está inicializado.");
-                return;
-            }
-
-            // Construir el objeto JSON
-            var medicoData = {
-                nombre_completo: document.getElementById('nombre_completo').value,
-                identidad: document.getElementById('identidad').value,
-                telefono: document.getElementById('telefono').value,
-                rol: document.getElementById('rol').value,
-                id_especialidad: parseInt(document.getElementById('id_especialidad').value),
-                
-                correo: document.getElementById('correo').value,
-                contrasenia: document.getElementById('contrasenia').value,
-                rol_sistema: document.getElementById('rol_sistema').value,
-                estado: document.getElementById('estado').value
-            };
-
-            var jsonString = JSON.stringify(medicoData);
-            
-            // Enviar a Java
-            var respuesta = window.javaConnector.registrarPersonalMedico(jsonString);
-            var partes = respuesta.split("|");
-            
-            alert(partes[1]);
-            
-            if (partes[0] === "OK") {
-                document.getElementById("registroMedicoForm").reset(); // Limpiar formulario tras éxito
-            }
-        }
     </script>
 </body>
 
