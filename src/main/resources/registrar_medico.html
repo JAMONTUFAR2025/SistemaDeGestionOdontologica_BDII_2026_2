@@ -113,7 +113,7 @@
         <h2>Registro de Personal y Usuario</h2>
 
         <!-- Formulario listo para Java/JavaScript -->
-        <form id="registroMedicoForm">
+        <form id="registroMedicoForm" onsubmit="enviarFormulario(event)">
             <div class="form-grid">
 
                 <!-- SECCIÓN 1: DATOS DEL PERSONAL MÉDICO -->
@@ -146,9 +146,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="id_especialidad">ID Especialidad:*</label>
-                    <!-- Ajustado a tipo número porque es INT (llave foránea) -->
-                    <input type="number" id="id_especialidad" name="id_especialidad" placeholder="Ej: 1" required>
+                    <label for="id_especialidad">Especialidad Médica:*</label>
+                    <select id="id_especialidad" name="id_especialidad" required>
+                        <option value="">Cargando especialidades...</option>
+                    </select>
                 </div>
 
                 <!-- SECCIÓN 2: DATOS DE ACCESO AL SISTEMA (LOGIN) -->
@@ -189,6 +190,92 @@
         </form>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            intentarCargarEspecialidades();
+
+            // Formatear DNI automáticamente (XXXX-XXXX-XXXXX)
+            const inputDNI = document.getElementById('identidad');
+            inputDNI.addEventListener('input', function (e) {
+                let val = this.value.replace(/\D/g, ''); // Solo números
+                if (val.length > 4 && val.length <= 8) {
+                    val = val.substring(0, 4) + '-' + val.substring(4);
+                } else if (val.length > 8) {
+                    val = val.substring(0, 4) + '-' + val.substring(4, 8) + '-' + val.substring(8, 13);
+                }
+                this.value = val;
+            });
+
+            // Formatear Teléfono automáticamente (XXXX-XXXX)
+            const inputTel = document.getElementById('telefono');
+            inputTel.addEventListener('input', function (e) {
+                let val = this.value.replace(/\D/g, ''); // Solo números
+                if (val.length > 4) {
+                    val = val.substring(0, 4) + '-' + val.substring(4, 8);
+                }
+                this.value = val;
+            });
+        });
+
+        function intentarCargarEspecialidades() {
+            if (window.javaConnector) {
+                try {
+                    var jsonEspecialidades = window.javaConnector.obtenerEspecialidades();
+                    var especialidades = JSON.parse(jsonEspecialidades);
+                    
+                    var selectElement = document.getElementById("id_especialidad");
+                    selectElement.innerHTML = '<option value="">Seleccione una especialidad</option>'; // Limpiar "cargando"
+                    
+                    especialidades.forEach(function(esp) {
+                        var option = document.createElement("option");
+                        option.value = esp.idEspecialidad;
+                        option.text = esp.nombreEspecialidad;
+                        selectElement.appendChild(option);
+                    });
+                } catch(e) {
+                    console.error("Error al cargar especialidades:", e);
+                }
+            } else {
+                // Java no ha inyectado el conector aún, intentar en 100ms
+                setTimeout(intentarCargarEspecialidades, 100);
+            }
+        }
+
+        function enviarFormulario(event) {
+            event.preventDefault(); // Evitar que recargue la página
+
+            if (!window.javaConnector) {
+                alert("Error: El puente con Java no está inicializado.");
+                return;
+            }
+
+            // Construir el objeto JSON
+            var medicoData = {
+                nombre_completo: document.getElementById('nombre_completo').value,
+                identidad: document.getElementById('identidad').value,
+                telefono: document.getElementById('telefono').value,
+                rol: document.getElementById('rol').value,
+                id_especialidad: parseInt(document.getElementById('id_especialidad').value),
+                
+                correo: document.getElementById('correo').value,
+                contrasenia: document.getElementById('contrasenia').value,
+                rol_sistema: document.getElementById('rol_sistema').value,
+                estado: document.getElementById('estado').value
+            };
+
+            var jsonString = JSON.stringify(medicoData);
+            
+            // Enviar a Java
+            var respuesta = window.javaConnector.registrarPersonalMedico(jsonString);
+            var partes = respuesta.split("|");
+            
+            alert(partes[1]);
+            
+            if (partes[0] === "OK") {
+                document.getElementById("registroMedicoForm").reset(); // Limpiar formulario tras éxito
+            }
+        }
+    </script>
 </body>
 
 </html>

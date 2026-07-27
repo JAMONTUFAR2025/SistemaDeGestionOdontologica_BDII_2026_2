@@ -165,4 +165,34 @@ public class JavaConnector {
             return "ERR|Error al procesar los datos del formulario.";
         }
     }
+        
+    // ==========================================
+    // METODOS DE PERSONAL MEDICO
+    // ==========================================
+
+    public String obtenerEspecialidades() {
+        System.out.println("-> JavaConnector: solicitando especialidades...");
+        application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+        java.util.List<application.model.dao.Especialidad> lista = pmDAO.obtenerEspecialidades();
+        System.out.println("-> Especialidades encontradas: " + lista.size());
+        return gson.toJson(lista);
+    }
+
+    public String registrarPersonalMedico(String jsonPersonal) {
+        System.out.println("-> Peticion de registro de medico en Java: " + jsonPersonal);
+        try {
+            application.model.dao.PersonalMedico pm = gson.fromJson(jsonPersonal, application.model.dao.PersonalMedico.class);
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            
+            boolean exito = pmDAO.registrarPersonalYUsuario(pm);
+            if (exito) {
+                return "OK|Personal y usuario registrados con éxito en la base de datos.";
+            } else {
+                return "ERR|Ocurrió un error al registrar. Es posible que el correo o identidad ya existan.";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "ERR|Error procesando datos: " + e.getMessage();
+        }
+    }
 }
