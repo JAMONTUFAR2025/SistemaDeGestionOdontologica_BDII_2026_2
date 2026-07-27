@@ -220,3 +220,18 @@ ADD COLUMN fecha_inactivacion DATETIME NULL AFTER metodo_pago;
 INSERT INTO Usuarios_Login (correo, contrasenia, rol_sistema, estado) 
 VALUES ('erickfernandochavezcardona@gmail.com', 'admin123', 'Administrador', 'Activo');
 
+
+
+-- ========================================== 
+-- CAT�LOGO DE ESPECIALIDADES M�DICAS 
+-- (Precargadas para que aparezcan al registrar doctores)
+-- ==========================================
+INSERT INTO Especialidades (nombre_especialidad) VALUES 
+('Odontologa General'),
+('Ortodoncia'),
+('Endodoncia'),
+('Periodoncia'),
+('Cirugia Bucal / Maxilofacial'),
+('Odontopediatra'),
+('Prostodoncia / Rehabilitacion Oral');
+
