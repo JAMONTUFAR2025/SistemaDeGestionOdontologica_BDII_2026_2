@@ -77,4 +77,24 @@ public class UserDAO {
             return false;
         }
     }
+    public java.util.List<String> obtenerCorreosActivos() {
+        java.util.List<String> correos = new java.util.ArrayList<>();
+        String query = "SELECT correo FROM Usuarios_Login WHERE estado = 'Activo'";
+        
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query);
+                 ResultSet rs = stmt.executeQuery()) {
+                 
+                while (rs.next()) {
+                    correos.add(rs.getString("correo"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener correos activos: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return correos;
+    }
 }

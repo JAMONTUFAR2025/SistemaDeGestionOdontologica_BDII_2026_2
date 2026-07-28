@@ -196,6 +196,16 @@ public class JavaConnector {
         }
     }
 
+    public String obtenerCorreosActivos() {
+        try {
+            java.util.List<String> correos = userDAO.obtenerCorreosActivos();
+            return gson.toJson(correos);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en obtenerCorreosActivos: " + t.getMessage());
+            return "[]";
+        }
+    }
+
     // Registrar solo un usuario (sin médico vinculado)
     public String registrarUsuarioSolo(String jsonUsuario) {
         System.out.println("-> Peticion de registro de usuario en Java: " + jsonUsuario);

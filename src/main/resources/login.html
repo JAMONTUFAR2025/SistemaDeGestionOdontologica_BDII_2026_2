@@ -358,9 +358,19 @@
         // Lógica de Autocompletado (Sugerencias)
         // ==========================================
         var correosGuardados = [];
+        
+        function cargarCorreosSiEsNecesario() {
+            if (correosGuardados.length === 0 && window.javaConnector) {
+                var jsonCorreos = window.javaConnector.obtenerCorreosActivos();
+                if (jsonCorreos) {
+                    correosGuardados = JSON.parse(jsonCorreos);
+                }
+            }
+        }
 
         function autocomplete(inp) {
             if (!inp) return;
+            inp.addEventListener("focus", cargarCorreosSiEsNecesario);
             inp.addEventListener("input", function (e) {
                 var a, b, i, val = this.value;
                 closeAllLists();
@@ -388,6 +398,7 @@
 
             // Si dan clic para ver sugerencias aunque no hayan escrito nada
             inp.addEventListener("click", function (e) {
+                cargarCorreosSiEsNecesario();
                 if (this.value == "") {
                     closeAllLists();
                     var a = document.createElement("DIV");
