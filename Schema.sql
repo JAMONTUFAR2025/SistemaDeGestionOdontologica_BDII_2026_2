@@ -246,5 +246,34 @@ INSERT INTO Especialidades (nombre_especialidad) VALUES
 ('Odontopediatra'),
 ('Prostodoncia / Rehabilitacion Oral');
 
-ALTER TABLE Pacientes
-ADD COLUMN estado_civil varchar(30);
+
+-- ==========================================
+-- ACTUALIZACIONES RECIENTES (AGREGADAS AL FINAL)
+-- ==========================================
+
+ALTER TABLE Pacientes ADD COLUMN estado_civil varchar(30);
+
+
+ALTER TABLE Egresos_Gastos
+ADD COLUMN estado ENUM('Activo','Inactivo') DEFAULT 'Activo' AFTER numero_comprobante;
+
+ALTER TABLE Egresos_Gastos
+ADD COLUMN fecha_inactivacion DATETIME NULL AFTER estado;
+-- 1. Nuevos campos agregados en el apartado de Signos y Diagnósticos de la Historia Clínica (Expediente Base)
+ALTER TABLE Expediente_Base
+ADD COLUMN diagnostico_presuntivo TEXT AFTER tipo_mordida,
+ADD COLUMN observaciones_generales TEXT AFTER diagnostico_presuntivo;
+
+-- 2. Tabla para el adjuntado de archivos locales (Radiografías, Fotos, Resultados, etc.)
+CREATE TABLE Expediente_Archivos (
+    id_archivo INT AUTO_INCREMENT PRIMARY KEY,
+    identidad_paciente VARCHAR(20) NOT NULL,
+    tipo_archivo ENUM('Radiografia', 'Fotografia', 'Laboratorio', 'Otro') NOT NULL,
+    nombre_archivo VARCHAR(255) NOT NULL,
+    ruta_archivo VARCHAR(500) NOT NULL, -- Aquí se guardará la ruta de la carpeta local (ej: C:\SOE_Archivos\...)
+    observaciones TEXT,
+    fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    estado ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
+    fecha_inactivacion DATETIME NULL,
+    FOREIGN KEY (identidad_paciente) REFERENCES Pacientes(identidad)
+);
