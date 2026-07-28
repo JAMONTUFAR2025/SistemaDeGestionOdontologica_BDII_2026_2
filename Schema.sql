@@ -183,6 +183,12 @@ CREATE TABLE Egresos_Gastos (
     numero_comprobante VARCHAR(100)
 );
 
+ALTER TABLE Egresos_Gastos
+ADD COLUMN estado ENUM('Activo','Inactivo') DEFAULT 'Activo' AFTER numero_comprobante;
+
+ALTER TABLE Egresos_Gastos
+ADD COLUMN fecha_inactivacion DATETIME NULL AFTER estado;
+
 ALTER TABLE Evolucion_Clinica
 DROP COLUMN tratamiento_realizado;
 
@@ -218,8 +224,13 @@ ADD COLUMN fecha_inactivacion DATETIME NULL AFTER metodo_pago;
 -- Esto te servira para probar la recuperacion de contrasenia.
 -- ==========================================
 INSERT INTO Usuarios_Login (correo, contrasenia, rol_sistema, estado) 
-VALUES ('erickfernandochavezcardona@gmail.com', 'admin123', 'Administrador', 'Activo');
+VALUES ('erickfernandochavezcardona@gmail.com', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'Administrador', 'Activo');
 
+ALTER TABLE Egresos_Gastos
+ADD COLUMN estado ENUM('Activo','Inactivo') DEFAULT 'Activo' AFTER numero_comprobante;
+
+ALTER TABLE Egresos_Gastos
+ADD COLUMN fecha_inactivacion DATETIME NULL AFTER estado;
 
 
 -- ========================================== 

@@ -15,8 +15,9 @@ public class UserDAO {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 
+                String hashedPass = application.util.SecurityUtils.hashPassword(contrasenia);
                 stmt.setString(1, correo);
-                stmt.setString(2, contrasenia);
+                stmt.setString(2, hashedPass);
                 
                 try (ResultSet rs = stmt.executeQuery()) {
                     return rs.next(); // Si hay un resultado, el login es exitoso
@@ -64,7 +65,8 @@ public class UserDAO {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 
-                stmt.setString(1, nuevaContrasenia);
+                String hashedPass = application.util.SecurityUtils.hashPassword(nuevaContrasenia);
+                stmt.setString(1, hashedPass);
                 stmt.setString(2, correoOTelefono);
                 stmt.setString(3, correoOTelefono);
                 

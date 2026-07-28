@@ -44,4 +44,20 @@ public class PacienteDAO {
             return false;
         }
     }
+    
+    // Borrado lógico de un paciente
+    public boolean eliminarPaciente(String identidad) {
+        String query = "UPDATE Pacientes SET estado = 'Inactivo', fecha_inactivacion = CURRENT_TIMESTAMP WHERE identidad = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, identidad);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al realizar borrado lógico de paciente: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

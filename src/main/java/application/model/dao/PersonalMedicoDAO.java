@@ -37,8 +37,9 @@ public class PersonalMedicoDAO {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                String hashedPass = application.util.SecurityUtils.hashPassword(contrasenia);
                 stmt.setString(1, correo);
-                stmt.setString(2, contrasenia);
+                stmt.setString(2, hashedPass);
                 stmt.setString(3, rolSistema);
                 stmt.setString(4, estado);
                 return stmt.executeUpdate() > 0;
