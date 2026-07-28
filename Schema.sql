@@ -259,12 +259,11 @@ ADD COLUMN estado ENUM('Activo','Inactivo') DEFAULT 'Activo' AFTER numero_compro
 
 ALTER TABLE Egresos_Gastos
 ADD COLUMN fecha_inactivacion DATETIME NULL AFTER estado;
--- 1. Nuevos campos agregados en el apartado de Signos y Diagnósticos de la Historia Clínica (Expediente Base)
+
 ALTER TABLE Expediente_Base
 ADD COLUMN diagnostico_presuntivo TEXT AFTER tipo_mordida,
 ADD COLUMN observaciones_generales TEXT AFTER diagnostico_presuntivo;
 
--- 2. Tabla para el adjuntado de archivos locales (Radiografías, Fotos, Resultados, etc.)
 CREATE TABLE Expediente_Archivos (
     id_archivo INT AUTO_INCREMENT PRIMARY KEY,
     identidad_paciente VARCHAR(20) NOT NULL,
