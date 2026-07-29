@@ -18,7 +18,6 @@ CREATE TABLE Catalogo_Procedimientos (
     precio_sugerido DECIMAL(10,2)
 );
 
-
 CREATE TABLE Personal_Medico (
     id_medico INT AUTO_INCREMENT PRIMARY KEY,
     nombre_completo VARCHAR(100) NOT NULL,

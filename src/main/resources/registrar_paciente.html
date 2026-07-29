@@ -121,7 +121,8 @@
                         placeholder="Escriba para buscar...">
                 </div>
                 <div>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarPaciente" onclick="openAddModal()">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarPaciente"
+                        onclick="openAddModal()">
                         <i class="fas fa-plus"></i> Agregar Paciente
                     </button>
                 </div>
@@ -168,7 +169,8 @@
                         <div class="row mb-3">
                             <div class="col-md-9">
                                 <label for="nombre_completo">Nombre:</label>
-                                <input type="text" id="nombre_completo" name="nombreCompleto" class="form-control" required>
+                                <input type="text" id="nombre_completo" name="nombreCompleto" class="form-control"
+                                    required>
                             </div>
                             <div class="col-md-3">
                                 <label for="edad">Edad:</label>
@@ -211,33 +213,39 @@
 
                         <!-- Fila 4 -->
                         <div class="row mb-3">
-                            <div class="col-md-12">
+                            <div class="col-md-4">
                                 <label for="fecha_nacimiento">Fecha de nacimiento:</label>
-                                <input type="date" id="fecha_nacimiento" name="fechaNacimiento" class="form-control">
+                                <input type="text" id="fecha_nacimiento" name="fechaNacimiento" class="form-control"
+                                    placeholder="DD-MM-AAAA">
                             </div>
                         </div>
 
                         <!-- Fila 5 -->
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="telefono"># Telefónico:</label>
-                                <input type="text" id="telefono" name="telefono" class="form-control" required>
+                                <label for="telefono">Teléfono:</label>
+                                <input type="text" id="telefono" name="telefono" class="form-control"
+                                    placeholder="####-####" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="identidad">Identidad:</label>
-                                <input type="text" id="identidad" name="identidad" class="form-control" required>
+                                <input type="text" id="identidad" name="identidad" class="form-control"
+                                    placeholder="####-####-#####" required>
                             </div>
                         </div>
 
+                        <div class="section-title">- En caso de emergencia o menor de edad</div>
                         <!-- Fila 6 -->
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <label for="persona_responsable">Personas Responsable:</label>
-                                <input type="text" id="persona_responsable" name="personaResponsable" class="form-control">
+                                <input type="text" id="persona_responsable" name="personaResponsable"
+                                    class="form-control">
                             </div>
                             <div class="col-md-6">
                                 <label for="telefono_responsable">Teléfono:</label>
-                                <input type="text" id="telefono_responsable" name="telefonoResponsable" class="form-control">
+                                <input type="text" id="telefono_responsable" name="telefonoResponsable"
+                                    class="form-control" placeholder="####-####">
                             </div>
                         </div>
 
@@ -261,17 +269,20 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow-lg">
                 <div class="modal-header text-white bg-danger">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h5>
+                    <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación
+                    </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body p-4 text-center">
                     <h5 class="mb-3">¿Está seguro de que desea borrar a este paciente?</h5>
-                    <p class="text-muted small">El paciente será marcado como inactivo y ya no aparecerá en la tabla.</p>
+                    <p class="text-muted small">El paciente será marcado como inactivo y ya no aparecerá en la tabla.
+                    </p>
                 </div>
                 <div class="modal-footer justify-content-center border-0 pb-4">
                     <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">No</button>
-                    <button type="button" class="btn btn-danger px-4 fw-bold" onclick="confirmarEliminacion()">Sí, borrar</button>
+                    <button type="button" class="btn btn-danger px-4 fw-bold" onclick="confirmarEliminacion()">Sí,
+                        borrar</button>
                 </div>
             </div>
         </div>
@@ -341,32 +352,33 @@
             const inputIdentidad = document.getElementById('identidad');
             if (inputIdentidad) {
                 inputIdentidad.value = p.identidad || '';
-                inputIdentidad.readOnly = true; 
+                inputIdentidad.readOnly = true;
             }
             document.getElementById('nombre_completo').value = p.nombreCompleto || '';
 
-            // Asignar fecha en formato YYYY-MM-DD para el input type="date"
+            // Asignar fecha en formato DD-MM-AAAA
             let fechaStr = '';
             if (p.fechaNacimiento) {
                 if (typeof p.fechaNacimiento === 'object') {
                     const y = p.fechaNacimiento.year;
                     const m = String(p.fechaNacimiento.month).padStart(2, '0');
                     const d = String(p.fechaNacimiento.day).padStart(2, '0');
-                    fechaStr = `${y}-${m}-${d}`;
+                    fechaStr = `${d}-${m}-${y}`;
                 } else {
                     const partes = p.fechaNacimiento.split('-');
                     if (partes.length === 3) {
                         if (partes[0].length === 4) {
-                            fechaStr = `${partes[0]}-${partes[1]}-${partes[2]}`;
-                        } else {
                             fechaStr = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                        } else {
+                            fechaStr = `${partes[0]}-${partes[1]}-${partes[2]}`;
                         }
                     }
                 }
             }
             document.getElementById('fecha_nacimiento').value = fechaStr;
-            // Calcular edad inmediatamente
-            document.getElementById('fecha_nacimiento').dispatchEvent(new Event('change'));
+            if (fechaStr.length === 10) {
+                calcularEdad(fechaStr);
+            }
             document.getElementById('genero').value = p.genero || 'M';
             document.getElementById('estado_civil').value = p.estadoCivil || 'Soltero(a)';
             document.getElementById('ocupacion').value = p.ocupacion || '';
@@ -450,10 +462,17 @@
             }
         }
 
-        // === 6. FUNCIONES DE VALIDACION ===
-        function soloNumeros(e) {
+        // === 6. FUNCIONES DE VALIDACION Y FORMATO ===
+        function formatTelefono(e) {
             let val = e.target.value.replace(/\D/g, '');
-            e.target.value = val;
+            let newVal = '';
+            if (val.length > 0) {
+                newVal += val.substring(0, 4);
+            }
+            if (val.length >= 5) {
+                newVal += '-' + val.substring(4, 8);
+            }
+            e.target.value = newVal;
         }
 
         function formatIdentidad(e) {
@@ -471,6 +490,46 @@
             e.target.value = newVal;
         }
 
+        function formatFecha(e) {
+            let val = e.target.value.replace(/\D/g, '');
+            let newVal = '';
+            if (val.length > 0) {
+                newVal += val.substring(0, 2);
+            }
+            if (val.length >= 3) {
+                newVal += '-' + val.substring(2, 4);
+            }
+            if (val.length >= 5) {
+                newVal += '-' + val.substring(4, 8);
+            }
+            e.target.value = newVal;
+
+            if (newVal.length === 10) {
+                calcularEdad(newVal);
+            } else {
+                document.getElementById('edad').value = '';
+            }
+        }
+
+        function calcularEdad(fechaStr) {
+            const partes = fechaStr.split('-');
+            if (partes.length === 3) {
+                const dia = parseInt(partes[0], 10);
+                const mes = parseInt(partes[1], 10) - 1;
+                const ano = parseInt(partes[2], 10);
+                if (!isNaN(dia) && !isNaN(mes) && !isNaN(ano)) {
+                    const cumpleanos = new Date(ano, mes, dia);
+                    const hoy = new Date();
+                    let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+                    let m = hoy.getMonth() - cumpleanos.getMonth();
+                    if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) {
+                        edad--;
+                    }
+                    document.getElementById('edad').value = (edad >= 0 && cumpleanos <= hoy) ? edad : '';
+                }
+            }
+        }
+
         // Inicializar eventos y cargar datos al abrir la página
         document.addEventListener('DOMContentLoaded', () => {
             cargarPacientes();
@@ -485,29 +544,16 @@
                 inputIdentidad.maxLength = 15;
             }
             if (inputTelefono) {
-                inputTelefono.addEventListener('input', soloNumeros);
-                inputTelefono.maxLength = 15; // Max 15 digitos
+                inputTelefono.addEventListener('input', formatTelefono);
+                inputTelefono.maxLength = 9;
             }
             if (inputTelefonoResp) {
-                inputTelefonoResp.addEventListener('input', soloNumeros);
-                inputTelefonoResp.maxLength = 15;
+                inputTelefonoResp.addEventListener('input', formatTelefono);
+                inputTelefonoResp.maxLength = 9;
             }
             if (inputFechaNacimiento) {
-                inputFechaNacimiento.addEventListener('change', function() {
-                    let fecha = this.value;
-                    if (fecha) {
-                        let hoy = new Date();
-                        let cumpleanos = new Date(fecha);
-                        let edad = hoy.getFullYear() - cumpleanos.getFullYear();
-                        let m = hoy.getMonth() - cumpleanos.getMonth();
-                        if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) {
-                            edad--;
-                        }
-                        document.getElementById('edad').value = (edad >= 0) ? edad : '';
-                    } else {
-                        document.getElementById('edad').value = '';
-                    }
-                });
+                inputFechaNacimiento.addEventListener('input', formatFecha);
+                inputFechaNacimiento.maxLength = 10;
             }
         });
     </script>
