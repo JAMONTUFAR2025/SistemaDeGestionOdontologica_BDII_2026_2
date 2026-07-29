@@ -1,11 +1,10 @@
-package application.controller;
+package application.model.connection;
 
 import application.model.dao.PacienteDAO;
 import application.model.dao.UserDAO;
 import application.model.entity.Paciente;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 
 import java.time.LocalDate;
 
@@ -18,17 +17,20 @@ public class JavaConnector {
     public JavaConnector() {
         this.userDAO = new UserDAO();
         this.pacienteDAO = new PacienteDAO();
-        // Configuramos Gson para manejar LocalDate (formato yyyy-MM-dd que viene del HTML input date)
+        // Configuramos Gson para manejar LocalDate (formato yyyy-MM-dd que viene del
+        // HTML input date)
         this.gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDate.class, new com.google.gson.TypeAdapter<LocalDate>() {
                     @Override
-                    public void write(com.google.gson.stream.JsonWriter jsonWriter, LocalDate localDate) throws java.io.IOException {
+                    public void write(com.google.gson.stream.JsonWriter jsonWriter, LocalDate localDate)
+                            throws java.io.IOException {
                         if (localDate == null) {
                             jsonWriter.nullValue();
                         } else {
                             jsonWriter.value(localDate.toString());
                         }
                     }
+
                     @Override
                     public LocalDate read(com.google.gson.stream.JsonReader jsonReader) throws java.io.IOException {
                         if (jsonReader.peek() == com.google.gson.stream.JsonToken.NULL) {
@@ -44,35 +46,41 @@ public class JavaConnector {
                         } catch (java.time.format.DateTimeParseException e) {
                             // Intenta parsear dd-MM-yyyy o MM-dd-yyyy si el navegador envia otro formato
                             try {
-                                return LocalDate.parse(dateStr, java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                                return LocalDate.parse(dateStr,
+                                        java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"));
                             } catch (Exception ex) {
-                                return LocalDate.parse(dateStr, java.time.format.DateTimeFormatter.ofPattern("MM-dd-yyyy"));
+                                return LocalDate.parse(dateStr,
+                                        java.time.format.DateTimeFormatter.ofPattern("MM-dd-yyyy"));
                             }
                         }
                     }
                 })
-                .registerTypeAdapter(java.time.LocalDateTime.class, new com.google.gson.TypeAdapter<java.time.LocalDateTime>() {
-                    @Override
-                    public void write(com.google.gson.stream.JsonWriter jsonWriter, java.time.LocalDateTime localDateTime) throws java.io.IOException {
-                        if (localDateTime == null) {
-                            jsonWriter.nullValue();
-                        } else {
-                            jsonWriter.value(localDateTime.toString());
-                        }
-                    }
-                    @Override
-                    public java.time.LocalDateTime read(com.google.gson.stream.JsonReader jsonReader) throws java.io.IOException {
-                        if (jsonReader.peek() == com.google.gson.stream.JsonToken.NULL) {
-                            jsonReader.nextNull();
-                            return null;
-                        }
-                        String dateStr = jsonReader.nextString();
-                        if (dateStr == null || dateStr.trim().isEmpty()) {
-                            return null;
-                        }
-                        return java.time.LocalDateTime.parse(dateStr);
-                    }
-                })
+                .registerTypeAdapter(java.time.LocalDateTime.class,
+                        new com.google.gson.TypeAdapter<java.time.LocalDateTime>() {
+                            @Override
+                            public void write(com.google.gson.stream.JsonWriter jsonWriter,
+                                    java.time.LocalDateTime localDateTime) throws java.io.IOException {
+                                if (localDateTime == null) {
+                                    jsonWriter.nullValue();
+                                } else {
+                                    jsonWriter.value(localDateTime.toString());
+                                }
+                            }
+
+                            @Override
+                            public java.time.LocalDateTime read(com.google.gson.stream.JsonReader jsonReader)
+                                    throws java.io.IOException {
+                                if (jsonReader.peek() == com.google.gson.stream.JsonToken.NULL) {
+                                    jsonReader.nextNull();
+                                    return null;
+                                }
+                                String dateStr = jsonReader.nextString();
+                                if (dateStr == null || dateStr.trim().isEmpty()) {
+                                    return null;
+                                }
+                                return java.time.LocalDateTime.parse(dateStr);
+                            }
+                        })
                 .create();
     }
 
@@ -94,18 +102,19 @@ public class JavaConnector {
     // Paso 1: Generar y enviar el codigo de recuperacion
     public String enviarCodigoRecuperacion(String correo) {
         System.out.println("Solicitud de codigo para: " + correo);
-        
+
         boolean existe = userDAO.verificarCorreoExistente(correo);
         if (existe) {
             // 1. Generar nuevo codigo aleatorio de 6 digitos
-            String codigoSeguridad = String.format("%06d", (int)(Math.random() * 1000000));
-            
+            String codigoSeguridad = String.format("%06d", (int) (Math.random() * 1000000));
+
             // 2. Guardarlo en memoria (no en la base de datos)
             codigosRecuperacion.put(correo, codigoSeguridad);
 
             // 3. Enviar el correo
             System.out.println("-> Enviando correo a " + correo + "...");
-            boolean enviado = application.model.connection.EmailService.enviarCorreoNuevaContrasenia(correo, codigoSeguridad);
+            boolean enviado = application.model.connection.EmailService.enviarCorreoNuevaContrasenia(correo,
+                    codigoSeguridad);
             if (enviado) {
                 return "OK|Código enviado con éxito. Revisa tu bandeja de entrada.";
             } else {
@@ -136,7 +145,7 @@ public class JavaConnector {
 
         // Actualizar en la base de datos
         boolean actualizado = userDAO.actualizarContrasenia(correo, nuevaContrasenia);
-        
+
         if (actualizado) {
             codigosRecuperacion.remove(correo); // Borrar el codigo de la memoria por seguridad
             return "OK|Contraseña actualizada exitosamente. Ya puedes iniciar sesión.";
@@ -144,6 +153,7 @@ public class JavaConnector {
             return "ERR|Ocurrió un error al guardar la nueva contraseña en la base de datos.";
         }
     }
+
     // Retorna un mensaje indicando el resultado del guardado (inserta o actualiza)
     public String registrarPaciente(String jsonPaciente) {
         System.out.println("-> Petición de registro/actualización de paciente recibida en Java: " + jsonPaciente);
@@ -153,7 +163,7 @@ public class JavaConnector {
                 return "ERR|La identidad (DNI) del paciente es requerida.";
             }
             System.out.println("-> Gson deserializó correctamente a: " + paciente.getNombreCompleto());
-            
+
             if (pacienteDAO.existe(paciente.getIdentidad())) {
                 return pacienteDAO.actualizar(paciente);
             } else {
@@ -189,7 +199,7 @@ public class JavaConnector {
             return "ERR|Error al eliminar paciente: " + t.getMessage();
         }
     }
-        
+
     // ==========================================
     // METODOS DE PERSONAL MEDICO
     // ==========================================
@@ -205,9 +215,10 @@ public class JavaConnector {
     public String registrarPersonalMedico(String jsonPersonal) {
         System.out.println("-> Peticion de registro de medico en Java: " + jsonPersonal);
         try {
-            application.model.dao.PersonalMedico pm = gson.fromJson(jsonPersonal, application.model.dao.PersonalMedico.class);
+            application.model.dao.PersonalMedico pm = gson.fromJson(jsonPersonal,
+                    application.model.dao.PersonalMedico.class);
             application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
-            
+
             boolean exito = pmDAO.registrarPersonalYUsuario(pm);
             if (exito) {
                 return "OK|Personal y usuario registrados con éxito en la base de datos.";
@@ -240,7 +251,7 @@ public class JavaConnector {
             String contrasenia = obj.get("contrasenia").getAsString();
             String rolSistema = obj.get("rol_sistema").getAsString();
             String estado = obj.get("estado").getAsString();
-            
+
             application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
             boolean exito = pmDAO.registrarUsuarioSolo(correo, contrasenia, rolSistema, estado);
             if (exito) {
@@ -263,7 +274,8 @@ public class JavaConnector {
             java.util.List<java.util.Map<String, String>> lista = pmDAO.obtenerUsuariosSinMedico();
             return gson.toJson(lista);
         } catch (Throwable t) {
-            System.err.println("-> ERROR en obtenerUsuariosSinMedico: " + t.getClass().getName() + " - " + t.getMessage());
+            System.err.println(
+                    "-> ERROR en obtenerUsuariosSinMedico: " + t.getClass().getName() + " - " + t.getMessage());
             t.printStackTrace();
             System.err.flush();
             return "[]";
@@ -277,10 +289,11 @@ public class JavaConnector {
         try {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonMedico).getAsJsonObject();
             int idUsuario = obj.get("id_usuario").getAsInt();
-            
-            application.model.dao.PersonalMedico pm = gson.fromJson(jsonMedico, application.model.dao.PersonalMedico.class);
+
+            application.model.dao.PersonalMedico pm = gson.fromJson(jsonMedico,
+                    application.model.dao.PersonalMedico.class);
             application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
-            
+
             boolean exito = pmDAO.registrarPersonalYVincular(pm, idUsuario);
             if (exito) {
                 return "OK|Médico registrado y vinculado al usuario exitosamente.";
@@ -288,7 +301,8 @@ public class JavaConnector {
                 return "ERR|Error al registrar. Verifica que la identidad no exista ya.";
             }
         } catch (Throwable t) {
-            System.err.println("-> ERROR en registrarMedicoConUsuario: " + t.getClass().getName() + " - " + t.getMessage());
+            System.err.println(
+                    "-> ERROR en registrarMedicoConUsuario: " + t.getClass().getName() + " - " + t.getMessage());
             t.printStackTrace();
             System.err.flush();
             return "ERR|Error procesando datos: " + t.getMessage();

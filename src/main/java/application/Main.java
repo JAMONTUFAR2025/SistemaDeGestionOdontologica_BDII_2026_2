@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     // Strong reference to prevent Garbage Collection by JavaFX WebEngine
-    private application.controller.JavaConnector javaConnector = new application.controller.JavaConnector();
+    private application.model.connection.JavaConnector javaConnector = new application.model.connection.JavaConnector();
 
     @Override
     public void start(Stage primaryStage) {
@@ -21,24 +21,27 @@ public class Main extends Application {
             throw new RuntimeException("No se encontró el archivo '/login.html' en src/main/resources/");
         }
         String urlHtml = resource.toExternalForm();
-        
+
         // Configurar el puente de Java a Javascript
         webView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue == javafx.concurrent.Worker.State.SUCCEEDED) {
-                netscape.javascript.JSObject window = (netscape.javascript.JSObject) webView.getEngine().executeScript("window");
+                netscape.javascript.JSObject window = (netscape.javascript.JSObject) webView.getEngine()
+                        .executeScript("window");
                 window.setMember("javaConnector", javaConnector);
             }
         });
-        
-        // Habilitar alert() de JavaScript para que se muestre como ventana emergente en JavaFX
+
+        // Habilitar alert() de JavaScript para que se muestre como ventana emergente en
+        // JavaFX
         webView.getEngine().setOnAlert(event -> {
-            javafx.scene.control.Alert alerta = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+            javafx.scene.control.Alert alerta = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.INFORMATION);
             alerta.setTitle("SOE Odontología");
             alerta.setHeaderText(null);
             alerta.setContentText(event.getData());
             alerta.showAndWait();
         });
-        
+
         webView.getEngine().load(urlHtml);
 
         // 3. Configurar la ventana
