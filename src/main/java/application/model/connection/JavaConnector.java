@@ -207,7 +207,7 @@ public class JavaConnector {
     public String obtenerEspecialidades() {
         System.out.println("-> JavaConnector: solicitando especialidades...");
         application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
-        java.util.List<application.model.dao.Especialidad> lista = pmDAO.obtenerEspecialidades();
+        java.util.List<application.model.entity.Especialidad> lista = pmDAO.obtenerEspecialidades();
         System.out.println("-> Especialidades encontradas: " + lista.size());
         return gson.toJson(lista);
     }
@@ -330,6 +330,60 @@ public class JavaConnector {
         } catch (Throwable t) {
             System.err.println("-> ERROR en obtenerPersonalMedico: " + t.getMessage());
             return "[]";
+        }
+    }
+
+    // Actualizar usuario (rol y contraseña opcional)
+    public String actualizarUsuario(String jsonUsuario) {
+        try {
+            com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonUsuario).getAsJsonObject();
+            int idUsuario = obj.get("id_usuario").getAsInt();
+            String rolSistema = obj.get("rol_sistema").getAsString();
+            String contrasenia = obj.has("contrasenia") ? obj.get("contrasenia").getAsString() : "";
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            boolean exito = pmDAO.actualizarUsuario(idUsuario, rolSistema, contrasenia);
+            return exito ? "OK|Usuario actualizado exitosamente." : "ERR|No se pudo actualizar el usuario.";
+        } catch (Throwable t) {
+            return "ERR|Error: " + t.getMessage();
+        }
+    }
+
+    // Inactivar usuario (borrado lógico)
+    public String inactivarUsuario(String idUsuarioStr) {
+        try {
+            int idUsuario = Integer.parseInt(idUsuarioStr.trim());
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            boolean exito = pmDAO.inactivarUsuario(idUsuario);
+            return exito ? "OK|Usuario inactivado correctamente." : "ERR|No se pudo inactivar el usuario.";
+        } catch (Throwable t) {
+            return "ERR|Error: " + t.getMessage();
+        }
+    }
+
+    // Actualizar personal médico
+    public String actualizarPersonalMedico(String jsonMedico) {
+        try {
+            com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonMedico).getAsJsonObject();
+            String identidad = obj.get("identidad").getAsString();
+            String nombreCompleto = obj.get("nombre_completo").getAsString();
+            String telefono = obj.get("telefono").getAsString();
+            int idEspecialidad = obj.get("id_especialidad").getAsInt();
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            boolean exito = pmDAO.actualizarPersonalMedico(identidad, nombreCompleto, telefono, idEspecialidad);
+            return exito ? "OK|Médico actualizado exitosamente." : "ERR|No se pudo actualizar el médico.";
+        } catch (Throwable t) {
+            return "ERR|Error: " + t.getMessage();
+        }
+    }
+
+    // Inactivar personal médico (borrado lógico)
+    public String inactivarPersonalMedico(String identidad) {
+        try {
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            boolean exito = pmDAO.inactivarPersonalMedico(identidad);
+            return exito ? "OK|Médico inactivado correctamente." : "ERR|No se pudo inactivar el médico.";
+        } catch (Throwable t) {
+            return "ERR|Error: " + t.getMessage();
         }
     }
 }

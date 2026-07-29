@@ -1,6 +1,7 @@
 package application.model.dao;
 
 import application.model.connection.DBConnection;
+import application.model.entity.Especialidad;
 import application.model.entity.PersonalMedico;
 
 import java.sql.Connection;
@@ -202,7 +203,7 @@ public class PersonalMedicoDAO {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
-                 ResultSet rs = stmt.executeQuery()) {
+                    ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
                     map.put("id_usuario", rs.getInt("id_usuario"));
@@ -223,13 +224,13 @@ public class PersonalMedicoDAO {
     public java.util.List<java.util.Map<String, Object>> obtenerPersonalMedico() {
         java.util.List<java.util.Map<String, Object>> lista = new java.util.ArrayList<>();
         String query = "SELECT pm.identidad, pm.nombre_completo, pm.telefono, pm.correo, pm.estado, " +
-                       "e.nombre_especialidad FROM Personal_Medico pm " +
-                       "LEFT JOIN Especialidades e ON pm.id_especialidad = e.id_especialidad " +
-                       "WHERE pm.estado = 'Activo' ORDER BY pm.nombre_completo ASC";
+                "e.nombre_especialidad FROM Personal_Medico pm " +
+                "LEFT JOIN Especialidades e ON pm.id_especialidad = e.id_especialidad " +
+                "WHERE pm.estado = 'Activo' ORDER BY pm.nombre_completo ASC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
-                 ResultSet rs = stmt.executeQuery()) {
+                    ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
                     map.put("identidad", rs.getString("identidad"));
@@ -245,5 +246,81 @@ public class PersonalMedicoDAO {
             System.err.println("Error al obtener personal médico: " + e.getMessage());
         }
         return lista;
+    }
+
+    // Actualizar datos de un usuario (rol y opcionalmente contraseña)
+    public boolean actualizarUsuario(int idUsuario, String rolSistema, String nuevaContrasenia) {
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            if (nuevaContrasenia != null && !nuevaContrasenia.isEmpty()) {
+                String hashed = application.util.SecurityUtils.hashPassword(nuevaContrasenia);
+                String q = "UPDATE Usuarios_Login SET rol_sistema = ?, contrasenia = ? WHERE id_usuario = ?";
+                try (PreparedStatement stmt = conn.prepareStatement(q)) {
+                    stmt.setString(1, rolSistema);
+                    stmt.setString(2, hashed);
+                    stmt.setInt(3, idUsuario);
+                    return stmt.executeUpdate() > 0;
+                }
+            } else {
+                String q = "UPDATE Usuarios_Login SET rol_sistema = ? WHERE id_usuario = ?";
+                try (PreparedStatement stmt = conn.prepareStatement(q)) {
+                    stmt.setString(1, rolSistema);
+                    stmt.setInt(2, idUsuario);
+                    return stmt.executeUpdate() > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar usuario: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Inactivar usuario (borrado lógico)
+    public boolean inactivarUsuario(int idUsuario) {
+        String q = "UPDATE Usuarios_Login SET estado = 'Inactivo', fecha_inactivacion = NOW() WHERE id_usuario = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(q)) {
+                stmt.setInt(1, idUsuario);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al inactivar usuario: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Actualizar datos de personal médico
+    public boolean actualizarPersonalMedico(String identidad, String nombreCompleto, String telefono,
+            int idEspecialidad) {
+        String q = "UPDATE Personal_Medico SET nombre_completo = ?, telefono = ?, id_especialidad = ? WHERE identidad = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(q)) {
+                stmt.setString(1, nombreCompleto);
+                stmt.setString(2, telefono);
+                stmt.setInt(3, idEspecialidad);
+                stmt.setString(4, identidad);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar personal médico: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Inactivar personal médico (borrado lógico)
+    public boolean inactivarPersonalMedico(String identidad) {
+        String q = "UPDATE Personal_Medico SET estado = 'Inactivo', fecha_inactivacion = NOW() WHERE identidad = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(q)) {
+                stmt.setString(1, identidad);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al inactivar personal médico: " + e.getMessage());
+            return false;
+        }
     }
 }
