@@ -33,7 +33,7 @@ public class UserDAO {
     public boolean verificarCorreoExistente(String correoOTelefono) {
         // Buscamos si existe el correo en Usuarios_Login O si coincide el telefono del medico asociado
         String query = "SELECT u.id_usuario FROM Usuarios_Login u " +
-                       "LEFT JOIN Personal_Medico p ON u.id_medico = p.id_medico " +
+                       "LEFT JOIN Personal_Medico p ON u.identidad_medico = p.identidad " +
                        "WHERE (u.correo = ? OR p.telefono = ?) AND u.estado = 'Activo'";
         
         try {
@@ -57,7 +57,7 @@ public class UserDAO {
     public boolean actualizarContrasenia(String correoOTelefono, String nuevaContrasenia) {
         // Actualizar la contraseña del usuario donde coincida su correo o su telefono
         String query = "UPDATE Usuarios_Login u " +
-                       "LEFT JOIN Personal_Medico p ON u.id_medico = p.id_medico " +
+                       "LEFT JOIN Personal_Medico p ON u.identidad_medico = p.identidad " +
                        "SET u.contrasenia = ? " +
                        "WHERE (u.correo = ? OR p.telefono = ?) AND u.estado = 'Activo'";
                        

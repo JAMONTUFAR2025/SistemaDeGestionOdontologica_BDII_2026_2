@@ -257,15 +257,6 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="med_rol">Rol en Clínica:*</label>
-                        <select id="med_rol">
-                            <option value="Operativo">Operativo</option>
-                            <option value="Asistente">Asistente</option>
-                            <option value="Administrador">Administrador</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
                         <label for="med_especialidad">Especialidad Médica:*</label>
                         <select id="med_especialidad">
                             <option value="">Cargando especialidades...</option>
@@ -399,7 +390,6 @@
             var nombre = document.getElementById('med_nombre').value.trim();
             var identidad = document.getElementById('med_identidad').value.trim();
             var telefono = document.getElementById('med_telefono').value.trim();
-            var rol = document.getElementById('med_rol').value;
             var especialidad = document.getElementById('med_especialidad').value;
 
             if (!idUsuario) { alert("Por favor, selecciona un usuario para vincular."); return; }
@@ -417,7 +407,6 @@
                 nombre_completo: nombre,
                 identidad: identidad,
                 telefono: telefono,
-                rol: rol,
                 id_especialidad: parseInt(especialidad),
                 correo: correoUsuario
             };

@@ -276,3 +276,30 @@ CREATE TABLE Expediente_Archivos (
     fecha_inactivacion DATETIME NULL,
     FOREIGN KEY (identidad_paciente) REFERENCES Pacientes(identidad)
 );
+
+-- ==========================================
+-- ACTUALIZACIONES: MODIFICAR PERSONAL_MEDICO Y PACIENTES
+-- ==========================================
+
+-- Nota: Reemplazar los nombres de las llaves foraneas (ibfk) por los reales de la base de datos si son diferentes.
+ALTER TABLE Usuarios_Login DROP FOREIGN KEY Usuarios_Login_ibfk_1;
+ALTER TABLE Citas DROP FOREIGN KEY Citas_ibfk_2;
+ALTER TABLE Evolucion_Clinica DROP FOREIGN KEY Evolucion_Clinica_ibfk_4;
+
+ALTER TABLE Personal_Medico MODIFY id_medico INT NOT NULL;
+ALTER TABLE Personal_Medico DROP PRIMARY KEY;
+ALTER TABLE Personal_Medico DROP COLUMN id_medico;
+ALTER TABLE Personal_Medico DROP COLUMN rol;
+ALTER TABLE Personal_Medico ADD PRIMARY KEY (identidad);
+
+ALTER TABLE Usuarios_Login CHANGE id_medico identidad_medico VARCHAR(20) NULL;
+ALTER TABLE Usuarios_Login ADD FOREIGN KEY (identidad_medico) REFERENCES Personal_Medico(identidad);
+
+ALTER TABLE Citas CHANGE id_medico identidad_medico VARCHAR(20) NULL;
+ALTER TABLE Citas ADD FOREIGN KEY (identidad_medico) REFERENCES Personal_Medico(identidad);
+
+ALTER TABLE Evolucion_Clinica CHANGE id_medico identidad_medico VARCHAR(20) NOT NULL;
+ALTER TABLE Evolucion_Clinica ADD FOREIGN KEY (identidad_medico) REFERENCES Personal_Medico(identidad);
+
+-- Modificar Paciente: Mover columna estado antes de fecha_inactivacion
+ALTER TABLE Pacientes MODIFY COLUMN estado ENUM('Activo','Inactivo') DEFAULT 'Activo' AFTER fecha_registro;

@@ -4,7 +4,6 @@ public class PersonalMedico {
     private String nombre_completo;
     private String identidad;
     private String telefono;
-    private String rol;
     private int id_especialidad;
 
     // Datos de usuario
@@ -23,10 +22,6 @@ public class PersonalMedico {
 
     public String getTelefono() {
         return telefono;
-    }
-
-    public String getRol() {
-        return rol;
     }
 
     public int getId_especialidad() {
