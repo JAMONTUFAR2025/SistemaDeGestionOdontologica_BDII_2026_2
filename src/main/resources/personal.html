@@ -344,11 +344,18 @@
                             <input type="text" id="med_telefono" class="form-control" placeholder="9999-9999" maxlength="9">
                         </div>
                     </div>
-                    <div class="mb-4">
-                        <label for="med_especialidad">Especialidad Médica:*</label>
-                        <select id="med_especialidad" class="form-select">
-                            <option value="">Seleccione una especialidad</option>
-                        </select>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="med_especialidad" class="mb-0">Especialidad Médica:*</label>
+                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 fw-bold" onclick="abrirModalEspecialidad(null)" title="Agregar nueva especialidad">
+                                    <i class="fas fa-plus"></i> Nueva
+                                </button>
+                            </div>
+                            <select id="med_especialidad" class="form-select">
+                                <option value="">Seleccione una especialidad</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -399,6 +406,26 @@
                 <div class="modal-footer justify-content-center border-0 pb-4">
                     <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">No</button>
                     <button type="button" class="btn btn-danger px-4 fw-bold" onclick="confirmarEliminarMedico()">Sí, inactivar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR ELIMINACIÓN ESPECIALIDAD (FÍSICA) -->
+    <div class="modal fade" id="modalEliminarEspecialidad" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header text-white bg-danger">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle"></i> Eliminar Especialidad</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <h5 class="mb-3">¿Desea eliminar permanentemente esta especialidad?</h5>
+                    <p class="text-muted small">Esta acción realizará un borrado físico de la base de datos.</p>
+                </div>
+                <div class="modal-footer justify-content-center border-0 pb-4">
+                    <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger px-4 fw-bold" onclick="confirmarEliminarEspecialidad()">Sí, eliminar</button>
                 </div>
             </div>
         </div>
@@ -818,6 +845,7 @@
                     <td>${e.nombreEspecialidad}</td>
                     <td class="action-icons">
                         <i class="fas fa-edit" title="Editar" onclick="abrirModalEspecialidad({id:${e.idEspecialidad}, nombre:'${e.nombreEspecialidad.replace(/'/g,"\\'")}'})"></i>
+                        <i class="fas fa-trash" title="Eliminar" onclick="deleteEspecialidad(${e.idEspecialidad})"></i>
                     </td>
                 </tr>
             `).join('');
@@ -855,6 +883,26 @@
             alert(partes[1]);
             if (partes[0] === 'OK') {
                 bootstrap.Modal.getInstance(document.getElementById('modalAgregarEspecialidad')).hide();
+                cargarTablaEspecialidades();
+                intentarCargarEspecialidades();
+            }
+        }
+
+        // ELIMINAR ESPECIALIDAD (FÍSICO)
+        function deleteEspecialidad(id) {
+            idEspecialidadAEliminar = id;
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminarEspecialidad'))
+                       || new bootstrap.Modal(document.getElementById('modalEliminarEspecialidad'));
+            modal.show();
+        }
+
+        function confirmarEliminarEspecialidad() {
+            if (!window.javaConnector || !idEspecialidadAEliminar) return;
+            const respuesta = window.javaConnector.eliminarEspecialidad(String(idEspecialidadAEliminar));
+            const partes = respuesta.split('|');
+            alert(partes[1]);
+            if (partes[0] === 'OK') {
+                bootstrap.Modal.getInstance(document.getElementById('modalEliminarEspecialidad')).hide();
                 cargarTablaEspecialidades();
                 intentarCargarEspecialidades();
             }

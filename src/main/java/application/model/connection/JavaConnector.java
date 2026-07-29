@@ -235,6 +235,18 @@ public class JavaConnector {
         }
     }
 
+    // Eliminar especialidad (borrado físico)
+    public String eliminarEspecialidad(String idStr) {
+        try {
+            int id = Integer.parseInt(idStr.trim());
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            boolean exito = pmDAO.eliminarEspecialidad(id);
+            return exito ? "OK|Especialidad eliminada correctamente." : "ERR|No se pudo eliminar. Puede estar en uso por algún médico.";
+        } catch (Throwable t) {
+            return "ERR|Error: " + t.getMessage();
+        }
+    }
+
     public String registrarPersonalMedico(String jsonPersonal) {
         System.out.println("-> Peticion de registro de medico en Java: " + jsonPersonal);
         try {

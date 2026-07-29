@@ -16,7 +16,7 @@ public class PersonalMedicoDAO {
 
     public List<Especialidad> obtenerEspecialidades() {
         List<Especialidad> lista = new ArrayList<>();
-        String query = "SELECT id_especialidad, nombre_especialidad FROM Especialidades";
+        String query = "SELECT id_especialidad, nombre_especialidad FROM Especialidades ORDER BY id_especialidad DESC";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -65,6 +65,21 @@ public class PersonalMedicoDAO {
         }
     }
 
+    // Eliminar especialidad (borrado físico)
+    public boolean eliminarEspecialidad(int id) {
+        String q = "DELETE FROM Especialidades WHERE id_especialidad = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(q)) {
+                stmt.setInt(1, id);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar especialidad: " + e.getMessage());
+            return false;
+        }
+    }
+
     // Registrar SOLO un usuario de login (sin vincularlo a ningún médico)
     public boolean registrarUsuarioSolo(String correo, String contrasenia, String rolSistema, String estado) {
         String query = "INSERT INTO Usuarios_Login (correo, contrasenia, rol_sistema, estado) VALUES (?, ?, ?, ?)";
@@ -85,12 +100,23 @@ public class PersonalMedicoDAO {
         }
     }
 
-    // Obtener usuarios que NO tienen un médico vinculado (identidad_medico IS NULL)
+    // Obtener usuarios que NO tienen un médico vinculado
+    // Usa NOT EXISTS como fallback robusto si identidad_medico no existe
     public java.util.List<java.util.Map<String, String>> obtenerUsuariosSinMedico() {
         java.util.List<java.util.Map<String, String>> usuarios = new java.util.ArrayList<>();
-        String query = "SELECT id_usuario, correo, rol_sistema FROM Usuarios_Login WHERE identidad_medico IS NULL AND estado = 'Activo'";
+        // Intentar primero con identidad_medico (columna añadida por ALTER)
+        String queryConColumna = "SELECT id_usuario, correo, rol_sistema FROM Usuarios_Login WHERE identidad_medico IS NULL AND estado = 'Activo' ORDER BY id_usuario DESC";
+        String queryFallback   = "SELECT u.id_usuario, u.correo, u.rol_sistema FROM Usuarios_Login u WHERE estado = 'Activo' AND NOT EXISTS (SELECT 1 FROM Personal_Medico pm WHERE pm.correo = u.correo) ORDER BY u.id_usuario DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
+            String query = queryConColumna;
+            // Detectar si la columna existe
+            try {
+                conn.prepareStatement("SELECT identidad_medico FROM Usuarios_Login LIMIT 1").close();
+            } catch (SQLException ex) {
+                query = queryFallback;
+                System.out.println("-> identidad_medico no encontrada, usando fallback por correo.");
+            }
             try (PreparedStatement stmt = conn.prepareStatement(query);
                     ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -257,7 +283,7 @@ public class PersonalMedicoDAO {
         String query = "SELECT pm.identidad, pm.nombre_completo, pm.telefono, pm.correo, pm.estado, " +
                 "e.nombre_especialidad FROM Personal_Medico pm " +
                 "LEFT JOIN Especialidades e ON pm.id_especialidad = e.id_especialidad " +
-                "WHERE pm.estado = 'Activo' ORDER BY pm.nombre_completo ASC";
+                "WHERE pm.estado = 'Activo' ORDER BY pm.identidad DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
