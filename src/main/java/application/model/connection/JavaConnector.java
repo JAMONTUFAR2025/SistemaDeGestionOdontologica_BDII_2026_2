@@ -421,4 +421,34 @@ public class JavaConnector {
             return "ERR|Error: " + t.getMessage();
         }
     }
+
+    // ==========================================
+    // MÉTODOS PARA EGRESOS Y GASTOS
+    // ==========================================
+    public String registrarEgreso(String jsonEgreso) {
+        try {
+            com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonEgreso).getAsJsonObject();
+            String fecha = obj.has("fecha") ? obj.get("fecha").getAsString() : "";
+            String descripcion = obj.has("descripcion") ? obj.get("descripcion").getAsString() : "";
+            double monto = obj.has("monto") ? obj.get("monto").getAsDouble() : 0.0;
+            String numeroComprobante = obj.has("numero_comprobante") ? obj.get("numero_comprobante").getAsString() : "";
+
+            application.model.dao.EgresoGastoDAO dao = new application.model.dao.EgresoGastoDAO();
+            boolean exito = dao.registrarEgreso(fecha, descripcion, monto, numeroComprobante);
+            return exito ? "OK|Egreso registrado con éxito." : "ERR|Ocurrió un error al registrar el egreso.";
+        } catch (Throwable t) {
+            return "ERR|Error procesando datos: " + t.getMessage();
+        }
+    }
+
+    public String obtenerEgresos() {
+        try {
+            application.model.dao.EgresoGastoDAO dao = new application.model.dao.EgresoGastoDAO();
+            java.util.List<java.util.Map<String, Object>> lista = dao.obtenerEgresos();
+            return gson.toJson(lista);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en obtenerEgresos: " + t.getMessage());
+            return "[]";
+        }
+    }
 }

@@ -1,134 +1,301 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
-    <title>Control de Egresos y Gastos - Clínica</title>
-    <!-- Hojas de estilo locales (Offline) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Egresos y Gastos - SOE Odontología</title>
+    <!-- Estilos locales -->
     <link href="application/assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="application/assets/css/all.min.css" rel="stylesheet">
     <style>
+        /* === ESTILOS GENERALES Y DE TABLA === */
         body {
-            background: url('fondo-clinica.jpg') no-repeat center center fixed;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('fondo-clinica.jpg');
             background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #e9f0f5;
         }
 
-        .seccion-bloque {
-            background: rgba(255, 255, 255, 0.95);
+        .card-container {
+            max-width: 950px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px;
             border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-custom {
+            width: 100%;
+            margin-bottom: 1rem;
+            border-collapse: collapse;
+        }
+
+        .table-custom th {
+            border-top: none;
+            border-bottom: 1px solid #dee2e6;
+            padding: 12px 15px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .table-custom td {
+            border-bottom: 1px solid #eaeaea;
+            padding: 15px;
+            vertical-align: middle;
+            color: #555;
+        }
+
+        .btn-nuevo {
+            background-color: #0d6efd;
+            color: white;
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 6px;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .btn-nuevo:hover {
+            background-color: #0b5ed7;
+            color: white;
+        }
+        
+        .btn-volver {
+            background-color: #6c757d;
+            color: white;
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 6px;
+            border: none;
+            text-decoration: none;
+        }
+        .btn-volver:hover {
+            background-color: #5a6268;
+            color: white;
+        }
+
+        /* === ESTILOS DEL MODAL === */
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            background-color: #0d6efd;
+            color: white;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            border-bottom: none;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .btn-guardar {
+            background-color: #0d6efd;
+            color: white;
+            font-weight: 600;
+            padding: 10px;
+            border: none;
+            width: 100%;
+            border-radius: 6px;
+        }
+        .btn-guardar:hover {
+            background-color: #0b5ed7;
+            color: white;
+        }
+        
+        .section-title {
+            color: #0d6efd;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 5px;
+            font-size: 1.1rem;
         }
     </style>
 </head>
-
 <body>
 
-    <div class="container py-5">
-        <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm">
-            <h2 class="m-0"><i class="fa-solid fa-wallet text-danger me-2"></i>Control de Egresos y Gastos</h2>
-            <a href="menu.html" class="btn btn-secondary fw-bold"><i class="fa-solid fa-arrow-left me-1"></i> Volver al
-                Menú</a>
+    <div class="card-container">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="m-0" style="color: #333; font-weight: 700;">
+                <i class="fa-solid fa-wallet text-primary me-2"></i> Control de Egresos y Gastos
+            </h2>
+            <div>
+                <a href="menu.html" class="btn-volver me-2"><i class="fa-solid fa-arrow-left"></i> Volver</a>
+                <button class="btn-nuevo" onclick="abrirModalNuevo()">
+                    <i class="fa-solid fa-plus me-1"></i> Nuevo Egreso
+                </button>
+            </div>
         </div>
 
-        <div class="row g-4">
-            <!-- Formulario para Registrar Gasto -->
-            <div class="col-md-4">
-                <div class="seccion-bloque border-top border-danger border-4">
-                    <h4 class="fw-bold text-danger mb-3"><i class="fa-solid fa-plus-circle me-2"></i>Registrar Nuevo
-                        Gasto</h4>
+        <!-- Tabla -->
+        <div class="table-responsive">
+            <table class="table table-custom table-hover">
+                <thead>
+                    <tr>
+                        <th>N° Transacción</th>
+                        <th>Fecha</th>
+                        <th>Descripción</th>
+                        <th>N° Comprobante</th>
+                        <th>Monto (Lps)</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaEgresosBody">
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">Cargando registros...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL REGISTRO DE EGRESO -->
+    <!-- data-bs-backdrop="false" para evitar pantalla negra en WebView -->
+    <div class="modal fade" id="modalAgregarEgreso" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tituloModal">
+                        <i class="fa-solid fa-wallet me-2"></i> Registrar Egreso
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
                     <form id="formEgreso">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Descripción / Concepto:*</label>
-                            <textarea name="descripcion" class="form-control" rows="2" required
-                                placeholder="Ej: Compra de guantes y mascarillas"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Monto (Lps):*</label>
-                            <input type="number" step="0.01" name="monto" class="form-control" required
-                                placeholder="0.00">
-                        </div>
+                        <div class="section-title">Detalles de la Compra / Gasto</div>
+                        
                         <div class="mb-3">
                             <label class="form-label fw-bold">Fecha del Gasto:*</label>
-                            <input type="date" name="fecha" id="inputFechaActual" class="form-control" required>
+                            <input type="date" id="eg_fecha" class="form-control" required>
                         </div>
+                        
                         <div class="mb-3">
-                            <label class="form-label fw-bold">N° Comprobante / Factura:</label>
-                            <input type="text" name="numero_comprobante_factura" class="form-control"
-                                placeholder="Ej: FAC-00123">
+                            <label class="form-label fw-bold">Descripción / Concepto:*</label>
+                            <textarea id="eg_descripcion" class="form-control" rows="2" placeholder="Ej: Compra de insumos médicos" required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-danger w-100 fw-bold"><i
-                                class="fa-solid fa-save me-2"></i>Guardar Egreso</button>
-                    </form>
-                </div>
-            </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Monto (Lps):*</label>
+                                <input type="number" id="eg_monto" step="0.01" min="0.01" class="form-control" placeholder="0.00" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">N° Factura:</label>
+                                <input type="text" id="eg_comprobante" class="form-control" placeholder="Opcional">
+                            </div>
+                        </div>
 
-            <!-- Historial y Tabla de Egresos (Cargado dinámicamente vía JavaScript) -->
-            <div class="col-md-8">
-                <div class="seccion-bloque">
-                    <h4 class="fw-bold text-primary mb-3"><i class="fa-solid fa-list-ul me-2"></i>Historial de Gastos
-                        Registrados</h4>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Descripción</th>
-                                    <th>N° Factura</th>
-                                    <th>Monto</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tablaEgresosBody">
-                                <!-- Los registros se cargarán aquí por JavaScript -->
-                                <tr>
-                                    <td colspan='4' class='text-center text-muted py-4'>Cargando registros...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6 mb-2">
+                                <button type="button" class="btn btn-secondary w-100 py-2" data-bs-dismiss="modal">Cancelar</button>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-guardar py-2" onclick="guardarEgreso()">
+                                    <i class="fa-solid fa-save me-1"></i> Guardar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Inicializar la fecha actual en el input al cargar la página
         document.addEventListener('DOMContentLoaded', () => {
+            cargarEgresos();
+        });
+
+        // Abrir modal e inicializar fecha
+        function abrirModalNuevo() {
+            document.getElementById('formEgreso').reset();
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('inputFechaActual').value = today;
+            document.getElementById('eg_fecha').value = today;
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalAgregarEgreso')) 
+                       || new bootstrap.Modal(document.getElementById('modalAgregarEgreso'));
+            modal.show();
+        }
 
-            // Función opcional para cargar los datos si tienes un endpoint que devuelva JSON
-            // cargarEgresos();
-        });
+        // Cargar tabla desde base de datos
+        function cargarEgresos() {
+            if (!window.javaConnector) {
+                setTimeout(cargarEgresos, 150);
+                return;
+            }
+            try {
+                const json = window.javaConnector.obtenerEgresos();
+                const egresos = JSON.parse(json || '[]');
+                renderTabla(egresos);
+            } catch (e) {
+                console.error('Error al cargar egresos', e);
+            }
+        }
 
-        // Manejo del formulario por AJAX
-        document.getElementById('formEgreso').addEventListener('submit', function (e) {
-            e.preventDefault();
-            let formData = new FormData(this);
+        // Renderizar tabla
+        function renderTabla(lista) {
+            const tbody = document.getElementById('tablaEgresosBody');
+            if (!lista || lista.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No hay egresos registrados.</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            lista.forEach(e => {
+                const montoFormateado = parseFloat(e.monto).toLocaleString('es-HN', { style: 'currency', currency: 'HNL' });
+                html += `
+                    <tr>
+                        <td class="fw-bold"># ${e.id_egreso}</td>
+                        <td>${e.fecha}</td>
+                        <td>${e.descripcion}</td>
+                        <td>${e.numero_comprobante || '-'}</td>
+                        <td class="fw-bold text-danger">${montoFormateado}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
 
-            // Ajusta la ruta del endpoint según el backend que estés manejando
-            fetch('guardar_egreso_ajax', {
-                method: 'POST',
-                body: formData
-            })
-                .then(res => res.json())
-                .then(data => {
-                    alert(data.mensaje);
-                    if (data.exito) {
-                        this.reset();
-                        const today = new Date().toISOString().split('T')[0];
-                        document.getElementById('inputFechaActual').value = today;
-                        // location.reload(); // O recargar la tabla dinámicamente
-                    }
-                })
-                .catch(err => {
-                    console.error("Error:", err);
-                    alert("Error de conexión al intentar guardar el egreso.");
-                });
-        });
+        // Guardar nuevo egreso
+        function guardarEgreso() {
+            if (!window.javaConnector) { alert('Conector Java no encontrado.'); return; }
+            
+            const fecha = document.getElementById('eg_fecha').value;
+            const descripcion = document.getElementById('eg_descripcion').value.trim();
+            const monto = document.getElementById('eg_monto').value;
+            const comprobante = document.getElementById('eg_comprobante').value.trim();
+            
+            if (!fecha || !descripcion || !monto) {
+                alert('Por favor complete los campos obligatorios (*).');
+                return;
+            }
+
+            const data = {
+                fecha: fecha,
+                descripcion: descripcion,
+                monto: parseFloat(monto),
+                numero_comprobante: comprobante
+            };
+            
+            const respuesta = window.javaConnector.registrarEgreso(JSON.stringify(data));
+            const partes = respuesta.split('|');
+            alert(partes[1]);
+            
+            if (partes[0] === 'OK') {
+                bootstrap.Modal.getInstance(document.getElementById('modalAgregarEgreso')).hide();
+                cargarEgresos();
+            }
+        }
     </script>
 </body>
-
 </html>
