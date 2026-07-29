@@ -104,27 +104,37 @@ public class PersonalMedicoDAO {
     // Usa NOT EXISTS como fallback robusto si identidad_medico no existe
     public java.util.List<java.util.Map<String, String>> obtenerUsuariosSinMedico() {
         java.util.List<java.util.Map<String, String>> usuarios = new java.util.ArrayList<>();
-        // Intentar primero con identidad_medico (columna añadida por ALTER)
         String queryConColumna = "SELECT id_usuario, correo, rol_sistema FROM Usuarios_Login WHERE identidad_medico IS NULL AND estado = 'Activo' ORDER BY id_usuario DESC";
         String queryFallback   = "SELECT u.id_usuario, u.correo, u.rol_sistema FROM Usuarios_Login u WHERE estado = 'Activo' AND NOT EXISTS (SELECT 1 FROM Personal_Medico pm WHERE pm.correo = u.correo) ORDER BY u.id_usuario DESC";
+        
         try {
             Connection conn = DBConnection.getInstance().getConnection();
-            String query = queryConColumna;
-            // Detectar si la columna existe
-            try {
-                conn.prepareStatement("SELECT identidad_medico FROM Usuarios_Login LIMIT 1").close();
-            } catch (SQLException ex) {
-                query = queryFallback;
-                System.out.println("-> identidad_medico no encontrada, usando fallback por correo.");
-            }
-            try (PreparedStatement stmt = conn.prepareStatement(query);
-                    ResultSet rs = stmt.executeQuery()) {
+            boolean usarFallback = false;
+            
+            try (PreparedStatement stmt = conn.prepareStatement(queryConColumna);
+                 ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     java.util.Map<String, String> map = new java.util.HashMap<>();
                     map.put("id_usuario", String.valueOf(rs.getInt("id_usuario")));
                     map.put("correo", rs.getString("correo"));
                     map.put("rol_sistema", rs.getString("rol_sistema"));
                     usuarios.add(map);
+                }
+            } catch (SQLException ex1) {
+                usarFallback = true;
+                System.out.println("-> identidad_medico no encontrada en Usuarios_Login, usando fallback por correo.");
+            }
+            
+            if (usarFallback) {
+                try (PreparedStatement stmt = conn.prepareStatement(queryFallback);
+                     ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        java.util.Map<String, String> map = new java.util.HashMap<>();
+                        map.put("id_usuario", String.valueOf(rs.getInt("id_usuario")));
+                        map.put("correo", rs.getString("correo"));
+                        map.put("rol_sistema", rs.getString("rol_sistema"));
+                        usuarios.add(map);
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -158,16 +168,15 @@ public class PersonalMedicoDAO {
                 }
             }
 
-            // 2. Vincular el usuario existente con el nuevo médico
-            try (PreparedStatement stmtUpdate = conn.prepareStatement(updateUsuario)) {
-                stmtUpdate.setString(1, pm.getIdentidad());
-                stmtUpdate.setInt(2, idUsuario);
-
-                int filas = stmtUpdate.executeUpdate();
-                if (filas == 0) {
-                    conn.rollback();
-                    return false;
+            // 2. Vincular el usuario existente con el nuevo médico (Puede fallar si falta columna)
+            try {
+                try (PreparedStatement stmtUpdate = conn.prepareStatement(updateUsuario)) {
+                    stmtUpdate.setString(1, pm.getIdentidad());
+                    stmtUpdate.setInt(2, idUsuario);
+                    stmtUpdate.executeUpdate();
                 }
+            } catch (SQLException eUpdate) {
+                System.out.println("-> Update identidad_medico en Usuarios_Login falló. Ignorando debido al fallback por correo.");
             }
 
             conn.commit();
