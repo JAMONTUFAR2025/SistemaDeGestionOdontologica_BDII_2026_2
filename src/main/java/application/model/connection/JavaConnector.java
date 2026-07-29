@@ -215,8 +215,8 @@ public class JavaConnector {
     public String registrarPersonalMedico(String jsonPersonal) {
         System.out.println("-> Peticion de registro de medico en Java: " + jsonPersonal);
         try {
-            application.model.dao.PersonalMedico pm = gson.fromJson(jsonPersonal,
-                    application.model.dao.PersonalMedico.class);
+            application.model.entity.PersonalMedico pm = gson.fromJson(jsonPersonal,
+                    application.model.entity.PersonalMedico.class);
             application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
 
             boolean exito = pmDAO.registrarPersonalYUsuario(pm);
@@ -290,8 +290,8 @@ public class JavaConnector {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonMedico).getAsJsonObject();
             int idUsuario = obj.get("id_usuario").getAsInt();
 
-            application.model.dao.PersonalMedico pm = gson.fromJson(jsonMedico,
-                    application.model.dao.PersonalMedico.class);
+            application.model.entity.PersonalMedico pm = gson.fromJson(jsonMedico,
+                    application.model.entity.PersonalMedico.class);
             application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
 
             boolean exito = pmDAO.registrarPersonalYVincular(pm, idUsuario);
