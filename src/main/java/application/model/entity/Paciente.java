@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Paciente {
-
+    private int idPaciente;
     private String identidad;
     private String nombreCompleto;
     private LocalDate fechaNacimiento;
@@ -22,7 +22,8 @@ public class Paciente {
     public Paciente() {
     }
 
-    public Paciente(String identidad, String nombreCompleto, LocalDate fechaNacimiento, String genero, String estadoCivil, String ocupacion, String domicilio, String telefono, String personaResponsable, String telefonoResponsable, LocalDateTime fechaRegistro, String estado, LocalDateTime fechaInactivacion) {
+    public Paciente(int idPaciente, String identidad, String nombreCompleto, LocalDate fechaNacimiento, String genero, String estadoCivil, String ocupacion, String domicilio, String telefono, String personaResponsable, String telefonoResponsable, LocalDateTime fechaRegistro, String estado, LocalDateTime fechaInactivacion) {
+        this.idPaciente = idPaciente;
         this.identidad = identidad;
         this.nombreCompleto = nombreCompleto;
         this.fechaNacimiento = fechaNacimiento;
@@ -36,6 +37,14 @@ public class Paciente {
         this.fechaRegistro = fechaRegistro;
         this.estado = estado;
         this.fechaInactivacion = fechaInactivacion;
+    }
+
+    public int getIdPaciente() {
+        return idPaciente;
+    }
+
+    public void setIdPaciente(int idPaciente) {
+        this.idPaciente = idPaciente;
     }
 
     public String getIdentidad() {

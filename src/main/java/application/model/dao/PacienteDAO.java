@@ -139,6 +139,7 @@ public class PacienteDAO {
                  ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Paciente p = new Paciente();
+                    try { p.setIdPaciente(rs.getInt("id_paciente")); } catch (Exception ignored) {}
                     p.setIdentidad(rs.getString("identidad"));
                     p.setNombreCompleto(rs.getString("nombre_completo"));
                     

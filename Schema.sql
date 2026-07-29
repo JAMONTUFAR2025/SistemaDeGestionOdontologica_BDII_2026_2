@@ -302,4 +302,23 @@ ALTER TABLE Evolucion_Clinica CHANGE id_medico identidad_medico VARCHAR(20) NOT 
 ALTER TABLE Evolucion_Clinica ADD FOREIGN KEY (identidad_medico) REFERENCES Personal_Medico(identidad);
 
 -- Modificar Paciente: Mover columna estado antes de fecha_inactivacion
-ALTER TABLE Pacientes MODIFY COLUMN estado ENUM('Activo','Inactivo') DEFAULT 'Activo' AFTER fecha_registro;
+ALTER TABLE Pacientes MODIFY COLUMN estado ENUM('Activo','Inactivo') DEFAULT 'Activo' AFTER fecha_registro;
+
+-- 1. Eliminar llaves foráneas que referencian a Pacientes(identidad)
+ALTER TABLE Paciente_Alergias DROP FOREIGN KEY Paciente_Alergias_ibfk_1;
+ALTER TABLE Citas DROP FOREIGN KEY Citas_ibfk_1;
+ALTER TABLE Expediente_Base DROP FOREIGN KEY Expediente_Base_ibfk_1;
+ALTER TABLE Evolucion_Clinica DROP FOREIGN KEY Evolucion_Clinica_ibfk_1;
+ALTER TABLE Facturacion_Recibos DROP FOREIGN KEY Facturacion_Recibos_ibfk_1;
+
+-- 2. Modificar Pacientes para que id_paciente sea la clave primaria e identidad sea UNIQUE
+ALTER TABLE Pacientes DROP PRIMARY KEY;
+ALTER TABLE Pacientes ADD COLUMN id_paciente INT AUTO_INCREMENT PRIMARY KEY FIRST;
+ALTER TABLE Pacientes ADD UNIQUE (identidad);
+
+-- 3. Recrear las llaves foráneas apuntando a Pacientes(identidad) como campo UNIQUE
+ALTER TABLE Paciente_Alergias ADD FOREIGN KEY (identidad_paciente) REFERENCES Pacientes(identidad);
+ALTER TABLE Citas ADD FOREIGN KEY (identidad_paciente) REFERENCES Pacientes(identidad);
+ALTER TABLE Expediente_Base ADD FOREIGN KEY (identidad_paciente) REFERENCES Pacientes(identidad);
+ALTER TABLE Evolucion_Clinica ADD FOREIGN KEY (identidad_paciente) REFERENCES Pacientes(identidad);
+ALTER TABLE Facturacion_Recibos ADD FOREIGN KEY (identidad_paciente) REFERENCES Pacientes(identidad);
