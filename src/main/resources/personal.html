@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal - SOE Odontología</title>
+    <link href="application/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="application/assets/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* === ESTILOS GENERALES === */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('fondo-clinica.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #e9f0f5;
+        }
+
+        .card-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* === TABS === */
+        .nav-tabs-custom {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 25px;
+        }
+
+        .nav-tab-btn {
+            padding: 12px 30px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            border-bottom: 3px solid transparent;
+            background: transparent;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .nav-tab-btn:hover {
+            color: #007bf0;
+        }
+
+        .nav-tab-btn.active {
+            color: #007bf0;
+            border-bottom-color: #007bf0;
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* === TABLA === */
+        .table-custom {
+            width: 100%;
+            margin-bottom: 1rem;
+            border-collapse: collapse;
+        }
+
+        .table-custom th {
+            border-top: none;
+            border-bottom: 1px solid #dee2e6;
+            padding: 12px 15px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .table-custom td {
+            border-bottom: 1px solid #eaeaea;
+            padding: 15px;
+            vertical-align: middle;
+            color: #555;
+        }
+
+        .action-icons i {
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+
+        .fa-trash { color: #dc3545; }
+        .fa-user-edit { color: #007bf0; }
+
+        /* === FORM === */
+        .section-title {
+            background: #e9ecef;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .section-title-green {
+            background: #d4edda;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            color: #155724;
+        }
+
+        .modal-body label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .btn-guardar {
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+            padding: 10px;
+            width: 100%;
+        }
+
+        .btn-guardar:hover {
+            background-color: #218838;
+            color: white;
+        }
+
+        .badge-rol {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .badge-admin { background: #e3f2fd; color: #1565c0; }
+        .badge-medico { background: #e8f5e9; color: #2e7d32; }
+        .badge-recep { background: #fff8e1; color: #f57f17; }
+    </style>
+</head>
+
+<body>
+    <div class="container card-container">
+        <a href="menu.html" class="text-decoration-none mb-3 d-inline-block fw-bold" style="color: #007bf0;">
+            ← Volver al Menú Principal
+        </a>
+
+        <h3 class="fw-bold mb-4" style="color: #007bf0;">
+            <i class="fas fa-id-badge"></i> Gestión de Personal
+        </h3>
+
+        <!-- TABS -->
+        <div class="nav-tabs-custom">
+            <button class="nav-tab-btn active" onclick="mostrarTab('tabUsuarios', this)" id="btnTabUsuarios">
+                <i class="fas fa-user-lock"></i> Usuarios del Sistema
+            </button>
+            <button class="nav-tab-btn" onclick="mostrarTab('tabMedicos', this)" id="btnTabMedicos">
+                <i class="fas fa-user-md"></i> Personal Médico
+            </button>
+        </div>
+
+        <!-- ======================== -->
+        <!-- TAB: USUARIOS           -->
+        <!-- ======================== -->
+        <div id="tabUsuarios" class="tab-panel active">
+            <!-- Buscador y botón Agregar -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <label class="me-2 fw-bold text-dark mb-0">Buscar:</label>
+                    <input type="text" id="buscadorUsuarios" class="form-control" style="width: 250px;"
+                        placeholder="Buscar por correo o rol...">
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="abrirModalUsuario()">
+                        <i class="fas fa-plus"></i> Agregar Usuario
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla de Usuarios -->
+            <div class="table-responsive">
+                <table class="table-custom text-center">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Correo Electrónico</th>
+                            <th>Rol en el Sistema</th>
+                            <th>Fecha de Creación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaUsuarios">
+                        <tr><td colspan="5" class="text-muted py-4">Cargando usuarios...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- TAB: MEDICOS            -->
+        <!-- ======================== -->
+        <div id="tabMedicos" class="tab-panel">
+            <!-- Buscador y botón Agregar -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <label class="me-2 fw-bold text-dark mb-0">Buscar:</label>
+                    <input type="text" id="buscadorMedicos" class="form-control" style="width: 250px;"
+                        placeholder="Buscar por nombre, especialidad...">
+                </div>
+                <div>
+                    <button class="btn btn-success" onclick="abrirModalMedico()">
+                        <i class="fas fa-plus"></i> Agregar Médico
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla de Médicos -->
+            <div class="table-responsive">
+                <table class="table-custom text-center">
+                    <thead>
+                        <tr>
+                            <th>Identidad</th>
+                            <th>Nombre Completo</th>
+                            <th>Especialidad</th>
+                            <th>Teléfono</th>
+                            <th>Correo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaMedicos">
+                        <tr><td colspan="6" class="text-muted py-4">Cargando médicos...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODAL: AGREGAR USUARIO         -->
+    <!-- ============================== -->
+    <div class="modal fade" id="modalAgregarUsuario" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header text-white" style="background:#007bf0;">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-user-plus"></i> Nuevo Usuario del Sistema</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="msgModalUsuario" style="display:none; padding:10px; border-radius:4px; margin-bottom:15px; font-size:13px;"></div>
+
+                    <div class="section-title">Datos de Acceso al Sistema</div>
+
+                    <div class="mb-3">
+                        <label for="usu_correo">Correo Electrónico (Login):*</label>
+                        <input type="email" id="usu_correo" class="form-control" placeholder="ejemplo@clinica.com">
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="usu_contrasenia">Contraseña:*</label>
+                            <input type="password" id="usu_contrasenia" class="form-control" placeholder="••••••••">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="usu_rol_sistema">Rol en el Sistema:*</label>
+                            <select id="usu_rol_sistema" class="form-select">
+                                <option value="Medico">Médico</option>
+                                <option value="Recepcionista">Recepcionista</option>
+                                <option value="Administrador">Administrador</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <button type="button" class="btn btn-secondary w-100 py-2" data-bs-dismiss="modal">Cancelar</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-guardar rounded" onclick="guardarUsuario()">Crear Usuario</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODAL: AGREGAR MÉDICO          -->
+    <!-- ============================== -->
+    <div class="modal fade" id="modalAgregarMedico" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header text-white" style="background:#28a745;">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-user-md"></i> Registrar Personal Médico</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="msgModalMedico" style="display:none; padding:10px; border-radius:4px; margin-bottom:15px; font-size:13px;"></div>
+
+                    <div class="section-title-green">Vincular con Usuario Existente</div>
+                    <div class="mb-3">
+                        <label for="med_id_usuario">Seleccionar Usuario (sin médico asignado):*</label>
+                        <select id="med_id_usuario" class="form-select">
+                            <option value="">Cargando usuarios...</option>
+                        </select>
+                    </div>
+
+                    <div class="section-title-green">Datos del Personal de la Clínica</div>
+                    <div class="mb-3">
+                        <label for="med_nombre">Nombre Completo:*</label>
+                        <input type="text" id="med_nombre" class="form-control" placeholder="Ej: Dr. Carlos Mendoza">
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="med_identidad">Identidad (DNI):*</label>
+                            <input type="text" id="med_identidad" class="form-control" placeholder="0801-1990-12345" maxlength="15">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="med_telefono">Teléfono:*</label>
+                            <input type="text" id="med_telefono" class="form-control" placeholder="9999-9999" maxlength="9">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="med_especialidad">Especialidad Médica:*</label>
+                        <select id="med_especialidad" class="form-select">
+                            <option value="">Cargando especialidades...</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <button type="button" class="btn btn-secondary w-100 py-2" data-bs-dismiss="modal">Cancelar</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-guardar rounded" style="background:#28a745;" onclick="guardarMedico()">Registrar Médico</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR ELIMINACIÓN USUARIO -->
+    <div class="modal fade" id="modalEliminarUsuario" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header text-white bg-danger">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <h5 class="mb-3">¿Está seguro de que desea inactivar este usuario?</h5>
+                    <p class="text-muted small">El usuario será marcado como inactivo y no podrá iniciar sesión.</p>
+                </div>
+                <div class="modal-footer justify-content-center border-0 pb-4">
+                    <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger px-4 fw-bold" onclick="confirmarEliminarUsuario()">Sí, inactivar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR ELIMINACIÓN MÉDICO -->
+    <div class="modal fade" id="modalEliminarMedico" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header text-white bg-danger">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <h5 class="mb-3">¿Está seguro de que desea inactivar este médico?</h5>
+                    <p class="text-muted small">El médico será marcado como inactivo y no aparecerá en la tabla.</p>
+                </div>
+                <div class="modal-footer justify-content-center border-0 pb-4">
+                    <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger px-4 fw-bold" onclick="confirmarEliminarMedico()">Sí, inactivar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="application/assets/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ==========================================
+        // NAVEGACIÓN DE TABS
+        // ==========================================
+        function mostrarTab(tabId, btn) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+
+            if (tabId === 'tabUsuarios') cargarUsuarios();
+            if (tabId === 'tabMedicos') { cargarMedicos(); cargarUsuariosSinMedico(); }
+        }
+
+        // ==========================================
+        // CARGAR TABLA DE USUARIOS
+        // ==========================================
+        function cargarUsuarios() {
+            if (!window.javaConnector) { setTimeout(cargarUsuarios, 150); return; }
+            try {
+                const json = window.javaConnector.obtenerUsuarios();
+                const usuarios = JSON.parse(json);
+                const tbody = document.getElementById('cuerpoTablaUsuarios');
+
+                if (!usuarios || usuarios.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-muted py-4">No hay usuarios registrados.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = usuarios.map(u => `
+                    <tr>
+                        <td>${u.id_usuario}</td>
+                        <td>${u.correo}</td>
+                        <td><span class="badge-rol ${badgeClaseRol(u.rol_sistema)}">${u.rol_sistema}</span></td>
+                        <td>${u.fecha_creacion ? u.fecha_creacion.substring(0,10) : '-'}</td>
+                        <td class="action-icons">
+                            <i class="fas fa-trash" title="Inactivar" onclick="deleteUsuario(${u.id_usuario})"></i>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) {
+                console.error('Error al cargar usuarios:', e);
+            }
+        }
+
+        function badgeClaseRol(rol) {
+            if (rol === 'Administrador') return 'badge-admin';
+            if (rol === 'Medico') return 'badge-medico';
+            return 'badge-recep';
+        }
+
+        // Búsqueda incremental para usuarios
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('buscadorUsuarios').addEventListener('keyup', function() {
+                const filtro = this.value.toLowerCase();
+                document.querySelectorAll('#cuerpoTablaUsuarios tr').forEach(tr => {
+                    tr.style.display = tr.textContent.toLowerCase().includes(filtro) ? '' : 'none';
+                });
+            });
+
+            document.getElementById('buscadorMedicos').addEventListener('keyup', function() {
+                const filtro = this.value.toLowerCase();
+                document.querySelectorAll('#cuerpoTablaMedicos tr').forEach(tr => {
+                    tr.style.display = tr.textContent.toLowerCase().includes(filtro) ? '' : 'none';
+                });
+            });
+
+            // Máscara identidad médico
+            document.getElementById('med_identidad').addEventListener('input', function() {
+                let val = this.value.replace(/\D/g, '');
+                if (val.length > 4 && val.length <= 8) val = val.substring(0,4) + '-' + val.substring(4);
+                else if (val.length > 8) val = val.substring(0,4) + '-' + val.substring(4,8) + '-' + val.substring(8,13);
+                this.value = val;
+            });
+
+            // Máscara teléfono médico
+            document.getElementById('med_telefono').addEventListener('input', function() {
+                let val = this.value.replace(/\D/g, '');
+                if (val.length > 4) val = val.substring(0,4) + '-' + val.substring(4,8);
+                this.value = val;
+            });
+
+            cargarUsuarios();
+            intentarCargarEspecialidades();
+        });
+
+        // ==========================================
+        // CARGAR TABLA DE MÉDICOS
+        // ==========================================
+        function cargarMedicos() {
+            if (!window.javaConnector) { setTimeout(cargarMedicos, 150); return; }
+            try {
+                const json = window.javaConnector.obtenerPersonalMedico();
+                const medicos = JSON.parse(json);
+                const tbody = document.getElementById('cuerpoTablaMedicos');
+
+                if (!medicos || medicos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-muted py-4">No hay personal médico registrado.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = medicos.map(m => `
+                    <tr>
+                        <td>${m.identidad || '-'}</td>
+                        <td>${m.nombreCompleto}</td>
+                        <td>${m.especialidadNombre || '-'}</td>
+                        <td>${m.telefono || '-'}</td>
+                        <td>${m.correo || '-'}</td>
+                        <td class="action-icons">
+                            <i class="fas fa-trash" title="Inactivar" onclick="deleteMedico('${m.identidad}')"></i>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) {
+                console.error('Error al cargar médicos:', e);
+            }
+        }
+
+        // ==========================================
+        // CARGAR USUARIOS SIN MÉDICO (para select del modal médico)
+        // ==========================================
+        function cargarUsuariosSinMedico() {
+            if (!window.javaConnector) { setTimeout(cargarUsuariosSinMedico, 150); return; }
+            try {
+                const json = window.javaConnector.obtenerUsuariosSinMedico();
+                const usuarios = JSON.parse(json);
+                const select = document.getElementById('med_id_usuario');
+                select.innerHTML = '<option value="">-- Seleccionar usuario --</option>';
+                if (usuarios.length === 0) {
+                    select.innerHTML = '<option value="">No hay usuarios disponibles sin médico asignado.</option>';
+                } else {
+                    usuarios.forEach(u => {
+                        const opt = document.createElement('option');
+                        opt.value = u.id_usuario;
+                        opt.text = u.correo + ' (' + u.rol_sistema + ')';
+                        select.appendChild(opt);
+                    });
+                }
+            } catch(e) {
+                console.error('Error al cargar usuarios sin médico:', e);
+            }
+        }
+
+        // ==========================================
+        // CARGAR ESPECIALIDADES
+        // ==========================================
+        function intentarCargarEspecialidades() {
+            if (!window.javaConnector) { setTimeout(intentarCargarEspecialidades, 150); return; }
+            try {
+                const json = window.javaConnector.obtenerEspecialidades();
+                const especialidades = JSON.parse(json);
+                const select = document.getElementById('med_especialidad');
+                select.innerHTML = '<option value="">Seleccione una especialidad</option>';
+                especialidades.forEach(esp => {
+                    const opt = document.createElement('option');
+                    opt.value = esp.idEspecialidad;
+                    opt.text = esp.nombreEspecialidad;
+                    select.appendChild(opt);
+                });
+            } catch(e) {
+                console.error('Error al cargar especialidades:', e);
+            }
+        }
+
+        // ==========================================
+        // ABRIR MODALES
+        // ==========================================
+        function abrirModalUsuario() {
+            document.getElementById('msgModalUsuario').style.display = 'none';
+            document.getElementById('usu_correo').value = '';
+            document.getElementById('usu_contrasenia').value = '';
+            document.getElementById('usu_rol_sistema').value = 'Medico';
+            const modal = new bootstrap.Modal(document.getElementById('modalAgregarUsuario'));
+            modal.show();
+        }
+
+        function abrirModalMedico() {
+            document.getElementById('msgModalMedico').style.display = 'none';
+            document.getElementById('med_nombre').value = '';
+            document.getElementById('med_identidad').value = '';
+            document.getElementById('med_telefono').value = '';
+            cargarUsuariosSinMedico();
+            const modal = new bootstrap.Modal(document.getElementById('modalAgregarMedico'));
+            modal.show();
+        }
+
+        // ==========================================
+        // GUARDAR USUARIO
+        // ==========================================
+        function guardarUsuario() {
+            if (!window.javaConnector) { alert('Error: Puente Java no inicializado.'); return; }
+
+            const correo = document.getElementById('usu_correo').value.trim();
+            const contrasenia = document.getElementById('usu_contrasenia').value;
+            const rolSistema = document.getElementById('usu_rol_sistema').value;
+
+            if (!correo) { alert('Por favor, ingresa el correo electrónico.'); return; }
+            if (!contrasenia) { alert('Por favor, ingresa la contraseña.'); return; }
+
+            const data = { correo, contrasenia, rol_sistema: rolSistema, estado: 'Activo' };
+            const respuesta = window.javaConnector.registrarUsuarioSolo(JSON.stringify(data));
+            const partes = respuesta.split('|');
+            alert(partes[1]);
+
+            if (partes[0] === 'OK') {
+                bootstrap.Modal.getInstance(document.getElementById('modalAgregarUsuario')).hide();
+                cargarUsuarios();
+            }
+        }
+
+        // ==========================================
+        // GUARDAR MÉDICO
+        // ==========================================
+        function guardarMedico() {
+            if (!window.javaConnector) { alert('Error: Puente Java no inicializado.'); return; }
+
+            const idUsuario = document.getElementById('med_id_usuario').value;
+            const nombre = document.getElementById('med_nombre').value.trim();
+            const identidad = document.getElementById('med_identidad').value.trim();
+            const telefono = document.getElementById('med_telefono').value.trim();
+            const especialidad = document.getElementById('med_especialidad').value;
+
+            if (!idUsuario) { alert('Por favor, selecciona un usuario para vincular.'); return; }
+            if (!nombre) { alert('Por favor, ingresa el nombre completo.'); return; }
+            if (!identidad) { alert('Por favor, ingresa la identidad (DNI).'); return; }
+            if (!telefono) { alert('Por favor, ingresa el teléfono.'); return; }
+            if (!especialidad) { alert('Por favor, selecciona la especialidad.'); return; }
+
+            const selectUsuario = document.getElementById('med_id_usuario');
+            const correoUsuario = selectUsuario.options[selectUsuario.selectedIndex].text.split(' (')[0];
+
+            const data = {
+                id_usuario: parseInt(idUsuario),
+                nombre_completo: nombre,
+                identidad,
+                telefono,
+                id_especialidad: parseInt(especialidad),
+                correo: correoUsuario
+            };
+
+            const respuesta = window.javaConnector.registrarMedicoConUsuario(JSON.stringify(data));
+            const partes = respuesta.split('|');
+            alert(partes[1]);
+
+            if (partes[0] === 'OK') {
+                bootstrap.Modal.getInstance(document.getElementById('modalAgregarMedico')).hide();
+                cargarMedicos();
+            }
+        }
+
+        // ==========================================
+        // ELIMINAR / INACTIVAR
+        // ==========================================
+        let idUsuarioAEliminar = null;
+        let identidadMedicoAEliminar = null;
+
+        function deleteUsuario(idUsuario) {
+            idUsuarioAEliminar = idUsuario;
+            new bootstrap.Modal(document.getElementById('modalEliminarUsuario')).show();
+        }
+
+        function deleteMedico(identidad) {
+            identidadMedicoAEliminar = identidad;
+            new bootstrap.Modal(document.getElementById('modalEliminarMedico')).show();
+        }
+
+        function confirmarEliminarUsuario() {
+            // Por ahora muestra aviso, se puede implementar el DAO de inactivar usuario
+            alert('Funcionalidad de inactivar usuario en desarrollo.');
+            bootstrap.Modal.getInstance(document.getElementById('modalEliminarUsuario')).hide();
+        }
+
+        function confirmarEliminarMedico() {
+            // Por ahora muestra aviso, se puede implementar el DAO de inactivar médico
+            alert('Funcionalidad de inactivar médico en desarrollo.');
+            bootstrap.Modal.getInstance(document.getElementById('modalEliminarMedico')).hide();
+        }
+    </script>
+</body>
+
+</html>

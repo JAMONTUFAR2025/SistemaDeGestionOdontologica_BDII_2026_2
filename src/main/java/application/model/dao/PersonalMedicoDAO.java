@@ -194,4 +194,56 @@ public class PersonalMedicoDAO {
             }
         }
     }
+
+    // Obtener todos los usuarios activos para la tabla de personal
+    public java.util.List<java.util.Map<String, Object>> obtenerUsuarios() {
+        java.util.List<java.util.Map<String, Object>> lista = new java.util.ArrayList<>();
+        String query = "SELECT id_usuario, correo, rol_sistema, estado, fecha_creacion FROM Usuarios_Login WHERE estado = 'Activo' ORDER BY fecha_creacion DESC";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query);
+                 ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+                    map.put("id_usuario", rs.getInt("id_usuario"));
+                    map.put("correo", rs.getString("correo"));
+                    map.put("rol_sistema", rs.getString("rol_sistema"));
+                    map.put("estado", rs.getString("estado"));
+                    map.put("fecha_creacion", rs.getString("fecha_creacion"));
+                    lista.add(map);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener usuarios: " + e.getMessage());
+        }
+        return lista;
+    }
+
+    // Obtener todo el personal médico activo para la tabla
+    public java.util.List<java.util.Map<String, Object>> obtenerPersonalMedico() {
+        java.util.List<java.util.Map<String, Object>> lista = new java.util.ArrayList<>();
+        String query = "SELECT pm.identidad, pm.nombre_completo, pm.telefono, pm.correo, pm.estado, " +
+                       "e.nombre_especialidad FROM Personal_Medico pm " +
+                       "LEFT JOIN Especialidades e ON pm.id_especialidad = e.id_especialidad " +
+                       "WHERE pm.estado = 'Activo' ORDER BY pm.nombre_completo ASC";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query);
+                 ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+                    map.put("identidad", rs.getString("identidad"));
+                    map.put("nombreCompleto", rs.getString("nombre_completo"));
+                    map.put("telefono", rs.getString("telefono"));
+                    map.put("correo", rs.getString("correo"));
+                    map.put("estado", rs.getString("estado"));
+                    map.put("especialidadNombre", rs.getString("nombre_especialidad"));
+                    lista.add(map);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener personal médico: " + e.getMessage());
+        }
+        return lista;
+    }
 }

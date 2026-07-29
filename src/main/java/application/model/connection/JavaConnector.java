@@ -308,4 +308,28 @@ public class JavaConnector {
             return "ERR|Error procesando datos: " + t.getMessage();
         }
     }
+
+    // Obtener todos los usuarios activos (para la tabla del módulo de personal)
+    public String obtenerUsuarios() {
+        try {
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            java.util.List<java.util.Map<String, Object>> lista = pmDAO.obtenerUsuarios();
+            return gson.toJson(lista);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en obtenerUsuarios: " + t.getMessage());
+            return "[]";
+        }
+    }
+
+    // Obtener todo el personal médico activo (para la tabla del módulo de personal)
+    public String obtenerPersonalMedico() {
+        try {
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            java.util.List<java.util.Map<String, Object>> lista = pmDAO.obtenerPersonalMedico();
+            return gson.toJson(lista);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en obtenerPersonalMedico: " + t.getMessage());
+            return "[]";
+        }
+    }
 }
