@@ -48,4 +48,36 @@ public class EgresoGastoDAO {
         }
         return lista;
     }
+
+    public boolean actualizarEgreso(int id, String fecha, String descripcion, double monto, String numeroComprobante) {
+        String query = "UPDATE Egresos_Gastos SET fecha = ?, descripcion = ?, monto = ?, numero_comprobante = ? WHERE id_egreso = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, fecha);
+                stmt.setString(2, descripcion);
+                stmt.setDouble(3, monto);
+                stmt.setString(4, numeroComprobante != null ? numeroComprobante : "");
+                stmt.setInt(5, id);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar egreso: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean inactivarEgreso(int id) {
+        String query = "UPDATE Egresos_Gastos SET estado = 'Inactivo', fecha_inactivacion = NOW() WHERE id_egreso = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, id);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al inactivar egreso: " + e.getMessage());
+            return false;
+        }
+    }
 }

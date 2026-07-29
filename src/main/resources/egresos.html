@@ -48,32 +48,18 @@
             color: #555;
         }
 
-        .btn-nuevo {
-            background-color: #0d6efd;
-            color: white;
-            font-weight: 500;
-            padding: 8px 20px;
-            border-radius: 6px;
-            border: none;
-            transition: all 0.3s ease;
+        .action-icons i {
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-right: 15px;
         }
-        .btn-nuevo:hover {
-            background-color: #0b5ed7;
-            color: white;
+
+        .fa-edit {
+            color: #0d6efd;
         }
-        
-        .btn-volver {
-            background-color: #6c757d;
-            color: white;
-            font-weight: 500;
-            padding: 8px 20px;
-            border-radius: 6px;
-            border: none;
-            text-decoration: none;
-        }
-        .btn-volver:hover {
-            background-color: #5a6268;
-            color: white;
+
+        .fa-trash {
+            color: #dc3545;
         }
 
         /* === ESTILOS DEL MODAL === */
@@ -84,37 +70,32 @@
         }
 
         .modal-header {
-            background-color: #0d6efd;
+            background-color: #007bf0;
             color: white;
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
             border-bottom: none;
         }
 
-        .modal-title {
-            font-weight: 600;
-            font-size: 1.25rem;
-        }
-
         .btn-guardar {
-            background-color: #0d6efd;
+            background-color: #28a745;
             color: white;
-            font-weight: 600;
+            font-weight: bold;
             padding: 10px;
             border: none;
             width: 100%;
             border-radius: 6px;
         }
         .btn-guardar:hover {
-            background-color: #0b5ed7;
+            background-color: #218838;
             color: white;
         }
         
         .section-title {
-            color: #0d6efd;
+            color: #28a745;
             font-weight: 600;
             margin-bottom: 15px;
-            border-bottom: 2px solid #0d6efd;
+            border-bottom: 2px solid #28a745;
             padding-bottom: 5px;
             font-size: 1.1rem;
         }
@@ -122,55 +103,68 @@
 </head>
 <body>
 
-    <div class="card-container">
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="m-0" style="color: #333; font-weight: 700;">
-                <i class="fa-solid fa-wallet text-primary me-2"></i> Control de Egresos y Gastos
-            </h2>
-            <div>
-                <a href="menu.html" class="btn-volver me-2"><i class="fa-solid fa-arrow-left"></i> Volver</a>
-                <button class="btn-nuevo" onclick="abrirModalNuevo()">
-                    <i class="fa-solid fa-plus me-1"></i> Nuevo Egreso
-                </button>
-            </div>
-        </div>
+    <div class="container card-container">
+        <a href="menu.html" class="text-decoration-none mb-3 d-inline-block fw-bold" style="color: #007bf0;">
+            ← Volver al Menú Principal
+        </a>
 
-        <!-- Tabla -->
-        <div class="table-responsive">
-            <table class="table table-custom table-hover">
-                <thead>
-                    <tr>
-                        <th>N° Transacción</th>
-                        <th>Fecha</th>
-                        <th>Descripción</th>
-                        <th>N° Comprobante</th>
-                        <th>Monto (Lps)</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaEgresosBody">
-                    <tr>
-                        <td colspan="5" class="text-center text-muted py-4">Cargando registros...</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div>
+            <h3 class="fw-bold text-start mb-4" style="color: #007bf0 !important;">
+                <i class="fa-solid fa-wallet"></i> Control de Egresos y Gastos
+            </h3>
+
+            <!-- Buscador universal y botón Agregar -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <label for="buscadorEgresos" class="me-2 fw-bold text-dark mb-0">Buscar:</label>
+                    <input type="text" id="buscadorEgresos" class="form-control" style="width: 250px;"
+                        placeholder="Escriba para buscar...">
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="abrirModalEgreso(null)">
+                        <i class="fas fa-plus"></i> Nuevo Egreso
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla -->
+            <div class="table-responsive">
+                <table class="table-custom text-center">
+                    <thead>
+                        <tr>
+                            <th>N° Transacción</th>
+                            <th>Fecha</th>
+                            <th>Descripción</th>
+                            <th>N° Comprobante</th>
+                            <th>Monto (Lps)</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaEgresosBody">
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">Cargando registros...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <!-- MODAL REGISTRO DE EGRESO -->
-    <!-- data-bs-backdrop="false" para evitar pantalla negra en WebView -->
+    <!-- MODAL REGISTRO/EDICION DE EGRESO -->
     <div class="modal fade" id="modalAgregarEgreso" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content shadow-lg">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="tituloModal">
-                        <i class="fa-solid fa-wallet me-2"></i> Registrar Egreso
+                    <h5 class="modal-title fw-bold" id="tituloModal">
+                        <i class="fa-solid fa-wallet"></i> Registrar Nuevo Egreso
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body p-4">
                     <form id="formEgreso">
-                        <div class="section-title">Detalles de la Compra / Gasto</div>
+                        <input type="hidden" id="eg_id">
+                        
+                        <div class="section-title mt-0">Detalles de la Compra / Gasto</div>
                         
                         <div class="mb-3">
                             <label class="form-label fw-bold">Fecha del Gasto:*</label>
@@ -198,9 +192,7 @@
                                 <button type="button" class="btn btn-secondary w-100 py-2" data-bs-dismiss="modal">Cancelar</button>
                             </div>
                             <div class="col-md-6">
-                                <button type="button" class="btn btn-guardar py-2" onclick="guardarEgreso()">
-                                    <i class="fa-solid fa-save me-1"></i> Guardar
-                                </button>
+                                <button type="button" class="btn btn-guardar rounded" onclick="guardarEgreso()">Guardar Egreso</button>
                             </div>
                         </div>
                     </form>
@@ -209,25 +201,70 @@
         </div>
     </div>
 
+    <!-- MODAL CONFIRMAR ELIMINACIÓN -->
+    <div class="modal fade" id="modalEliminarEgreso" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header text-white bg-danger">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <h5 class="mb-3">¿Desea eliminar este registro?</h5>
+                    <p class="text-muted small">El egreso será marcado como inactivo.</p>
+                </div>
+                <div class="modal-footer justify-content-center border-0 pb-4">
+                    <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger px-4 fw-bold" onclick="confirmarEliminarEgreso()">Sí, eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
     <script>
+        let egresosLista = [];
+        let idEgresoEliminar = null;
+
         document.addEventListener('DOMContentLoaded', () => {
             cargarEgresos();
+            
+            document.getElementById('buscadorEgresos').addEventListener('input', function() {
+                const term = this.value.toLowerCase();
+                const trs = document.getElementById('tablaEgresosBody').querySelectorAll('tr');
+                trs.forEach(tr => {
+                    if (tr.children.length === 1) return; // ignore loading/empty rows
+                    const text = tr.innerText.toLowerCase();
+                    tr.style.display = text.includes(term) ? '' : 'none';
+                });
+            });
         });
 
-        // Abrir modal e inicializar fecha
-        function abrirModalNuevo() {
+        function abrirModalEgreso(egresoJson) {
             document.getElementById('formEgreso').reset();
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('eg_fecha').value = today;
+            const titulo = document.getElementById('tituloModal');
+            
+            if (egresoJson) {
+                const e = JSON.parse(decodeURIComponent(egresoJson));
+                document.getElementById('eg_id').value = e.id_egreso;
+                document.getElementById('eg_fecha').value = e.fecha;
+                document.getElementById('eg_descripcion').value = e.descripcion;
+                document.getElementById('eg_monto').value = e.monto;
+                document.getElementById('eg_comprobante').value = e.numero_comprobante || '';
+                titulo.innerHTML = '<i class="fa-solid fa-edit"></i> Editar Egreso';
+            } else {
+                document.getElementById('eg_id').value = '';
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('eg_fecha').value = today;
+                titulo.innerHTML = '<i class="fa-solid fa-wallet"></i> Registrar Nuevo Egreso';
+            }
             
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalAgregarEgreso')) 
                        || new bootstrap.Modal(document.getElementById('modalAgregarEgreso'));
             modal.show();
         }
 
-        // Cargar tabla desde base de datos
         function cargarEgresos() {
             if (!window.javaConnector) {
                 setTimeout(cargarEgresos, 150);
@@ -235,24 +272,24 @@
             }
             try {
                 const json = window.javaConnector.obtenerEgresos();
-                const egresos = JSON.parse(json || '[]');
-                renderTabla(egresos);
+                egresosLista = JSON.parse(json || '[]');
+                renderTabla(egresosLista);
             } catch (e) {
                 console.error('Error al cargar egresos', e);
             }
         }
 
-        // Renderizar tabla
         function renderTabla(lista) {
             const tbody = document.getElementById('tablaEgresosBody');
             if (!lista || lista.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No hay egresos registrados.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No hay egresos activos registrados.</td></tr>';
                 return;
             }
             
             let html = '';
             lista.forEach(e => {
                 const montoFormateado = parseFloat(e.monto).toLocaleString('es-HN', { style: 'currency', currency: 'HNL' });
+                const jsonStr = encodeURIComponent(JSON.stringify(e));
                 html += `
                     <tr>
                         <td class="fw-bold"># ${e.id_egreso}</td>
@@ -260,16 +297,26 @@
                         <td>${e.descripcion}</td>
                         <td>${e.numero_comprobante || '-'}</td>
                         <td class="fw-bold text-danger">${montoFormateado}</td>
+                        <td class="action-icons">
+                            <i class="fas fa-edit" title="Editar" onclick="abrirModalEgreso('${jsonStr}')"></i>
+                            <i class="fas fa-trash" title="Eliminar" onclick="borrarEgreso(${e.id_egreso})"></i>
+                        </td>
                     </tr>
                 `;
             });
             tbody.innerHTML = html;
+            
+            // Reaplicar filtro si hay busqueda
+            const term = document.getElementById('buscadorEgresos').value.toLowerCase();
+            if(term) {
+                document.getElementById('buscadorEgresos').dispatchEvent(new Event('input'));
+            }
         }
 
-        // Guardar nuevo egreso
         function guardarEgreso() {
             if (!window.javaConnector) { alert('Conector Java no encontrado.'); return; }
             
+            const id = document.getElementById('eg_id').value;
             const fecha = document.getElementById('eg_fecha').value;
             const descripcion = document.getElementById('eg_descripcion').value.trim();
             const monto = document.getElementById('eg_monto').value;
@@ -281,18 +328,43 @@
             }
 
             const data = {
+                id_egreso: id ? parseInt(id) : null,
                 fecha: fecha,
                 descripcion: descripcion,
                 monto: parseFloat(monto),
                 numero_comprobante: comprobante
             };
             
-            const respuesta = window.javaConnector.registrarEgreso(JSON.stringify(data));
+            let respuesta = "";
+            if (id) {
+                respuesta = window.javaConnector.actualizarEgreso(JSON.stringify(data));
+            } else {
+                respuesta = window.javaConnector.registrarEgreso(JSON.stringify(data));
+            }
+            
             const partes = respuesta.split('|');
             alert(partes[1]);
             
             if (partes[0] === 'OK') {
                 bootstrap.Modal.getInstance(document.getElementById('modalAgregarEgreso')).hide();
+                cargarEgresos();
+            }
+        }
+        
+        function borrarEgreso(id) {
+            idEgresoEliminar = id;
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminarEgreso')) 
+                       || new bootstrap.Modal(document.getElementById('modalEliminarEgreso'));
+            modal.show();
+        }
+        
+        function confirmarEliminarEgreso() {
+            if (!window.javaConnector || !idEgresoEliminar) return;
+            const respuesta = window.javaConnector.inactivarEgreso(String(idEgresoEliminar));
+            const partes = respuesta.split('|');
+            alert(partes[1]);
+            if (partes[0] === 'OK') {
+                bootstrap.Modal.getInstance(document.getElementById('modalEliminarEgreso')).hide();
                 cargarEgresos();
             }
         }
