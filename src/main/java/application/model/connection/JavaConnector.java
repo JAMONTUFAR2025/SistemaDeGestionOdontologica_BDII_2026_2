@@ -212,6 +212,29 @@ public class JavaConnector {
         return gson.toJson(lista);
     }
 
+    // Agregar nueva especialidad
+    public String agregarEspecialidad(String nombre) {
+        try {
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            boolean exito = pmDAO.agregarEspecialidad(nombre.trim());
+            return exito ? "OK|Especialidad registrada correctamente." : "ERR|No se pudo registrar la especialidad.";
+        } catch (Throwable t) {
+            return "ERR|Error: " + t.getMessage();
+        }
+    }
+
+    // Actualizar nombre de especialidad
+    public String actualizarEspecialidad(String idStr, String nombre) {
+        try {
+            int id = Integer.parseInt(idStr.trim());
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            boolean exito = pmDAO.actualizarEspecialidad(id, nombre.trim());
+            return exito ? "OK|Especialidad actualizada correctamente." : "ERR|No se pudo actualizar la especialidad.";
+        } catch (Throwable t) {
+            return "ERR|Error: " + t.getMessage();
+        }
+    }
+
     public String registrarPersonalMedico(String jsonPersonal) {
         System.out.println("-> Peticion de registro de medico en Java: " + jsonPersonal);
         try {

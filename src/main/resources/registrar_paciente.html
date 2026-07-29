@@ -56,16 +56,9 @@
             margin-right: 15px;
         }
 
-        .fa-file-signature {
+        .fa-edit {
             color: #0d6efd;
         }
-
-        /* Icono de editar */
-        .fa-trash {
-            color: #dc3545;
-        }
-
-        /* Icono de eliminar */
 
         /* === ESTILOS DEL FORMULARIO (Tu código adaptado) === */
         .section-title {
@@ -327,7 +320,7 @@
                     <td>${p.nombreCompleto || ''}</td>
                     <td>${p.telefono || ''}</td>
                     <td class="action-icons">
-                        <i class="fas fa-file-signature" title="Editar" onclick="openEditModal('${p.identidad}')"></i>
+                        <i class="fas fa-edit" title="Editar" onclick="openEditModal('${p.identidad}')"></i>
                         <i class="fas fa-trash" title="Eliminar" onclick="deletePatient('${p.identidad}')"></i>
                     </td>
                 `;

@@ -34,6 +34,37 @@ public class PersonalMedicoDAO {
         return lista;
     }
 
+    // Insertar nueva especialidad
+    public boolean agregarEspecialidad(String nombre) {
+        String q = "INSERT INTO Especialidades (nombre_especialidad) VALUES (?)";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(q)) {
+                stmt.setString(1, nombre);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al agregar especialidad: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Actualizar nombre de especialidad
+    public boolean actualizarEspecialidad(int id, String nombre) {
+        String q = "UPDATE Especialidades SET nombre_especialidad = ? WHERE id_especialidad = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(q)) {
+                stmt.setString(1, nombre);
+                stmt.setInt(2, id);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar especialidad: " + e.getMessage());
+            return false;
+        }
+    }
+
     // Registrar SOLO un usuario de login (sin vincularlo a ningún médico)
     public boolean registrarUsuarioSolo(String correo, String contrasenia, String rolSistema, String estado) {
         String query = "INSERT INTO Usuarios_Login (correo, contrasenia, rol_sistema, estado) VALUES (?, ?, ?, ?)";

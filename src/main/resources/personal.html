@@ -135,6 +135,9 @@
             <button class="nav-tab-btn" onclick="mostrarTab('tabMedicos', this, true)" id="btnTabMedicos">
                 <i class="fas fa-user-md"></i> Personal Médico
             </button>
+            <button class="nav-tab-btn" onclick="mostrarTab('tabEspecialidades', this, false)" id="btnTabEspecialidades">
+                <i class="fas fa-star"></i> Especialidades
+            </button>
         </div>
 
         <!-- ======================== -->
@@ -207,6 +210,39 @@
                 </table>
             </div>
         </div>
+
+        <!-- ======================== -->
+        <!-- TAB: ESPECIALIDADES     -->
+        <!-- ======================== -->
+        <div id="tabEspecialidades" class="tab-panel">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <label class="me-2 fw-bold text-dark mb-0">Buscar:</label>
+                    <input type="text" id="buscadorEspecialidades" class="form-control" style="width: 260px;"
+                        placeholder="Escribe para buscar...">
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="abrirModalEspecialidad(null)">
+                        <i class="fas fa-plus"></i> Nueva Especialidad
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table-custom text-center">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre de Especialidad</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaEspecialidades">
+                        <tr><td colspan="3" class="text-muted py-4">Cargando especialidades...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- ================================================ -->
@@ -214,7 +250,7 @@
     <!-- data-bs-backdrop="false" evita pantalla negra    -->
     <!-- ================================================ -->
     <div class="modal fade" id="modalAgregarUsuario" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content shadow-lg">
                 <div class="modal-header text-white" style="background:#007bf0;">
                     <h5 class="modal-title fw-bold" id="tituloModalUsuario">
@@ -227,17 +263,12 @@
 
                     <div class="section-title">Datos de Acceso al Sistema</div>
 
-                    <div class="mb-3">
-                        <label for="usu_correo">Correo Electrónico:*</label>
-                        <input type="email" id="usu_correo" class="form-control" placeholder="ejemplo@clinica.com">
-                    </div>
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="usu_contrasenia">Contraseña:*</label>
-                            <input type="password" id="usu_contrasenia" class="form-control" placeholder="••••••••">
-                            <small id="usu_pass_hint" class="text-muted" style="display:none;">Dejar vacío para no cambiar la contraseña.</small>
+                        <div class="col-md-7">
+                            <label for="usu_correo">Correo Electrónico:*</label>
+                            <input type="email" id="usu_correo" class="form-control" placeholder="ejemplo@clinica.com">
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <label for="usu_rol_sistema">Rol en el Sistema:*</label>
                             <select id="usu_rol_sistema" class="form-select">
                                 <option value="Medico">Médico</option>
@@ -246,6 +277,17 @@
                             </select>
                         </div>
                     </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="usu_contrasenia">Contraseña:*</label>
+                            <input type="password" id="usu_contrasenia" class="form-control" placeholder="••••••••">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="usu_confirmar_pass">Confirmar Contraseña:*</label>
+                            <input type="password" id="usu_confirmar_pass" class="form-control" placeholder="••••••••">
+                        </div>
+                    </div>
+                    <small id="usu_pass_hint" class="text-muted d-block mb-3" style="display:none!important;">Dejar vacío para no cambiar la contraseña. Si ingresa una nueva contraseña, confirme en ambos campos.</small>
 
                     <div class="row">
                         <div class="col-md-6 mb-2">
@@ -362,6 +404,39 @@
         </div>
     </div>
 
+    <!-- ================================================ -->
+    <!-- MODAL: AGREGAR / EDITAR ESPECIALIDAD             -->
+    <!-- ------------------------------------------------ -->
+    <div class="modal fade" id="modalAgregarEspecialidad" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header text-white" style="background:#6f42c1;">
+                    <h5 class="modal-title fw-bold" id="tituloModalEspecialidad">
+                        <i class="fas fa-star"></i> Nueva Especialidad
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" id="esp_id_editar">
+                    <div class="mb-4">
+                        <label for="esp_nombre" class="fw-bold">Nombre de la Especialidad:*</label>
+                        <input type="text" id="esp_nombre" class="form-control mt-1"
+                            placeholder="Ej: Ortodoncia, Endodoncia...">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <button type="button" class="btn btn-secondary w-100 py-2" data-bs-dismiss="modal">Cancelar</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="btn w-100 py-2 fw-bold text-white"
+                                style="background:#6f42c1;" onclick="guardarEspecialidad()">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
     <script>
         // ==========================================
@@ -369,10 +444,13 @@
         // ==========================================
         let listaUsuarios = [];
         let listaMedicos = [];
+        let listaEspecialidades = [];
         let idUsuarioAEliminar = null;
         let identidadMedicoAEliminar = null;
+        let idEspecialidadAEliminar = null;
         let modoEdicionUsuario = false;
         let modoEdicionMedico = false;
+        let modoEdicionEspecialidad = false;
 
         // ==========================================
         // TABS
@@ -390,6 +468,7 @@
                 cargarMedicos();
                 intentarCargarEspecialidades();
             }
+            if (tabId === 'tabEspecialidades') cargarTablaEspecialidades();
         }
 
         // ==========================================
@@ -529,6 +608,7 @@
             document.getElementById('usu_id_editar').value = idUsuario || '';
             document.getElementById('usu_correo').value = correo || '';
             document.getElementById('usu_contrasenia').value = '';
+            document.getElementById('usu_confirmar_pass').value = '';
             document.getElementById('usu_rol_sistema').value = rol || 'Medico';
 
             const titulo = document.getElementById('tituloModalUsuario');
@@ -602,11 +682,16 @@
 
             const correo = document.getElementById('usu_correo').value.trim();
             const contrasenia = document.getElementById('usu_contrasenia').value;
+            const confirmar = document.getElementById('usu_confirmar_pass').value;
             const rolSistema = document.getElementById('usu_rol_sistema').value;
             const idUsuario = document.getElementById('usu_id_editar').value;
 
             if (!correo) { alert('Por favor, ingresa el correo electrónico.'); return; }
             if (!modoEdicionUsuario && !contrasenia) { alert('Por favor, ingresa la contraseña.'); return; }
+            if (contrasenia && contrasenia !== confirmar) {
+                alert('Las contraseñas no coinciden. Por favor verifica.');
+                return;
+            }
 
             let respuesta;
             if (modoEdicionUsuario) {
@@ -710,6 +795,72 @@
         }
 
         // ==========================================
+        // ESPECIALIDADES - TABLA
+        // ==========================================
+        function cargarTablaEspecialidades() {
+            if (!window.javaConnector) { setTimeout(cargarTablaEspecialidades, 150); return; }
+            try {
+                const json = window.javaConnector.obtenerEspecialidades();
+                listaEspecialidades = JSON.parse(json || '[]');
+                renderizarEspecialidades(listaEspecialidades);
+            } catch(e) { console.error('Error al cargar especialidades:', e); }
+        }
+
+        function renderizarEspecialidades(lista) {
+            const tbody = document.getElementById('cuerpoTablaEspecialidades');
+            if (!lista || lista.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-muted py-4">No hay especialidades registradas.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = lista.map(e => `
+                <tr>
+                    <td>${e.idEspecialidad}</td>
+                    <td>${e.nombreEspecialidad}</td>
+                    <td class="action-icons">
+                        <i class="fas fa-edit" title="Editar" onclick="abrirModalEspecialidad({id:${e.idEspecialidad}, nombre:'${e.nombreEspecialidad.replace(/'/g,"\\'")}'})"></i>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // MODAL ESPECIALIDAD - ABRIR
+        function abrirModalEspecialidad(esp) {
+            modoEdicionEspecialidad = (esp !== null);
+            document.getElementById('esp_id_editar').value = esp ? esp.id : '';
+            document.getElementById('esp_nombre').value = esp ? esp.nombre : '';
+            const titulo = document.getElementById('tituloModalEspecialidad');
+            titulo.innerHTML = esp
+                ? '<i class="fas fa-edit"></i> Editar Especialidad'
+                : '<i class="fas fa-star"></i> Nueva Especialidad';
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalAgregarEspecialidad'))
+                       || new bootstrap.Modal(document.getElementById('modalAgregarEspecialidad'));
+            modal.show();
+        }
+
+        // GUARDAR ESPECIALIDAD
+        function guardarEspecialidad() {
+            if (!window.javaConnector) { alert('Error: Puente Java no inicializado.'); return; }
+            const nombre = document.getElementById('esp_nombre').value.trim();
+            if (!nombre) { alert('Por favor, ingresa el nombre de la especialidad.'); return; }
+
+            let respuesta;
+            if (modoEdicionEspecialidad) {
+                const id = document.getElementById('esp_id_editar').value;
+                respuesta = window.javaConnector.actualizarEspecialidad(id, nombre);
+            } else {
+                respuesta = window.javaConnector.agregarEspecialidad(nombre);
+            }
+
+            const partes = respuesta.split('|');
+            alert(partes[1]);
+            if (partes[0] === 'OK') {
+                bootstrap.Modal.getInstance(document.getElementById('modalAgregarEspecialidad')).hide();
+                cargarTablaEspecialidades();
+                intentarCargarEspecialidades();
+            }
+        }
+
+        // ==========================================
         // INICIALIZACIÓN
         // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
@@ -724,6 +875,11 @@
             // Búsqueda médicos: columnas 0=identidad, 1=nombre, 2=especialidad, 3=telefono, 4=correo
             document.getElementById('buscadorMedicos').addEventListener('keyup', function() {
                 buscarEnTabla('buscadorMedicos', 'cuerpoTablaMedicos', [0, 1, 2, 3, 4]);
+            });
+
+            // Búsqueda especialidades: columna 1=nombre (excluir 0=ID)
+            document.getElementById('buscadorEspecialidades').addEventListener('keyup', function() {
+                buscarEnTabla('buscadorEspecialidades', 'cuerpoTablaEspecialidades', [1]);
             });
 
             // Máscara identidad médico
