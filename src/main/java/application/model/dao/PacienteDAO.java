@@ -6,21 +6,62 @@ import application.model.entity.Paciente;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PacienteDAO {
 
-    public boolean registrar(Paciente p) {
-        String query = "INSERT INTO Pacientes (identidad, nombre_completo, fecha_nacimiento, genero, estado_civil, ocupacion, domicilio, telefono, persona_responsable, telefono_responsable) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private void asegurarColumnas(Connection conn) {
+        if (conn == null) return;
+        String[] alterStatements = {
+            "ALTER TABLE Pacientes ADD COLUMN estado_civil VARCHAR(30)",
+            "ALTER TABLE Pacientes ADD COLUMN estado ENUM('Activo','Inactivo') DEFAULT 'Activo'",
+            "ALTER TABLE Pacientes ADD COLUMN fecha_inactivacion DATETIME NULL"
+        };
+        for (String sql : alterStatements) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.executeUpdate();
+            } catch (SQLException ignored) {
+                // Si la columna ya existe, se ignora la excepción
+            }
+        }
+    }
+
+    public boolean existe(String identidad) {
+        String query = "SELECT COUNT(*) FROM Pacientes WHERE identidad = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) return false;
+            asegurarColumnas(conn);
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, identidad);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1) > 0;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al verificar existencia de paciente: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public String registrar(Paciente p) {
+        String query = "INSERT INTO Pacientes (identidad, nombre_completo, fecha_nacimiento, genero, estado_civil, ocupacion, domicilio, telefono, persona_responsable, telefono_responsable, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Activo')";
         
         try {
             Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) {
+                return "ERR|No se pudo establecer conexión con la base de datos.";
+            }
+            asegurarColumnas(conn);
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            
                 stmt.setString(1, p.getIdentidad());
                 stmt.setString(2, p.getNombreCompleto());
                 
-                // Si la fecha no es nula, la convertimos a java.sql.Date
                 if (p.getFechaNacimiento() != null) {
                     stmt.setDate(3, Date.valueOf(p.getFechaNacimiento()));
                 } else {
@@ -36,20 +77,102 @@ public class PacienteDAO {
                 stmt.setString(10, p.getTelefonoResponsable());
             
                 int filasAfectadas = stmt.executeUpdate();
-                return filasAfectadas > 0;
+                if (filasAfectadas > 0) {
+                    return "OK|Paciente registrado exitosamente.";
+                } else {
+                    return "ERR|No se pudo registrar el paciente en la base de datos.";
+                }
             }
         } catch (SQLException e) {
             System.err.println("Error al registrar paciente: " + e.getMessage());
             e.printStackTrace();
-            return false;
+            return "ERR|Error de base de datos: " + e.getMessage();
         }
     }
-    
+
+    public String actualizar(Paciente p) {
+        String query = "UPDATE Pacientes SET nombre_completo=?, fecha_nacimiento=?, genero=?, estado_civil=?, ocupacion=?, domicilio=?, telefono=?, persona_responsable=?, telefono_responsable=?, estado='Activo' WHERE identidad=?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) {
+                return "ERR|No se pudo establecer conexión con la base de datos.";
+            }
+            asegurarColumnas(conn);
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, p.getNombreCompleto());
+                if (p.getFechaNacimiento() != null) {
+                    stmt.setDate(2, Date.valueOf(p.getFechaNacimiento()));
+                } else {
+                    stmt.setNull(2, java.sql.Types.DATE);
+                }
+                stmt.setString(3, p.getGenero());
+                stmt.setString(4, p.getEstadoCivil());
+                stmt.setString(5, p.getOcupacion());
+                stmt.setString(6, p.getDomicilio());
+                stmt.setString(7, p.getTelefono());
+                stmt.setString(8, p.getPersonaResponsable());
+                stmt.setString(9, p.getTelefonoResponsable());
+                stmt.setString(10, p.getIdentidad());
+
+                int filasAfectadas = stmt.executeUpdate();
+                if (filasAfectadas > 0) {
+                    return "OK|Paciente actualizado exitosamente.";
+                } else {
+                    return "ERR|No se pudo actualizar el paciente en la base de datos.";
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar paciente: " + e.getMessage());
+            e.printStackTrace();
+            return "ERR|Error de base de datos: " + e.getMessage();
+        }
+    }
+
+    public List<Paciente> obtenerPacientes() {
+        List<Paciente> lista = new ArrayList<>();
+        String query = "SELECT * FROM Pacientes WHERE estado = 'Activo' OR estado IS NULL ORDER BY nombre_completo ASC";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) return lista;
+            asegurarColumnas(conn);
+            try (PreparedStatement stmt = conn.prepareStatement(query);
+                 ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Paciente p = new Paciente();
+                    p.setIdentidad(rs.getString("identidad"));
+                    p.setNombreCompleto(rs.getString("nombre_completo"));
+                    
+                    Date fechaNac = rs.getDate("fecha_nacimiento");
+                    if (fechaNac != null) {
+                        p.setFechaNacimiento(fechaNac.toLocalDate());
+                    }
+                    
+                    p.setGenero(rs.getString("genero"));
+                    try { p.setEstadoCivil(rs.getString("estado_civil")); } catch (Exception ignored) {}
+                    p.setOcupacion(rs.getString("ocupacion"));
+                    p.setDomicilio(rs.getString("domicilio"));
+                    p.setTelefono(rs.getString("telefono"));
+                    p.setPersonaResponsable(rs.getString("persona_responsable"));
+                    p.setTelefonoResponsable(rs.getString("telefono_responsable"));
+                    try { p.setEstado(rs.getString("estado")); } catch (Exception ignored) {}
+                    
+                    lista.add(p);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener pacientes: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
     // Borrado lógico de un paciente
     public boolean eliminarPaciente(String identidad) {
         String query = "UPDATE Pacientes SET estado = 'Inactivo', fecha_inactivacion = CURRENT_TIMESTAMP WHERE identidad = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) return false;
+            asegurarColumnas(conn);
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setString(1, identidad);
                 return stmt.executeUpdate() > 0;

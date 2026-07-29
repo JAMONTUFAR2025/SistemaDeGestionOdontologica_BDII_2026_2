@@ -4,203 +4,412 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Pacientes - SOE Odontología</title>
+    <title>Pacientes - SOE Odontología</title>
+    <!-- Estilos locales -->
+    <link href="application/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="application/assets/css/all.min.css" rel="stylesheet">
+
     <style>
+        /* === ESTILOS GENERALES Y DE TABLA === */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            margin: 20px;
+            background-color: #e9f0f5;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 30px auto;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        .card-container {
+            max-width: 950px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        h2 {
-            color: #007bf0;
-            text-align: center;
-            margin-bottom: 20px;
+        .table-custom {
+            width: 100%;
+            margin-bottom: 1rem;
+            border-collapse: collapse;
         }
 
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
+        .table-custom th {
+            border-top: none;
+            border-bottom: 1px solid #dee2e6;
+            padding: 12px 15px;
             font-weight: bold;
-            color: #333;
+            color: #000;
         }
 
-        input,
-        select,
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
+        .table-custom td {
+            border-bottom: 1px solid #eaeaea;
+            padding: 15px;
+            vertical-align: middle;
+            color: #555;
         }
 
-        .row {
-            display: flex;
-            gap: 15px;
-        }
-
-        .col {
-            flex: 1;
-        }
-
-        button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 4px;
+        .action-icons i {
+            font-size: 1.2rem;
             cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            margin-top: 15px;
+            margin-right: 15px;
         }
 
-        button:hover {
-            background-color: #218838;
+        .fa-file-signature {
+            color: #0d6efd;
         }
 
+        /* Icono de editar */
+        .fa-trash {
+            color: #dc3545;
+        }
+
+        /* Icono de eliminar */
+
+        /* === ESTILOS DEL FORMULARIO (Tu código adaptado) === */
         .section-title {
             background: #e9ecef;
-            padding: 8px;
+            padding: 8px 15px;
             border-radius: 4px;
             font-weight: bold;
             margin-top: 20px;
             margin-bottom: 15px;
             color: #495057;
         }
+
+        .modal-body label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .btn-guardar {
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+            padding: 10px;
+            width: 100%;
+        }
+
+        .btn-guardar:hover {
+            background-color: #218838;
+            color: white;
+        }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
-        <div style="margin-bottom: 15px;">
-            <a href="menu.html" style="text-decoration: none; color: #007bf0; font-weight: bold; font-size: 14px;">
-                ← Volver al Menú Principal
-            </a>
+    <div class="container card-container">
+        <a href="menu.html" class="text-decoration-none mb-3 d-inline-block fw-bold" style="color: #007bf0;">
+            ← Volver al Menú Principal
+        </a>
+
+        <!-- ======================================================= -->
+        <!-- VISTA PRINCIPAL: TABLA DE PACIENTES                     -->
+        <!-- ======================================================= -->
+        <div>
+            <h3 class="text-primary fw-bold text-start mb-4" style="color: #007bf0 !important;">
+                <i class="fas fa-users"></i> Pacientes
+            </h3>
+
+            <!-- Buscador universal y botón Agregar -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <label for="buscadorPacientes" class="me-2 fw-bold text-dark mb-0">Buscar:</label>
+                    <input type="text" id="buscadorPacientes" class="form-control" style="width: 250px;"
+                        placeholder="Escriba para buscar...">
+                </div>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarPaciente" onclick="openAddModal()">
+                        <i class="fas fa-plus"></i> Agregar Paciente
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla -->
+            <div class="table-responsive">
+                <table class="table-custom text-center">
+                    <thead>
+                        <tr>
+                            <th>DNI</th>
+                            <th>Nombre Completo</th>
+                            <th>Teléfono</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTabla">
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <h2>Registro de Nuevo Paciente</h2>
-
-        <!-- El formulario ya no usa un action de PHP, se preparó para conectarse con JavaScript/Java -->
-        <form id="registroPacienteForm" onsubmit="registrarPaciente(event)">
-
-            <div class="section-title">Datos Personales</div>
-
-            <div class="row">
-                <div class="col form-group">
-                    <label for="identidad">DNI:</label>
-                    <input type="text" id="identidad" name="identidad" placeholder="Ej: 0801-1990-12345" required>
-                </div>
-                <div class="col form-group">
-                    <label for="nombre_completo">Nombre Completo:</label>
-                    <input type="text" id="nombre_completo" name="nombreCompleto" required>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col form-group">
-                    <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
-                    <input type="text" id="fecha_nacimiento" name="fechaNacimiento" placeholder="DD-MM-AAAA">
-                </div>
-                <div class="col form-group">
-                    <label for="genero">Género:</label>
-                    <select id="genero" name="genero">
-                        <option value="M">Masculino</option>
-                        <option value="F">Femenino</option>
-                    </select>
-                </div>
-                <div class="col form-group">
-                    <label for="estado_civil">Estado Civil:</label>
-                    <select id="estado_civil" name="estadoCivil">
-                        <option value="Soltero(a)">Soltero(a)</option>
-                        <option value="Casado(a)">Casado(a)</option>
-                        <option value="Divorciado(a)">Divorciado(a)</option>
-                        <option value="Viudo(a)">Viudo(a)</option>
-                        <option value="Union Libre">Unión Libre</option>
-                    </select>
-                </div>
-                <div class="col form-group">
-                    <label for="ocupacion">Ocupación:</label>
-                    <input type="text" id="ocupacion" name="ocupacion">
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col form-group">
-                    <label for="telefono">Teléfono:</label>
-                    <input type="text" id="telefono" name="telefono" required>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="domicilio">Domicilio / Dirección:</label>
-                <textarea id="domicilio" name="domicilio" rows="2"></textarea>
-            </div>
-
-            <div class="section-title">Persona Responsable en caso de emergencia o si es menor de edad</div>
-
-            <div class="row">
-                <div class="col form-group">
-                    <label for="persona_responsable">Nombre del Responsable:</label>
-                    <input type="text" id="persona_responsable" name="personaResponsable">
-                </div>
-                <div class="col form-group">
-                    <label for="telefono_responsable">Teléfono del Responsable:</label>
-                    <input type="text" id="telefono_responsable" name="telefonoResponsable">
-                </div>
-            </div>
-
-            <button type="submit">Guardar Paciente</button>
-        </form>
     </div>
 
+    <!-- ======================================================= -->
+    <!-- VENTANA FLOTANTE (MODAL): TU FORMULARIO                 -->
+    <!-- ======================================================= -->
+    <!-- data-bs-backdrop="false" evita la pantalla negra en Java -->
+    <div class="modal fade" id="modalAgregarPaciente" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header text-white" style="background-color: #007bf0;">
+                    <h5 class="modal-title fw-bold">Registro de Nuevo Paciente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <!-- TU FORMULARIO EXACTO -->
+                    <form id="registroPacienteForm" onsubmit="registrarPaciente(event)">
+
+                        <div class="section-title mt-0">Datos Personales</div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="identidad">DNI:</label>
+                                <input type="text" id="identidad" name="identidad" class="form-control"
+                                    placeholder="Ej: 0801-1990-12345" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nombre_completo">Nombre Completo:</label>
+                                <input type="text" id="nombre_completo" name="nombreCompleto" class="form-control"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
+                                <input type="text" id="fecha_nacimiento" name="fechaNacimiento" class="form-control"
+                                    placeholder="DD-MM-AAAA">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="genero">Género:</label>
+                                <select id="genero" name="genero" class="form-select">
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Femenino</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="estado_civil">Estado Civil:</label>
+                                <select id="estado_civil" name="estadoCivil" class="form-select">
+                                    <option value="Soltero(a)">Soltero(a)</option>
+                                    <option value="Casado(a)">Casado(a)</option>
+                                    <option value="Divorciado(a)">Divorciado(a)</option>
+                                    <option value="Viudo(a)">Viudo(a)</option>
+                                    <option value="Union Libre">Unión Libre</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="ocupacion">Ocupación:</label>
+                                <input type="text" id="ocupacion" name="ocupacion" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="telefono">Teléfono:</label>
+                                <input type="text" id="telefono" name="telefono" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="domicilio">Domicilio / Dirección:</label>
+                            <textarea id="domicilio" name="domicilio" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="section-title">Persona Responsable en caso de emergencia o si es menor de edad</div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="persona_responsable">Nombre del Responsable:</label>
+                                <input type="text" id="persona_responsable" name="personaResponsable"
+                                    class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="telefono_responsable">Teléfono del Responsable:</label>
+                                <input type="text" id="telefono_responsable" name="telefonoResponsable"
+                                    class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <button type="button" class="btn btn-secondary w-100 py-2"
+                                    data-bs-dismiss="modal">Cancelar</button>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-guardar rounded">Guardar Paciente</button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts Locales -->
+    <script src="application/assets/js/bootstrap.bundle.min.js"></script>
+
     <script>
+        let listaPacientes = [];
+
+        // === 1. CARGAR PACIENTES DESDE LA BASE DE DATOS ===
+        function cargarPacientes() {
+            if (!window.javaConnector) {
+                // Esperar a que JavaFX WebView inyecte el conector
+                setTimeout(cargarPacientes, 100);
+                return;
+            }
+            try {
+                const jsonStr = window.javaConnector.obtenerPacientes();
+                listaPacientes = JSON.parse(jsonStr || '[]');
+                renderizarTabla(listaPacientes);
+            } catch (e) {
+                console.error("Error al cargar pacientes:", e);
+            }
+        }
+
+        function renderizarTabla(pacientes) {
+            const tbody = document.getElementById('cuerpoTabla');
+            tbody.innerHTML = '';
+
+            if (pacientes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-muted py-3">No hay pacientes registrados.</td></tr>`;
+                return;
+            }
+
+            pacientes.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-id', p.identidad || '');
+                tr.innerHTML = `
+                    <td>${p.identidad || ''}</td>
+                    <td>${p.nombreCompleto || ''}</td>
+                    <td>${p.telefono || ''}</td>
+                    <td class="action-icons">
+                        <i class="fas fa-file-signature" title="Editar" onclick="openEditModal('${p.identidad}')"></i>
+                        <i class="fas fa-trash" title="Eliminar" onclick="deletePatient('${p.identidad}')"></i>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // === 2. MODALES AGREGAR / EDITAR ===
+        function openAddModal() {
+            const form = document.getElementById('registroPacienteForm');
+            if (form) form.reset();
+            const inputIdentidad = document.getElementById('identidad');
+            if (inputIdentidad) inputIdentidad.readOnly = false;
+            const titulo = document.querySelector('.modal-title');
+            if (titulo) titulo.innerHTML = '<i class="fas fa-user-plus"></i> Registro de Nuevo Paciente';
+        }
+
+        function openEditModal(identidad) {
+            const p = listaPacientes.find(item => item.identidad === identidad);
+            if (!p) return;
+
+            const inputIdentidad = document.getElementById('identidad');
+            if (inputIdentidad) {
+                inputIdentidad.value = p.identidad || '';
+                inputIdentidad.readOnly = true; // No modificar DNI por ser clave primaria
+            }
+            document.getElementById('nombre_completo').value = p.nombreCompleto || '';
+
+            let fechaStr = '';
+            if (p.fechaNacimiento) {
+                if (typeof p.fechaNacimiento === 'object') {
+                    const y = p.fechaNacimiento.year;
+                    const m = String(p.fechaNacimiento.month).padStart(2, '0');
+                    const d = String(p.fechaNacimiento.day).padStart(2, '0');
+                    fechaStr = `${d}-${m}-${y}`;
+                } else {
+                    const partes = p.fechaNacimiento.split('-');
+                    if (partes.length === 3) {
+                        if (partes[0].length === 4) {
+                            fechaStr = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                        } else {
+                            fechaStr = p.fechaNacimiento;
+                        }
+                    }
+                }
+            }
+            document.getElementById('fecha_nacimiento').value = fechaStr;
+            document.getElementById('genero').value = p.genero || 'M';
+            document.getElementById('estado_civil').value = p.estadoCivil || 'Soltero(a)';
+            document.getElementById('ocupacion').value = p.ocupacion || '';
+            document.getElementById('telefono').value = p.telefono || '';
+            document.getElementById('domicilio').value = p.domicilio || '';
+            document.getElementById('persona_responsable').value = p.personaResponsable || '';
+            document.getElementById('telefono_responsable').value = p.telefonoResponsable || '';
+
+            const titulo = document.querySelector('.modal-title');
+            if (titulo) titulo.innerHTML = '<i class="fas fa-user-edit"></i> Editar Paciente';
+
+            let modalEl = document.getElementById('modalAgregarPaciente');
+            let modalInst = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modalInst.show();
+        }
+
+        // === 3. ELIMINAR PACIENTE ===
+        function deletePatient(identidad) {
+            if (!confirm('¿Está seguro de eliminar este paciente?')) return;
+            if (window.javaConnector) {
+                const respuesta = window.javaConnector.eliminarPaciente(identidad);
+                const partes = respuesta.split("|");
+                alert(partes[1]);
+                if (partes[0] === 'OK') {
+                    cargarPacientes();
+                }
+            }
+        }
+
+        // === 4. LÓGICA DE BÚSQUEDA UNIVERSAL (LIKE) ===
+        document.getElementById('buscadorPacientes').addEventListener('keyup', function () {
+            let filtro = this.value.toLowerCase();
+            let filas = document.querySelectorAll('#cuerpoTabla tr');
+
+            filas.forEach(function (fila) {
+                let textoFila = fila.textContent.toLowerCase();
+                if (textoFila.includes(filtro)) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+        });
+
+        // === 5. REGISTRO/EDICIÓN A JAVA ===
         function registrarPaciente(event) {
-            event.preventDefault(); // Evitar que recargue la página
-            
-            // Recopilamos los datos del formulario
+            event.preventDefault();
+
             const form = document.getElementById('registroPacienteForm');
             const formData = new FormData(form);
             const paciente = Object.fromEntries(formData.entries());
-            
-            // Convertimos a JSON
+
             const jsonStr = JSON.stringify(paciente);
-            
+
             if (window.javaConnector) {
-                // Llamamos a Java
                 const respuesta = window.javaConnector.registrarPaciente(jsonStr);
                 const partes = respuesta.split("|");
                 alert(partes[1]);
-                
+
                 if (partes[0] === "OK") {
-                    form.reset(); // Limpiar el formulario si se guardó bien
+                    form.reset();
+                    let modalEl = document.getElementById('modalAgregarPaciente');
+                    let modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                    cargarPacientes();
                 }
             } else {
                 alert("Error: El puente con Java no está inicializado.");
             }
         }
 
-        // --- Funciones para autocompletar guiones ---
-        
+        // === 6. FUNCIONES DE AUTOCOMPLETADO DE GUIONES ===
         function formatIdentidad(e) {
-            let val = e.target.value.replace(/\D/g, ''); // Quita todo lo que no sea numero
+            let val = e.target.value.replace(/\D/g, '');
             let newVal = '';
             if (val.length > 0) {
                 newVal += val.substring(0, 4);
@@ -227,22 +436,24 @@
         }
 
         function formatFecha(e) {
-            let val = e.target.value.replace(/\D/g, ''); // Quita todo lo que no sea numero
+            let val = e.target.value.replace(/\D/g, '');
             let newVal = '';
             if (val.length > 0) {
-                newVal += val.substring(0, 2); // Dia
+                newVal += val.substring(0, 2);
             }
             if (val.length >= 3) {
-                newVal += '-' + val.substring(2, 4); // Mes
+                newVal += '-' + val.substring(2, 4);
             }
             if (val.length >= 5) {
-                newVal += '-' + val.substring(4, 8); // Año
+                newVal += '-' + val.substring(4, 8);
             }
             e.target.value = newVal;
         }
 
-        // Agregar los eventos a los inputs cuando cargue la pagina
+        // Inicializar eventos y cargar datos al abrir la página
         document.addEventListener('DOMContentLoaded', () => {
+            cargarPacientes();
+
             const inputIdentidad = document.getElementById('identidad');
             const inputTelefono = document.getElementById('telefono');
             const inputTelefonoResp = document.getElementById('telefono_responsable');
@@ -250,19 +461,19 @@
 
             if (inputIdentidad) {
                 inputIdentidad.addEventListener('input', formatIdentidad);
-                inputIdentidad.maxLength = 15; // 13 numeros + 2 guiones
+                inputIdentidad.maxLength = 15;
             }
             if (inputTelefono) {
                 inputTelefono.addEventListener('input', formatTelefono);
-                inputTelefono.maxLength = 9; // 8 numeros + 1 guion
+                inputTelefono.maxLength = 9;
             }
             if (inputTelefonoResp) {
                 inputTelefonoResp.addEventListener('input', formatTelefono);
-                inputTelefonoResp.maxLength = 9; 
+                inputTelefonoResp.maxLength = 9;
             }
             if (inputFecha) {
                 inputFecha.addEventListener('input', formatFecha);
-                inputFecha.maxLength = 10; // DD-MM-AAAA (8 numeros + 2 guiones)
+                inputFecha.maxLength = 10;
             }
         });
     </script>

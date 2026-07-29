@@ -144,25 +144,49 @@ public class JavaConnector {
             return "ERR|Ocurrió un error al guardar la nueva contraseña en la base de datos.";
         }
     }
-    // Retorna un mensaje indicando el resultado del guardado
+    // Retorna un mensaje indicando el resultado del guardado (inserta o actualiza)
     public String registrarPaciente(String jsonPaciente) {
-        System.out.println("-> Peticion de registro recibida en Java: " + jsonPaciente);
+        System.out.println("-> Petición de registro/actualización de paciente recibida en Java: " + jsonPaciente);
         try {
             Paciente paciente = gson.fromJson(jsonPaciente, Paciente.class);
-            System.out.println("-> Gson deserializo correctamente a: " + paciente.getNombreCompleto());
+            if (paciente == null || paciente.getIdentidad() == null || paciente.getIdentidad().trim().isEmpty()) {
+                return "ERR|La identidad (DNI) del paciente es requerida.";
+            }
+            System.out.println("-> Gson deserializó correctamente a: " + paciente.getNombreCompleto());
             
-            boolean exito = pacienteDAO.registrar(paciente);
-            if (exito) {
-                System.out.println("-> Paciente insertado en DB con exito.");
-                return "OK|Paciente registrado exitosamente.";
+            if (pacienteDAO.existe(paciente.getIdentidad())) {
+                return pacienteDAO.actualizar(paciente);
             } else {
-                System.out.println("-> Error en la insercion DB (PacienteDAO retorno false).");
-                return "ERR|No se pudo registrar el paciente en la base de datos.";
+                return pacienteDAO.registrar(paciente);
             }
         } catch (Exception e) {
             System.err.println("-> ERROR procesando paciente: " + e.getMessage());
             e.printStackTrace();
-            return "ERR|Error al procesar los datos del formulario.";
+            return "ERR|Error al procesar los datos del formulario: " + e.getMessage();
+        }
+    }
+
+    public String obtenerPacientes() {
+        try {
+            java.util.List<Paciente> lista = pacienteDAO.obtenerPacientes();
+            return gson.toJson(lista);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en obtenerPacientes: " + t.getMessage());
+            return "[]";
+        }
+    }
+
+    public String eliminarPaciente(String identidad) {
+        try {
+            boolean exito = pacienteDAO.eliminarPaciente(identidad);
+            if (exito) {
+                return "OK|Paciente eliminado exitosamente.";
+            } else {
+                return "ERR|No se pudo eliminar el paciente.";
+            }
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en eliminarPaciente: " + t.getMessage());
+            return "ERR|Error al eliminar paciente: " + t.getMessage();
         }
     }
         
