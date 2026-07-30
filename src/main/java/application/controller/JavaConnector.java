@@ -1,4 +1,4 @@
-package application.model.connection;
+package application.controller;
 
 import application.model.dao.PacienteDAO;
 import application.model.dao.UserDAO;
@@ -241,7 +241,8 @@ public class JavaConnector {
             int id = Integer.parseInt(idStr.trim());
             application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
             boolean exito = pmDAO.eliminarEspecialidad(id);
-            return exito ? "OK|Especialidad eliminada correctamente." : "ERR|No se pudo eliminar. Puede estar en uso por algún médico.";
+            return exito ? "OK|Especialidad eliminada correctamente."
+                    : "ERR|No se pudo eliminar. Puede estar en uso por algún médico.";
         } catch (Throwable t) {
             return "ERR|Error: " + t.getMessage();
         }

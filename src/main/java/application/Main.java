@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     // Strong reference to prevent Garbage Collection by JavaFX WebEngine
-    private application.model.connection.JavaConnector javaConnector = new application.model.connection.JavaConnector();
+    private application.controller.JavaConnector javaConnector = new application.controller.JavaConnector();
 
     @Override
     public void start(Stage primaryStage) {
