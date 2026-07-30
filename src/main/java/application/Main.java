@@ -7,8 +7,12 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    // Strong reference to prevent Garbage Collection by JavaFX WebEngine
-    private application.controller.JavaConnector javaConnector = new application.controller.JavaConnector();
+    // Strong references to prevent Garbage Collection by JavaFX WebEngine
+    private application.controller.AuthController authController = new application.controller.AuthController();
+    private application.controller.PacienteController pacienteController = new application.controller.PacienteController();
+    private application.controller.PersonalController personalController = new application.controller.PersonalController();
+    private application.controller.CitaController citaController = new application.controller.CitaController();
+    private application.controller.FinanzasController finanzasController = new application.controller.FinanzasController();
 
     @Override
     public void start(Stage primaryStage) {
@@ -27,7 +31,11 @@ public class Main extends Application {
             if (newValue == javafx.concurrent.Worker.State.SUCCEEDED) {
                 netscape.javascript.JSObject window = (netscape.javascript.JSObject) webView.getEngine()
                         .executeScript("window");
-                window.setMember("javaConnector", javaConnector);
+                window.setMember("authController", authController);
+                window.setMember("pacienteController", pacienteController);
+                window.setMember("personalController", personalController);
+                window.setMember("citaController", citaController);
+                window.setMember("finanzasController", finanzasController);
             }
         });
 

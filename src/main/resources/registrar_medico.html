@@ -294,9 +294,9 @@
         // CARGA DE DATOS DINÁMICOS
         // ==========================================
         function intentarCargarEspecialidades() {
-            if (window.javaConnector) {
+            if ((window.personalController)) {
                 try {
-                    var json = window.javaConnector.obtenerEspecialidades();
+                    var json = window.personalController.obtenerEspecialidades();
                     var especialidades = JSON.parse(json);
                     var select = document.getElementById("med_especialidad");
                     select.innerHTML = '<option value="">Seleccione una especialidad</option>';
@@ -315,9 +315,9 @@
         }
 
         function cargarUsuariosSinMedico() {
-            if (window.javaConnector) {
+            if ((window.personalController)) {
                 try {
-                    var json = window.javaConnector.obtenerUsuariosSinMedico();
+                    var json = window.personalController.obtenerUsuariosSinMedico();
                     var usuarios = JSON.parse(json);
                     var select = document.getElementById("med_id_usuario");
                     select.innerHTML = '<option value="">-- Seleccionar usuario --</option>';
@@ -344,7 +344,7 @@
         // GUARDAR USUARIO (Paso 1)
         // ==========================================
         function guardarUsuario() {
-            if (!window.javaConnector) {
+            if ((!window.personalController)) {
                 alert("Error: Puente Java no inicializado.");
                 return;
             }
@@ -364,7 +364,7 @@
                 estado: estado
             };
 
-            var respuesta = window.javaConnector.registrarUsuarioSolo(JSON.stringify(data));
+            var respuesta = window.personalController.registrarUsuarioSolo(JSON.stringify(data));
             if (!respuesta) {
                 alert("Error: Java no devolvió respuesta.");
                 return;
@@ -381,7 +381,7 @@
         // GUARDAR MÉDICO (Paso 2)
         // ==========================================
         function guardarMedico() {
-            if (!window.javaConnector) {
+            if ((!window.personalController)) {
                 alert("Error: Puente Java no inicializado.");
                 return;
             }
@@ -411,7 +411,7 @@
                 correo: correoUsuario
             };
 
-            var respuesta = window.javaConnector.registrarMedicoConUsuario(JSON.stringify(data));
+            var respuesta = window.personalController.registrarMedicoConUsuario(JSON.stringify(data));
             if (!respuesta) {
                 alert("Error: Java no devolvió respuesta.");
                 return;

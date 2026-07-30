@@ -266,12 +266,12 @@
         }
 
         function cargarEgresos() {
-            if (!window.javaConnector) {
+            if ((!window.finanzasController)) {
                 setTimeout(cargarEgresos, 150);
                 return;
             }
             try {
-                const json = window.javaConnector.obtenerEgresos();
+                const json = window.finanzasController.obtenerEgresos();
                 egresosLista = JSON.parse(json || '[]');
                 renderTabla(egresosLista);
             } catch (e) {
@@ -314,7 +314,7 @@
         }
 
         function guardarEgreso() {
-            if (!window.javaConnector) { alert('Conector Java no encontrado.'); return; }
+            if ((!window.finanzasController)) { alert('Conector Java no encontrado.'); return; }
             
             const id = document.getElementById('eg_id').value;
             const fecha = document.getElementById('eg_fecha').value;
@@ -337,9 +337,9 @@
             
             let respuesta = "";
             if (id) {
-                respuesta = window.javaConnector.actualizarEgreso(JSON.stringify(data));
+                respuesta = window.finanzasController.actualizarEgreso(JSON.stringify(data));
             } else {
-                respuesta = window.javaConnector.registrarEgreso(JSON.stringify(data));
+                respuesta = window.finanzasController.registrarEgreso(JSON.stringify(data));
             }
             
             const partes = respuesta.split('|');
@@ -359,8 +359,8 @@
         }
         
         function confirmarEliminarEgreso() {
-            if (!window.javaConnector || !idEgresoEliminar) return;
-            const respuesta = window.javaConnector.inactivarEgreso(String(idEgresoEliminar));
+            if ((!window.finanzasController) || !idEgresoEliminar) return;
+            const respuesta = window.finanzasController.inactivarEgreso(String(idEgresoEliminar));
             const partes = respuesta.split('|');
             alert(partes[1]);
             if (partes[0] === 'OK') {

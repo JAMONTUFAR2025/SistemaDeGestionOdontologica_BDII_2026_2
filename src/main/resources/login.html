@@ -261,8 +261,8 @@
             var correo = document.getElementById('usuario').value;
             var pass = document.getElementById('password').value;
 
-            if (window.javaConnector) {
-                var exito = window.javaConnector.login(correo, pass);
+            if ((window.personalController && window.authController)) {
+                var exito = window.authController.login(correo, pass);
                 if (exito) {
                     window.location.href = 'menu.html';
                 } else {
@@ -277,13 +277,13 @@
             event.preventDefault();
             var correo = document.getElementById('recovery-input').value;
 
-            if (window.javaConnector) {
+            if ((window.personalController && window.authController)) {
                 // Notificar al usuario que estamos cargando (puede tardar un par de segundos en enviar el correo)
                 document.querySelector('#recovery-section button').innerText = "Enviando...";
                 document.querySelector('#recovery-section button').disabled = true;
 
                 setTimeout(function () {
-                    var respuesta = window.javaConnector.enviarCodigoRecuperacion(correo);
+                    var respuesta = window.authController.enviarCodigoRecuperacion(correo);
                     var partes = respuesta.split("|");
                     alert(partes[1]);
 
@@ -305,8 +305,8 @@
             event.preventDefault();
             var codigo = document.getElementById('code-input').value;
 
-            if (window.javaConnector) {
-                var respuesta = window.javaConnector.verificarCodigo(correoUsuarioActual, codigo);
+            if ((window.personalController && window.authController)) {
+                var respuesta = window.authController.verificarCodigo(correoUsuarioActual, codigo);
                 var partes = respuesta.split("|");
 
                 if (partes[0] === "OK") {
@@ -329,8 +329,8 @@
                 return;
             }
 
-            if (window.javaConnector) {
-                var respuesta = window.javaConnector.restablecerContrasenia(correoUsuarioActual, codigoRecuperacionActual, pass1);
+            if ((window.personalController && window.authController)) {
+                var respuesta = window.authController.restablecerContrasenia(correoUsuarioActual, codigoRecuperacionActual, pass1);
                 var partes = respuesta.split("|");
                 alert(partes[1]);
 
@@ -360,8 +360,8 @@
         var correosGuardados = [];
         
         function cargarCorreosSiEsNecesario() {
-            if (correosGuardados.length === 0 && window.javaConnector) {
-                var jsonCorreos = window.javaConnector.obtenerCorreosActivos();
+            if (correosGuardados.length === 0 && (window.personalController && window.authController)) {
+                var jsonCorreos = window.personalController.obtenerCorreosActivos();
                 if (jsonCorreos) {
                     correosGuardados = JSON.parse(jsonCorreos);
                 }

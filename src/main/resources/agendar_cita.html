@@ -333,9 +333,9 @@
             });
 
             // Cargar pacientes y médicos desde JavaConnector
-            if (window.javaConnector) {
+            if ((window.pacienteController && window.personalController && window.citaController)) {
                 try {
-                    let pacientesJson = window.javaConnector.obtenerPacientes();
+                    let pacientesJson = window.pacienteController.obtenerPacientes();
                     let pacientes = JSON.parse(pacientesJson);
                     let selPaciente = document.getElementById("identidad_paciente");
                     pacientes.forEach(p => {
@@ -344,7 +344,7 @@
                         selPaciente.appendChild(opt);
                     });
 
-                    let medicosJson = window.javaConnector.obtenerPersonalMedico();
+                    let medicosJson = window.personalController.obtenerPersonalMedico();
                     let medicos = JSON.parse(medicosJson);
                     let selMedico = document.getElementById("id_medico");
                     medicos.forEach(m => {
@@ -359,7 +359,7 @@
             // Manejar submit del formulario de cita
             $('#agendarCitaForm').on('submit', function (e) {
                 e.preventDefault();
-                if (!window.javaConnector) {
+                if ((!window.pacienteController || !window.personalController || !window.citaController)) {
                     alert("Error: Puente Java no inicializado.");
                     return;
                 }
@@ -383,7 +383,7 @@
                     motivoCita: motivo
                 };
 
-                let respuesta = window.javaConnector.agendarCita(JSON.stringify(data));
+                let respuesta = window.citaController.agendarCita(JSON.stringify(data));
                 let partes = respuesta.split("|");
                 alert(partes[1]);
 

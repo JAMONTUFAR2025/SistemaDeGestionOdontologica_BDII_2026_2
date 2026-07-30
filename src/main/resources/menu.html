@@ -207,9 +207,9 @@
 
             // Función recursiva que espera a que Java cargue
             function intentarCargarPermisos() {
-                if (window.javaConnector) {
+                if ((window.citaController && window.authController)) {
                     // ¡Java ya cargó! Traemos el rol
-                    let rol = window.javaConnector.obtenerRolActual();
+                    let rol = window.authController.obtenerRolActual();
 
                     aplicarPermisos(rol);
                     actualizarTextoBienvenida(rol);
@@ -267,7 +267,7 @@
         function cargarCitas() {
             try {
                 // Citas de Hoy
-                let jsonHoy = window.javaConnector.obtenerCitasHoyDelUsuario();
+                let jsonHoy = window.citaController.obtenerCitasHoyDelUsuario();
                 let citasHoy = JSON.parse(jsonHoy);
                 let tbodyHoy = document.getElementById('tbodyCitasHoy');
                 
@@ -287,7 +287,7 @@
                 }
 
                 // Próximas Citas
-                let jsonProximas = window.javaConnector.obtenerProximasCitasDelUsuario();
+                let jsonProximas = window.citaController.obtenerProximasCitasDelUsuario();
                 let citasProximas = JSON.parse(jsonProximas);
                 let tbodyProximas = document.getElementById('tbodyProximasCitas');
 

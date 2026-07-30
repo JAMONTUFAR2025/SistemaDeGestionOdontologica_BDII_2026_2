@@ -289,13 +289,13 @@
 
         // === 1. CARGAR PACIENTES DESDE LA BASE DE DATOS ===
         function cargarPacientes() {
-            if (!window.javaConnector) {
+            if ((!window.pacienteController)) {
                 // Esperar a que JavaFX WebView inyecte el conector
                 setTimeout(cargarPacientes, 100);
                 return;
             }
             try {
-                const jsonStr = window.javaConnector.obtenerPacientes();
+                const jsonStr = window.pacienteController.obtenerPacientes();
                 listaPacientes = JSON.parse(jsonStr || '[]');
                 renderizarTabla(listaPacientes);
             } catch (e) {
@@ -400,8 +400,8 @@
 
         function confirmarEliminacion() {
             if (!identidadAEliminar) return;
-            if (window.javaConnector) {
-                const respuesta = window.javaConnector.eliminarPaciente(identidadAEliminar);
+            if ((window.pacienteController)) {
+                const respuesta = window.pacienteController.eliminarPaciente(identidadAEliminar);
                 const partes = respuesta.split("|");
                 alert(partes[1]);
                 if (partes[0] === 'OK') {
@@ -438,8 +438,8 @@
 
             const jsonStr = JSON.stringify(paciente);
 
-            if (window.javaConnector) {
-                const respuesta = window.javaConnector.registrarPaciente(jsonStr);
+            if ((window.pacienteController)) {
+                const respuesta = window.pacienteController.registrarPaciente(jsonStr);
                 const partes = respuesta.split("|");
                 alert(partes[1]);
 

@@ -502,9 +502,9 @@
         // CARGAR TABLA DE USUARIOS
         // ==========================================
         function cargarUsuarios() {
-            if (!window.javaConnector) { setTimeout(cargarUsuarios, 150); return; }
+            if ((!window.personalController)) { setTimeout(cargarUsuarios, 150); return; }
             try {
-                const json = window.javaConnector.obtenerUsuarios();
+                const json = window.personalController.obtenerUsuarios();
                 listaUsuarios = JSON.parse(json || '[]');
                 renderizarUsuarios(listaUsuarios);
             } catch (e) { console.error('Error al cargar usuarios:', e); }
@@ -540,9 +540,9 @@
         // CARGAR TABLA DE MÉDICOS
         // ==========================================
         function cargarMedicos() {
-            if (!window.javaConnector) { setTimeout(cargarMedicos, 150); return; }
+            if ((!window.personalController)) { setTimeout(cargarMedicos, 150); return; }
             try {
-                const json = window.javaConnector.obtenerPersonalMedico();
+                const json = window.personalController.obtenerPersonalMedico();
                 listaMedicos = JSON.parse(json || '[]');
                 renderizarMedicos(listaMedicos);
             } catch (e) { console.error('Error al cargar médicos:', e); }
@@ -587,9 +587,9 @@
         // CARGAR USUARIOS SIN MÉDICO (para select modal médico)
         // ==========================================
         function cargarUsuariosSinMedico() {
-            if (!window.javaConnector) { setTimeout(cargarUsuariosSinMedico, 150); return; }
+            if ((!window.personalController)) { setTimeout(cargarUsuariosSinMedico, 150); return; }
             try {
-                const json = window.javaConnector.obtenerUsuariosSinMedico();
+                const json = window.personalController.obtenerUsuariosSinMedico();
                 const usuarios = JSON.parse(json || '[]');
                 const select = document.getElementById('med_id_usuario');
                 select.innerHTML = '<option value="">-- Seleccionar usuario --</option>';
@@ -610,9 +610,9 @@
         // CARGAR ESPECIALIDADES
         // ==========================================
         function intentarCargarEspecialidades() {
-            if (!window.javaConnector) { setTimeout(intentarCargarEspecialidades, 150); return; }
+            if ((!window.personalController)) { setTimeout(intentarCargarEspecialidades, 150); return; }
             try {
-                const json = window.javaConnector.obtenerEspecialidades();
+                const json = window.personalController.obtenerEspecialidades();
                 const especialidades = JSON.parse(json || '[]');
                 const select = document.getElementById('med_especialidad');
                 const valorActual = select.value;
@@ -705,7 +705,7 @@
         // GUARDAR USUARIO (crear o actualizar)
         // ==========================================
         function guardarUsuario() {
-            if (!window.javaConnector) { alert('Error: Puente Java no inicializado.'); return; }
+            if ((!window.personalController)) { alert('Error: Puente Java no inicializado.'); return; }
 
             const correo = document.getElementById('usu_correo').value.trim();
             const contrasenia = document.getElementById('usu_contrasenia').value;
@@ -723,10 +723,10 @@
             let respuesta;
             if (modoEdicionUsuario) {
                 const data = { id_usuario: parseInt(idUsuario), correo, contrasenia, rol_sistema: rolSistema };
-                respuesta = window.javaConnector.actualizarUsuario(JSON.stringify(data));
+                respuesta = window.personalController.actualizarUsuario(JSON.stringify(data));
             } else {
                 const data = { correo, contrasenia, rol_sistema: rolSistema, estado: 'Activo' };
-                respuesta = window.javaConnector.registrarUsuarioSolo(JSON.stringify(data));
+                respuesta = window.personalController.registrarUsuarioSolo(JSON.stringify(data));
             }
 
             const partes = respuesta.split('|');
@@ -741,7 +741,7 @@
         // GUARDAR MÉDICO (crear o actualizar)
         // ==========================================
         function guardarMedico() {
-            if (!window.javaConnector) { alert('Error: Puente Java no inicializado.'); return; }
+            if ((!window.personalController)) { alert('Error: Puente Java no inicializado.'); return; }
 
             const nombre = document.getElementById('med_nombre').value.trim();
             const identidad = document.getElementById('med_identidad').value.trim();
@@ -757,7 +757,7 @@
             if (modoEdicionMedico) {
                 const identidadOriginal = document.getElementById('med_identidad_original').value;
                 const data = { identidad: identidadOriginal, nombre_completo: nombre, telefono, id_especialidades: parseInt(especialidad) };
-                respuesta = window.javaConnector.actualizarPersonalMedico(JSON.stringify(data));
+                respuesta = window.personalController.actualizarPersonalMedico(JSON.stringify(data));
             } else {
                 const idUsuario = document.getElementById('med_id_usuario').value;
                 if (!idUsuario) { alert('Por favor, selecciona un usuario para vincular.'); return; }
@@ -771,7 +771,7 @@
                     id_especialidades: parseInt(especialidad),
                     correo: correoUsuario
                 };
-                respuesta = window.javaConnector.registrarMedicoConUsuario(JSON.stringify(data));
+                respuesta = window.personalController.registrarMedicoConUsuario(JSON.stringify(data));
             }
 
             const partes = respuesta.split('|');
@@ -800,8 +800,8 @@
         }
 
         function confirmarEliminarUsuario() {
-            if (!window.javaConnector || !idUsuarioAEliminar) return;
-            const respuesta = window.javaConnector.inactivarUsuario(String(idUsuarioAEliminar));
+            if ((!window.personalController) || !idUsuarioAEliminar) return;
+            const respuesta = window.personalController.inactivarUsuario(String(idUsuarioAEliminar));
             const partes = respuesta.split('|');
             alert(partes[1]);
             if (partes[0] === 'OK') {
@@ -811,8 +811,8 @@
         }
 
         function confirmarEliminarMedico() {
-            if (!window.javaConnector || !identidadMedicoAEliminar) return;
-            const respuesta = window.javaConnector.inactivarPersonalMedico(identidadMedicoAEliminar);
+            if ((!window.personalController) || !identidadMedicoAEliminar) return;
+            const respuesta = window.personalController.inactivarPersonalMedico(identidadMedicoAEliminar);
             const partes = respuesta.split('|');
             alert(partes[1]);
             if (partes[0] === 'OK') {
@@ -825,9 +825,9 @@
         // ESPECIALIDADES - TABLA
         // ==========================================
         function cargarTablaEspecialidades() {
-            if (!window.javaConnector) { setTimeout(cargarTablaEspecialidades, 150); return; }
+            if ((!window.personalController)) { setTimeout(cargarTablaEspecialidades, 150); return; }
             try {
-                const json = window.javaConnector.obtenerEspecialidades();
+                const json = window.personalController.obtenerEspecialidades();
                 listaEspecialidades = JSON.parse(json || '[]');
                 renderizarEspecialidades(listaEspecialidades);
             } catch(e) { console.error('Error al cargar especialidades:', e); }
@@ -867,16 +867,16 @@
 
         // GUARDAR ESPECIALIDAD
         function guardarEspecialidad() {
-            if (!window.javaConnector) { alert('Error: Puente Java no inicializado.'); return; }
+            if ((!window.personalController)) { alert('Error: Puente Java no inicializado.'); return; }
             const nombre = document.getElementById('esp_nombre').value.trim();
             if (!nombre) { alert('Por favor, ingresa el nombre de la especialidad.'); return; }
 
             let respuesta;
             if (modoEdicionEspecialidad) {
                 const id = document.getElementById('esp_id_editar').value;
-                respuesta = window.javaConnector.actualizarEspecialidad(id, nombre);
+                respuesta = window.personalController.actualizarEspecialidad(id, nombre);
             } else {
-                respuesta = window.javaConnector.agregarEspecialidad(nombre);
+                respuesta = window.personalController.agregarEspecialidad(nombre);
             }
 
             const partes = respuesta.split('|');
@@ -897,8 +897,8 @@
         }
 
         function confirmarEliminarEspecialidad() {
-            if (!window.javaConnector || !idEspecialidadAEliminar) return;
-            const respuesta = window.javaConnector.eliminarEspecialidad(String(idEspecialidadAEliminar));
+            if ((!window.personalController) || !idEspecialidadAEliminar) return;
+            const respuesta = window.personalController.eliminarEspecialidad(String(idEspecialidadAEliminar));
             const partes = respuesta.split('|');
             alert(partes[1]);
             if (partes[0] === 'OK') {
