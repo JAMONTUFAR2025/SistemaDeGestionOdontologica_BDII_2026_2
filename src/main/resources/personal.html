@@ -619,7 +619,7 @@
                 select.innerHTML = '<option value="">Seleccione una especialidad</option>';
                 especialidades.forEach(esp => {
                     const opt = document.createElement('option');
-                    opt.value = esp.idEspecialidad;
+                    opt.value = esp.idEspecialidades;
                     opt.text = esp.nombreEspecialidad;
                     select.appendChild(opt);
                 });
@@ -756,7 +756,7 @@
             let respuesta;
             if (modoEdicionMedico) {
                 const identidadOriginal = document.getElementById('med_identidad_original').value;
-                const data = { identidad: identidadOriginal, nombre_completo: nombre, telefono, id_especialidad: parseInt(especialidad) };
+                const data = { identidad: identidadOriginal, nombre_completo: nombre, telefono, id_especialidades: parseInt(especialidad) };
                 respuesta = window.javaConnector.actualizarPersonalMedico(JSON.stringify(data));
             } else {
                 const idUsuario = document.getElementById('med_id_usuario').value;
@@ -768,7 +768,7 @@
                     nombre_completo: nombre,
                     identidad,
                     telefono,
-                    id_especialidad: parseInt(especialidad),
+                    id_especialidades: parseInt(especialidad),
                     correo: correoUsuario
                 };
                 respuesta = window.javaConnector.registrarMedicoConUsuario(JSON.stringify(data));
@@ -841,11 +841,11 @@
             }
             tbody.innerHTML = lista.map(e => `
                 <tr>
-                    <td>${e.idEspecialidad}</td>
+                    <td>${e.idEspecialidades}</td>
                     <td>${e.nombreEspecialidad}</td>
                     <td class="action-icons">
-                        <i class="fas fa-edit" title="Editar" onclick="abrirModalEspecialidad({id:${e.idEspecialidad}, nombre:'${e.nombreEspecialidad.replace(/'/g,"\\'")}'})"></i>
-                        <i class="fas fa-trash" title="Eliminar" onclick="deleteEspecialidad(${e.idEspecialidad})"></i>
+                        <i class="fas fa-edit" title="Editar" onclick="abrirModalEspecialidad({id:${e.idEspecialidades}, nombre:'${e.nombreEspecialidad.replace(/'/g,"\\'")}'})"></i>
+                        <i class="fas fa-trash" title="Eliminar" onclick="deleteEspecialidad(${e.idEspecialidades})"></i>
                     </td>
                 </tr>
             `).join('');

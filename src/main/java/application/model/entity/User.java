@@ -4,35 +4,36 @@ import java.time.LocalDateTime;
 
 public class User {
 
-    private Integer idUsuario;
+    private Integer idUsuariosLogin;
     private String correo;
     private String contrasenia;
-    private Integer idMedico;
+    private Integer idPersonalMedico;
     private String rolSistema;
-    private String estado;
+    private String borrado;
     private LocalDateTime fechaCreacion;
-    private LocalDateTime fechaInactivacion;
+    private LocalDateTime fechaBorrado;
 
     public User() {
     }
 
-    public User(Integer idUsuario, String correo, String contrasenia, Integer idMedico, String rolSistema, String estado, LocalDateTime fechaCreacion, LocalDateTime fechaInactivacion) {
-        this.idUsuario = idUsuario;
+    public User(Integer idUsuariosLogin, String correo, String contrasenia, Integer idPersonalMedico,
+                String rolSistema, String borrado, LocalDateTime fechaCreacion, LocalDateTime fechaBorrado) {
+        this.idUsuariosLogin = idUsuariosLogin;
         this.correo = correo;
         this.contrasenia = contrasenia;
-        this.idMedico = idMedico;
+        this.idPersonalMedico = idPersonalMedico;
         this.rolSistema = rolSistema;
-        this.estado = estado;
+        this.borrado = borrado;
         this.fechaCreacion = fechaCreacion;
-        this.fechaInactivacion = fechaInactivacion;
+        this.fechaBorrado = fechaBorrado;
     }
 
-    public Integer getIdUsuario() {
-        return idUsuario;
+    public Integer getIdUsuariosLogin() {
+        return idUsuariosLogin;
     }
 
-    public void setIdUsuario(Integer idUsuario) {
-        this.idUsuario = idUsuario;
+    public void setIdUsuariosLogin(Integer idUsuariosLogin) {
+        this.idUsuariosLogin = idUsuariosLogin;
     }
 
     public String getCorreo() {
@@ -51,12 +52,12 @@ public class User {
         this.contrasenia = contrasenia;
     }
 
-    public Integer getIdMedico() {
-        return idMedico;
+    public Integer getIdPersonalMedico() {
+        return idPersonalMedico;
     }
 
-    public void setIdMedico(Integer idMedico) {
-        this.idMedico = idMedico;
+    public void setIdPersonalMedico(Integer idPersonalMedico) {
+        this.idPersonalMedico = idPersonalMedico;
     }
 
     public String getRolSistema() {
@@ -67,12 +68,12 @@ public class User {
         this.rolSistema = rolSistema;
     }
 
-    public String getEstado() {
-        return estado;
+    public String getBorrado() {
+        return borrado;
     }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public void setBorrado(String borrado) {
+        this.borrado = borrado;
     }
 
     public LocalDateTime getFechaCreacion() {
@@ -83,24 +84,23 @@ public class User {
         this.fechaCreacion = fechaCreacion;
     }
 
-    public LocalDateTime getFechaInactivacion() {
-        return fechaInactivacion;
+    public LocalDateTime getFechaBorrado() {
+        return fechaBorrado;
     }
 
-    public void setFechaInactivacion(LocalDateTime fechaInactivacion) {
-        this.fechaInactivacion = fechaInactivacion;
+    public void setFechaBorrado(LocalDateTime fechaBorrado) {
+        this.fechaBorrado = fechaBorrado;
     }
 
     @Override
     public String toString() {
         return "User{" +
-                "idUsuario=" + idUsuario +
+                "idUsuariosLogin=" + idUsuariosLogin +
                 ", correo='" + correo + '\'' +
-                ", idMedico=" + idMedico +
+                ", idPersonalMedico=" + idPersonalMedico +
                 ", rolSistema='" + rolSistema + '\'' +
-                ", estado='" + estado + '\'' +
+                ", borrado='" + borrado + '\'' +
                 ", fechaCreacion=" + fechaCreacion +
-                ", fechaInactivacion=" + fechaInactivacion +
                 '}';
     }
 }

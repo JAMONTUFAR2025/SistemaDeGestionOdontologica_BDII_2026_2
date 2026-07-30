@@ -9,7 +9,9 @@ import java.sql.SQLException;
 public class EgresoGastoDAO {
 
     public boolean registrarEgreso(String fecha, String descripcion, double monto, String numeroComprobante) {
-        String query = "INSERT INTO Egresos_Gastos (fecha, descripcion, monto, numero_comprobante, estado) VALUES (?, ?, ?, ?, 'Activo')";
+        // SchemaActual: columnas id_egresos_gastos, borrado ENUM('Si','No') DEFAULT 'No'
+        // No existe columna "estado" en SchemaActual — solo borrado
+        String query = "INSERT INTO Egresos_Gastos (fecha, descripcion, monto, numero_comprobante) VALUES (?, ?, ?, ?)";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -27,19 +29,21 @@ public class EgresoGastoDAO {
 
     public java.util.List<java.util.Map<String, Object>> obtenerEgresos() {
         java.util.List<java.util.Map<String, Object>> lista = new java.util.ArrayList<>();
-        String query = "SELECT id_egreso, fecha, descripcion, monto, numero_comprobante, estado FROM Egresos_Gastos WHERE estado = 'Activo' ORDER BY id_egreso DESC";
+        // SchemaActual: PK = id_egresos_gastos, borrado ENUM('Si','No')
+        String query = "SELECT id_egresos_gastos, fecha, descripcion, monto, numero_comprobante, borrado " +
+                       "FROM Egresos_Gastos WHERE borrado = 'No' ORDER BY id_egresos_gastos DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
                  ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
-                    map.put("id_egreso", rs.getInt("id_egreso"));
+                    map.put("id_egreso", rs.getInt("id_egresos_gastos"));
                     map.put("fecha", rs.getString("fecha"));
                     map.put("descripcion", rs.getString("descripcion"));
                     map.put("monto", rs.getDouble("monto"));
                     map.put("numero_comprobante", rs.getString("numero_comprobante"));
-                    map.put("estado", rs.getString("estado"));
+                    map.put("estado", rs.getString("borrado"));
                     lista.add(map);
                 }
             }
@@ -50,7 +54,9 @@ public class EgresoGastoDAO {
     }
 
     public boolean actualizarEgreso(int id, String fecha, String descripcion, double monto, String numeroComprobante) {
-        String query = "UPDATE Egresos_Gastos SET fecha = ?, descripcion = ?, monto = ?, numero_comprobante = ? WHERE id_egreso = ?";
+        // SchemaActual: WHERE id_egresos_gastos = ?
+        String query = "UPDATE Egresos_Gastos SET fecha = ?, descripcion = ?, monto = ?, numero_comprobante = ? " +
+                       "WHERE id_egresos_gastos = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -68,7 +74,8 @@ public class EgresoGastoDAO {
     }
 
     public boolean inactivarEgreso(int id) {
-        String query = "UPDATE Egresos_Gastos SET estado = 'Inactivo', fecha_inactivacion = NOW() WHERE id_egreso = ?";
+        // SchemaActual: borrado='Si', fecha_borrado en vez de estado/fecha_inactivacion
+        String query = "UPDATE Egresos_Gastos SET borrado = 'Si', fecha_borrado = NOW() WHERE id_egresos_gastos = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {

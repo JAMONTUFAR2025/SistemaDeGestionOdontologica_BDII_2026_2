@@ -85,7 +85,7 @@ CREATE TABLE Usuarios_Login (
 
 CREATE TABLE Pacientes (
     id_pacientes INT AUTO_INCREMENT,
-    identidad VARCHAR(20) NOT NULL,
+    identidad VARCHAR(20),
     nombre_completo VARCHAR(100) NOT NULL,
     fecha_nacimiento DATE,
     genero ENUM('M', 'F'),
@@ -144,7 +144,7 @@ CREATE TABLE Expediente_Base (
     antecedentes_ginecobstetros VARCHAR(255),
     habitos_toxicos VARCHAR(255),
     farmacos_uso_habitual TEXT,
-    reaccion_anestesicos BOOLEAN,
+    reaccion_anestesicos ENUM('Si', 'No'),
     especifique_anestesia TEXT,
     complicaciones_tratamientos_previos TEXT,
     habitos_bucales VARCHAR(100),
@@ -269,4 +269,4 @@ INSERT INTO Especialidades (nombre_especialidad) VALUES
 ('Periodoncia'),
 ('Cirugia Bucal / Maxilofacial'),
 ('Odontopediatra'),
-('Prostodoncia / Rehabilitacion Oral');s
+('Prostodoncia / Rehabilitacion Oral');

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Paciente {
+    // SchemaActual: PK = id_pacientes (INT AUTO_INCREMENT), borrado ENUM('Si','No')
     private int idPaciente;
     private String identidad;
     private String nombreCompleto;
@@ -16,13 +17,14 @@ public class Paciente {
     private String personaResponsable;
     private String telefonoResponsable;
     private LocalDateTime fechaRegistro;
-    private String estado;
-    private LocalDateTime fechaInactivacion;
 
     public Paciente() {
     }
 
-    public Paciente(int idPaciente, String identidad, String nombreCompleto, LocalDate fechaNacimiento, String genero, String estadoCivil, String ocupacion, String domicilio, String telefono, String personaResponsable, String telefonoResponsable, LocalDateTime fechaRegistro, String estado, LocalDateTime fechaInactivacion) {
+    public Paciente(int idPaciente, String identidad, String nombreCompleto, LocalDate fechaNacimiento,
+                    String genero, String estadoCivil, String ocupacion, String domicilio,
+                    String telefono, String personaResponsable, String telefonoResponsable,
+                    LocalDateTime fechaRegistro) {
         this.idPaciente = idPaciente;
         this.identidad = identidad;
         this.nombreCompleto = nombreCompleto;
@@ -35,8 +37,6 @@ public class Paciente {
         this.personaResponsable = personaResponsable;
         this.telefonoResponsable = telefonoResponsable;
         this.fechaRegistro = fechaRegistro;
-        this.estado = estado;
-        this.fechaInactivacion = fechaInactivacion;
     }
 
     public int getIdPaciente() {
@@ -133,22 +133,6 @@ public class Paciente {
 
     public void setFechaRegistro(LocalDateTime fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    public LocalDateTime getFechaInactivacion() {
-        return fechaInactivacion;
-    }
-
-    public void setFechaInactivacion(LocalDateTime fechaInactivacion) {
-        this.fechaInactivacion = fechaInactivacion;
     }
 
     @Override

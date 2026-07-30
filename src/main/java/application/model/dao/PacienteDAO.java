@@ -13,28 +13,12 @@ import java.util.List;
 
 public class PacienteDAO {
 
-    private void asegurarColumnas(Connection conn) {
-        if (conn == null) return;
-        String[] alterStatements = {
-            "ALTER TABLE Pacientes ADD COLUMN estado_civil VARCHAR(30)",
-            "ALTER TABLE Pacientes ADD COLUMN estado ENUM('Activo','Inactivo') DEFAULT 'Activo'",
-            "ALTER TABLE Pacientes ADD COLUMN fecha_inactivacion DATETIME NULL"
-        };
-        for (String sql : alterStatements) {
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.executeUpdate();
-            } catch (SQLException ignored) {
-                // Si la columna ya existe, se ignora la excepción
-            }
-        }
-    }
-
+    // Verifica si un paciente existe por identidad
     public boolean existe(String identidad) {
         String query = "SELECT COUNT(*) FROM Pacientes WHERE identidad = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return false;
-            asegurarColumnas(conn);
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setString(1, identidad);
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -50,24 +34,27 @@ public class PacienteDAO {
     }
 
     public String registrar(Paciente p) {
-        String query = "INSERT INTO Pacientes (identidad, nombre_completo, fecha_nacimiento, genero, estado_civil, ocupacion, domicilio, telefono, persona_responsable, telefono_responsable, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Activo')";
-        
+        // SchemaActual: columnas id_pacientes (PK auto), identidad (UNIQUE), borrado ENUM('Si','No') DEFAULT 'No'
+        String query = "INSERT INTO Pacientes " +
+                "(identidad, nombre_completo, fecha_nacimiento, genero, estado_civil, ocupacion, " +
+                "domicilio, telefono, persona_responsable, telefono_responsable) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) {
                 return "ERR|No se pudo establecer conexión con la base de datos.";
             }
-            asegurarColumnas(conn);
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setString(1, p.getIdentidad());
                 stmt.setString(2, p.getNombreCompleto());
-                
+
                 if (p.getFechaNacimiento() != null) {
                     stmt.setDate(3, Date.valueOf(p.getFechaNacimiento()));
                 } else {
                     stmt.setNull(3, java.sql.Types.DATE);
                 }
-            
+
                 stmt.setString(4, p.getGenero());
                 stmt.setString(5, p.getEstadoCivil());
                 stmt.setString(6, p.getOcupacion());
@@ -75,7 +62,7 @@ public class PacienteDAO {
                 stmt.setString(8, p.getTelefono());
                 stmt.setString(9, p.getPersonaResponsable());
                 stmt.setString(10, p.getTelefonoResponsable());
-            
+
                 int filasAfectadas = stmt.executeUpdate();
                 if (filasAfectadas > 0) {
                     return "OK|Paciente registrado exitosamente.";
@@ -91,13 +78,15 @@ public class PacienteDAO {
     }
 
     public String actualizar(Paciente p) {
-        String query = "UPDATE Pacientes SET nombre_completo=?, fecha_nacimiento=?, genero=?, estado_civil=?, ocupacion=?, domicilio=?, telefono=?, persona_responsable=?, telefono_responsable=?, estado='Activo' WHERE identidad=?";
+        // SchemaActual: no toca borrado al actualizar datos personales
+        String query = "UPDATE Pacientes SET nombre_completo=?, fecha_nacimiento=?, genero=?, estado_civil=?, " +
+                "ocupacion=?, domicilio=?, telefono=?, persona_responsable=?, telefono_responsable=? " +
+                "WHERE identidad=?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) {
                 return "ERR|No se pudo establecer conexión con la base de datos.";
             }
-            asegurarColumnas(conn);
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setString(1, p.getNombreCompleto());
                 if (p.getFechaNacimiento() != null) {
@@ -130,24 +119,24 @@ public class PacienteDAO {
 
     public List<Paciente> obtenerPacientes() {
         List<Paciente> lista = new ArrayList<>();
-        String query = "SELECT * FROM Pacientes WHERE estado = 'Activo' OR estado IS NULL ORDER BY nombre_completo ASC";
+        // SchemaActual: PK = id_pacientes, borrado ENUM('Si','No') DEFAULT 'No'
+        String query = "SELECT * FROM Pacientes WHERE borrado = 'No' ORDER BY nombre_completo ASC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return lista;
-            asegurarColumnas(conn);
             try (PreparedStatement stmt = conn.prepareStatement(query);
                  ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Paciente p = new Paciente();
-                    try { p.setIdPaciente(rs.getInt("id_paciente")); } catch (Exception ignored) {}
+                    try { p.setIdPaciente(rs.getInt("id_pacientes")); } catch (Exception ignored) {}
                     p.setIdentidad(rs.getString("identidad"));
                     p.setNombreCompleto(rs.getString("nombre_completo"));
-                    
+
                     Date fechaNac = rs.getDate("fecha_nacimiento");
                     if (fechaNac != null) {
                         p.setFechaNacimiento(fechaNac.toLocalDate());
                     }
-                    
+
                     p.setGenero(rs.getString("genero"));
                     try { p.setEstadoCivil(rs.getString("estado_civil")); } catch (Exception ignored) {}
                     p.setOcupacion(rs.getString("ocupacion"));
@@ -155,8 +144,7 @@ public class PacienteDAO {
                     p.setTelefono(rs.getString("telefono"));
                     p.setPersonaResponsable(rs.getString("persona_responsable"));
                     p.setTelefonoResponsable(rs.getString("telefono_responsable"));
-                    try { p.setEstado(rs.getString("estado")); } catch (Exception ignored) {}
-                    
+
                     lista.add(p);
                 }
             }
@@ -167,13 +155,12 @@ public class PacienteDAO {
         return lista;
     }
 
-    // Borrado lógico de un paciente
+    // Borrado lógico de un paciente — SchemaActual usa borrado='Si', fecha_borrado
     public boolean eliminarPaciente(String identidad) {
-        String query = "UPDATE Pacientes SET estado = 'Inactivo', fecha_inactivacion = CURRENT_TIMESTAMP WHERE identidad = ?";
+        String query = "UPDATE Pacientes SET borrado = 'Si', fecha_borrado = CURRENT_TIMESTAMP WHERE identidad = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return false;
-            asegurarColumnas(conn);
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setString(1, identidad);
                 return stmt.executeUpdate() > 0;

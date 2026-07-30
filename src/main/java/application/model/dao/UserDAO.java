@@ -9,7 +9,8 @@ import java.sql.SQLException;
 public class UserDAO {
 
     public boolean autenticarUsuario(String correo, String contrasenia) {
-        String query = "SELECT id_usuario FROM Usuarios_Login WHERE correo = ? AND contrasenia = ? AND estado = 'Activo'";
+        // SchemaActual: borrado ENUM('Si','No'), id_usuarios_login
+        String query = "SELECT id_usuarios_login FROM Usuarios_Login WHERE correo = ? AND contrasenia = ? AND borrado = 'No'";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -20,7 +21,7 @@ public class UserDAO {
                 stmt.setString(2, hashedPass);
 
                 try (ResultSet rs = stmt.executeQuery()) {
-                    return rs.next(); // Si hay un resultado, el login es exitoso
+                    return rs.next();
                 }
             }
         } catch (SQLException e) {
@@ -31,11 +32,10 @@ public class UserDAO {
     }
 
     public boolean verificarCorreoExistente(String correoOTelefono) {
-        // Buscamos si existe el correo en Usuarios_Login O si coincide el telefono del
-        // medico asociado
-        String query = "SELECT u.id_usuario FROM Usuarios_Login u " +
-                "LEFT JOIN Personal_Medico p ON u.identidad_medico = p.identidad " +
-                "WHERE (u.correo = ? OR p.telefono = ?) AND u.estado = 'Activo'";
+        // SchemaActual: Usuarios_Login.id_personal_medico (INT FK), borrado='No'
+        String query = "SELECT u.id_usuarios_login FROM Usuarios_Login u " +
+                "LEFT JOIN Personal_Medico p ON u.id_personal_medico = p.id_personal_medico " +
+                "WHERE (u.correo = ? OR p.telefono = ?) AND u.borrado = 'No'";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -45,7 +45,7 @@ public class UserDAO {
                 stmt.setString(2, correoOTelefono);
 
                 try (ResultSet rs = stmt.executeQuery()) {
-                    return rs.next(); // Retorna true si encontro a alguien
+                    return rs.next();
                 }
             }
         } catch (SQLException e) {
@@ -56,11 +56,11 @@ public class UserDAO {
     }
 
     public boolean actualizarContrasenia(String correoOTelefono, String nuevaContrasenia) {
-        // Actualizar la contraseña del usuario donde coincida su correo o su telefono
+        // SchemaActual: JOIN por id_personal_medico, borrado='No'
         String query = "UPDATE Usuarios_Login u " +
-                "LEFT JOIN Personal_Medico p ON u.identidad_medico = p.identidad " +
+                "LEFT JOIN Personal_Medico p ON u.id_personal_medico = p.id_personal_medico " +
                 "SET u.contrasenia = ? " +
-                "WHERE (u.correo = ? OR p.telefono = ?) AND u.estado = 'Activo'";
+                "WHERE (u.correo = ? OR p.telefono = ?) AND u.borrado = 'No'";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -83,7 +83,8 @@ public class UserDAO {
 
     public java.util.List<String> obtenerCorreosActivos() {
         java.util.List<String> correos = new java.util.ArrayList<>();
-        String query = "SELECT correo FROM Usuarios_Login WHERE estado = 'Activo'";
+        // SchemaActual: borrado='No'
+        String query = "SELECT correo FROM Usuarios_Login WHERE borrado = 'No'";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -103,11 +104,10 @@ public class UserDAO {
     }
 
     // =========================================================================
-    // NUEVO MÉTODO: Obtener el rol del usuario para los permisos del sistema
+    // MÉTODO: Obtener el rol del usuario para los permisos del sistema
     // =========================================================================
     public String obtenerRolPorCorreo(String correo) {
         String rol = "";
-        // Consulta adaptada a tu tabla Usuarios_Login
         String query = "SELECT rol_sistema FROM Usuarios_Login WHERE correo = ?";
 
         try {

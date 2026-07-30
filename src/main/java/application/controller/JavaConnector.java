@@ -415,9 +415,12 @@ public class JavaConnector {
             String identidad = obj.get("identidad").getAsString();
             String nombreCompleto = obj.get("nombre_completo").getAsString();
             String telefono = obj.get("telefono").getAsString();
-            int idEspecialidad = obj.get("id_especialidad").getAsInt();
+            // SchemaActual: campo renombrado a id_especialidades
+            int idEspecialidades = obj.has("id_especialidades")
+                    ? obj.get("id_especialidades").getAsInt()
+                    : (obj.has("id_especialidad") ? obj.get("id_especialidad").getAsInt() : 0);
             application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
-            boolean exito = pmDAO.actualizarPersonalMedico(identidad, nombreCompleto, telefono, idEspecialidad);
+            boolean exito = pmDAO.actualizarPersonalMedico(identidad, nombreCompleto, telefono, idEspecialidades);
             return exito ? "OK|Médico actualizado exitosamente." : "ERR|No se pudo actualizar el médico.";
         } catch (Throwable t) {
             return "ERR|Error: " + t.getMessage();

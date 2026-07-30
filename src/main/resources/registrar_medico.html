@@ -302,7 +302,7 @@
                     select.innerHTML = '<option value="">Seleccione una especialidad</option>';
                     especialidades.forEach(function(esp) {
                         var option = document.createElement("option");
-                        option.value = esp.idEspecialidad;
+                        option.value = esp.idEspecialidades;
                         option.text = esp.nombreEspecialidad;
                         select.appendChild(option);
                     });
@@ -407,7 +407,7 @@
                 nombre_completo: nombre,
                 identidad: identidad,
                 telefono: telefono,
-                id_especialidad: parseInt(especialidad),
+                id_especialidades: parseInt(especialidad),
                 correo: correoUsuario
             };
 
