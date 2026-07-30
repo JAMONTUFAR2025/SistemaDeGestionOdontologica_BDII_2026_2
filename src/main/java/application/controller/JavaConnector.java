@@ -13,12 +13,14 @@ public class JavaConnector {
     private UserDAO userDAO;
     private PacienteDAO pacienteDAO;
     private Gson gson;
+    
+    // NUEVO: Variable para almacenar el rol del usuario que inició sesión
+    private String rolUsuarioActual = "";
 
     public JavaConnector() {
         this.userDAO = new UserDAO();
         this.pacienteDAO = new PacienteDAO();
-        // Configuramos Gson para manejar LocalDate (formato yyyy-MM-dd que viene del
-        // HTML input date)
+        // Configuramos Gson para manejar LocalDate (formato yyyy-MM-dd que viene del HTML input date)
         this.gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDate.class, new com.google.gson.TypeAdapter<LocalDate>() {
                     @Override
@@ -84,14 +86,24 @@ public class JavaConnector {
                 .create();
     }
 
-    // Retorna true si las credenciales son correctas
+    // ==========================================
+    // MÉTODO NUEVO PARA ENVIAR EL ROL AL FRONTEND
+    // ==========================================
+    public String obtenerRolActual() {
+        return this.rolUsuarioActual;
+    }
+
+    // MODIFICADO: Retorna true si las credenciales son correctas y guarda el rol
     public boolean login(String correo, String contrasenia) {
         System.out.println("Intentando iniciar sesion con: " + correo);
         boolean exito = userDAO.autenticarUsuario(correo, contrasenia);
         if (exito) {
             System.out.println("-> Inicio de sesion EXITOSO para: " + correo);
+            // NUEVO: Consultamos a la base de datos qué rol tiene este usuario
+            this.rolUsuarioActual = userDAO.obtenerRolPorCorreo(correo); 
         } else {
             System.out.println("-> Fila no encontrada o credenciales INCORRECTAS para: " + correo);
+            this.rolUsuarioActual = ""; // Limpiamos por seguridad
         }
         return exito;
     }

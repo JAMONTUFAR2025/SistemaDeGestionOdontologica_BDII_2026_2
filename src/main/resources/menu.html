@@ -136,49 +136,116 @@
     <div class="dashboard-grid">
 
         <!-- Módulo: Registrar Paciente -->
-        <a href="registrar_paciente.html" class="card">
+        <a href="registrar_paciente.html" class="card" id="card-pacientes">
             <div class="icon"><i class="fas fa-user-plus"></i></div>
             <h3> Pacientes</h3>
             <p>Ingresar un nuevo paciente al sistema</p>
         </a>
 
         <!-- Módulo: Agenda / Citas -->
-        <a href="agendar_cita.html" class="card">
+        <a href="agendar_cita.html" class="card" id="card-citas">
             <div class="icon"><i class="fas fa-calendar-alt"></i></div>
             <h3>Agenda y Citas</h3>
             <p>Programar y gestionar citas médicas</p>
         </a>
 
         <!-- Módulo: Historia Clínica -->
-        <a href="historia_clinica.html" class="card">
+        <a href="historia_clinica.html" class="card" id="card-historia">
             <div class="icon"><i class="fas fa-notes-medical"></i></div>
             <h3>Historia Clínica</h3>
             <p>Odontograma y diagnósticos</p>
         </a>
 
         <!-- Módulo: Facturación -->
-        <a href="facturacion.html" class="card">
+        <a href="facturacion.html" class="card" id="card-facturacion">
             <div class="icon"><i class="fas fa-file-invoice-dollar"></i></div>
             <h3>Facturación</h3>
             <p>Cobros, recibos del SAR y pagos</p>
         </a>
 
         <!-- Módulo: Control de Egresos -->
-        <a href="egresos.html" class="card">
+        <a href="egresos.html" class="card" id="card-egresos">
             <div class="icon"><i class="fas fa-chart-line"></i></div>
             <h3>Egresos y Gastos</h3>
             <p>Registro de compras e insumos</p>
         </a>
 
         <!-- Módulo: Personal Médico -->
-        <a href="personal.html" class="card">
+        <a href="personal.html" class="card" id="card-personal">
             <div class="icon"><i class="fas fa-user-md"></i></div>
             <h3>Personal Médico</h3>
             <p>Gestión de doctores, usuarios y roles</p>
         </a>
 
     </div>
+
+    <!-- Script original de Bootstrap -->
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
+
+    <!-- NUEVO SCRIPT DE PERMISOS PARA OCULTAR MÓDULOS -->
+    <script>
+        // 1. Ocultamos la página mientras calculamos los permisos
+        document.body.style.visibility = 'hidden';
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Función recursiva que espera a que Java cargue
+            function intentarCargarPermisos() {
+                if (window.javaConnector) {
+                    // ¡Java ya cargó! Traemos el rol
+                    let rol = window.javaConnector.obtenerRolActual();
+
+                    aplicarPermisos(rol);
+                    actualizarTextoBienvenida(rol);
+
+                    // 2. Volvemos a hacer visible la página de golpe, ya limpia
+                    document.body.style.visibility = 'visible';
+                } else {
+                    // Si Java aún no está listo, intentamos de nuevo en 50 milisegundos
+                    setTimeout(intentarCargarPermisos, 50);
+                }
+            }
+
+            // Iniciamos el intento de carga
+            intentarCargarPermisos();
+        });
+
+        function aplicarPermisos(rol) {
+            const cardHistoria = document.getElementById('card-historia');
+            const cardFacturacion = document.getElementById('card-facturacion');
+            const cardEgresos = document.getElementById('card-egresos');
+            const cardPersonal = document.getElementById('card-personal');
+            const cardCitas = document.getElementById('card-citas');
+
+            let rolNormalizado = rol ? rol.trim().toLowerCase() : "";
+
+            if (rolNormalizado === 'recepcionista') {
+                if (cardHistoria) cardHistoria.style.display = 'none';
+                if (cardEgresos) cardEgresos.style.display = 'none';
+                if (cardPersonal) cardPersonal.style.display = 'none';
+
+            } else if (rolNormalizado === 'médico' || rolNormalizado === 'medico') {
+                if (cardCitas) cardCitas.style.display = 'none';
+                if (cardFacturacion) cardFacturacion.style.display = 'none';
+                if (cardEgresos) cardEgresos.style.display = 'none';
+                if (cardPersonal) cardPersonal.style.display = 'none';
+            }
+        }
+
+        // Corrige el texto superior que dice "(Administrador)"
+        function actualizarTextoBienvenida(rol) {
+            if (!rol) return;
+
+            let rolFormateado = rol.charAt(0).toUpperCase() + rol.slice(1).toLowerCase();
+
+            let parrafos = document.getElementsByTagName('p');
+            for (let p of parrafos) {
+                if (p.innerHTML.includes('Bienvenido(a):')) {
+                    p.innerHTML = p.innerHTML.replace('(Administrador)', '(' + rolFormateado + ')');
+                }
+            }
+        }
+    </script>
 </body>
 
 </html>
