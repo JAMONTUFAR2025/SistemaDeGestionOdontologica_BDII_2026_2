@@ -1,90 +1,14 @@
 package application.model.dao;
 
 import application.model.connection.DBConnection;
-import application.model.entity.Especialidad;
 import application.model.entity.PersonalMedico;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PersonalMedicoDAO {
-
-    // ==========================================
-    // ESPECIALIDADES
-    // ==========================================
-
-    public List<Especialidad> obtenerEspecialidades() {
-        List<Especialidad> lista = new ArrayList<>();
-        // SchemaActual: PK = id_especialidades
-        String query = "SELECT id_especialidades, nombre_especialidad FROM Especialidades ORDER BY id_especialidades DESC";
-
-        try {
-            Connection conn = DBConnection.getInstance().getConnection();
-            try (PreparedStatement stmt = conn.prepareStatement(query);
-                    ResultSet rs = stmt.executeQuery()) {
-
-                while (rs.next()) {
-                    lista.add(new Especialidad(rs.getInt("id_especialidades"), rs.getString("nombre_especialidad")));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al obtener especialidades: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return lista;
-    }
-
-    // Insertar nueva especialidad
-    public boolean agregarEspecialidad(String nombre) {
-        String q = "INSERT INTO Especialidades (nombre_especialidad) VALUES (?)";
-        try {
-            Connection conn = DBConnection.getInstance().getConnection();
-            try (PreparedStatement stmt = conn.prepareStatement(q)) {
-                stmt.setString(1, nombre);
-                return stmt.executeUpdate() > 0;
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al agregar especialidad: " + e.getMessage());
-            return false;
-        }
-    }
-
-    // Actualizar nombre de especialidad
-    public boolean actualizarEspecialidad(int id, String nombre) {
-        // SchemaActual: WHERE id_especialidades = ?
-        String q = "UPDATE Especialidades SET nombre_especialidad = ? WHERE id_especialidades = ?";
-        try {
-            Connection conn = DBConnection.getInstance().getConnection();
-            try (PreparedStatement stmt = conn.prepareStatement(q)) {
-                stmt.setString(1, nombre);
-                stmt.setInt(2, id);
-                return stmt.executeUpdate() > 0;
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al actualizar especialidad: " + e.getMessage());
-            return false;
-        }
-    }
-
-    // Eliminar especialidad (borrado físico)
-    public boolean eliminarEspecialidad(int id) {
-        // SchemaActual: WHERE id_especialidades = ?
-        String q = "DELETE FROM Especialidades WHERE id_especialidades = ?";
-        try {
-            Connection conn = DBConnection.getInstance().getConnection();
-            try (PreparedStatement stmt = conn.prepareStatement(q)) {
-                stmt.setInt(1, id);
-                return stmt.executeUpdate() > 0;
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al eliminar especialidad: " + e.getMessage());
-            return false;
-        }
-    }
 
     // ==========================================
     // USUARIOS DE LOGIN
@@ -92,7 +16,8 @@ public class PersonalMedicoDAO {
 
     // Registrar SOLO un usuario de login (sin vincularlo a ningún médico)
     public boolean registrarUsuarioSolo(String correo, String contrasenia, String rolSistema, String estadoIgnorado) {
-        // SchemaActual: no tiene columna "estado" — usa borrado ENUM('Si','No') DEFAULT 'No'
+        // SchemaActual: no tiene columna "estado" — usa borrado ENUM('Si','No') DEFAULT
+        // 'No'
         String query = "INSERT INTO Usuarios_Login (correo, contrasenia, rol_sistema) VALUES (?, ?, ?)";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -110,17 +35,18 @@ public class PersonalMedicoDAO {
         }
     }
 
-    // Obtener usuarios que NO tienen un médico vinculado (id_personal_medico IS NULL)
+    // Obtener usuarios que NO tienen un médico vinculado (id_personal_medico IS
+    // NULL)
     public java.util.List<java.util.Map<String, String>> obtenerUsuariosSinMedico() {
         java.util.List<java.util.Map<String, String>> usuarios = new java.util.ArrayList<>();
         // SchemaActual: FK = id_personal_medico (INT), borrado='No'
         String query = "SELECT id_usuarios_login, correo, rol_sistema FROM Usuarios_Login " +
-                       "WHERE id_personal_medico IS NULL AND borrado = 'No' ORDER BY id_usuarios_login DESC";
+                "WHERE id_personal_medico IS NULL AND borrado = 'No' ORDER BY id_usuarios_login DESC";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
-                 ResultSet rs = stmt.executeQuery()) {
+                    ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     java.util.Map<String, String> map = new java.util.HashMap<>();
                     // Se mantiene clave "id_usuario" para compatibilidad con el frontend existente
@@ -138,12 +64,14 @@ public class PersonalMedicoDAO {
 
     // Registrar Personal Médico y VINCULAR con un usuario existente
     public boolean registrarPersonalYVincular(PersonalMedico pm, int idUsuario) {
-        // SchemaActual: id_especialidades (no id_especialidad), id_personal_medico (INT PK auto)
-        String insertPersonal = "INSERT INTO Personal_Medico (identidad, nombre_completo, telefono, id_especialidades, correo) " +
-                                "VALUES (?, ?, ?, ?, ?)";
+        // SchemaActual: id_especialidades (no id_especialidad), id_personal_medico (INT
+        // PK auto)
+        String insertPersonal = "INSERT INTO Personal_Medico (identidad, nombre_completo, telefono, id_especialidades, correo) "
+                +
+                "VALUES (?, ?, ?, ?, ?)";
         // SchemaActual: FK en Usuarios_Login = id_personal_medico (INT)
-        String getIdPersonal  = "SELECT id_personal_medico FROM Personal_Medico WHERE identidad = ?";
-        String updateUsuario  = "UPDATE Usuarios_Login SET id_personal_medico = ? WHERE id_usuarios_login = ?";
+        String getIdPersonal = "SELECT id_personal_medico FROM Personal_Medico WHERE identidad = ?";
+        String updateUsuario = "UPDATE Usuarios_Login SET id_personal_medico = ? WHERE id_usuarios_login = ?";
 
         Connection conn = DBConnection.getInstance().getConnection();
 
@@ -191,7 +119,8 @@ public class PersonalMedicoDAO {
         } catch (SQLException e) {
             System.err.println("Error en la transacción al registrar personal: " + e.getMessage());
             try {
-                if (conn != null) conn.rollback();
+                if (conn != null)
+                    conn.rollback();
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
@@ -199,7 +128,8 @@ public class PersonalMedicoDAO {
             return false;
         } finally {
             try {
-                if (conn != null) conn.setAutoCommit(true);
+                if (conn != null)
+                    conn.setAutoCommit(true);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -209,11 +139,12 @@ public class PersonalMedicoDAO {
     // Método que crea personal médico y usuario de una vez
     public boolean registrarPersonalYUsuario(PersonalMedico pm) {
         // SchemaActual: id_especialidades, borrado DEFAULT 'No' (no hay columna estado)
-        String insertPersonal = "INSERT INTO Personal_Medico (identidad, nombre_completo, telefono, id_especialidades, correo) " +
-                                "VALUES (?, ?, ?, ?, ?)";
-        String getIdPersonal  = "SELECT id_personal_medico FROM Personal_Medico WHERE identidad = ?";
-        String insertUsuario  = "INSERT INTO Usuarios_Login (correo, contrasenia, id_personal_medico, rol_sistema) " +
-                                "VALUES (?, ?, ?, ?)";
+        String insertPersonal = "INSERT INTO Personal_Medico (identidad, nombre_completo, telefono, id_especialidades, correo) "
+                +
+                "VALUES (?, ?, ?, ?, ?)";
+        String getIdPersonal = "SELECT id_personal_medico FROM Personal_Medico WHERE identidad = ?";
+        String insertUsuario = "INSERT INTO Usuarios_Login (correo, contrasenia, id_personal_medico, rol_sistema) " +
+                "VALUES (?, ?, ?, ?)";
 
         Connection conn = DBConnection.getInstance().getConnection();
 
@@ -263,7 +194,8 @@ public class PersonalMedicoDAO {
         } catch (SQLException e) {
             System.err.println("Error en transacción: " + e.getMessage());
             try {
-                if (conn != null) conn.rollback();
+                if (conn != null)
+                    conn.rollback();
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
@@ -271,7 +203,8 @@ public class PersonalMedicoDAO {
             return false;
         } finally {
             try {
-                if (conn != null) conn.setAutoCommit(true);
+                if (conn != null)
+                    conn.setAutoCommit(true);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -287,7 +220,7 @@ public class PersonalMedicoDAO {
         java.util.List<java.util.Map<String, Object>> lista = new java.util.ArrayList<>();
         // SchemaActual: PK = id_usuarios_login, borrado='No'
         String query = "SELECT id_usuarios_login, correo, rol_sistema, borrado, fecha_creacion " +
-                       "FROM Usuarios_Login WHERE borrado = 'No' ORDER BY fecha_creacion DESC";
+                "FROM Usuarios_Login WHERE borrado = 'No' ORDER BY fecha_creacion DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
@@ -313,7 +246,8 @@ public class PersonalMedicoDAO {
     public java.util.List<java.util.Map<String, Object>> obtenerPersonalMedico() {
         java.util.List<java.util.Map<String, Object>> lista = new java.util.ArrayList<>();
         // SchemaActual: FK id_especialidades, borrado='No'
-        String query = "SELECT pm.id_personal_medico, pm.identidad, pm.nombre_completo, pm.telefono, pm.correo, pm.borrado, " +
+        String query = "SELECT pm.id_personal_medico, pm.identidad, pm.nombre_completo, pm.telefono, pm.correo, pm.borrado, "
+                +
                 "e.nombre_especialidad FROM Personal_Medico pm " +
                 "LEFT JOIN Especialidades e ON pm.id_especialidades = e.id_especialidades " +
                 "WHERE pm.borrado = 'No' ORDER BY pm.id_personal_medico DESC";

@@ -128,4 +128,30 @@ public class UserDAO {
         }
         return rol;
     }
+
+    public Integer obtenerIdMedicoPorCorreo(String correo) {
+        Integer idMedico = null;
+        String query = "SELECT id_personal_medico FROM Usuarios_Login WHERE correo = ? AND borrado = 'No'";
+
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) return null;
+
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, correo);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        int id = rs.getInt("id_personal_medico");
+                        if (!rs.wasNull()) {
+                            idMedico = id;
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener id_personal_medico: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return idMedico;
+    }
 }

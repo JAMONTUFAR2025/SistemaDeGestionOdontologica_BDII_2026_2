@@ -122,13 +122,29 @@
                     <th style="padding: 10px;">Teléfono</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr style="border-bottom: 1px solid #ddd;">
-                    <td style="padding: 10px; font-weight: bold; color: #007bf0;">08:00 AM</td>
-                    <td style="padding: 10px;">Ejemplo Paciente</td>
-                    <td style="padding: 10px;">Limpieza General</td>
-                    <td style="padding: 10px;">+504 0000-0000</td>
+            <tbody id="tbodyCitasHoy">
+                <!-- Se llenará dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Panel de Próximas Citas -->
+    <div id="panelProximasCitas"
+        style="max-width: 900px; margin: 0 auto 30px auto; background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+        <h3 style="color: #28a745; margin-top: 0;"><i class="fas fa-calendar-check"></i> Próximas Citas</h3>
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">
+            <thead>
+                <tr style="background: #28a745; color: white; text-align: left;">
+                    <th style="padding: 10px;">Fecha</th>
+                    <th style="padding: 10px;">Hora</th>
+                    <th style="padding: 10px;">Paciente</th>
+                    <th style="padding: 10px;">Motivo</th>
+                    <th style="padding: 10px;">Estado</th>
                 </tr>
+            </thead>
+            <tbody id="tbodyProximasCitas">
+                <!-- Se llenará dinámicamente -->
             </tbody>
         </table>
     </div>
@@ -197,6 +213,7 @@
 
                     aplicarPermisos(rol);
                     actualizarTextoBienvenida(rol);
+                    cargarCitas(); // Cargar citas dinámicamente
 
                     // 2. Volvemos a hacer visible la página de golpe, ya limpia
                     document.body.style.visibility = 'visible';
@@ -243,6 +260,56 @@
                 if (p.innerHTML.includes('Bienvenido(a):')) {
                     p.innerHTML = p.innerHTML.replace('(Administrador)', '(' + rolFormateado + ')');
                 }
+            }
+        }
+
+        // Cargar citas de la BD
+        function cargarCitas() {
+            try {
+                // Citas de Hoy
+                let jsonHoy = window.javaConnector.obtenerCitasHoyDelUsuario();
+                let citasHoy = JSON.parse(jsonHoy);
+                let tbodyHoy = document.getElementById('tbodyCitasHoy');
+                
+                if (citasHoy.length === 0) {
+                    tbodyHoy.innerHTML = '<tr><td colspan="4" style="padding: 10px; text-align: center; color: #666;">No hay citas programadas para hoy.</td></tr>';
+                } else {
+                    let htmlHoy = "";
+                    citasHoy.forEach(c => {
+                        htmlHoy += `<tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 10px; font-weight: bold; color: #007bf0;">${c.hora}</td>
+                            <td style="padding: 10px;">${c.paciente}</td>
+                            <td style="padding: 10px;">${c.motivo_cita}</td>
+                            <td style="padding: 10px;">${c.telefono}</td>
+                        </tr>`;
+                    });
+                    tbodyHoy.innerHTML = htmlHoy;
+                }
+
+                // Próximas Citas
+                let jsonProximas = window.javaConnector.obtenerProximasCitasDelUsuario();
+                let citasProximas = JSON.parse(jsonProximas);
+                let tbodyProximas = document.getElementById('tbodyProximasCitas');
+
+                if (citasProximas.length === 0) {
+                    tbodyProximas.innerHTML = '<tr><td colspan="5" style="padding: 10px; text-align: center; color: #666;">No hay citas programadas para los próximos días.</td></tr>';
+                } else {
+                    let htmlProximas = "";
+                    citasProximas.forEach(c => {
+                        htmlProximas += `<tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 10px; font-weight: bold; color: #28a745;">${c.fecha}</td>
+                            <td style="padding: 10px; color: #555;">${c.hora}</td>
+                            <td style="padding: 10px;">${c.paciente}</td>
+                            <td style="padding: 10px;">${c.motivo_cita}</td>
+                            <td style="padding: 10px;">
+                                <span style="background: #eef6ff; color: #007bf0; padding: 3px 8px; border-radius: 4px; font-size: 12px; border: 1px solid #007bf0;">${c.estado}</span>
+                            </td>
+                        </tr>`;
+                    });
+                    tbodyProximas.innerHTML = htmlProximas;
+                }
+            } catch (e) {
+                console.error("Error al cargar citas:", e);
             }
         }
     </script>

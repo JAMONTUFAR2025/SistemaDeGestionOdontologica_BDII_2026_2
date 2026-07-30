@@ -331,6 +331,68 @@
                 placeholder: "-- Buscar o seleccionar paciente --",
                 allowClear: true
             });
+
+            // Cargar pacientes y médicos desde JavaConnector
+            if (window.javaConnector) {
+                try {
+                    let pacientesJson = window.javaConnector.obtenerPacientes();
+                    let pacientes = JSON.parse(pacientesJson);
+                    let selPaciente = document.getElementById("identidad_paciente");
+                    pacientes.forEach(p => {
+                        let opt = new Option(p.nombreCompleto + " (" + p.identidad + ")", p.idPaciente);
+                        opt.setAttribute("data-telefono", p.telefono || "");
+                        selPaciente.appendChild(opt);
+                    });
+
+                    let medicosJson = window.javaConnector.obtenerPersonalMedico();
+                    let medicos = JSON.parse(medicosJson);
+                    let selMedico = document.getElementById("id_medico");
+                    medicos.forEach(m => {
+                        let opt = new Option(m.nombreCompleto + " (" + m.especialidadNombre + ")", m.idPersonalMedico);
+                        selMedico.appendChild(opt);
+                    });
+                } catch (e) {
+                    console.error("Error cargando datos:", e);
+                }
+            }
+
+            // Manejar submit del formulario de cita
+            $('#agendarCitaForm').on('submit', function (e) {
+                e.preventDefault();
+                if (!window.javaConnector) {
+                    alert("Error: Puente Java no inicializado.");
+                    return;
+                }
+
+                let idPaciente = $('#identidad_paciente').val();
+                let idMedico = $('#id_medico').val();
+                let fechaHora = $('#fecha_hora').val();
+                let estado = $('#estado').val();
+                let motivo = $('#motivo_cita').val();
+
+                if (!idPaciente || !idMedico || !fechaHora) {
+                    alert("Complete todos los campos obligatorios.");
+                    return;
+                }
+
+                let data = {
+                    id_pacientes: parseInt(idPaciente),
+                    id_personal_medico: parseInt(idMedico),
+                    fecha_hora: fechaHora,
+                    estado: estado,
+                    motivoCita: motivo
+                };
+
+                let respuesta = window.javaConnector.agendarCita(JSON.stringify(data));
+                let partes = respuesta.split("|");
+                alert(partes[1]);
+
+                if (partes[0] === "OK") {
+                    this.reset();
+                    $('#identidad_paciente').val(null).trigger('change');
+                    setFechaHoraActual();
+                }
+            });
         });
 
         $(document).ready(function () {

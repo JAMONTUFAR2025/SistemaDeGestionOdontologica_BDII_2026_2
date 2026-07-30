@@ -16,6 +16,7 @@ public class JavaConnector {
     
     // NUEVO: Variable para almacenar el rol del usuario que inició sesión
     private String rolUsuarioActual = "";
+    private Integer idPersonalMedicoActual = null;
 
     public JavaConnector() {
         this.userDAO = new UserDAO();
@@ -93,17 +94,19 @@ public class JavaConnector {
         return this.rolUsuarioActual;
     }
 
-    // MODIFICADO: Retorna true si las credenciales son correctas y guarda el rol
+    // MODIFICADO: Retorna true si las credenciales son correctas y guarda el rol e id
     public boolean login(String correo, String contrasenia) {
         System.out.println("Intentando iniciar sesion con: " + correo);
         boolean exito = userDAO.autenticarUsuario(correo, contrasenia);
         if (exito) {
             System.out.println("-> Inicio de sesion EXITOSO para: " + correo);
-            // NUEVO: Consultamos a la base de datos qué rol tiene este usuario
+            // Consultamos a la base de datos qué rol y qué id_personal_medico tiene este usuario
             this.rolUsuarioActual = userDAO.obtenerRolPorCorreo(correo); 
+            this.idPersonalMedicoActual = userDAO.obtenerIdMedicoPorCorreo(correo);
         } else {
             System.out.println("-> Fila no encontrada o credenciales INCORRECTAS para: " + correo);
             this.rolUsuarioActual = ""; // Limpiamos por seguridad
+            this.idPersonalMedicoActual = null;
         }
         return exito;
     }
@@ -218,8 +221,8 @@ public class JavaConnector {
 
     public String obtenerEspecialidades() {
         System.out.println("-> JavaConnector: solicitando especialidades...");
-        application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
-        java.util.List<application.model.entity.Especialidad> lista = pmDAO.obtenerEspecialidades();
+        application.model.dao.EspecialidadDAO especialidadDAO = new application.model.dao.EspecialidadDAO();
+        java.util.List<application.model.entity.Especialidad> lista = especialidadDAO.obtenerEspecialidades();
         System.out.println("-> Especialidades encontradas: " + lista.size());
         return gson.toJson(lista);
     }
@@ -227,8 +230,8 @@ public class JavaConnector {
     // Agregar nueva especialidad
     public String agregarEspecialidad(String nombre) {
         try {
-            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
-            boolean exito = pmDAO.agregarEspecialidad(nombre.trim());
+            application.model.dao.EspecialidadDAO especialidadDAO = new application.model.dao.EspecialidadDAO();
+            boolean exito = especialidadDAO.agregarEspecialidad(nombre.trim());
             return exito ? "OK|Especialidad registrada correctamente." : "ERR|No se pudo registrar la especialidad.";
         } catch (Throwable t) {
             return "ERR|Error: " + t.getMessage();
@@ -239,8 +242,8 @@ public class JavaConnector {
     public String actualizarEspecialidad(String idStr, String nombre) {
         try {
             int id = Integer.parseInt(idStr.trim());
-            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
-            boolean exito = pmDAO.actualizarEspecialidad(id, nombre.trim());
+            application.model.dao.EspecialidadDAO especialidadDAO = new application.model.dao.EspecialidadDAO();
+            boolean exito = especialidadDAO.actualizarEspecialidad(id, nombre.trim());
             return exito ? "OK|Especialidad actualizada correctamente." : "ERR|No se pudo actualizar la especialidad.";
         } catch (Throwable t) {
             return "ERR|Error: " + t.getMessage();
@@ -251,8 +254,8 @@ public class JavaConnector {
     public String eliminarEspecialidad(String idStr) {
         try {
             int id = Integer.parseInt(idStr.trim());
-            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
-            boolean exito = pmDAO.eliminarEspecialidad(id);
+            application.model.dao.EspecialidadDAO especialidadDAO = new application.model.dao.EspecialidadDAO();
+            boolean exito = especialidadDAO.eliminarEspecialidad(id);
             return exito ? "OK|Especialidad eliminada correctamente."
                     : "ERR|No se pudo eliminar. Puede estar en uso por algún médico.";
         } catch (Throwable t) {
@@ -355,6 +358,49 @@ public class JavaConnector {
             System.err.flush();
             return "ERR|Error procesando datos: " + t.getMessage();
         }
+    }
+
+    // ==========================================
+    // MÓDULO DE CITAS
+    // ==========================================
+
+    public String agendarCita(String jsonCita) {
+        System.out.println("-> Peticion para agendar cita: " + jsonCita);
+        try {
+            application.model.entity.Cita cita = gson.fromJson(jsonCita, application.model.entity.Cita.class);
+            // Gson deserializa fechas si están en formato ISO. Para evitar problemas con LocalDateTime:
+            // Vamos a extraer la fechaHora manualmente usando JsonObject si falla:
+            com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonCita).getAsJsonObject();
+            String fechaHoraStr = obj.get("fecha_hora").getAsString(); 
+            // reemplazar espacio por T para formato ISO localdatetime "yyyy-MM-dd HH:mm:ss" -> "yyyy-MM-ddTHH:mm:ss"
+            fechaHoraStr = fechaHoraStr.replace(" ", "T");
+            cita.setFechaHora(java.time.LocalDateTime.parse(fechaHoraStr));
+
+            // Extraemos los enteros (Gson pudo haber hecho match, pero aseguramos)
+            cita.setIdPacientes(obj.get("id_pacientes").getAsInt());
+            cita.setIdPersonalMedico(obj.get("id_personal_medico").getAsInt());
+
+            application.model.dao.CitaDAO citaDAO = new application.model.dao.CitaDAO();
+            boolean exito = citaDAO.agendarCita(cita);
+            
+            return exito ? "OK|Cita agendada exitosamente." : "ERR|Error al guardar la cita en la base de datos.";
+        } catch (Exception e) {
+            System.err.println("Error en agendarCita: " + e.getMessage());
+            e.printStackTrace();
+            return "ERR|Error interno al procesar la cita: " + e.getMessage();
+        }
+    }
+
+    public String obtenerCitasHoyDelUsuario() {
+        application.model.dao.CitaDAO citaDAO = new application.model.dao.CitaDAO();
+        java.util.List<java.util.Map<String, String>> citas = citaDAO.obtenerCitasHoy(this.idPersonalMedicoActual, this.rolUsuarioActual);
+        return gson.toJson(citas);
+    }
+
+    public String obtenerProximasCitasDelUsuario() {
+        application.model.dao.CitaDAO citaDAO = new application.model.dao.CitaDAO();
+        java.util.List<java.util.Map<String, String>> citas = citaDAO.obtenerProximasCitas(this.idPersonalMedicoActual, this.rolUsuarioActual);
+        return gson.toJson(citas);
     }
 
     // Obtener todos los usuarios activos (para la tabla del módulo de personal)

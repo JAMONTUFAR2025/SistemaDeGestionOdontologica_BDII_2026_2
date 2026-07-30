@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 
 public class Cita {
 
-    private Integer idCita;
-    private String identidadPaciente;
-    private Integer idMedico;
+    private Integer idCitas;
+    private Integer idPacientes;
+    private Integer idPersonalMedico;
     private LocalDateTime fechaHora;
     private String motivoCita;
     private String estado;
@@ -14,37 +14,37 @@ public class Cita {
     public Cita() {
     }
 
-    public Cita(Integer idCita, String identidadPaciente, Integer idMedico, LocalDateTime fechaHora, String motivoCita, String estado) {
-        this.idCita = idCita;
-        this.identidadPaciente = identidadPaciente;
-        this.idMedico = idMedico;
+    public Cita(Integer idCitas, Integer idPacientes, Integer idPersonalMedico, LocalDateTime fechaHora, String motivoCita, String estado) {
+        this.idCitas = idCitas;
+        this.idPacientes = idPacientes;
+        this.idPersonalMedico = idPersonalMedico;
         this.fechaHora = fechaHora;
         this.motivoCita = motivoCita;
         this.estado = estado;
     }
 
-    public Integer getIdCita() {
-        return idCita;
+    public Integer getIdCitas() {
+        return idCitas;
     }
 
-    public void setIdCita(Integer idCita) {
-        this.idCita = idCita;
+    public void setIdCitas(Integer idCitas) {
+        this.idCitas = idCitas;
     }
 
-    public String getIdentidadPaciente() {
-        return identidadPaciente;
+    public Integer getIdPacientes() {
+        return idPacientes;
     }
 
-    public void setIdentidadPaciente(String identidadPaciente) {
-        this.identidadPaciente = identidadPaciente;
+    public void setIdPacientes(Integer idPacientes) {
+        this.idPacientes = idPacientes;
     }
 
-    public Integer getIdMedico() {
-        return idMedico;
+    public Integer getIdPersonalMedico() {
+        return idPersonalMedico;
     }
 
-    public void setIdMedico(Integer idMedico) {
-        this.idMedico = idMedico;
+    public void setIdPersonalMedico(Integer idPersonalMedico) {
+        this.idPersonalMedico = idPersonalMedico;
     }
 
     public LocalDateTime getFechaHora() {
@@ -74,9 +74,9 @@ public class Cita {
     @Override
     public String toString() {
         return "Cita{" +
-                "idCita=" + idCita +
-                ", identidadPaciente='" + identidadPaciente + '\'' +
-                ", idMedico=" + idMedico +
+                "idCitas=" + idCitas +
+                ", idPacientes=" + idPacientes +
+                ", idPersonalMedico=" + idPersonalMedico +
                 ", fechaHora=" + fechaHora +
                 ", estado='" + estado + '\'' +
                 '}';
