@@ -1,0 +1,191 @@
+package application.model.dao;
+
+import application.model.connection.DBConnection;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * DAO para la tabla Facturacion_Recibos.
+ * Esquema: id_facturacion_recibos, numero_recibo, id_pacientes, rtn_cliente,
+ *          fecha_emision, concepto, suma_neta, total_honorarios, total_retenido,
+ *          total_neto_recibido, metodo_pago, borrado ENUM('Si','No'), fecha_borrado.
+ *
+ * La FK es id_pacientes (entero). Para facilitar la búsqueda desde el frontend
+ * se resuelve el nombre del paciente con un JOIN.
+ */
+public class FacturacionReciboDAO {
+
+    // ------------------------------------------------------------------
+    // REGISTRAR (INSERT)
+    // ------------------------------------------------------------------
+    public boolean registrarRecibo(String numeroRecibo, int idPaciente, String rtnCliente,
+                                   String fechaEmision, String concepto,
+                                   double sumaNeta, double totalHonorarios,
+                                   double totalRetenido, double totalNetoRecibido,
+                                   String metodoPago) {
+        String query = "INSERT INTO Facturacion_Recibos " +
+                "(numero_recibo, id_pacientes, rtn_cliente, fecha_emision, concepto, " +
+                "suma_neta, total_honorarios, total_retenido, total_neto_recibido, metodo_pago) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, numeroRecibo != null ? numeroRecibo : "");
+                stmt.setInt(2, idPaciente);
+                stmt.setString(3, rtnCliente != null ? rtnCliente : "");
+                stmt.setString(4, fechaEmision);
+                stmt.setString(5, concepto);
+                stmt.setDouble(6, sumaNeta);
+                stmt.setDouble(7, totalHonorarios);
+                stmt.setDouble(8, totalRetenido);
+                stmt.setDouble(9, totalNetoRecibido);
+                stmt.setString(10, metodoPago);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al registrar recibo: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // OBTENER TODOS (SELECT activos) con JOIN para nombre del paciente
+    // ------------------------------------------------------------------
+    public List<Map<String, Object>> obtenerRecibos() {
+        List<Map<String, Object>> lista = new ArrayList<>();
+        String query = "SELECT fr.id_facturacion_recibos, fr.numero_recibo, fr.id_pacientes, " +
+                       "p.nombre_completo AS nombre_paciente, p.identidad AS identidad_paciente, " +
+                       "fr.rtn_cliente, fr.fecha_emision, fr.concepto, " +
+                       "fr.suma_neta, fr.total_honorarios, fr.total_retenido, " +
+                       "fr.total_neto_recibido, fr.metodo_pago " +
+                       "FROM Facturacion_Recibos fr " +
+                       "INNER JOIN Pacientes p ON fr.id_pacientes = p.id_pacientes " +
+                       "WHERE fr.borrado = 'No' ORDER BY fr.id_facturacion_recibos DESC";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query);
+                 ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> map = new LinkedHashMap<>();
+                    map.put("id_factura", rs.getInt("id_facturacion_recibos"));
+                    map.put("numero_recibo", rs.getString("numero_recibo"));
+                    map.put("id_paciente", rs.getInt("id_pacientes"));
+                    map.put("nombre_paciente", rs.getString("nombre_paciente"));
+                    map.put("identidad_paciente", rs.getString("identidad_paciente"));
+                    map.put("rtn_cliente", rs.getString("rtn_cliente"));
+                    map.put("fecha_emision", rs.getString("fecha_emision"));
+                    map.put("concepto", rs.getString("concepto"));
+                    map.put("suma_neta", rs.getDouble("suma_neta"));
+                    map.put("total_honorarios", rs.getDouble("total_honorarios"));
+                    map.put("total_retenido", rs.getDouble("total_retenido"));
+                    map.put("total_neto_recibido", rs.getDouble("total_neto_recibido"));
+                    map.put("metodo_pago", rs.getString("metodo_pago"));
+                    lista.add(map);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener recibos: " + e.getMessage());
+        }
+        return lista;
+    }
+
+    // ------------------------------------------------------------------
+    // ACTUALIZAR (UPDATE)
+    // ------------------------------------------------------------------
+    public boolean actualizarRecibo(int id, String numeroRecibo, int idPaciente, String rtnCliente,
+                                    String fechaEmision, String concepto,
+                                    double sumaNeta, double totalHonorarios,
+                                    double totalRetenido, double totalNetoRecibido,
+                                    String metodoPago) {
+        String query = "UPDATE Facturacion_Recibos SET " +
+                "numero_recibo=?, id_pacientes=?, rtn_cliente=?, fecha_emision=?, concepto=?, " +
+                "suma_neta=?, total_honorarios=?, total_retenido=?, total_neto_recibido=?, metodo_pago=? " +
+                "WHERE id_facturacion_recibos=?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, numeroRecibo != null ? numeroRecibo : "");
+                stmt.setInt(2, idPaciente);
+                stmt.setString(3, rtnCliente != null ? rtnCliente : "");
+                stmt.setString(4, fechaEmision);
+                stmt.setString(5, concepto);
+                stmt.setDouble(6, sumaNeta);
+                stmt.setDouble(7, totalHonorarios);
+                stmt.setDouble(8, totalRetenido);
+                stmt.setDouble(9, totalNetoRecibido);
+                stmt.setString(10, metodoPago);
+                stmt.setInt(11, id);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar recibo: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // ELIMINAR LÓGICO (borrado = 'Si')
+    // ------------------------------------------------------------------
+    public boolean inactivarRecibo(int id) {
+        String query = "UPDATE Facturacion_Recibos SET borrado = 'Si', fecha_borrado = NOW() " +
+                       "WHERE id_facturacion_recibos = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, id);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al inactivar recibo: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // BUSCAR id_pacientes por identidad (para resolución en el frontend)
+    // ------------------------------------------------------------------
+    public int obtenerIdPacientePorIdentidad(String identidad) {
+        String query = "SELECT id_pacientes FROM Pacientes WHERE identidad = ? AND borrado = 'No'";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, identidad);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) return rs.getInt("id_pacientes");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al buscar paciente por identidad: " + e.getMessage());
+        }
+        return -1;
+    }
+
+    // ------------------------------------------------------------------
+    // LISTAR PACIENTES activos (para el selector del formulario)
+    // ------------------------------------------------------------------
+    public List<Map<String, Object>> obtenerPacientesActivos() {
+        List<Map<String, Object>> lista = new ArrayList<>();
+        String query = "SELECT id_pacientes, identidad, nombre_completo FROM Pacientes " +
+                       "WHERE borrado = 'No' ORDER BY nombre_completo ASC";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query);
+                 ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> map = new LinkedHashMap<>();
+                    map.put("id_paciente", rs.getInt("id_pacientes"));
+                    map.put("identidad", rs.getString("identidad"));
+                    map.put("nombre_completo", rs.getString("nombre_completo"));
+                    lista.add(map);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al listar pacientes activos: " + e.getMessage());
+        }
+        return lista;
+    }
+}

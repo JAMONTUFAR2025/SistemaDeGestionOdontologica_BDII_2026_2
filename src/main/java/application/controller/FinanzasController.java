@@ -6,6 +6,10 @@ public class FinanzasController extends BaseController {
         super();
     }
 
+    // =========================================================
+    // MÉTODOS DE EGRESOS (existentes)
+    // =========================================================
+
     public String registrarEgreso(String jsonEgreso) {
         try {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonEgreso).getAsJsonObject();
@@ -58,6 +62,118 @@ public class FinanzasController extends BaseController {
             return exito ? "OK|Egreso eliminado correctamente." : "ERR|No se pudo eliminar el egreso.";
         } catch (Throwable t) {
             return "ERR|Error: " + t.getMessage();
+        }
+    }
+
+    // =========================================================
+    // MÉTODOS DE FACTURACIÓN / RECIBOS (nuevos)
+    // =========================================================
+
+    /**
+     * Registra un nuevo recibo en Facturacion_Recibos.
+     * JSON esperado: { numero_recibo, id_paciente, rtn_cliente, fecha_emision,
+     *                  concepto, suma_neta, total_honorarios, total_retenido,
+     *                  total_neto_recibido, metodo_pago }
+     */
+    public String registrarRecibo(String jsonRecibo) {
+        try {
+            com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonRecibo).getAsJsonObject();
+            String numeroRecibo      = obj.has("numero_recibo")      ? obj.get("numero_recibo").getAsString()      : "";
+            int    idPaciente        = obj.has("id_paciente")        ? obj.get("id_paciente").getAsInt()           : -1;
+            String rtnCliente        = obj.has("rtn_cliente")        ? obj.get("rtn_cliente").getAsString()        : "";
+            String fechaEmision      = obj.has("fecha_emision")      ? obj.get("fecha_emision").getAsString()      : "";
+            String concepto          = obj.has("concepto")           ? obj.get("concepto").getAsString()           : "";
+            double sumaNeta          = obj.has("suma_neta")          ? obj.get("suma_neta").getAsDouble()          : 0.0;
+            double totalHonorarios   = obj.has("total_honorarios")   ? obj.get("total_honorarios").getAsDouble()   : 0.0;
+            double totalRetenido     = obj.has("total_retenido")     ? obj.get("total_retenido").getAsDouble()     : 0.0;
+            double totalNetoRecibido = obj.has("total_neto_recibido")? obj.get("total_neto_recibido").getAsDouble(): 0.0;
+            String metodoPago        = obj.has("metodo_pago")        ? obj.get("metodo_pago").getAsString()        : "Efectivo";
+
+            if (idPaciente <= 0) return "ERR|Debe seleccionar un paciente válido.";
+            if (fechaEmision.isEmpty()) return "ERR|La fecha de emisión es obligatoria.";
+            if (concepto.isEmpty())     return "ERR|El concepto es obligatorio.";
+
+            application.model.dao.FacturacionReciboDAO dao = new application.model.dao.FacturacionReciboDAO();
+            boolean exito = dao.registrarRecibo(numeroRecibo, idPaciente, rtnCliente, fechaEmision,
+                    concepto, sumaNeta, totalHonorarios, totalRetenido, totalNetoRecibido, metodoPago);
+            return exito ? "OK|Recibo registrado con éxito." : "ERR|Ocurrió un error al registrar el recibo.";
+        } catch (Throwable t) {
+            return "ERR|Error procesando datos: " + t.getMessage();
+        }
+    }
+
+    /**
+     * Retorna el listado de recibos activos como JSON array.
+     */
+    public String obtenerRecibos() {
+        try {
+            application.model.dao.FacturacionReciboDAO dao = new application.model.dao.FacturacionReciboDAO();
+            java.util.List<java.util.Map<String, Object>> lista = dao.obtenerRecibos();
+            return gson.toJson(lista);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en obtenerRecibos: " + t.getMessage());
+            return "[]";
+        }
+    }
+
+    /**
+     * Actualiza un recibo existente.
+     * JSON esperado: igual que registrarRecibo, más { id_factura }.
+     */
+    public String actualizarRecibo(String jsonRecibo) {
+        try {
+            com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonRecibo).getAsJsonObject();
+            int    id                = obj.get("id_factura").getAsInt();
+            String numeroRecibo      = obj.has("numero_recibo")      ? obj.get("numero_recibo").getAsString()      : "";
+            int    idPaciente        = obj.has("id_paciente")        ? obj.get("id_paciente").getAsInt()           : -1;
+            String rtnCliente        = obj.has("rtn_cliente")        ? obj.get("rtn_cliente").getAsString()        : "";
+            String fechaEmision      = obj.has("fecha_emision")      ? obj.get("fecha_emision").getAsString()      : "";
+            String concepto          = obj.has("concepto")           ? obj.get("concepto").getAsString()           : "";
+            double sumaNeta          = obj.has("suma_neta")          ? obj.get("suma_neta").getAsDouble()          : 0.0;
+            double totalHonorarios   = obj.has("total_honorarios")   ? obj.get("total_honorarios").getAsDouble()   : 0.0;
+            double totalRetenido     = obj.has("total_retenido")     ? obj.get("total_retenido").getAsDouble()     : 0.0;
+            double totalNetoRecibido = obj.has("total_neto_recibido")? obj.get("total_neto_recibido").getAsDouble(): 0.0;
+            String metodoPago        = obj.has("metodo_pago")        ? obj.get("metodo_pago").getAsString()        : "Efectivo";
+
+            if (idPaciente <= 0) return "ERR|Debe seleccionar un paciente válido.";
+            if (fechaEmision.isEmpty()) return "ERR|La fecha de emisión es obligatoria.";
+            if (concepto.isEmpty())     return "ERR|El concepto es obligatorio.";
+
+            application.model.dao.FacturacionReciboDAO dao = new application.model.dao.FacturacionReciboDAO();
+            boolean exito = dao.actualizarRecibo(id, numeroRecibo, idPaciente, rtnCliente, fechaEmision,
+                    concepto, sumaNeta, totalHonorarios, totalRetenido, totalNetoRecibido, metodoPago);
+            return exito ? "OK|Recibo actualizado con éxito." : "ERR|Ocurrió un error al actualizar el recibo.";
+        } catch (Throwable t) {
+            return "ERR|Error procesando datos: " + t.getMessage();
+        }
+    }
+
+    /**
+     * Elimina lógicamente un recibo (borrado = 'Si').
+     * @param idStr ID del recibo como String.
+     */
+    public String inactivarRecibo(String idStr) {
+        try {
+            int id = Integer.parseInt(idStr.trim());
+            application.model.dao.FacturacionReciboDAO dao = new application.model.dao.FacturacionReciboDAO();
+            boolean exito = dao.inactivarRecibo(id);
+            return exito ? "OK|Recibo eliminado correctamente." : "ERR|No se pudo eliminar el recibo.";
+        } catch (Throwable t) {
+            return "ERR|Error: " + t.getMessage();
+        }
+    }
+
+    /**
+     * Retorna los pacientes activos para poblar el selector del formulario.
+     */
+    public String obtenerPacientesParaFactura() {
+        try {
+            application.model.dao.FacturacionReciboDAO dao = new application.model.dao.FacturacionReciboDAO();
+            java.util.List<java.util.Map<String, Object>> lista = dao.obtenerPacientesActivos();
+            return gson.toJson(lista);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en obtenerPacientesParaFactura: " + t.getMessage());
+            return "[]";
         }
     }
 }
