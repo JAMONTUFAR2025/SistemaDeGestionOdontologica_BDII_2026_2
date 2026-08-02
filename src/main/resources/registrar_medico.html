@@ -6,14 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Personal Médico - SOE Odontología</title>
     <style>
+        html,
         body {
             font-family: Arial, sans-serif;
             background-image: url('fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-color: #e9f0f5;
+            min-height: 100vh;
             margin: 0;
             padding: 30px 20px;
+        }
+
+        .modal-backdrop.show {
+            opacity: 0.35 !important;
+            background-color: rgba(0, 0, 0, 0.4) !important;
         }
 
         .container {
@@ -54,7 +62,8 @@
             color: #333;
         }
 
-        input, select {
+        input,
+        select {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
@@ -75,7 +84,10 @@
             margin-top: 20px;
             transition: background 0.3s;
         }
-        .btn-primary:hover { background-color: #0056b3; }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
 
         .btn-success {
             background-color: #28a745;
@@ -90,7 +102,10 @@
             margin-top: 20px;
             transition: background 0.3s;
         }
-        .btn-success:hover { background-color: #1e7e34; }
+
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
 
         .back-link {
             text-decoration: none;
@@ -129,6 +144,7 @@
             gap: 0;
             margin-bottom: 25px;
         }
+
         .tab-btn {
             flex: 1;
             padding: 14px;
@@ -141,20 +157,34 @@
             color: #666;
             transition: all 0.3s;
         }
-        .tab-btn:first-child { border-radius: 8px 0 0 8px; }
-        .tab-btn:last-child { border-radius: 0 8px 8px 0; }
+
+        .tab-btn:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .tab-btn:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
         .tab-btn.active-blue {
             background: #007bf0;
             color: white;
             border-color: #007bf0;
         }
+
         .tab-btn.active-green {
             background: #28a745;
             color: white;
             border-color: #28a745;
         }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
 
         hr.divider {
             border: none;
@@ -175,7 +205,8 @@
 
         <!-- TABS -->
         <div class="tabs">
-            <div class="tab-btn active-blue" onclick="mostrarTab('tabUsuario', this, 'blue')">👤 Paso 1: Crear Usuario</div>
+            <div class="tab-btn active-blue" onclick="mostrarTab('tabUsuario', this, 'blue')">👤 Paso 1: Crear Usuario
+            </div>
             <div class="tab-btn" onclick="mostrarTab('tabMedico', this, 'green')">🩺 Paso 2: Registrar Médico</div>
         </div>
 
@@ -264,7 +295,8 @@
                     </div>
                 </div>
 
-                <button type="button" class="btn-success" onclick="guardarMedico()">Registrar Médico y Vincular Usuario</button>
+                <button type="button" class="btn-success" onclick="guardarMedico()">Registrar Médico y Vincular
+                    Usuario</button>
             </form>
         </div>
     </div>
@@ -300,13 +332,13 @@
                     var especialidades = JSON.parse(json);
                     var select = document.getElementById("med_especialidad");
                     select.innerHTML = '<option value="">Seleccione una especialidad</option>';
-                    especialidades.forEach(function(esp) {
+                    especialidades.forEach(function (esp) {
                         var option = document.createElement("option");
                         option.value = esp.idEspecialidades;
                         option.text = esp.nombreEspecialidad;
                         select.appendChild(option);
                     });
-                } catch(e) {
+                } catch (e) {
                     console.error("Error al cargar especialidades:", e);
                 }
             } else {
@@ -321,18 +353,18 @@
                     var usuarios = JSON.parse(json);
                     var select = document.getElementById("med_id_usuario");
                     select.innerHTML = '<option value="">-- Seleccionar usuario --</option>';
-                    
+
                     if (usuarios.length === 0) {
                         select.innerHTML = '<option value="">No hay usuarios disponibles. Crea uno primero.</option>';
                     } else {
-                        usuarios.forEach(function(u) {
+                        usuarios.forEach(function (u) {
                             var option = document.createElement("option");
                             option.value = u.id_usuario;
                             option.text = u.correo + " (" + u.rol_sistema + ")";
                             select.appendChild(option);
                         });
                     }
-                } catch(e) {
+                } catch (e) {
                     console.error("Error al cargar usuarios:", e);
                 }
             } else {
@@ -428,11 +460,11 @@
         // ==========================================
         // INICIALIZACIÓN
         // ==========================================
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             intentarCargarEspecialidades();
 
             // Formatear DNI automáticamente (XXXX-XXXX-XXXXX)
-            document.getElementById('med_identidad').addEventListener('input', function() {
+            document.getElementById('med_identidad').addEventListener('input', function () {
                 var val = this.value.replace(/\D/g, '');
                 if (val.length > 4 && val.length <= 8) {
                     val = val.substring(0, 4) + '-' + val.substring(4);
@@ -443,7 +475,7 @@
             });
 
             // Formatear Teléfono automáticamente (XXXX-XXXX)
-            document.getElementById('med_telefono').addEventListener('input', function() {
+            document.getElementById('med_telefono').addEventListener('input', function () {
                 var val = this.value.replace(/\D/g, '');
                 if (val.length > 4) {
                     val = val.substring(0, 4) + '-' + val.substring(4, 8);

@@ -9,13 +9,19 @@
     <link href="application/assets/css/all.min.css" rel="stylesheet">
     <style>
         /* === ESTILOS GENERALES === */
-        body {
+        html, body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
+            background-repeat: no-repeat;
             background-color: #e9f0f5;
+            min-height: 100vh;
+        }
+
+        .modal-backdrop.show {
+            opacity: 0.35 !important;
+            background-color: rgba(0, 0, 0, 0.4) !important;
         }
 
         .card-container {

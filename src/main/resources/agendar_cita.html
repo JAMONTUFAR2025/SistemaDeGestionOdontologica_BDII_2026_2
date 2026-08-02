@@ -9,12 +9,14 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <style>
+        html,
         body {
             font-family: Arial, sans-serif;
             background-image: url('fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-color: #e9f0f5;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -22,6 +24,11 @@
             justify-content: center;
             min-height: 100vh;
             box-sizing: border-box;
+        }
+
+        .modal-backdrop.show {
+            opacity: 0.35 !important;
+            background-color: rgba(0, 0, 0, 0.4) !important;
         }
 
         .container {

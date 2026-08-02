@@ -8,13 +8,33 @@
     <link href="application/assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="application/assets/css/all.min.css" rel="stylesheet">
     <style>
+        html,
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+        }
+
+        #bg-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -10;
             background-image: url('fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
+            background-repeat: no-repeat;
+            pointer-events: none;
+        }
+
+        .modal-backdrop.show {
+            opacity: 0.35 !important;
+            background-color: rgba(0, 0, 0, 0.4) !important;
         }
 
         .main-container {
@@ -36,10 +56,11 @@
             color: #495057;
             transition: all 0.3s ease;
         }
+
         .btn-tab-main.active {
             background-color: #0d6efd;
             color: white;
-            box-shadow: 0 4px 10px rgba(13,110,253,0.3);
+            box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
         }
 
         /* ---- SUB-PESTAÑAS (formulario paso a paso) ---- */
@@ -52,6 +73,7 @@
             border-radius: 8px;
             transition: all 0.3s ease;
         }
+
         .btn-subtab.active {
             background-color: #0d6efd;
             color: white;
@@ -66,6 +88,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
         .info-value {
             font-size: 0.93rem;
             color: #1a252f;
@@ -77,8 +100,16 @@
             margin-top: 3px;
             min-height: 34px;
         }
-        .seccion-panel, .subpanel-paso { display: none; }
-        .seccion-panel.active, .subpanel-paso.active { display: block; }
+
+        .seccion-panel,
+        .subpanel-paso {
+            display: none;
+        }
+
+        .seccion-panel.active,
+        .subpanel-paso.active {
+            display: block;
+        }
 
         .seccion-bloque {
             background: #fff;
@@ -94,6 +125,7 @@
             border-radius: 10px;
             padding: 16px;
         }
+
         .arcada-container {
             display: flex;
             flex-wrap: wrap;
@@ -101,25 +133,73 @@
             gap: 5px;
             margin-bottom: 12px;
         }
+
         .diente-item {
-            width: 42px; height: 54px;
+            width: 42px;
+            height: 54px;
             border: 2px solid #ced4da;
             border-radius: 6px;
             background: #fff;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            cursor: pointer; font-size: 11px; font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
             transition: all 0.2s;
         }
-        .diente-item:hover { transform: scale(1.08); border-color: #0d6efd; }
-        .diente-num   { font-size: 10px; color: #6c757d; margin-bottom: 1px; }
-        .diente-simbolo { font-size: 13px; }
-        .diente-neutro  { background-color:#fff!important; border-color:#ced4da!important; }
-        .diente-sano    { background-color:#d1e7dd!important; border-color:#198754!important; color:#0f5132; }
-        .diente-caries  { background-color:#f8d7da!important; border-color:#dc3545!important; color:#842029; }
-        .diente-resina  { background-color:#cfe2ff!important; border-color:#0d6efd!important; color:#084298; }
-        .diente-corona  { background-color:#fff3cd!important; border-color:#ffc107!important; color:#664d03; }
-        .diente-ausente { background-color:#e2e3e5!important; border-color:#6c757d!important; color:#383d41; text-decoration:line-through; }
+
+        .diente-item:hover {
+            transform: scale(1.08);
+            border-color: #0d6efd;
+        }
+
+        .diente-num {
+            font-size: 10px;
+            color: #6c757d;
+            margin-bottom: 1px;
+        }
+
+        .diente-simbolo {
+            font-size: 13px;
+        }
+
+        .diente-neutro {
+            background-color: #fff !important;
+            border-color: #ced4da !important;
+        }
+
+        .diente-sano {
+            background-color: #d1e7dd !important;
+            border-color: #198754 !important;
+            color: #0f5132;
+        }
+
+        .diente-caries {
+            background-color: #f8d7da !important;
+            border-color: #dc3545 !important;
+            color: #842029;
+        }
+
+        .diente-resina {
+            background-color: #cfe2ff !important;
+            border-color: #0d6efd !important;
+            color: #084298;
+        }
+
+        .diente-corona {
+            background-color: #fff3cd !important;
+            border-color: #ffc107 !important;
+            color: #664d03;
+        }
+
+        .diente-ausente {
+            background-color: #e2e3e5 !important;
+            border-color: #6c757d !important;
+            color: #383d41;
+            text-decoration: line-through;
+        }
 
         /* ---- TIMELINE DE EVOLUCIONES ---- */
         .evolucion-card {
@@ -130,676 +210,694 @@
             margin-bottom: 12px;
             position: relative;
         }
+
         .evolucion-card:before {
             content: '';
             position: absolute;
-            left: -10px; top: 18px;
-            width: 14px; height: 14px;
+            left: -10px;
+            top: 18px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background: #0d6efd;
             border: 2px solid #fff;
         }
 
         @media print {
-            body * { visibility: hidden; }
-            #seccion-imprimir, #seccion-imprimir * { visibility: visible; }
-            #seccion-imprimir { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; }
+            body * {
+                visibility: hidden;
+            }
+
+            #seccion-imprimir,
+            #seccion-imprimir * {
+                visibility: visible;
+            }
+
+            #seccion-imprimir {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 
 <body>
-<div class="container my-4">
-<div class="main-container">
+    <div id="bg-fixed"></div>
+    <div class="container my-4">
+        <div class="main-container">
 
-    <!-- Enlace Volver -->
-    <div class="mb-3">
-        <a href="menu.html" class="text-decoration-none fw-bold text-primary">
-            <i class="fa-solid fa-arrow-left me-2"></i>Volver al Menú Principal
-        </a>
-    </div>
+            <!-- Enlace Volver -->
+            <div class="mb-3">
+                <a href="menu.html" class="text-decoration-none fw-bold text-primary">
+                    <i class="fa-solid fa-arrow-left me-2"></i>Volver al Menú Principal
+                </a>
+            </div>
 
-    <!-- PESTAÑAS PRINCIPALES -->
-    <div class="d-flex justify-content-center mb-4 bg-light p-2 rounded-pill shadow-sm mx-auto"
-        style="max-width: 680px;">
-        <button class="btn-tab-main active me-2" id="btnTab1"
-            onclick="cambiarPestana('panel-expedientes', this)">
-            <i class="fa-solid fa-folder-open me-2"></i>1. Buscar Expediente
-        </button>
-        <button class="btn-tab-main" id="btnTab2"
-            onclick="cambiarPestana('panel-nuevo-registro', this)">
-            <i class="fa-solid fa-clipboard-user me-2"></i>2. Registrar Historia Clínica
-        </button>
-    </div>
+            <!-- PESTAÑAS PRINCIPALES -->
+            <div class="d-flex justify-content-center mb-4 bg-light p-2 rounded-pill shadow-sm mx-auto"
+                style="max-width: 680px;">
+                <button class="btn-tab-main active me-2" id="btnTab1"
+                    onclick="cambiarPestana('panel-expedientes', this)">
+                    <i class="fa-solid fa-folder-open me-2"></i>1. Buscar Expediente
+                </button>
+                <button class="btn-tab-main" id="btnTab2" onclick="cambiarPestana('panel-nuevo-registro', this)">
+                    <i class="fa-solid fa-clipboard-user me-2"></i>2. Registrar Historia Clínica
+                </button>
+            </div>
 
-    <!-- =====================================================
+            <!-- =====================================================
          PANEL 1: BUSCADOR + VISOR
          ===================================================== -->
-    <div id="panel-expedientes" class="seccion-panel active">
-        <!-- Buscador -->
-        <div class="row mb-4 py-2">
-            <div class="col-md-8 mx-auto text-center">
-                <h4 class="fw-bold text-primary mb-3">
-                    <i class="fa-solid fa-magnifying-glass me-2"></i>Buscar Expediente de Paciente
-                </h4>
-                <div class="input-group input-group-lg shadow-sm">
-                    <input type="text" id="inputBuscar" class="form-control"
-                        placeholder="Ingrese el DNI del Paciente (Ej: 1601-2010-00271)...">
-                    <button class="btn btn-primary px-4" type="button" onclick="buscarExpediente()">
-                        <i class="fa-solid fa-magnifying-glass me-2"></i>Buscar
-                    </button>
-                </div>
-                <div class="text-muted small mt-2">También puede presionar Enter para buscar</div>
-            </div>
-        </div>
-
-        <!-- Spinner de carga -->
-        <div id="spinnerBuscar" class="text-center py-4" style="display:none;">
-            <div class="spinner-border text-primary" role="status"></div>
-            <div class="text-muted mt-2">Buscando expediente...</div>
-        </div>
-
-        <!-- Mensaje sin resultados -->
-        <div id="msgNoResultado" class="text-center py-5 text-muted" style="display:none;">
-            <i class="fa-solid fa-folder-open fa-3x mb-3 text-secondary"></i>
-            <h5 id="txtMensajeError">No se encontró ningún expediente para esta identidad.</h5>
-            <p class="small">Verifique el número de identidad o registre al paciente primero.</p>
-        </div>
-
-        <!-- VISOR DEL EXPEDIENTE -->
-        <div id="contenedorExpediente" style="display:none;">
-
-            <!-- Cabecera del paciente -->
-            <div class="card border-primary shadow-sm mb-4">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
-                    <div>
-                        <h5 class="m-0 fw-bold">
-                            <i class="fa-solid fa-id-card me-2"></i>
-                            <span id="lblNombrePaciente">---</span>
-                        </h5>
-                        <small class="opacity-75" id="lblDatosPaciente"></small>
+            <div id="panel-expedientes" class="seccion-panel active">
+                <!-- Buscador -->
+                <div class="row mb-4 py-2">
+                    <div class="col-md-8 mx-auto text-center">
+                        <h4 class="fw-bold text-primary mb-3">
+                            <i class="fa-solid fa-magnifying-glass me-2"></i>Buscar Expediente de Paciente
+                        </h4>
+                        <div class="input-group input-group-lg shadow-sm">
+                            <input type="text" id="inputBuscar" class="form-control"
+                                placeholder="Ingrese el DNI del Paciente (Ej: 1601-2010-00271)...">
+                            <button class="btn btn-primary px-4" type="button" onclick="buscarExpediente()">
+                                <i class="fa-solid fa-magnifying-glass me-2"></i>Buscar
+                            </button>
+                        </div>
+                        <div class="text-muted small mt-2">También puede presionar Enter para buscar</div>
                     </div>
-                    <span class="badge bg-light text-primary fs-6 px-3 py-2" id="lblIdentidad">ID: ---</span>
                 </div>
 
-                <!-- Datos demográficos del paciente -->
-                <div class="card-body p-3 bg-light border-bottom">
-                    <div class="row g-2" id="datosDemograficos"></div>
+                <!-- Spinner de carga -->
+                <div id="spinnerBuscar" class="text-center py-4" style="display:none;">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="text-muted mt-2">Buscando expediente...</div>
                 </div>
 
-                <!-- Secciones del expediente -->
-                <div class="card-body p-4">
-                    <div id="detalleHistoriaBase" class="row g-4"></div>
+                <!-- Mensaje sin resultados -->
+                <div id="msgNoResultado" class="text-center py-5 text-muted" style="display:none;">
+                    <i class="fa-solid fa-folder-open fa-3x mb-3 text-secondary"></i>
+                    <h5 id="txtMensajeError">No se encontró ningún expediente para esta identidad.</h5>
+                    <p class="small">Verifique el número de identidad o registre al paciente primero.</p>
+                </div>
+
+                <!-- VISOR DEL EXPEDIENTE -->
+                <div id="contenedorExpediente" style="display:none;">
+
+                    <!-- Cabecera del paciente -->
+                    <div class="card border-primary shadow-sm mb-4">
+                        <div
+                            class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+                            <div>
+                                <h5 class="m-0 fw-bold">
+                                    <i class="fa-solid fa-id-card me-2"></i>
+                                    <span id="lblNombrePaciente">---</span>
+                                </h5>
+                                <small class="opacity-75" id="lblDatosPaciente"></small>
+                            </div>
+                            <span class="badge bg-light text-primary fs-6 px-3 py-2" id="lblIdentidad">ID: ---</span>
+                        </div>
+
+                        <!-- Datos demográficos del paciente -->
+                        <div class="card-body p-3 bg-light border-bottom">
+                            <div class="row g-2" id="datosDemograficos"></div>
+                        </div>
+
+                        <!-- Secciones del expediente -->
+                        <div class="card-body p-4">
+                            <div id="detalleHistoriaBase" class="row g-4"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- =====================================================
+            <!-- =====================================================
          PANEL 2: FORMULARIO DE REGISTRO EN PASOS
          ===================================================== -->
-    <div id="panel-nuevo-registro" class="seccion-panel">
-        <h4 class="fw-bold text-primary mb-3">
-            <i class="fa-solid fa-clipboard-list me-2"></i>Registro de Historia Clínica (Expediente Base)
-        </h4>
+            <div id="panel-nuevo-registro" class="seccion-panel">
+                <h4 class="fw-bold text-primary mb-3">
+                    <i class="fa-solid fa-clipboard-list me-2"></i>Registro de Historia Clínica (Expediente Base)
+                </h4>
 
-        <form id="formHistoriaClinica" autocomplete="off">
+                <form id="formHistoriaClinica" autocomplete="off">
 
-            <!-- Navegación de sub-pestañas -->
-            <div class="d-flex flex-wrap gap-2 mb-4 border-bottom pb-3">
-                <button type="button" class="btn-subtab active" id="tab-paso-anamnesis"
-                    onclick="cambiarSubPaso('paso-anamnesis', this)">1. Datos del Paciente</button>
-                <button type="button" class="btn-subtab" id="tab-paso-antecedentes"
-                    onclick="cambiarSubPaso('paso-antecedentes', this)">2. Antecedentes</button>
-                <button type="button" class="btn-subtab" id="tab-paso-examen"
-                    onclick="cambiarSubPaso('paso-examen', this)">3. Examen Oral</button>
-                <button type="button" class="btn-subtab" id="tab-paso-signos"
-                    onclick="cambiarSubPaso('paso-signos', this)">4. Diagnóstico</button>
-            </div>
+                    <!-- Navegación de sub-pestañas -->
+                    <div class="d-flex flex-wrap gap-2 mb-4 border-bottom pb-3">
+                        <button type="button" class="btn-subtab active" id="tab-paso-anamnesis"
+                            onclick="cambiarSubPaso('paso-anamnesis', this)">1. Datos del Paciente</button>
+                        <button type="button" class="btn-subtab" id="tab-paso-antecedentes"
+                            onclick="cambiarSubPaso('paso-antecedentes', this)">2. Antecedentes</button>
+                        <button type="button" class="btn-subtab" id="tab-paso-examen"
+                            onclick="cambiarSubPaso('paso-examen', this)">3. Examen Oral</button>
+                        <button type="button" class="btn-subtab" id="tab-paso-signos"
+                            onclick="cambiarSubPaso('paso-signos', this)">4. Diagnóstico</button>
+                    </div>
 
-            <!-- PASO 1 -->
-            <div id="paso-anamnesis" class="subpanel-paso active">
-                <div class="row g-3">
-                    <div class="col-md-5">
-                        <label class="form-label fw-bold">DNI del Paciente: <span class="text-danger">*</span></label>
-                        <input type="text" id="hc_identidad" name="identidad_paciente" class="form-control"
-                            placeholder="Ej: 1601-2010-00271" required>
-                        <div class="form-text">El paciente debe estar registrado en el sistema.</div>
-                    </div>
-                    <div class="col-md-7">
-                        <label class="form-label fw-bold">Remitido Por:</label>
-                        <input type="text" id="hc_remitido_por" name="remitido_por" class="form-control"
-                            placeholder="Nombre del Dr. o Clínica que remite">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Motivo de Consulta:</label>
-                        <textarea id="hc_motivo" name="motivo_consulta" class="form-control" rows="3"
-                            placeholder="Razón principal por la que acude..."></textarea>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Síntoma Principal:</label>
-                        <textarea id="hc_sintoma" name="sintoma_principal" class="form-control" rows="3"
-                            placeholder="Descripción detallada del síntoma..."></textarea>
-                    </div>
-                </div>
-                <div class="text-end mt-4 pt-3 border-top">
-                    <button type="button" class="btn btn-primary px-4 fw-bold"
-                        onclick="cambiarSubPaso('paso-antecedentes', document.getElementById('tab-paso-antecedentes'))">
-                        Siguiente ➔
-                    </button>
-                </div>
-            </div>
-
-            <!-- PASO 2 -->
-            <div id="paso-antecedentes" class="subpanel-paso">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Antecedentes Patológicos:</label>
-                        <textarea id="hc_ant_patologicos" name="antecedentes_patologicos" class="form-control" rows="2"
-                            placeholder="Diabetes, Hipertensión, etc."></textarea>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Antecedentes Odontológicos:</label>
-                        <textarea id="hc_ant_odontologicos" name="antecedentes_odontologicos" class="form-control" rows="2"
-                            placeholder="Tratamientos previos, experiencias negativas..."></textarea>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Hábitos Tóxicos:</label>
-                        <input type="text" id="hc_habitos_toxicos" name="habitos_toxicos" class="form-control"
-                            placeholder="Tabaquismo, Alcohol, etc.">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Fármacos de Uso Habitual:</label>
-                        <input type="text" id="hc_farmacos" name="farmacos_uso_habitual" class="form-control"
-                            placeholder="Medicamentos que consume actualmente...">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Antecedentes Gineco-Obstétricos:</label>
-                        <input type="text" id="hc_gineco" name="antecedentes_ginecobstetros" class="form-control"
-                            placeholder="Solo si aplica (embarazo, semanas...)">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Antecedentes Quirúrgicos / Hospitalarios:</label>
-                        <input type="text" id="hc_ant_quirurgicos" name="antecedentes_quirurgicos" class="form-control"
-                            placeholder="Cirugías previas, hospitalizaciones...">
-                    </div>
-                    <div class="col-md-12">
-                        <label class="form-label fw-bold">Complicaciones en Tratamientos Previos:</label>
-                        <textarea id="hc_complicaciones" name="complicaciones_tratamientos_previos"
-                            class="form-control" rows="2"></textarea>
-                    </div>
-                    <div class="col-12 p-3 bg-warning bg-opacity-10 rounded border border-warning mt-2">
+                    <!-- PASO 1 -->
+                    <div id="paso-anamnesis" class="subpanel-paso active">
                         <div class="row g-3">
+                            <div class="col-md-5">
+                                <label class="form-label fw-bold">DNI del Paciente: <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" id="hc_identidad" name="identidad_paciente" class="form-control"
+                                    placeholder="Ej: 1601-2010-00271" required>
+                                <div class="form-text">El paciente debe estar registrado en el sistema.</div>
+                            </div>
+                            <div class="col-md-7">
+                                <label class="form-label fw-bold">Remitido Por:</label>
+                                <input type="text" id="hc_remitido_por" name="remitido_por" class="form-control"
+                                    placeholder="Nombre del Dr. o Clínica que remite">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Motivo de Consulta:</label>
+                                <textarea id="hc_motivo" name="motivo_consulta" class="form-control" rows="3"
+                                    placeholder="Razón principal por la que acude..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Síntoma Principal:</label>
+                                <textarea id="hc_sintoma" name="sintoma_principal" class="form-control" rows="3"
+                                    placeholder="Descripción detallada del síntoma..."></textarea>
+                            </div>
+                        </div>
+                        <div class="text-end mt-4 pt-3 border-top">
+                            <button type="button" class="btn btn-primary px-4 fw-bold"
+                                onclick="cambiarSubPaso('paso-antecedentes', document.getElementById('tab-paso-antecedentes'))">
+                                Siguiente ➔
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PASO 2 -->
+                    <div id="paso-antecedentes" class="subpanel-paso">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Antecedentes Patológicos:</label>
+                                <textarea id="hc_ant_patologicos" name="antecedentes_patologicos" class="form-control"
+                                    rows="2" placeholder="Diabetes, Hipertensión, etc."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Antecedentes Odontológicos:</label>
+                                <textarea id="hc_ant_odontologicos" name="antecedentes_odontologicos"
+                                    class="form-control" rows="2"
+                                    placeholder="Tratamientos previos, experiencias negativas..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Hábitos Tóxicos:</label>
+                                <input type="text" id="hc_habitos_toxicos" name="habitos_toxicos" class="form-control"
+                                    placeholder="Tabaquismo, Alcohol, etc.">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Fármacos de Uso Habitual:</label>
+                                <input type="text" id="hc_farmacos" name="farmacos_uso_habitual" class="form-control"
+                                    placeholder="Medicamentos que consume actualmente...">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Antecedentes Gineco-Obstétricos:</label>
+                                <input type="text" id="hc_gineco" name="antecedentes_ginecobstetros"
+                                    class="form-control" placeholder="Solo si aplica (embarazo, semanas...)">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Antecedentes Quirúrgicos / Hospitalarios:</label>
+                                <input type="text" id="hc_ant_quirurgicos" name="antecedentes_quirurgicos"
+                                    class="form-control" placeholder="Cirugías previas, hospitalizaciones...">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Complicaciones en Tratamientos Previos:</label>
+                                <textarea id="hc_complicaciones" name="complicaciones_tratamientos_previos"
+                                    class="form-control" rows="2"></textarea>
+                            </div>
+                            <div class="col-12 p-3 bg-warning bg-opacity-10 rounded border border-warning mt-2">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">¿Reacción a Anestésicos?</label>
+                                        <select id="hc_reaccion_anest" name="reaccion_anestesicos" class="form-select">
+                                            <option value="No">No</option>
+                                            <option value="Si">Sí</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label class="form-label fw-bold">Especifique Reacción:</label>
+                                        <input type="text" id="hc_especifica_anest" name="especifique_anestesia"
+                                            class="form-control" placeholder="Detalle si presentó alergia o choque...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                            <button type="button" class="btn btn-secondary px-4 fw-bold"
+                                onclick="cambiarSubPaso('paso-anamnesis', document.getElementById('tab-paso-anamnesis'))">
+                                ⬅ Anterior
+                            </button>
+                            <button type="button" class="btn btn-primary px-4 fw-bold"
+                                onclick="cambiarSubPaso('paso-examen', document.getElementById('tab-paso-examen'))">
+                                Siguiente ➔
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PASO 3 -->
+                    <div id="paso-examen" class="subpanel-paso">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Hábitos Bucales:</label>
+                                <input type="text" id="hc_habitos_bucales" name="habitos_bucales" class="form-control"
+                                    placeholder="Bruxismo, onicofagia, respirador bucal...">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Frecuencia de Cepillado:</label>
+                                <input type="text" id="hc_frec_cepillado" name="frecuencia_cepillado"
+                                    class="form-control" placeholder="Ej: 3 veces al día">
+                            </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-bold">¿Reacción a Anestésicos?</label>
-                                <select id="hc_reaccion_anest" name="reaccion_anestesicos" class="form-select">
-                                    <option value="No">No</option>
-                                    <option value="Si">Sí</option>
+                                <label class="form-label fw-bold">Tipo de Cerdas del Cepillo:</label>
+                                <select id="hc_tipo_cerdas" name="tipo_cepillo_cerdas" class="form-select">
+                                    <option value="">-- Seleccionar --</option>
+                                    <option value="Suaves">Suaves</option>
+                                    <option value="Moderadas">Moderadas</option>
+                                    <option value="Duras">Duras</option>
                                 </select>
                             </div>
-                            <div class="col-md-8">
-                                <label class="form-label fw-bold">Especifique Reacción:</label>
-                                <input type="text" id="hc_especifica_anest" name="especifique_anestesia"
-                                    class="form-control" placeholder="Detalle si presentó alergia o choque...">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Uso de Hilo Dental:</label>
+                                <select id="hc_hilo_dental" name="uso_hilo_dental" class="form-select">
+                                    <option value="">-- Seleccionar --</option>
+                                    <option value="Si">Sí</option>
+                                    <option value="A veces">A veces</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Tipo de Mordida:</label>
+                                <select id="hc_tipo_mordida" name="tipo_mordida" class="form-select">
+                                    <option value="">-- Seleccionar --</option>
+                                    <option value="Clase I">Clase I (Normoclusión)</option>
+                                    <option value="Clase II">Clase II (Distoclusión)</option>
+                                    <option value="Clase III">Clase III (Mesioclusión)</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Observación de Tejidos Blandos:</label>
+                                <textarea id="hc_tejidos_blandos" name="tejidos_blandos_observacion"
+                                    class="form-control" rows="3"
+                                    placeholder="Estado de encías, lengua, paladar, mucosa..."></textarea>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-between mt-4 pt-3 border-top">
-                    <button type="button" class="btn btn-secondary px-4 fw-bold"
-                        onclick="cambiarSubPaso('paso-anamnesis', document.getElementById('tab-paso-anamnesis'))">
-                        ⬅ Anterior
-                    </button>
-                    <button type="button" class="btn btn-primary px-4 fw-bold"
-                        onclick="cambiarSubPaso('paso-examen', document.getElementById('tab-paso-examen'))">
-                        Siguiente ➔
-                    </button>
-                </div>
-            </div>
-
-            <!-- PASO 3 -->
-            <div id="paso-examen" class="subpanel-paso">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Hábitos Bucales:</label>
-                        <input type="text" id="hc_habitos_bucales" name="habitos_bucales" class="form-control"
-                            placeholder="Bruxismo, onicofagia, respirador bucal...">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Frecuencia de Cepillado:</label>
-                        <input type="text" id="hc_frec_cepillado" name="frecuencia_cepillado" class="form-control"
-                            placeholder="Ej: 3 veces al día">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Tipo de Cerdas del Cepillo:</label>
-                        <select id="hc_tipo_cerdas" name="tipo_cepillo_cerdas" class="form-select">
-                            <option value="">-- Seleccionar --</option>
-                            <option value="Suaves">Suaves</option>
-                            <option value="Moderadas">Moderadas</option>
-                            <option value="Duras">Duras</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Uso de Hilo Dental:</label>
-                        <select id="hc_hilo_dental" name="uso_hilo_dental" class="form-select">
-                            <option value="">-- Seleccionar --</option>
-                            <option value="Si">Sí</option>
-                            <option value="A veces">A veces</option>
-                            <option value="No">No</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Tipo de Mordida:</label>
-                        <select id="hc_tipo_mordida" name="tipo_mordida" class="form-select">
-                            <option value="">-- Seleccionar --</option>
-                            <option value="Clase I">Clase I (Normoclusión)</option>
-                            <option value="Clase II">Clase II (Distoclusión)</option>
-                            <option value="Clase III">Clase III (Mesioclusión)</option>
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label fw-bold">Observación de Tejidos Blandos:</label>
-                        <textarea id="hc_tejidos_blandos" name="tejidos_blandos_observacion"
-                            class="form-control" rows="3"
-                            placeholder="Estado de encías, lengua, paladar, mucosa..."></textarea>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-between mt-4 pt-3 border-top">
-                    <button type="button" class="btn btn-secondary px-4 fw-bold"
-                        onclick="cambiarSubPaso('paso-antecedentes', document.getElementById('tab-paso-antecedentes'))">
-                        ⬅ Anterior
-                    </button>
-                    <button type="button" class="btn btn-primary px-4 fw-bold"
-                        onclick="cambiarSubPaso('paso-signos', document.getElementById('tab-paso-signos'))">
-                        Siguiente ➔
-                    </button>
-                </div>
-            </div>
-
-            <!-- PASO 4 -->
-            <div id="paso-signos" class="subpanel-paso">
-                <div class="row g-3">
-                    <!-- Odontograma del expediente base -->
-                    <div class="col-12">
-                        <label class="form-label fw-bold text-primary mb-2">
-                            <i class="fa-solid fa-tooth me-2"></i>Odontograma Inicial (clic para cambiar estado):
-                        </label>
-                        <div class="odontograma-box">
-                            <div class="d-flex flex-wrap justify-content-center gap-3 mb-3 pb-2 border-bottom small">
-                                <span><i class="fa-solid fa-square text-success"></i> Sano</span>
-                                <span><i class="fa-solid fa-square text-danger"></i> Caries</span>
-                                <span><i class="fa-solid fa-square text-primary"></i> Resina</span>
-                                <span><i class="fa-solid fa-square text-warning"></i> Corona</span>
-                                <span><i class="fa-solid fa-square text-secondary"></i> Ausente</span>
-                            </div>
-                            <div class="text-center fw-bold text-muted small mb-1">ARCADA SUPERIOR</div>
-                            <div class="arcada-container" id="arcadaSuperior"></div>
-                            <div class="text-center fw-bold text-muted small mt-2 mb-1">ARCADA INFERIOR</div>
-                            <div class="arcada-container" id="arcadaInferior"></div>
+                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                            <button type="button" class="btn btn-secondary px-4 fw-bold"
+                                onclick="cambiarSubPaso('paso-antecedentes', document.getElementById('tab-paso-antecedentes'))">
+                                ⬅ Anterior
+                            </button>
+                            <button type="button" class="btn btn-primary px-4 fw-bold"
+                                onclick="cambiarSubPaso('paso-signos', document.getElementById('tab-paso-signos'))">
+                                Siguiente ➔
+                            </button>
                         </div>
                     </div>
-                    <div class="col-12">
-                        <label class="form-label fw-bold small text-muted">Estado Odontograma (JSON generado):</label>
-                        <textarea id="estadoOdontogramaJSON" name="estado_odontograma"
-                            class="form-control font-monospace bg-light" rows="2" readonly
-                            placeholder="Vacío hasta que se marque alguna pieza..."></textarea>
+
+                    <!-- PASO 4 -->
+                    <div id="paso-signos" class="subpanel-paso">
+                        <div class="row g-3">
+                            <!-- Odontograma del expediente base -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-primary mb-2">
+                                    <i class="fa-solid fa-tooth me-2"></i>Odontograma Inicial (clic para cambiar
+                                    estado):
+                                </label>
+                                <div class="odontograma-box">
+                                    <div
+                                        class="d-flex flex-wrap justify-content-center gap-3 mb-3 pb-2 border-bottom small">
+                                        <span><i class="fa-solid fa-square text-success"></i> Sano</span>
+                                        <span><i class="fa-solid fa-square text-danger"></i> Caries</span>
+                                        <span><i class="fa-solid fa-square text-primary"></i> Resina</span>
+                                        <span><i class="fa-solid fa-square text-warning"></i> Corona</span>
+                                        <span><i class="fa-solid fa-square text-secondary"></i> Ausente</span>
+                                    </div>
+                                    <div class="text-center fw-bold text-muted small mb-1">ARCADA SUPERIOR</div>
+                                    <div class="arcada-container" id="arcadaSuperior"></div>
+                                    <div class="text-center fw-bold text-muted small mt-2 mb-1">ARCADA INFERIOR</div>
+                                    <div class="arcada-container" id="arcadaInferior"></div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold small text-muted">Estado Odontograma (JSON
+                                    generado):</label>
+                                <textarea id="estadoOdontogramaJSON" name="estado_odontograma"
+                                    class="form-control font-monospace bg-light" rows="2" readonly
+                                    placeholder="Vacío hasta que se marque alguna pieza..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Diagnóstico Presuntivo:</label>
+                                <textarea id="hc_diagnostico" name="diagnostico_presuntivo" class="form-control"
+                                    rows="3" placeholder="Diagnóstico inicial del paciente..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Observaciones Generales:</label>
+                                <textarea id="hc_observaciones_gen" name="observaciones_generales" class="form-control"
+                                    rows="3" placeholder="Notas adicionales del expediente..."></textarea>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <button type="button" class="btn btn-secondary px-4 fw-bold"
+                                onclick="cambiarSubPaso('paso-examen', document.getElementById('tab-paso-examen'))">
+                                ⬅ Anterior
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm fw-bold">
+                                <i class="fa-solid fa-floppy-disk me-2"></i>Guardar Historia Clínica
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Diagnóstico Presuntivo:</label>
-                        <textarea id="hc_diagnostico" name="diagnostico_presuntivo"
-                            class="form-control" rows="3"
-                            placeholder="Diagnóstico inicial del paciente..."></textarea>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Observaciones Generales:</label>
-                        <textarea id="hc_observaciones_gen" name="observaciones_generales"
-                            class="form-control" rows="3"
-                            placeholder="Notas adicionales del expediente..."></textarea>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-                    <button type="button" class="btn btn-secondary px-4 fw-bold"
-                        onclick="cambiarSubPaso('paso-examen', document.getElementById('tab-paso-examen'))">
-                        ⬅ Anterior
-                    </button>
-                    <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm fw-bold">
-                        <i class="fa-solid fa-floppy-disk me-2"></i>Guardar Historia Clínica
-                    </button>
-                </div>
+
+                </form>
             </div>
 
-        </form>
-    </div>
+        </div><!-- main-container -->
+    </div><!-- container -->
 
-</div><!-- main-container -->
-</div><!-- container -->
-
-<!-- ==============================================
+    <!-- ==============================================
      MODAL: AÑADIR EVOLUCIÓN / NUEVA CONSULTA
      ============================================== -->
-<div class="modal fade" id="modalNuevaConsulta" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title fw-bold">
-                    <i class="fa-solid fa-notes-medical me-2"></i>Registrar Evolución Clínica
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="formNuevaConsulta">
-                <div class="modal-body p-4">
-                    <input type="hidden" id="ev_identidad">
+    <div class="modal fade" id="modalNuevaConsulta" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fa-solid fa-notes-medical me-2"></i>Registrar Evolución Clínica
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formNuevaConsulta">
+                    <div class="modal-body p-4">
+                        <input type="hidden" id="ev_identidad">
 
-                    <!-- Fila 1: Fecha + Médico -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Fecha y Hora de Consulta: <span class="text-danger">*</span></label>
-                            <input type="datetime-local" id="ev_fecha" class="form-control" required>
+                        <!-- Fila 1: Fecha + Médico -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Fecha y Hora de Consulta: <span
+                                        class="text-danger">*</span></label>
+                                <input type="datetime-local" id="ev_fecha" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Médico Tratante: <span
+                                        class="text-danger">*</span></label>
+                                <select id="ev_id_medico" class="form-select" required>
+                                    <option value="">-- Seleccione un médico --</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Médico Tratante: <span class="text-danger">*</span></label>
-                            <select id="ev_id_medico" class="form-select" required>
-                                <option value="">-- Seleccione un médico --</option>
+
+                        <!-- Fila 2: Signos vitales -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Presión Arterial:</label>
+                                <input type="text" id="ev_presion" class="form-control" placeholder="120/80 mmHg">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Pulso Cardíaco:</label>
+                                <input type="text" id="ev_pulso" class="form-control" placeholder="75 bpm">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Temperatura:</label>
+                                <input type="text" id="ev_temperatura" class="form-control" placeholder="36.5 °C">
+                            </div>
+                        </div>
+                        <hr class="my-2">
+
+                        <!-- Fila 3: Motivo, síntoma, diagnóstico -->
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Motivo de Consulta: <span
+                                        class="text-danger">*</span></label>
+                                <textarea id="ev_motivo" class="form-control" rows="2" required
+                                    placeholder="Razón de la visita de hoy..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Síntoma Principal:</label>
+                                <textarea id="ev_sintoma" class="form-control" rows="2"
+                                    placeholder="Detalles del dolor o problema..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Tejidos Blandos:</label>
+                                <textarea id="ev_tejidos" class="form-control" rows="2"
+                                    placeholder="Observaciones de encías, mucosa..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Diagnóstico:</label>
+                                <textarea id="ev_diagnostico" class="form-control" rows="3"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Observaciones / Recomendaciones:</label>
+                                <textarea id="ev_observaciones" class="form-control" rows="3"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Estado Odontograma (JSON):</label>
+                                <input type="text" id="ev_odontograma" class="form-control font-monospace"
+                                    placeholder='{"18":"caries","21":"resina"} o vacío'>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Abono / Pago de Consulta (Lps.):</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Lps.</span>
+                                    <input type="number" step="0.01" min="0" id="ev_pago_abono" class="form-control"
+                                        value="0.00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-success fw-bold" onclick="guardarEvolucion()">
+                            <i class="fa-solid fa-save me-2"></i>Guardar Evolución
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================
+     MODAL: GENERAR DOCUMENTO MÉDICO
+     ============================================== -->
+    <div class="modal fade" id="modalGenerarDoc" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fa-solid fa-file-signature me-2"></i>Generar Documento Médico
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">Seleccione el Documento:</label>
+                            <select class="form-select border-dark" id="selectTipoPlantilla"
+                                onchange="actualizarVistaPrevia()">
+                                <option value="">-- Seleccionar Plantilla --</option>
+                                <option value="constancia">Constancia Médica</option>
+                                <option value="consentimiento_cirugia">Consentimiento Informado - Cirugía Bucal</option>
+                                <option value="consentimiento_endodoncia">Consentimiento Informado - Endodoncia</option>
                             </select>
                         </div>
-                    </div>
-
-                    <!-- Fila 2: Signos vitales -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Presión Arterial:</label>
-                            <input type="text" id="ev_presion" class="form-control" placeholder="120/80 mmHg">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Pulso Cardíaco:</label>
-                            <input type="text" id="ev_pulso" class="form-control" placeholder="75 bpm">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Temperatura:</label>
-                            <input type="text" id="ev_temperatura" class="form-control" placeholder="36.5 °C">
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-primary w-100 fw-bold" onclick="imprimirDocumento()">
+                                <i class="fa-solid fa-print me-2"></i>Imprimir
+                            </button>
                         </div>
                     </div>
-                    <hr class="my-2">
-
-                    <!-- Fila 3: Motivo, síntoma, diagnóstico -->
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label fw-bold">Motivo de Consulta: <span class="text-danger">*</span></label>
-                            <textarea id="ev_motivo" class="form-control" rows="2" required
-                                placeholder="Razón de la visita de hoy..."></textarea>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Síntoma Principal:</label>
-                            <textarea id="ev_sintoma" class="form-control" rows="2"
-                                placeholder="Detalles del dolor o problema..."></textarea>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Tejidos Blandos:</label>
-                            <textarea id="ev_tejidos" class="form-control" rows="2"
-                                placeholder="Observaciones de encías, mucosa..."></textarea>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Diagnóstico:</label>
-                            <textarea id="ev_diagnostico" class="form-control" rows="3"></textarea>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Observaciones / Recomendaciones:</label>
-                            <textarea id="ev_observaciones" class="form-control" rows="3"></textarea>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Estado Odontograma (JSON):</label>
-                            <input type="text" id="ev_odontograma" class="form-control font-monospace"
-                                placeholder='{"18":"caries","21":"resina"} o vacío'>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Abono / Pago de Consulta (Lps.):</label>
-                            <div class="input-group">
-                                <span class="input-group-text">Lps.</span>
-                                <input type="number" step="0.01" min="0" id="ev_pago_abono"
-                                    class="form-control" value="0.00">
+                    <div class="card shadow-sm border-0 mt-3">
+                        <div class="card-body p-4 bg-white" id="seccion-imprimir"
+                            style="min-height: 400px; border: 1px solid #dee2e6;">
+                            <div id="contenido_vista_previa" class="text-dark">
+                                <p class="text-center text-muted my-5">
+                                    <em>Seleccione una plantilla para visualizar el documento.</em>
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success fw-bold" onclick="guardarEvolucion()">
-                        <i class="fa-solid fa-save me-2"></i>Guardar Evolución
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- ==============================================
-     MODAL: GENERAR DOCUMENTO MÉDICO
-     ============================================== -->
-<div class="modal fade" id="modalGenerarDoc" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fw-bold">
-                    <i class="fa-solid fa-file-signature me-2"></i>Generar Documento Médico
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body bg-light">
-                <div class="row mb-3">
-                    <div class="col-md-8">
-                        <label class="form-label fw-bold">Seleccione el Documento:</label>
-                        <select class="form-select border-dark" id="selectTipoPlantilla"
-                            onchange="actualizarVistaPrevia()">
-                            <option value="">-- Seleccionar Plantilla --</option>
-                            <option value="constancia">Constancia Médica (Reposo)</option>
-                            <option value="receta">Receta Médica</option>
-                            <option value="consentimiento">Consentimiento Informado</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 d-flex align-items-end">
-                        <button class="btn btn-primary w-100 fw-bold" onclick="imprimirDocumento()">
-                            <i class="fa-solid fa-print me-2"></i>Imprimir
-                        </button>
-                    </div>
-                </div>
-                <div class="card shadow-sm border-0 mt-3">
-                    <div class="card-body p-5 bg-white" id="seccion-imprimir"
-                        style="min-height: 380px; border: 1px solid #dee2e6;">
-                        <div class="text-center border-bottom border-dark pb-3 mb-4">
-                            <h3 class="fw-bold text-primary mb-0">CLÍNICA SOE ODONTOLOGÍA</h3>
-                            <p class="m-0 text-muted">Dra. Especialista en Ortodoncia y Cirugía Menor</p>
-                            <p class="m-0 small text-muted">Santa Bárbara, Honduras | Tel: +504 9999-9999</p>
-                        </div>
-                        <div id="contenido_vista_previa" class="text-dark" style="line-height: 1.8;">
-                            <p class="text-center text-muted my-5">
-                                <em>Seleccione una plantilla para visualizar el documento.</em>
-                            </p>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script src="application/assets/js/bootstrap.bundle.min.js"></script>
-<script>
-    // ============================================================
-    // ESTADO GLOBAL
-    // ============================================================
-    let tempPacienteNombre = '';
-    let tempPacienteIdentidad = '';
-    let ultimoBusquedaIdentidad = '';
+    <script src="application/assets/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ============================================================
+        // ESTADO GLOBAL
+        // ============================================================
+        let tempPacienteNombre = '';
+        let tempPacienteIdentidad = '';
+        let ultimoBusquedaIdentidad = '';
 
-    const estadosDiente = [null, 'sano', 'caries', 'resina', 'corona', 'ausente'];
-    let odontogramaEstado = {};
+        const estadosDiente = [null, 'sano', 'caries', 'resina', 'corona', 'ausente'];
+        let odontogramaEstado = {};
 
-    // ============================================================
-    // INIT
-    // ============================================================
-    document.addEventListener('DOMContentLoaded', () => {
-        inicializarOdontograma();
-        cargarMedicosSelector();
+        // ============================================================
+        // INIT
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarOdontograma();
+            cargarMedicosSelector();
 
-        document.getElementById('inputBuscar').addEventListener('keypress', e => {
-            if (e.key === 'Enter') buscarExpediente();
-        });
-    });
-
-    // ============================================================
-    // ODONTOGRAMA
-    // ============================================================
-    function inicializarOdontograma() {
-        const superiores = [18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
-        const inferiores = [48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
-        const contSup = document.getElementById('arcadaSuperior');
-        const contInf = document.getElementById('arcadaInferior');
-        superiores.forEach(n => { odontogramaEstado[n] = null; contSup.appendChild(crearElementoDiente(n)); });
-        inferiores.forEach(n => { odontogramaEstado[n] = null; contInf.appendChild(crearElementoDiente(n)); });
-        actualizarJSONOdontograma();
-    }
-
-    function crearElementoDiente(num) {
-        const div = document.createElement('div');
-        div.className = 'diente-item diente-neutro';
-        div.id = `diente-${num}`;
-        div.innerHTML = `<span class="diente-num">${num}</span><span class="diente-simbolo" id="simb-${num}">•</span>`;
-        div.onclick = () => cambiarEstadoDiente(num);
-        return div;
-    }
-
-    function cambiarEstadoDiente(num) {
-        const estadoActual = odontogramaEstado[num];
-        const nextIndex = (estadosDiente.indexOf(estadoActual) + 1) % estadosDiente.length;
-        const nuevoEstado = estadosDiente[nextIndex];
-        odontogramaEstado[num] = nuevoEstado;
-
-        const el = document.getElementById(`diente-${num}`);
-        const simb = document.getElementById(`simb-${num}`);
-        el.className = 'diente-item';
-
-        if (nuevoEstado === null)        { el.classList.add('diente-neutro');  simb.innerHTML = '•'; }
-        else if (nuevoEstado==='sano')   { el.classList.add('diente-sano');    simb.innerHTML = '✔'; }
-        else if (nuevoEstado==='caries') { el.classList.add('diente-caries');  simb.innerHTML = '🔴'; }
-        else if (nuevoEstado==='resina') { el.classList.add('diente-resina');  simb.innerHTML = '🔵'; }
-        else if (nuevoEstado==='corona') { el.classList.add('diente-corona');  simb.innerHTML = '🟡'; }
-        else if (nuevoEstado==='ausente'){ el.classList.add('diente-ausente'); simb.innerHTML = '❌'; }
-
-        actualizarJSONOdontograma();
-    }
-
-    function actualizarJSONOdontograma() {
-        const filtrado = {};
-        for (const d in odontogramaEstado) {
-            if (odontogramaEstado[d] !== null) filtrado[d] = odontogramaEstado[d];
-        }
-        document.getElementById('estadoOdontogramaJSON').value =
-            Object.keys(filtrado).length > 0 ? JSON.stringify(filtrado) : '';
-    }
-
-    // ============================================================
-    // NAVEGACIÓN PESTAÑAS
-    // ============================================================
-    function cambiarPestana(panelId, btnElement) {
-        document.querySelectorAll('.seccion-panel').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.btn-tab-main').forEach(b => b.classList.remove('active'));
-        document.getElementById(panelId).classList.add('active');
-        btnElement.classList.add('active');
-    }
-
-    function cambiarSubPaso(pasoId, btnElement) {
-        document.querySelectorAll('.subpanel-paso').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.btn-subtab').forEach(b => b.classList.remove('active'));
-        document.getElementById(pasoId).classList.add('active');
-        btnElement.classList.add('active');
-    }
-
-    // ============================================================
-    // CARGAR MÉDICOS EN EL SELECTOR
-    // ============================================================
-    function cargarMedicosSelector() {
-        if (!window.historiaClinicaController) { setTimeout(cargarMedicosSelector, 150); return; }
-        try {
-            const json = window.historiaClinicaController.obtenerMedicos();
-            const medicos = JSON.parse(json || '[]');
-            const sel = document.getElementById('ev_id_medico');
-            medicos.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m.id_medico;
-                opt.text = m.nombre_completo;
-                sel.appendChild(opt);
+            document.getElementById('inputBuscar').addEventListener('keypress', e => {
+                if (e.key === 'Enter') buscarExpediente();
             });
-        } catch (e) {
-            console.error('Error cargando médicos:', e);
+        });
+
+        // ============================================================
+        // ODONTOGRAMA
+        // ============================================================
+        function inicializarOdontograma() {
+            const superiores = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
+            const inferiores = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
+            const contSup = document.getElementById('arcadaSuperior');
+            const contInf = document.getElementById('arcadaInferior');
+            superiores.forEach(n => { odontogramaEstado[n] = null; contSup.appendChild(crearElementoDiente(n)); });
+            inferiores.forEach(n => { odontogramaEstado[n] = null; contInf.appendChild(crearElementoDiente(n)); });
+            actualizarJSONOdontograma();
         }
-    }
 
-    // ============================================================
-    // BUSCAR EXPEDIENTE
-    // ============================================================
-    function buscarExpediente() {
-        const query = document.getElementById('inputBuscar').value.trim();
-        if (!query) { alert('Por favor ingrese un número de identidad.'); return; }
-        if (!window.historiaClinicaController) { alert('Conector Java no disponible aún.'); return; }
+        function crearElementoDiente(num) {
+            const div = document.createElement('div');
+            div.className = 'diente-item diente-neutro';
+            div.id = `diente-${num}`;
+            div.innerHTML = `<span class="diente-num">${num}</span><span class="diente-simbolo" id="simb-${num}">•</span>`;
+            div.onclick = () => cambiarEstadoDiente(num);
+            return div;
+        }
 
-        // Mostrar spinner
-        document.getElementById('contenedorExpediente').style.display = 'none';
-        document.getElementById('msgNoResultado').style.display = 'none';
-        document.getElementById('spinnerBuscar').style.display = 'block';
+        function cambiarEstadoDiente(num) {
+            const estadoActual = odontogramaEstado[num];
+            const nextIndex = (estadosDiente.indexOf(estadoActual) + 1) % estadosDiente.length;
+            const nuevoEstado = estadosDiente[nextIndex];
+            odontogramaEstado[num] = nuevoEstado;
 
-        try {
-            const respuesta = window.historiaClinicaController.buscarExpediente(query);
-            document.getElementById('spinnerBuscar').style.display = 'none';
+            const el = document.getElementById(`diente-${num}`);
+            const simb = document.getElementById(`simb-${num}`);
+            el.className = 'diente-item';
 
-            if (respuesta === 'NOT_FOUND' || respuesta.startsWith('ERR|')) {
-                const msg = respuesta.startsWith('ERR|') ? respuesta.substring(4) :
-                            'No se encontró ningún paciente con identidad: ' + query;
-                document.getElementById('txtMensajeError').innerText = msg;
-                document.getElementById('msgNoResultado').style.display = 'block';
-                return;
+            if (nuevoEstado === null) { el.classList.add('diente-neutro'); simb.innerHTML = '•'; }
+            else if (nuevoEstado === 'sano') { el.classList.add('diente-sano'); simb.innerHTML = '✔'; }
+            else if (nuevoEstado === 'caries') { el.classList.add('diente-caries'); simb.innerHTML = '🔴'; }
+            else if (nuevoEstado === 'resina') { el.classList.add('diente-resina'); simb.innerHTML = '🔵'; }
+            else if (nuevoEstado === 'corona') { el.classList.add('diente-corona'); simb.innerHTML = '🟡'; }
+            else if (nuevoEstado === 'ausente') { el.classList.add('diente-ausente'); simb.innerHTML = '❌'; }
+
+            actualizarJSONOdontograma();
+        }
+
+        function actualizarJSONOdontograma() {
+            const filtrado = {};
+            for (const d in odontogramaEstado) {
+                if (odontogramaEstado[d] !== null) filtrado[d] = odontogramaEstado[d];
             }
-
-            const data = JSON.parse(respuesta);
-            ultimoBusquedaIdentidad = query;
-            renderizarExpediente(data);
-            document.getElementById('contenedorExpediente').style.display = 'block';
-
-        } catch (e) {
-            document.getElementById('spinnerBuscar').style.display = 'none';
-            console.error('Error al buscar expediente:', e);
-            alert('Error al realizar la búsqueda: ' + e.message);
+            document.getElementById('estadoOdontogramaJSON').value =
+                Object.keys(filtrado).length > 0 ? JSON.stringify(filtrado) : '';
         }
-    }
 
-    // ============================================================
-    // RENDERIZAR EXPEDIENTE EN EL VISOR
-    // ============================================================
-    function renderizarExpediente(data) {
-        const p = data.paciente;
-        const exp = data.expediente;
-        const evoluciones = data.evoluciones || [];
+        // ============================================================
+        // NAVEGACIÓN PESTAÑAS
+        // ============================================================
+        function cambiarPestana(panelId, btnElement) {
+            document.querySelectorAll('.seccion-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.btn-tab-main').forEach(b => b.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+            btnElement.classList.add('active');
+        }
 
-        tempPacienteNombre = p.nombre_completo || '—';
-        tempPacienteIdentidad = p.identidad || ultimoBusquedaIdentidad;
+        function cambiarSubPaso(pasoId, btnElement) {
+            document.querySelectorAll('.subpanel-paso').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.btn-subtab').forEach(b => b.classList.remove('active'));
+            document.getElementById(pasoId).classList.add('active');
+            btnElement.classList.add('active');
+        }
 
-        // Cabecera
-        document.getElementById('lblNombrePaciente').innerText = tempPacienteNombre;
-        document.getElementById('lblIdentidad').innerText = 'DNI: ' + tempPacienteIdentidad;
-        document.getElementById('lblDatosPaciente').innerText =
-            (p.genero || '') + ' | ' + (p.fecha_nacimiento || '') + ' | Tel: ' + (p.telefono || 'N/D');
+        // ============================================================
+        // CARGAR MÉDICOS EN EL SELECTOR
+        // ============================================================
+        function cargarMedicosSelector() {
+            if (!window.historiaClinicaController) { setTimeout(cargarMedicosSelector, 150); return; }
+            try {
+                const json = window.historiaClinicaController.obtenerMedicos();
+                const medicos = JSON.parse(json || '[]');
+                const sel = document.getElementById('ev_id_medico');
+                medicos.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id_medico;
+                    opt.text = m.nombre_completo;
+                    sel.appendChild(opt);
+                });
+            } catch (e) {
+                console.error('Error cargando médicos:', e);
+            }
+        }
 
-        // Datos demográficos
-        document.getElementById('datosDemograficos').innerHTML = `
-            <div class="col-md-3"><span class="info-label">Ocupación</span><div class="info-value">${p.ocupacion||'N/A'}</div></div>
-            <div class="col-md-3"><span class="info-label">Estado Civil</span><div class="info-value">${p.estado_civil||'N/A'}</div></div>
-            <div class="col-md-3"><span class="info-label">Domicilio</span><div class="info-value">${p.domicilio||'N/A'}</div></div>
+        // ============================================================
+        // BUSCAR EXPEDIENTE
+        // ============================================================
+        function buscarExpediente() {
+            const query = document.getElementById('inputBuscar').value.trim();
+            if (!query) { alert('Por favor ingrese un número de identidad.'); return; }
+            if (!window.historiaClinicaController) { alert('Conector Java no disponible aún.'); return; }
+
+            // Mostrar spinner
+            document.getElementById('contenedorExpediente').style.display = 'none';
+            document.getElementById('msgNoResultado').style.display = 'none';
+            document.getElementById('spinnerBuscar').style.display = 'block';
+
+            try {
+                const respuesta = window.historiaClinicaController.buscarExpediente(query);
+                document.getElementById('spinnerBuscar').style.display = 'none';
+
+                if (respuesta === 'NOT_FOUND' || respuesta.startsWith('ERR|')) {
+                    const msg = respuesta.startsWith('ERR|') ? respuesta.substring(4) :
+                        'No se encontró ningún paciente con identidad: ' + query;
+                    document.getElementById('txtMensajeError').innerText = msg;
+                    document.getElementById('msgNoResultado').style.display = 'block';
+                    return;
+                }
+
+                const data = JSON.parse(respuesta);
+                ultimoBusquedaIdentidad = query;
+                renderizarExpediente(data);
+                document.getElementById('contenedorExpediente').style.display = 'block';
+
+            } catch (e) {
+                document.getElementById('spinnerBuscar').style.display = 'none';
+                console.error('Error al buscar expediente:', e);
+                alert('Error al realizar la búsqueda: ' + e.message);
+            }
+        }
+
+        // ============================================================
+        // RENDERIZAR EXPEDIENTE EN EL VISOR
+        // ============================================================
+        function renderizarExpediente(data) {
+            const p = data.paciente;
+            const exp = data.expediente;
+            const evoluciones = data.evoluciones || [];
+
+            tempPacienteNombre = p.nombre_completo || '—';
+            tempPacienteIdentidad = p.identidad || ultimoBusquedaIdentidad;
+
+            // Cabecera
+            document.getElementById('lblNombrePaciente').innerText = tempPacienteNombre;
+            document.getElementById('lblIdentidad').innerText = 'DNI: ' + tempPacienteIdentidad;
+            document.getElementById('lblDatosPaciente').innerText =
+                (p.genero || '') + ' | ' + (p.fecha_nacimiento || '') + ' | Tel: ' + (p.telefono || 'N/D');
+
+            // Datos demográficos
+            document.getElementById('datosDemograficos').innerHTML = `
+            <div class="col-md-3"><span class="info-label">Ocupación</span><div class="info-value">${p.ocupacion || 'N/A'}</div></div>
+            <div class="col-md-3"><span class="info-label">Estado Civil</span><div class="info-value">${p.estado_civil || 'N/A'}</div></div>
+            <div class="col-md-3"><span class="info-label">Domicilio</span><div class="info-value">${p.domicilio || 'N/A'}</div></div>
             <div class="col-md-3"><span class="info-label">Persona Responsable</span>
-                <div class="info-value">${p.persona_responsable||'N/A'} (${p.telefono_responsable||''})</div></div>
+                <div class="info-value">${p.persona_responsable || 'N/A'} (${p.telefono_responsable || ''})</div></div>
         `;
 
-        const contenedor = document.getElementById('detalleHistoriaBase');
-        if (!exp) {
-            contenedor.innerHTML = `
+            const contenedor = document.getElementById('detalleHistoriaBase');
+            if (!exp) {
+                contenedor.innerHTML = `
                 <div class="col-12">
                     <div class="alert alert-warning text-center fs-6 mb-0">
                         <i class="fa-solid fa-triangle-exclamation me-2"></i>
@@ -807,15 +905,15 @@
                         <br>Use la pestaña <strong>"2. Registrar Historia Clínica"</strong> para crearlo.
                     </div>
                 </div>`;
-            return;
-        }
+                return;
+            }
 
-        // Sección 1: Anamnesis
-        // Sección 2: Antecedentes
-        // Sección 3: Examen Oral
-        // Sección 4: Signos y Diagnóstico
-        // Sección 5: Evoluciones
-        contenedor.innerHTML = `
+            // Sección 1: Anamnesis
+            // Sección 2: Antecedentes
+            // Sección 3: Examen Oral
+            // Sección 4: Signos y Diagnóstico
+            // Sección 5: Evoluciones
+            contenedor.innerHTML = `
         <!-- Bloque 1: Datos Básicos -->
         <div class="col-12">
             <div class="seccion-bloque shadow-sm">
@@ -824,7 +922,7 @@
                 </h5>
                 <div class="row g-3">
                     <div class="col-md-4"><span class="info-label">Remitido Por</span>
-                        <div class="info-value">${exp.remitido_por||'N/A'}</div></div>
+                        <div class="info-value">${exp.remitido_por || 'N/A'}</div></div>
                 </div>
             </div>
         </div>
@@ -837,23 +935,23 @@
                 </h5>
                 <div class="row g-3">
                     <div class="col-md-6"><span class="info-label">Antecedentes Patológicos</span>
-                        <div class="info-value">${exp.antecedentes_patologicos||'N/A'}</div></div>
+                        <div class="info-value">${exp.antecedentes_patologicos || 'N/A'}</div></div>
                     <div class="col-md-6"><span class="info-label">Antecedentes Odontológicos</span>
-                        <div class="info-value">${exp.antecedentes_odontologicos||'N/A'}</div></div>
+                        <div class="info-value">${exp.antecedentes_odontologicos || 'N/A'}</div></div>
                     <div class="col-md-4"><span class="info-label">Hábitos Tóxicos</span>
-                        <div class="info-value">${exp.habitos_toxicos||'N/A'}</div></div>
+                        <div class="info-value">${exp.habitos_toxicos || 'N/A'}</div></div>
                     <div class="col-md-4"><span class="info-label">Antecedentes Quirúrgicos</span>
-                        <div class="info-value">${exp.antecedentes_quirurgicos||'N/A'}</div></div>
+                        <div class="info-value">${exp.antecedentes_quirurgicos || 'N/A'}</div></div>
                     <div class="col-md-4"><span class="info-label">Gineco-Obstétricos</span>
-                        <div class="info-value">${exp.antecedentes_ginecobstetros||'N/A'}</div></div>
+                        <div class="info-value">${exp.antecedentes_ginecobstetros || 'N/A'}</div></div>
                     <div class="col-md-6"><span class="info-label">Fármacos Habituales</span>
-                        <div class="info-value">${exp.farmacos_uso_habitual||'N/A'}</div></div>
+                        <div class="info-value">${exp.farmacos_uso_habitual || 'N/A'}</div></div>
                     <div class="col-md-6"><span class="info-label">¿Reacción Anestésicos?</span>
-                        <div class="info-value ${exp.reaccion_anestesicos==='Si'?'text-danger fw-bold':''}">
-                            ${exp.reaccion_anestesicos==='Si'?'⚠️ SÍ':'No'} — ${exp.especifique_anestesia||'Sin detalle'}
+                        <div class="info-value ${exp.reaccion_anestesicos === 'Si' ? 'text-danger fw-bold' : ''}">
+                            ${exp.reaccion_anestesicos === 'Si' ? '⚠️ SÍ' : 'No'} — ${exp.especifique_anestesia || 'Sin detalle'}
                         </div></div>
                     <div class="col-12"><span class="info-label">Complicaciones en Tratamientos Previos</span>
-                        <div class="info-value">${exp.complicaciones_tratamientos_previos||'N/A'}</div></div>
+                        <div class="info-value">${exp.complicaciones_tratamientos_previos || 'N/A'}</div></div>
                 </div>
             </div>
         </div>
@@ -866,15 +964,15 @@
                 </h5>
                 <div class="row g-3">
                     <div class="col-md-4"><span class="info-label">Hábitos Bucales</span>
-                        <div class="info-value">${exp.habitos_bucales||'N/A'}</div></div>
+                        <div class="info-value">${exp.habitos_bucales || 'N/A'}</div></div>
                     <div class="col-md-4"><span class="info-label">Frecuencia de Cepillado</span>
-                        <div class="info-value">${exp.frecuencia_cepillado||'N/A'}</div></div>
+                        <div class="info-value">${exp.frecuencia_cepillado || 'N/A'}</div></div>
                     <div class="col-md-4"><span class="info-label">Tipo Cerdas / Hilo Dental</span>
-                        <div class="info-value">${exp.tipo_cepillo_cerdas||'N/A'} / ${exp.uso_hilo_dental||'N/A'}</div></div>
+                        <div class="info-value">${exp.tipo_cepillo_cerdas || 'N/A'} / ${exp.uso_hilo_dental || 'N/A'}</div></div>
                     <div class="col-md-6"><span class="info-label">Tipo de Mordida</span>
-                        <div class="info-value">${exp.tipo_mordida||'N/A'}</div></div>
+                        <div class="info-value">${exp.tipo_mordida || 'N/A'}</div></div>
                     <div class="col-md-6"><span class="info-label">Observación Tejidos Blandos</span>
-                        <div class="info-value">${exp.tejidos_blandos_observacion||exp['tejidos_blandos_observacion']||'N/A'}</div></div>
+                        <div class="info-value">${exp.tejidos_blandos_observacion || exp['tejidos_blandos_observacion'] || 'N/A'}</div></div>
                 </div>
             </div>
         </div>
@@ -887,9 +985,9 @@
                 </h5>
                 <div class="row g-3">
                     <div class="col-md-6"><span class="info-label">Diagnóstico Presuntivo</span>
-                        <div class="info-value fw-bold text-dark">${exp.diagnostico_presuntivo||'N/A'}</div></div>
+                        <div class="info-value fw-bold text-dark">${exp.diagnostico_presuntivo || 'N/A'}</div></div>
                     <div class="col-md-6"><span class="info-label">Observaciones Generales</span>
-                        <div class="info-value">${exp.observaciones_generales||'N/A'}</div></div>
+                        <div class="info-value">${exp.observaciones_generales || 'N/A'}</div></div>
                 </div>
             </div>
         </div>
@@ -903,7 +1001,7 @@
                         <span class="badge bg-success ms-2">${evoluciones.length} consulta(s)</span>
                     </h5>
                     <button class="btn btn-sm btn-success fw-bold"
-                        onclick="abrirModalEvolucion('${escHtml(p.identidad||ultimoBusquedaIdentidad)}')">
+                        onclick="abrirModalEvolucion('${escHtml(p.identidad || ultimoBusquedaIdentidad)}')">
                         <i class="fa-solid fa-plus me-1"></i> Añadir Evolución
                     </button>
                 </div>
@@ -918,20 +1016,20 @@
                                 Cita #${ev.numero_cita} — ${ev.fecha_consulta || '—'}
                             </h6>
                             <span class="badge bg-secondary">
-                                <i class="fa-solid fa-user-doctor me-1"></i>${ev.nombre_medico||'Médico ID:'+ev.id_medico}
+                                <i class="fa-solid fa-user-doctor me-1"></i>${ev.nombre_medico || 'Médico ID:' + ev.id_medico}
                             </span>
                         </div>
                         <div class="row text-muted small mb-2">
-                            <div class="col-auto"><strong>PA:</strong> ${ev.presion_arterial||'N/A'}</div>
-                            <div class="col-auto"><strong>Pulso:</strong> ${ev.pulso_cardiaco||'N/A'}</div>
-                            <div class="col-auto"><strong>Temp:</strong> ${ev.temperatura||'N/A'}</div>
-                            ${ev.pago_abono > 0 ? `<div class="col-auto text-success fw-bold"><strong>Abono:</strong> Lps. ${parseFloat(ev.pago_abono).toFixed(2)}</div>`:''}
+                            <div class="col-auto"><strong>PA:</strong> ${ev.presion_arterial || 'N/A'}</div>
+                            <div class="col-auto"><strong>Pulso:</strong> ${ev.pulso_cardiaco || 'N/A'}</div>
+                            <div class="col-auto"><strong>Temp:</strong> ${ev.temperatura || 'N/A'}</div>
+                            ${ev.pago_abono > 0 ? `<div class="col-auto text-success fw-bold"><strong>Abono:</strong> Lps. ${parseFloat(ev.pago_abono).toFixed(2)}</div>` : ''}
                         </div>
-                        <p class="mb-1"><strong>Motivo:</strong> ${escHtml(ev.motivo_consulta||'—')}</p>
-                        <p class="mb-1"><strong>Síntoma:</strong> ${escHtml(ev.sintoma_principal||'N/A')}</p>
-                        <p class="mb-1"><strong>Diagnóstico:</strong> ${escHtml(ev.diagnostico||'N/A')}</p>
+                        <p class="mb-1"><strong>Motivo:</strong> ${escHtml(ev.motivo_consulta || '—')}</p>
+                        <p class="mb-1"><strong>Síntoma:</strong> ${escHtml(ev.sintoma_principal || 'N/A')}</p>
+                        <p class="mb-1"><strong>Diagnóstico:</strong> ${escHtml(ev.diagnostico || 'N/A')}</p>
                         ${ev.nombre_procedimiento ? `<p class="mb-1"><strong>Procedimiento:</strong> <span class="badge bg-info text-dark">${escHtml(ev.nombre_procedimiento)}</span></p>` : ''}
-                        <p class="mb-0 small text-muted"><strong>Observaciones:</strong> ${escHtml(ev.observaciones||'Ninguna')}</p>
+                        <p class="mb-0 small text-muted"><strong>Observaciones:</strong> ${escHtml(ev.observaciones || 'Ninguna')}</p>
                     </div>`).join('')}
                 </div>
                 ` : `
@@ -949,216 +1047,371 @@
                         <i class="fa-solid fa-file-signature me-2"></i>Documentos Médicos
                     </h6>
                     <button class="btn btn-sm btn-dark fw-bold"
-                        onclick="prepararGenerarDoc('${escHtml(p.identidad||ultimoBusquedaIdentidad)}','${escHtml(p.nombre_completo||'')}')">
+                        onclick="prepararGenerarDoc('${escHtml(p.identidad || ultimoBusquedaIdentidad)}','${escHtml(p.nombre_completo || '')}')">
                         <i class="fa-solid fa-print me-1"></i> Generar / Imprimir Documento
                     </button>
                 </div>
             </div>
         </div>`;
-    }
-
-    // ============================================================
-    // GUARDAR HISTORIA CLÍNICA (formulario de registro)
-    // ============================================================
-    document.getElementById('formHistoriaClinica').addEventListener('submit', function (e) {
-        e.preventDefault();
-        if (!window.historiaClinicaController) { alert('Conector Java no disponible.'); return; }
-
-        const identidad = document.getElementById('hc_identidad').value.trim();
-        if (!identidad) { alert('El DNI del paciente es obligatorio.'); return; }
-
-        const data = {
-            identidad_paciente:              identidad,
-            remitido_por:                    document.getElementById('hc_remitido_por').value,
-            motivo_consulta:                 document.getElementById('hc_motivo').value,
-            sintoma_principal:               document.getElementById('hc_sintoma').value,
-            antecedentes_patologicos:        document.getElementById('hc_ant_patologicos').value,
-            antecedentes_odontologicos:      document.getElementById('hc_ant_odontologicos').value,
-            habitos_toxicos:                 document.getElementById('hc_habitos_toxicos').value,
-            farmacos_uso_habitual:           document.getElementById('hc_farmacos').value,
-            antecedentes_ginecobstetros:     document.getElementById('hc_gineco').value,
-            antecedentes_quirurgicos:        document.getElementById('hc_ant_quirurgicos').value,
-            complicaciones_tratamientos_previos: document.getElementById('hc_complicaciones').value,
-            reaccion_anestesicos:            document.getElementById('hc_reaccion_anest').value,
-            especifique_anestesia:           document.getElementById('hc_especifica_anest').value,
-            habitos_bucales:                 document.getElementById('hc_habitos_bucales').value,
-            frecuencia_cepillado:            document.getElementById('hc_frec_cepillado').value,
-            tipo_cepillo_cerdas:             document.getElementById('hc_tipo_cerdas').value,
-            uso_hilo_dental:                 document.getElementById('hc_hilo_dental').value,
-            tipo_mordida:                    document.getElementById('hc_tipo_mordida').value,
-            tejidos_blandos_observacion:     document.getElementById('hc_tejidos_blandos').value,
-            diagnostico_presuntivo:          document.getElementById('hc_diagnostico').value,
-            observaciones_generales:         document.getElementById('hc_observaciones_gen').value
-        };
-
-        const respuesta = window.historiaClinicaController.registrarExpediente(JSON.stringify(data));
-        const partes = respuesta.split('|');
-        alert(partes[1]);
-
-        if (partes[0] === 'OK') {
-            this.reset();
-            // Resetear odontograma
-            const todasDientes = [...document.querySelectorAll('.diente-item')];
-            todasDientes.forEach(d => {
-                const num = d.id.replace('diente-', '');
-                odontogramaEstado[num] = null;
-                d.className = 'diente-item diente-neutro';
-                document.getElementById('simb-' + num).innerHTML = '•';
-            });
-            actualizarJSONOdontograma();
-            cambiarSubPaso('paso-anamnesis', document.getElementById('tab-paso-anamnesis'));
-            // Ir al buscador para verificar
-            cambiarPestana('panel-expedientes', document.getElementById('btnTab1'));
-            document.getElementById('inputBuscar').value = identidad;
-            buscarExpediente();
         }
-    });
 
-    // ============================================================
-    // MODAL EVOLUCIÓN
-    // ============================================================
-    function abrirModalEvolucion(identidad) {
-        document.getElementById('formNuevaConsulta').reset();
-        document.getElementById('ev_identidad').value = identidad;
-        document.getElementById('ev_pago_abono').value = '0.00';
+        // ============================================================
+        // GUARDAR HISTORIA CLÍNICA (formulario de registro)
+        // ============================================================
+        document.getElementById('formHistoriaClinica').addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (!window.historiaClinicaController) { alert('Conector Java no disponible.'); return; }
 
-        // Fecha actual
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        document.getElementById('ev_fecha').value = now.toISOString().slice(0, 16);
+            const identidad = document.getElementById('hc_identidad').value.trim();
+            if (!identidad) { alert('El DNI del paciente es obligatorio.'); return; }
 
-        const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevaConsulta'))
-                   || new bootstrap.Modal(document.getElementById('modalNuevaConsulta'));
-        modal.show();
-    }
+            const data = {
+                identidad_paciente: identidad,
+                remitido_por: document.getElementById('hc_remitido_por').value,
+                motivo_consulta: document.getElementById('hc_motivo').value,
+                sintoma_principal: document.getElementById('hc_sintoma').value,
+                antecedentes_patologicos: document.getElementById('hc_ant_patologicos').value,
+                antecedentes_odontologicos: document.getElementById('hc_ant_odontologicos').value,
+                habitos_toxicos: document.getElementById('hc_habitos_toxicos').value,
+                farmacos_uso_habitual: document.getElementById('hc_farmacos').value,
+                antecedentes_ginecobstetros: document.getElementById('hc_gineco').value,
+                antecedentes_quirurgicos: document.getElementById('hc_ant_quirurgicos').value,
+                complicaciones_tratamientos_previos: document.getElementById('hc_complicaciones').value,
+                reaccion_anestesicos: document.getElementById('hc_reaccion_anest').value,
+                especifique_anestesia: document.getElementById('hc_especifica_anest').value,
+                habitos_bucales: document.getElementById('hc_habitos_bucales').value,
+                frecuencia_cepillado: document.getElementById('hc_frec_cepillado').value,
+                tipo_cepillo_cerdas: document.getElementById('hc_tipo_cerdas').value,
+                uso_hilo_dental: document.getElementById('hc_hilo_dental').value,
+                tipo_mordida: document.getElementById('hc_tipo_mordida').value,
+                tejidos_blandos_observacion: document.getElementById('hc_tejidos_blandos').value,
+                diagnostico_presuntivo: document.getElementById('hc_diagnostico').value,
+                observaciones_generales: document.getElementById('hc_observaciones_gen').value
+            };
 
-    function guardarEvolucion() {
-        if (!window.historiaClinicaController) { alert('Conector Java no disponible.'); return; }
+            const respuesta = window.historiaClinicaController.registrarExpediente(JSON.stringify(data));
+            const partes = respuesta.split('|');
+            alert(partes[1]);
 
-        const identidad  = document.getElementById('ev_identidad').value.trim();
-        const idMedico   = document.getElementById('ev_id_medico').value;
-        const fecha      = document.getElementById('ev_fecha').value;
-        const motivo     = document.getElementById('ev_motivo').value.trim();
+            if (partes[0] === 'OK') {
+                this.reset();
+                // Resetear odontograma
+                const todasDientes = [...document.querySelectorAll('.diente-item')];
+                todasDientes.forEach(d => {
+                    const num = d.id.replace('diente-', '');
+                    odontogramaEstado[num] = null;
+                    d.className = 'diente-item diente-neutro';
+                    document.getElementById('simb-' + num).innerHTML = '•';
+                });
+                actualizarJSONOdontograma();
+                cambiarSubPaso('paso-anamnesis', document.getElementById('tab-paso-anamnesis'));
+                // Ir al buscador para verificar
+                cambiarPestana('panel-expedientes', document.getElementById('btnTab1'));
+                document.getElementById('inputBuscar').value = identidad;
+                buscarExpediente();
+            }
+        });
 
-        if (!identidad) { alert('Identidad del paciente faltante.'); return; }
-        if (!idMedico)  { alert('Seleccione un médico tratante.'); return; }
-        if (!fecha)     { alert('La fecha de consulta es obligatoria.'); return; }
-        if (!motivo)    { alert('El motivo de consulta es obligatorio.'); return; }
-
-        const data = {
-            identidad_paciente:          identidad,
-            id_medico:                   parseInt(idMedico),
-            fecha_consulta:              fecha.replace('T', ' ') + ':00',
-            motivo_consulta:             motivo,
-            sintoma_principal:           document.getElementById('ev_sintoma').value,
-            presion_arterial:            document.getElementById('ev_presion').value,
-            pulso_cardiaco:              document.getElementById('ev_pulso').value,
-            temperatura:                 document.getElementById('ev_temperatura').value,
-            tejidos_blandos_observacion: document.getElementById('ev_tejidos').value,
-            diagnostico:                 document.getElementById('ev_diagnostico').value,
-            estado_odontograma:          document.getElementById('ev_odontograma').value,
-            pago_abono:                  parseFloat(document.getElementById('ev_pago_abono').value) || 0,
-            observaciones:               document.getElementById('ev_observaciones').value
-        };
-
-        const respuesta = window.historiaClinicaController.agregarEvolucion(JSON.stringify(data));
-        const partes = respuesta.split('|');
-        alert(partes[1]);
-
-        if (partes[0] === 'OK') {
-            bootstrap.Modal.getInstance(document.getElementById('modalNuevaConsulta')).hide();
+        // ============================================================
+        // MODAL EVOLUCIÓN
+        // ============================================================
+        function abrirModalEvolucion(identidad) {
             document.getElementById('formNuevaConsulta').reset();
-            // Recargar expediente
-            document.getElementById('inputBuscar').value = identidad;
-            buscarExpediente();
+            document.getElementById('ev_identidad').value = identidad;
+            document.getElementById('ev_pago_abono').value = '0.00';
+
+            // Fecha actual
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('ev_fecha').value = now.toISOString().slice(0, 16);
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevaConsulta'))
+                || new bootstrap.Modal(document.getElementById('modalNuevaConsulta'));
+            modal.show();
         }
-    }
 
-    // ============================================================
-    // MODAL GENERAR DOCUMENTO
-    // ============================================================
-    function prepararGenerarDoc(identidad, nombrePaciente) {
-        tempPacienteIdentidad = identidad;
-        tempPacienteNombre = nombrePaciente;
-        document.getElementById('selectTipoPlantilla').value = '';
-        document.getElementById('contenido_vista_previa').innerHTML =
-            '<p class="text-center text-muted my-5"><em>Seleccione una plantilla.</em></p>';
-        new bootstrap.Modal(document.getElementById('modalGenerarDoc')).show();
-    }
+        function guardarEvolucion() {
+            if (!window.historiaClinicaController) { alert('Conector Java no disponible.'); return; }
 
-    function actualizarVistaPrevia() {
-        const plantilla = document.getElementById('selectTipoPlantilla').value;
-        const contenido = document.getElementById('contenido_vista_previa');
-        const fechaHoy = new Date().toLocaleDateString('es-HN', { year:'numeric', month:'long', day:'numeric' });
+            const identidad = document.getElementById('ev_identidad').value.trim();
+            const idMedico = document.getElementById('ev_id_medico').value;
+            const fecha = document.getElementById('ev_fecha').value;
+            const motivo = document.getElementById('ev_motivo').value.trim();
 
-        if (plantilla === 'constancia') {
-            contenido.innerHTML = `
-            <h4 class="text-center text-decoration-underline fw-bold mb-4">CONSTANCIA MÉDICA</h4>
-            <p>A quien corresponda:</p>
-            <p>Por medio de la presente, hago constar que el paciente <strong>${tempPacienteNombre}</strong>,
-            con número de identidad <strong>${tempPacienteIdentidad}</strong>, fue atendido(a) en esta clínica
-            odontológica en el día de hoy.</p>
-            <p>Debido al procedimiento realizado, se le recomienda guardar <strong>reposo absoluto por un periodo
-            de _____ días</strong>, iniciando desde la fecha de emisión.</p>
-            <p>Se extiende la presente en la ciudad de Santa Bárbara, a los <strong>${fechaHoy}</strong>.</p>
-            <br><br>
-            <div class="text-center mt-5">
-                <div style="border-top:1px solid #000;width:60%;margin:0 auto;padding-top:5px;">
-                    <strong>Firma y Sello del Médico Tratante</strong><br>Clínica SOE Odontología
+            if (!identidad) { alert('Identidad del paciente faltante.'); return; }
+            if (!idMedico) { alert('Seleccione un médico tratante.'); return; }
+            if (!fecha) { alert('La fecha de consulta es obligatoria.'); return; }
+            if (!motivo) { alert('El motivo de consulta es obligatorio.'); return; }
+
+            const data = {
+                identidad_paciente: identidad,
+                id_medico: parseInt(idMedico),
+                fecha_consulta: fecha.replace('T', ' ') + ':00',
+                motivo_consulta: motivo,
+                sintoma_principal: document.getElementById('ev_sintoma').value,
+                presion_arterial: document.getElementById('ev_presion').value,
+                pulso_cardiaco: document.getElementById('ev_pulso').value,
+                temperatura: document.getElementById('ev_temperatura').value,
+                tejidos_blandos_observacion: document.getElementById('ev_tejidos').value,
+                diagnostico: document.getElementById('ev_diagnostico').value,
+                estado_odontograma: document.getElementById('ev_odontograma').value,
+                pago_abono: parseFloat(document.getElementById('ev_pago_abono').value) || 0,
+                observaciones: document.getElementById('ev_observaciones').value
+            };
+
+            const respuesta = window.historiaClinicaController.agregarEvolucion(JSON.stringify(data));
+            const partes = respuesta.split('|');
+            alert(partes[1]);
+
+            if (partes[0] === 'OK') {
+                bootstrap.Modal.getInstance(document.getElementById('modalNuevaConsulta')).hide();
+                document.getElementById('formNuevaConsulta').reset();
+                // Recargar expediente
+                document.getElementById('inputBuscar').value = identidad;
+                buscarExpediente();
+            }
+        }
+
+        // ============================================================
+        // MODAL GENERAR DOCUMENTO
+        // ============================================================
+        function prepararGenerarDoc(identidad, nombrePaciente) {
+            tempPacienteIdentidad = identidad;
+            tempPacienteNombre = nombrePaciente;
+            document.getElementById('selectTipoPlantilla').value = '';
+            document.getElementById('contenido_vista_previa').innerHTML =
+                '<p class="text-center text-muted my-5"><em>Seleccione una plantilla.</em></p>';
+            new bootstrap.Modal(document.getElementById('modalGenerarDoc')).show();
+        }
+
+        function actualizarVistaPrevia() {
+            const plantilla = document.getElementById('selectTipoPlantilla').value;
+            const contenido = document.getElementById('contenido_vista_previa');
+
+            if (plantilla === 'constancia') {
+                contenido.innerHTML = `
+            <div class="p-3 bg-white" style="font-family: 'Segoe UI', Arial, sans-serif; color: #000; line-height: 1.6;">
+                <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
+                    <div style="width: 100px;" class="text-center">
+                        <img src="Logo.png" alt="Logo" style="max-width: 80px; height: auto;">
+                    </div>
+                    <div class="flex-grow-1 text-center pe-5">
+                        <h4 style="font-weight: 800; font-size: 20px; letter-spacing: 0.5px; margin-bottom: 2px; text-transform: uppercase;">
+                            SERVICIOS ODONTOLOGICOS ENAMORADO
+                        </h4>
+                        <h6 style="font-weight: bold; font-style: italic; font-size: 16px; font-family: Georgia, serif; margin: 0;">
+                            DRA. CINDY ENAMORADO
+                        </h6>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between my-4 fs-6">
+                    <div><strong>Fecha:</strong> _____ / _____ / ________</div>
+                    <div><strong>Santa Barbara, S.B.</strong></div>
+                </div>
+
+                <div class="text-center my-4">
+                    <h4 class="fw-bold" style="font-size: 20px;">Constancia</h4>
+                </div>
+
+                <div style="font-size: 15px; line-height: 2.1; text-align: justify;" class="my-4">
+                    Servicios odontológicos Enamorado por medio de la presente, hace constar que el
+                    paciente <strong style="text-decoration: underline; padding: 0 5px;">${tempPacienteNombre || '________________________________________'}</strong> de <strong style="text-decoration: underline; padding: 0 5px;">______</strong> años, con #
+                    de ID <strong style="text-decoration: underline; padding: 0 5px;">${tempPacienteIdentidad || '____________________'}</strong>, se presentó a consulta odontológica por
+                    ______________________________________________________________________________________.
+                    <br><br>
+                    Se le realizo el tratamiento de ___________________________________________________
+                    <br>
+                    ___________________________________________________________________________________
+                    <br>
+                    ___________________________________________________________________________________.
+                    <br><br>
+                    Para constancia se firma en la ciudad de Santa Barbara a las <strong>_________</strong> horas
+                    el día <strong>___ / ___ / _______</strong>.
+                </div>
+
+                <div class="mt-5 pt-3">
+                    <p class="mb-4">Atentamente.</p>
+                    <div style="width: 320px; border-top: 1px solid #000; padding-top: 5px; margin-top: 50px;">
+                        <strong>Dra. Cindy Carolina Enamorado Juárez</strong><br>
+                        Cirujano Dentista. Gerente Propietario
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center mt-5 pt-3 border-top" style="font-size: 12px; color: #555;">
+                    <div style="width: 50px;">
+                        <img src="Logo.png" alt="Logo SOE" style="max-height: 35px;">
+                    </div>
+                    <div class="text-center flex-grow-1">
+                        Edificio Perla, Frente al Hospital Santa Barbara Integrado, 2do Nivel, Local #2<br>
+                        Tel: 98224903
+                    </div>
                 </div>
             </div>`;
-        } else if (plantilla === 'receta') {
-            contenido.innerHTML = `
-            <h4 class="text-center text-decoration-underline fw-bold mb-4">RECETA MÉDICA</h4>
-            <div class="mb-4"><strong>Paciente:</strong> ${tempPacienteNombre}<br><strong>Fecha:</strong> ${fechaHoy}</div>
-            <p class="fw-bold mb-2">Rx:</p>
-            <ul style="line-height:2.2;">
-                <li><strong>Amoxicilina 500mg</strong> — 1 cápsula cada 8 horas por 7 días.</li>
-                <li><strong>Ibuprofeno 400mg</strong> — 1 tableta cada 8 horas en caso de dolor.</li>
-                <li><strong>Enjuague Bucal (Clorhexidina 0.12%)</strong> — 2 veces al día por 10 días.</li>
-            </ul>
-            <br><br>
-            <div class="text-center mt-5">
-                <div style="border-top:1px solid #000;width:60%;margin:0 auto;padding-top:5px;">
-                    <strong>Firma y Sello</strong>
+            } else if (plantilla === 'consentimiento_cirugia') {
+                contenido.innerHTML = `
+            <div class="p-3 bg-white" style="font-family: 'Segoe UI', Arial, sans-serif; color: #000; line-height: 1.6;">
+                <div class="text-center mb-3">
+                    <img src="Logo.png" alt="Logo SOE" style="max-height: 75px;" class="mb-2">
+                    <h4 class="fw-bold mb-2" style="letter-spacing: 0.5px;">SERVICIOS ODONTOLOGICOS ENAMORADO</h4>
+                    <h5 class="fw-bold text-center mt-3 mb-4" style="font-size: 16px; letter-spacing: 0.5px;">
+                        CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE CIRUGÍA BUCAL
+                    </h5>
+                </div>
+
+                <div style="font-size: 14px; text-align: justify; line-height: 1.8;" class="mb-3">
+                    Yo, <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteNombre || '________________________________________'}</strong> de <strong style="text-decoration: underline; padding: 0 4px;">______</strong> (representante legal o tutor/a de ________________________________ que me identifico con el documento de identidad <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteIdentidad || '____________________'}</strong> y que resido en el domicilio de ________________________________________________ por medio del presente documento hago constar lo siguiente.
+                </div>
+
+                <ul style="list-style-type: disc; padding-left: 20px; font-size: 13.5px; line-height: 1.8;" class="mb-3">
+                    <li class="mb-2">Que he acudido a la clínica ________________________________________________ donde he sido atendido por ________________________________</li>
+                    <li class="mb-2">Me han explicado de forma clara el diagnóstico de la enfermedad, que padezco, así como su evolución y los daños que ha generado; al igual que las alternativas de tratamiento para dicha enfermedad.</li>
+                    <li class="mb-2">He aceptado que el tratamiento que se me pratique sea ________________________________________________</li>
+                    <li class="mb-2">He entendido los posibles riesgos y complicaciones del plan de tratamiento propuesto para mi caso particular.</li>
+                    <li class="mb-2">Se me ha explicado que para poder ser intervenido debo presentar los exámenes de laboratorio que el profesional de cirugía bucal crea necesarios.</li>
+                    <li class="mb-2">He aceptado que se me practiquen tomas de imágenes como radiografías, fotografías o videos del procedimiento, y se me ha garantizado que se guardará mi identidad o la de mi representado/a, usándolas para mi expediente médico.</li>
+                    <li class="mb-2">Comprendo que en el área de cirugía bucal todos los procedimientos no están exentos de las complicaciones frecuentes como lo son:
+                        <ul style="list-style-type: circle; padding-left: 25px; margin-top: 5px;" class="mb-2">
+                            <li>Riesgo de la técnica de anestesia que se utiliza</li>
+                            <li>Posible inflamación y dolor del área afectada en la intervención</li>
+                            <li>Dificultad para abrir la boca y masticar; después del procedimiento</li>
+                            <li>Riesgo de hemorragia y aparición de hematomas en zonas adyacentes</li>
+                            <li>Infección de las heridas quirúrgicas</li>
+                            <li>Posibilidad de pérdida de sensibilidad temporal o no</li>
+                            <li>Riesgo de fracturas óseas, sinusitis, dislocación mandibular, comunicación bucosinusal.</li>
+                        </ul>
+                    </li>
+                    <li class="mb-2">Estoy enterado que se me darán indicaciones pre y post operatorias, según convenga a mi caso en particular, así como la indicación farmacológica que pueda requerir antes o después de la intervención.</li>
+                    <li class="mb-2">Confirmo que se me han aclarado todas mis dudas en torno al procedimiento quirúrgico que se me ha propuesto y me comprometo a cumplir con las indicaciones, las citas necesarias y los controles pertinentes.</li>
+                </ul>
+
+                <p style="font-size: 14px;" class="mt-4 mb-5">
+                    Doy mi consentimiento y autorización para la intervención descrita anteriormente, sin coacción ni manipulación de ningún tipo.
+                </p>
+
+                <div class="row text-center mt-5 pt-3">
+                    <div class="col-6">
+                        <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px;">
+                            <strong>Firma de paciente</strong>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px;">
+                            <strong>Firma de doctor/a</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 pt-2 mb-4">
+                    <div style="border-top: 1px solid #000; width: 40%; margin: 0 auto; padding-top: 5px;">
+                        <strong>Fecha</strong>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between mt-4 pt-2 border-top" style="font-size: 12px; color: #666;">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="Logo.png" alt="Logo" style="height: 28px;">
+                    </div>
+                    <div style="font-weight: bold; letter-spacing: 0.5px;">
+                        SERVICIOS ODONTOLÓGICOS ENAMORADO
+                    </div>
                 </div>
             </div>`;
-        } else if (plantilla === 'consentimiento') {
-            contenido.innerHTML = `
-            <h4 class="text-center text-decoration-underline fw-bold mb-4">CONSENTIMIENTO INFORMADO</h4>
-            <p>Yo, <strong>${tempPacienteNombre}</strong>, con identidad <strong>${tempPacienteIdentidad}</strong>,
-            otorgo mi consentimiento libre para que el profesional de la Clínica SOE realice los procedimientos
-            diagnósticos y terapéuticos necesarios según mi estado de salud bucal.</p>
-            <p>Declaro haber sido informado(a) sobre mi diagnóstico, el plan de tratamiento, las alternativas,
-            riesgos y posibles complicaciones.</p>
-            <p>Firmado en Santa Bárbara, el <strong>${fechaHoy}</strong>.</p>
-            <br><br>
-            <div class="d-flex justify-content-between mt-5 text-center">
-                <div style="width:45%;"><div style="border-top:1px solid #000;padding-top:5px;"><strong>Firma del Paciente</strong></div></div>
-                <div style="width:45%;"><div style="border-top:1px solid #000;padding-top:5px;"><strong>Firma del Profesional</strong></div></div>
+            } else if (plantilla === 'consentimiento_endodoncia') {
+                contenido.innerHTML = `
+            <div class="p-3 bg-white" style="font-family: 'Segoe UI', Arial, sans-serif; color: #000; line-height: 1.6;">
+                <div class="text-center mb-3">
+                    <img src="Logo.png" alt="Logo SOE" style="max-height: 75px;" class="mb-2">
+                    <h4 class="fw-bold mb-2" style="letter-spacing: 0.5px;">SERVICIOS ODONTOLOGICOS ENAMORADO</h4>
+                    <h5 class="fw-bold text-center mt-3 mb-4" style="font-size: 16px; letter-spacing: 0.5px;">
+                        CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE ENDODONCIA
+                    </h5>
+                </div>
+
+                <div style="font-size: 14px; text-align: justify; line-height: 1.8;" class="mb-3">
+                    Yo, <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteNombre || '________________________________________'}</strong> de <strong style="text-decoration: underline; padding: 0 4px;">______</strong> años que me identifico con el documento de identidad <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteIdentidad || '____________________'}</strong> y que resido en el domicilio de ________________________________________________ por medio del presente documento hago constar lo siguiente.
+                </div>
+
+                <ul style="list-style-type: disc; padding-left: 20px; font-size: 13.5px; line-height: 1.8;" class="mb-3">
+                    <li class="mb-2">Que he acudido a la clínica ________________________________________________ donde he sido atendido por ________________________________</li>
+                    <li class="mb-2">Me han explicado de forma clara el diagnóstico de la enfermedad, que padezco, así como su evolución y los daños que ha generado; al igual que las alternativas de tratamiento para dicha enfermedad.</li>
+                    <li class="mb-2">He aceptado que el tratamiento que se me pratique sea ________________________________________________</li>
+                    <li class="mb-2">He entendido los posibles riesgos y complicaciones del plan de tratamiento propuesto para mi caso particular.</li>
+                    <li class="mb-2">He aceptado que se me practiquen tomas de imágenes como radiografías, fotografías o videos del procedimiento, y se me ha garantizado que se guardará mi identidad o la de mi representado/a, usándolas para mi expediente médico.</li>
+                    <li class="mb-2">Comprendo que en el área de odontología todos los procedimientos no están exentos de riesgos, y algunos de los accidentes que pueden ocurrir durante el procedimiento son:
+                        <ul style="list-style-type: circle; padding-left: 25px; margin-top: 5px;" class="mb-2">
+                            <li>Perforación radicular.</li>
+                            <li>Riesgo de extrusión de sustancia desinfectante.</li>
+                            <li>Fractura de instrumental dentro de conducto.</li>
+                            <li>Sobre obturación o extrusión de material sellante del conducto.</li>
+                        </ul>
+                    </li>
+                    <li class="mb-2">Se me indica que hay sintomatología post-endodoncia.
+                        <ul style="list-style-type: circle; padding-left: 25px; margin-top: 5px;" class="mb-2">
+                            <li>Posible inflamación y dolor del área afectada en la intervención, post operatorio.</li>
+                            <li>Dificultad para abrir la boca y masticar; después del procedimiento.</li>
+                            <li>Dolor al morder.</li>
+                        </ul>
+                    </li>
+                    <li class="mb-2">Estoy enterado que se me darán indicaciones pre y post operatorias, según convenga a mi caso en particular, así como la indicación farmacológica que pueda requerir antes o después de la intervención.</li>
+                    <li class="mb-2">Confirmo que se me han aclarado todas mis dudas en torno al procedimiento de endodoncia que se me ha propuesto y me comprometo a cumplir con las indicaciones, las citas necesarias y los controles pertinentes.</li>
+                </ul>
+
+                <p style="font-size: 14px;" class="mt-4 mb-5">
+                    Doy mi consentimiento y autorización para la intervención descrita anteriormente, sin coacción ni manipulación de ningún tipo.
+                </p>
+
+                <div class="row text-center mt-5 pt-3">
+                    <div class="col-6">
+                        <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px;">
+                            <strong>Firma de paciente</strong>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px;">
+                            <strong>Firma de doctor/a</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 pt-2 mb-4">
+                    <div style="border-top: 1px solid #000; width: 40%; margin: 0 auto; padding-top: 5px;">
+                        <strong>Fecha</strong>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between mt-4 pt-2 border-top" style="font-size: 12px; color: #666;">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="Logo.png" alt="Logo" style="height: 28px;">
+                    </div>
+                    <div style="font-weight: bold; letter-spacing: 0.5px;">
+                        SERVICIOS ODONTOLÓGICOS ENAMORADO
+                    </div>
+                </div>
             </div>`;
-        } else {
-            contenido.innerHTML = '<p class="text-center text-muted my-5"><em>Seleccione una plantilla.</em></p>';
+            } else {
+                contenido.innerHTML = '<p class="text-center text-muted my-5"><em>Seleccione una plantilla para visualizar el documento.</em></p>';
+            }
         }
-    }
 
-    function imprimirDocumento() {
-        if (!document.getElementById('selectTipoPlantilla').value) {
-            alert('Por favor seleccione un documento primero.');
-            return;
+        function imprimirDocumento() {
+            if (!document.getElementById('selectTipoPlantilla').value) {
+                alert('Por favor seleccione un documento primero.');
+                return;
+            }
+            window.print();
         }
-        window.print();
-    }
 
-    // ============================================================
-    // UTILITY: escape HTML
-    // ============================================================
-    function escHtml(str) {
-        if (!str) return '';
-        return String(str)
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-</script>
+        // ============================================================
+        // UTILITY: escape HTML
+        // ============================================================
+        function escHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+    </script>
 </body>
+
 </html>
