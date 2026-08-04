@@ -137,6 +137,9 @@
                         <input type="text" id="fechaHastaEgresos" class="form-control" style="width: 145px;"
                             placeholder="DD-MM-YYYY" maxlength="10">
                     </div>
+                    <button class="btn btn-primary" onclick="buscarEgresos()" style="height:38px;">
+                        <i class="fas fa-search me-1"></i>Buscar
+                    </button>
                     <button class="btn btn-outline-secondary" onclick="limpiarFiltrosEgresos()" title="Limpiar filtros" style="height:38px;">
                         <i class="fas fa-times me-1"></i>Limpiar
                     </button>
@@ -251,17 +254,20 @@
         document.addEventListener('DOMContentLoaded', () => {
             cargarEgresos();
 
-            // Filtro combinado: texto + rango de fechas
-            document.getElementById('buscadorEgresos').addEventListener('input', aplicarFiltrosEgresos);
-
-            // Auto-formato de fecha (DD-MM-YYYY) en Desde y Hasta
+            // Auto-formato de fecha (DD-MM-YYYY) — solo formatea, no busca
             const inputDesde = document.getElementById('fechaDesdeEgresos');
             const inputHasta = document.getElementById('fechaHastaEgresos');
-            inputDesde.addEventListener('input', () => { aplicarFormatoFechaEg(inputDesde); aplicarFiltrosEgresos(); });
-            inputHasta.addEventListener('input', () => { aplicarFormatoFechaEg(inputHasta); aplicarFiltrosEgresos(); });
+            inputDesde.addEventListener('input', () => aplicarFormatoFechaEg(inputDesde));
+            inputHasta.addEventListener('input', () => aplicarFormatoFechaEg(inputHasta));
+
+            // Enter en cualquier campo dispara la búsqueda
+            [document.getElementById('buscadorEgresos'), inputDesde, inputHasta]
+                .forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') buscarEgresos(); }));
         });
 
-        // Formatea ##-##-#### conforme el usuario escribe
+        // -------------------------------------------------------
+        // FORMATO DE FECHA (DD-MM-YYYY)
+        // -------------------------------------------------------
         function formatearFechaEg(valor) {
             let d = valor.replace(/\D/g, '').substring(0, 8);
             if (d.length <= 2)  return d;
@@ -278,38 +284,38 @@
             input.setSelectionRange(pos + diff, pos + diff);
         }
 
-        // Convierte DD-MM-YYYY a YYYY-MM-DD para comparar con la BD
+        // Convierte DD-MM-YYYY → YYYY-MM-DD para la BD
         function ddmmyyyyToISOEg(str) {
             if (!str || str.length < 10) return '';
             return str.substring(6) + '-' + str.substring(3, 5) + '-' + str.substring(0, 2);
         }
 
-        function aplicarFiltrosEgresos() {
-            const term  = document.getElementById('buscadorEgresos').value.toLowerCase().trim();
-            const desde = ddmmyyyyToISOEg(document.getElementById('fechaDesdeEgresos').value.trim());
-            const hasta = ddmmyyyyToISOEg(document.getElementById('fechaHastaEgresos').value.trim());
+        // -------------------------------------------------------
+        // BÚSQL CON FILTROS (llamada al backend Java)
+        // -------------------------------------------------------
+        function buscarEgresos() {
+            if (!window.finanzasController) { alert('Conector Java no disponible.'); return; }
 
-            const filtrada = egresosLista.filter(e => {
-                const texto = [e.descripcion, e.numero_comprobante, e.fecha]
-                    .map(v => (v || '').toLowerCase()).join(' ');
-                if (term && !texto.includes(term)) return false;
+            const termino    = document.getElementById('buscadorEgresos').value.trim();
+            const fechaDesde = ddmmyyyyToISOEg(document.getElementById('fechaDesdeEgresos').value.trim());
+            const fechaHasta = ddmmyyyyToISOEg(document.getElementById('fechaHastaEgresos').value.trim());
 
-                // Filtro por rango de fecha del egreso (YYYY-MM-DD en BD)
-                const fechaReg = (e.fecha || '').trim();
-                if (desde && fechaReg < desde) return false;
-                if (hasta && fechaReg > hasta)  return false;
+            const filtros = JSON.stringify({ termino, fechaDesde, fechaHasta });
 
-                return true;
-            });
-
-            renderTabla(filtrada, true);
+            try {
+                const json = window.finanzasController.buscarEgresos(filtros);
+                const lista = JSON.parse(json || '[]');
+                renderTabla(lista);
+            } catch (e) {
+                console.error('Error al buscar egresos:', e);
+            }
         }
 
         function limpiarFiltrosEgresos() {
             document.getElementById('buscadorEgresos').value = '';
             document.getElementById('fechaDesdeEgresos').value = '';
             document.getElementById('fechaHastaEgresos').value = '';
-            renderTabla(egresosLista, true);
+            cargarEgresos(); // recarga la lista completa desde el backend
         }
 
         function abrirModalEgreso(egresoJson) {
@@ -350,10 +356,10 @@
             }
         }
 
-        function renderTabla(lista, sinRefiltro) {
+        function renderTabla(lista) {
             const tbody = document.getElementById('tablaEgresosBody');
             if (!lista || lista.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No hay egresos activos registrados.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No se encontraron egresos con los filtros aplicados.</td></tr>';
                 return;
             }
             

@@ -160,6 +160,9 @@
                     <input type="text" id="fechaHastaFacturas" class="form-control" style="width: 145px;"
                         placeholder="DD-MM-YYYY" maxlength="10">
                 </div>
+                <button class="btn btn-success" onclick="buscarFacturas()" style="height:38px;">
+                    <i class="fas fa-search me-1"></i>Buscar
+                </button>
                 <button class="btn btn-outline-secondary" onclick="limpiarFiltrosFacturas()" title="Limpiar filtros" style="height:38px;">
                     <i class="fas fa-times me-1"></i>Limpiar
                 </button>
@@ -352,17 +355,20 @@
             cargarFacturas();
             cargarPacientesSelector();
 
-            // Filtro combinado: texto + rango de fechas
-            document.getElementById('buscadorFacturas').addEventListener('input', aplicarFiltrosFacturas);
-
-            // Auto-formato de fecha (DD-MM-YYYY) en Desde y Hasta
+            // Auto-formato de fecha (DD-MM-YYYY) — solo formatea, no busca
             const inputDesde = document.getElementById('fechaDesdeFacturas');
             const inputHasta = document.getElementById('fechaHastaFacturas');
-            inputDesde.addEventListener('input', () => { aplicarFormatoFecha(inputDesde); aplicarFiltrosFacturas(); });
-            inputHasta.addEventListener('input', () => { aplicarFormatoFecha(inputHasta); aplicarFiltrosFacturas(); });
+            inputDesde.addEventListener('input', () => aplicarFormatoFecha(inputDesde));
+            inputHasta.addEventListener('input', () => aplicarFormatoFecha(inputHasta));
+
+            // Enter en cualquier campo dispara la búsqueda
+            [document.getElementById('buscadorFacturas'), inputDesde, inputHasta]
+                .forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') buscarFacturas(); }));
         });
 
-        // Formatea ##-##-#### conforme el usuario escribe
+        // -------------------------------------------------------
+        // FORMATO DE FECHA (DD-MM-YYYY)
+        // -------------------------------------------------------
         function formatearFecha(valor) {
             let d = valor.replace(/\D/g, '').substring(0, 8);
             if (d.length <= 2)  return d;
@@ -379,40 +385,38 @@
             input.setSelectionRange(pos + diff, pos + diff);
         }
 
-        // Convierte DD-MM-YYYY a YYYY-MM-DD para comparar con la BD
+        // Convierte DD-MM-YYYY → YYYY-MM-DD para la BD
         function ddmmyyyyToISO(str) {
             if (!str || str.length < 10) return '';
             return str.substring(6) + '-' + str.substring(3, 5) + '-' + str.substring(0, 2);
         }
 
-        function aplicarFiltrosFacturas() {
-            const term  = document.getElementById('buscadorFacturas').value.toLowerCase().trim();
-            const desde = ddmmyyyyToISO(document.getElementById('fechaDesdeFacturas').value.trim());
-            const hasta = ddmmyyyyToISO(document.getElementById('fechaHastaFacturas').value.trim());
+        // -------------------------------------------------------
+        // BÚSQL CON FILTROS (llamada al backend Java)
+        // -------------------------------------------------------
+        function buscarFacturas() {
+            if (!window.finanzasController) { alert('Conector Java no disponible.'); return; }
 
-            const filtrada = facturasLista.filter(f => {
-                // Filtro de texto
-                const texto = [f.numero_recibo, f.nombre_paciente, f.concepto, f.metodo_pago,
-                               f.fecha_emision, f.identidad_paciente]
-                    .map(v => (v || '').toLowerCase()).join(' ');
-                if (term && !texto.includes(term)) return false;
+            const termino    = document.getElementById('buscadorFacturas').value.trim();
+            const fechaDesde = ddmmyyyyToISO(document.getElementById('fechaDesdeFacturas').value.trim());
+            const fechaHasta = ddmmyyyyToISO(document.getElementById('fechaHastaFacturas').value.trim());
 
-                // Filtro por rango de fecha de emisión (YYYY-MM-DD en BD)
-                const fechaReg = (f.fecha_emision || '').trim();
-                if (desde && fechaReg < desde) return false;
-                if (hasta && fechaReg > hasta)  return false;
+            const filtros = JSON.stringify({ termino, fechaDesde, fechaHasta });
 
-                return true;
-            });
-
-            renderTablaFacturas(filtrada, true);
+            try {
+                const json = window.finanzasController.buscarRecibos(filtros);
+                const lista = JSON.parse(json || '[]');
+                renderTablaFacturas(lista);
+            } catch (e) {
+                console.error('Error al buscar facturas:', e);
+            }
         }
 
         function limpiarFiltrosFacturas() {
             document.getElementById('buscadorFacturas').value = '';
             document.getElementById('fechaDesdeFacturas').value = '';
             document.getElementById('fechaHastaFacturas').value = '';
-            renderTablaFacturas(facturasLista, true);
+            cargarFacturas(); // recarga la lista completa desde el backend
         }
 
         // -------------------------------------------------------
@@ -449,10 +453,10 @@
         // -------------------------------------------------------
         // RENDERIZAR TABLA
         // -------------------------------------------------------
-        function renderTablaFacturas(lista, sinRefiltro) {
+        function renderTablaFacturas(lista) {
             const tbody = document.getElementById('tablaFacturasBody');
             if (!lista || lista.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No hay recibos activos registrados.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No se encontraron recibos con los filtros aplicados.</td></tr>';
                 return;
             }
 
@@ -486,14 +490,6 @@
                     </tr>`;
             });
             tbody.innerHTML = html;
-
-            // Reaplicar filtros si hay criterios activos (y no venimos del propio filtro)
-            if (!sinRefiltro) {
-                const term  = document.getElementById('buscadorFacturas').value;
-                const desde = document.getElementById('fechaDesdeFacturas').value;
-                const hasta = document.getElementById('fechaHastaFacturas').value;
-                if (term || desde || hasta) aplicarFiltrosFacturas();
-            }
         }
 
         // -------------------------------------------------------

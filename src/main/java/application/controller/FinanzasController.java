@@ -176,4 +176,60 @@ public class FinanzasController extends BaseController {
             return "[]";
         }
     }
+
+    // =========================================================
+    // BÚSQUEDA CON FILTROS — FACTURACIÓN
+    // JSON esperado: { "termino": "...", "fechaDesde": "YYYY-MM-DD", "fechaHasta": "YYYY-MM-DD" }
+    // Todos los campos son opcionales; si vienen vacíos se ignoran.
+    // =========================================================
+    public String buscarRecibos(String jsonFiltros) {
+        try {
+            com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(
+                    jsonFiltros == null ? "{}" : jsonFiltros).getAsJsonObject();
+
+            String termino    = obj.has("termino")    ? obj.get("termino").getAsString().trim()    : "";
+            String fechaDesde = obj.has("fechaDesde") ? obj.get("fechaDesde").getAsString().trim() : "";
+            String fechaHasta = obj.has("fechaHasta") ? obj.get("fechaHasta").getAsString().trim() : "";
+
+            application.model.dao.FacturacionReciboDAO dao = new application.model.dao.FacturacionReciboDAO();
+            java.util.List<java.util.Map<String, Object>> lista =
+                    dao.buscarRecibos(
+                        termino.isEmpty()    ? null : termino,
+                        fechaDesde.isEmpty() ? null : fechaDesde,
+                        fechaHasta.isEmpty() ? null : fechaHasta
+                    );
+            return gson.toJson(lista);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en buscarRecibos: " + t.getMessage());
+            return "[]";
+        }
+    }
+
+    // =========================================================
+    // BÚSQUEDA CON FILTROS — EGRESOS
+    // JSON esperado: { "termino": "...", "fechaDesde": "YYYY-MM-DD", "fechaHasta": "YYYY-MM-DD" }
+    // =========================================================
+    public String buscarEgresos(String jsonFiltros) {
+        try {
+            com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(
+                    jsonFiltros == null ? "{}" : jsonFiltros).getAsJsonObject();
+
+            String termino    = obj.has("termino")    ? obj.get("termino").getAsString().trim()    : "";
+            String fechaDesde = obj.has("fechaDesde") ? obj.get("fechaDesde").getAsString().trim() : "";
+            String fechaHasta = obj.has("fechaHasta") ? obj.get("fechaHasta").getAsString().trim() : "";
+
+            application.model.dao.EgresoGastoDAO dao = new application.model.dao.EgresoGastoDAO();
+            java.util.List<java.util.Map<String, Object>> lista =
+                    dao.buscarEgresos(
+                        termino.isEmpty()    ? null : termino,
+                        fechaDesde.isEmpty() ? null : fechaDesde,
+                        fechaHasta.isEmpty() ? null : fechaHasta
+                    );
+            return gson.toJson(lista);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en buscarEgresos: " + t.getMessage());
+            return "[]";
+        }
+    }
 }
+
