@@ -151,12 +151,14 @@
                         placeholder="Nombre, recibo, concepto...">
                 </div>
                 <div>
-                    <label for="fechaDesdeFacturas" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Desde:</label>
-                    <input type="date" id="fechaDesdeFacturas" class="form-control" style="width: 150px;">
+                    <label for="fechaDesdeFacturas" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">DNI Desde:</label>
+                    <input type="text" id="fechaDesdeFacturas" class="form-control" style="width: 175px;"
+                        placeholder="Ej: 1601-2010-00001" maxlength="15">
                 </div>
                 <div>
-                    <label for="fechaHastaFacturas" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Hasta:</label>
-                    <input type="date" id="fechaHastaFacturas" class="form-control" style="width: 150px;">
+                    <label for="fechaHastaFacturas" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">DNI Hasta:</label>
+                    <input type="text" id="fechaHastaFacturas" class="form-control" style="width: 175px;"
+                        placeholder="Ej: 1601-2010-99999" maxlength="15">
                 </div>
                 <button class="btn btn-outline-secondary" onclick="limpiarFiltrosFacturas()" title="Limpiar filtros" style="height:38px;">
                     <i class="fas fa-times me-1"></i>Limpiar
@@ -350,32 +352,53 @@
             cargarFacturas();
             cargarPacientesSelector();
 
-            // Filtro combinado: texto + rango de fechas
+            // Filtro combinado: texto + rango de DNI
             document.getElementById('buscadorFacturas').addEventListener('input', aplicarFiltrosFacturas);
-            document.getElementById('fechaDesdeFacturas').addEventListener('change', aplicarFiltrosFacturas);
-            document.getElementById('fechaHastaFacturas').addEventListener('change', aplicarFiltrosFacturas);
+
+            // Auto-formato DNI (####-####-#####) en Desde y Hasta
+            const inputDesde = document.getElementById('fechaDesdeFacturas');
+            const inputHasta = document.getElementById('fechaHastaFacturas');
+            inputDesde.addEventListener('input', () => { aplicarFormatoDNI(inputDesde); aplicarFiltrosFacturas(); });
+            inputHasta.addEventListener('input', () => { aplicarFormatoDNI(inputHasta); aplicarFiltrosFacturas(); });
         });
 
+        function formatearDNI(valor) {
+            let d = valor.replace(/\D/g, '').substring(0, 13);
+            if (d.length <= 4)      return d;
+            if (d.length <= 8)      return d.substring(0, 4) + '-' + d.substring(4);
+            return d.substring(0, 4) + '-' + d.substring(4, 8) + '-' + d.substring(8);
+        }
+
+        function aplicarFormatoDNI(input) {
+            const pos   = input.selectionStart;
+            const antes = input.value;
+            const nuevo = formatearDNI(antes);
+            input.value = nuevo;
+            const diff  = nuevo.length - antes.length;
+            input.setSelectionRange(pos + diff, pos + diff);
+        }
+
         function aplicarFiltrosFacturas() {
-            const term    = document.getElementById('buscadorFacturas').value.toLowerCase().trim();
-            const desde   = document.getElementById('fechaDesdeFacturas').value;  // 'YYYY-MM-DD' o ''
-            const hasta   = document.getElementById('fechaHastaFacturas').value;
+            const term  = document.getElementById('buscadorFacturas').value.toLowerCase().trim();
+            const desde = document.getElementById('fechaDesdeFacturas').value.trim();
+            const hasta = document.getElementById('fechaHastaFacturas').value.trim();
 
             const filtrada = facturasLista.filter(f => {
                 // Filtro de texto
-                const texto = [f.numero_recibo, f.nombre_paciente, f.concepto, f.metodo_pago, f.fecha_emision]
+                const texto = [f.numero_recibo, f.nombre_paciente, f.concepto, f.metodo_pago,
+                               f.fecha_emision, f.identidad_paciente]
                     .map(v => (v || '').toLowerCase()).join(' ');
                 if (term && !texto.includes(term)) return false;
 
-                // Filtro de fecha (la fecha en BD viene como 'YYYY-MM-DD')
-                const fechaReg = f.fecha_emision || '';
-                if (desde && fechaReg < desde) return false;
-                if (hasta && fechaReg > hasta)  return false;
+                // Filtro por rango de DNI del paciente
+                const dni = (f.identidad_paciente || '').trim();
+                if (desde && dni < desde) return false;
+                if (hasta && dni > hasta)  return false;
 
                 return true;
             });
 
-            renderTablaFacturas(filtrada, true); // true = no reaplicar filtros (evitar recursión)
+            renderTablaFacturas(filtrada, true);
         }
 
         function limpiarFiltrosFacturas() {

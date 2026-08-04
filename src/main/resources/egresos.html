@@ -128,12 +128,14 @@
                             placeholder="Descripción, comprobante...">
                     </div>
                     <div>
-                        <label for="fechaDesdeEgresos" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Desde:</label>
-                        <input type="date" id="fechaDesdeEgresos" class="form-control" style="width: 150px;">
+                        <label for="fechaDesdeEgresos" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Desde (N° Comp.):</label>
+                        <input type="text" id="fechaDesdeEgresos" class="form-control" style="width: 175px;"
+                            placeholder="Ej: 1601-2010-00001" maxlength="15">
                     </div>
                     <div>
-                        <label for="fechaHastaEgresos" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Hasta:</label>
-                        <input type="date" id="fechaHastaEgresos" class="form-control" style="width: 150px;">
+                        <label for="fechaHastaEgresos" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Hasta (N° Comp.):</label>
+                        <input type="text" id="fechaHastaEgresos" class="form-control" style="width: 175px;"
+                            placeholder="Ej: 1601-2010-99999" maxlength="15">
                     </div>
                     <button class="btn btn-outline-secondary" onclick="limpiarFiltrosEgresos()" title="Limpiar filtros" style="height:38px;">
                         <i class="fas fa-times me-1"></i>Limpiar
@@ -249,25 +251,46 @@
         document.addEventListener('DOMContentLoaded', () => {
             cargarEgresos();
 
-            // Filtro combinado: texto + rango de fechas
+            // Filtro combinado: texto + rango
             document.getElementById('buscadorEgresos').addEventListener('input', aplicarFiltrosEgresos);
-            document.getElementById('fechaDesdeEgresos').addEventListener('change', aplicarFiltrosEgresos);
-            document.getElementById('fechaHastaEgresos').addEventListener('change', aplicarFiltrosEgresos);
+
+            // Auto-formato DNI (####-####-#####) en Desde y Hasta
+            const inputDesde = document.getElementById('fechaDesdeEgresos');
+            const inputHasta = document.getElementById('fechaHastaEgresos');
+            inputDesde.addEventListener('input', () => { aplicarFormatoDNIEg(inputDesde); aplicarFiltrosEgresos(); });
+            inputHasta.addEventListener('input', () => { aplicarFormatoDNIEg(inputHasta); aplicarFiltrosEgresos(); });
         });
+
+        function formatearDNIEg(valor) {
+            let d = valor.replace(/\D/g, '').substring(0, 13);
+            if (d.length <= 4)  return d;
+            if (d.length <= 8)  return d.substring(0, 4) + '-' + d.substring(4);
+            return d.substring(0, 4) + '-' + d.substring(4, 8) + '-' + d.substring(8);
+        }
+
+        function aplicarFormatoDNIEg(input) {
+            const pos   = input.selectionStart;
+            const antes = input.value;
+            const nuevo = formatearDNIEg(antes);
+            input.value = nuevo;
+            const diff  = nuevo.length - antes.length;
+            input.setSelectionRange(pos + diff, pos + diff);
+        }
 
         function aplicarFiltrosEgresos() {
             const term  = document.getElementById('buscadorEgresos').value.toLowerCase().trim();
-            const desde = document.getElementById('fechaDesdeEgresos').value;
-            const hasta = document.getElementById('fechaHastaEgresos').value;
+            const desde = document.getElementById('fechaDesdeEgresos').value.trim();
+            const hasta = document.getElementById('fechaHastaEgresos').value.trim();
 
             const filtrada = egresosLista.filter(e => {
                 const texto = [e.descripcion, e.numero_comprobante, e.fecha]
                     .map(v => (v || '').toLowerCase()).join(' ');
                 if (term && !texto.includes(term)) return false;
 
-                const fechaReg = e.fecha || '';
-                if (desde && fechaReg < desde) return false;
-                if (hasta && fechaReg > hasta)  return false;
+                // Rango por Nº Comprobante
+                const comp = (e.numero_comprobante || '').trim();
+                if (desde && comp < desde) return false;
+                if (hasta && comp > hasta)  return false;
 
                 return true;
             });
