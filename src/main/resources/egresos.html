@@ -128,14 +128,14 @@
                             placeholder="Descripción, comprobante...">
                     </div>
                     <div>
-                        <label for="fechaDesdeEgresos" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Desde (N° Comp.):</label>
-                        <input type="text" id="fechaDesdeEgresos" class="form-control" style="width: 175px;"
-                            placeholder="Ej: 1601-2010-00001" maxlength="15">
+                        <label for="fechaDesdeEgresos" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Desde:</label>
+                        <input type="text" id="fechaDesdeEgresos" class="form-control" style="width: 145px;"
+                            placeholder="DD-MM-YYYY" maxlength="10">
                     </div>
                     <div>
-                        <label for="fechaHastaEgresos" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Hasta (N° Comp.):</label>
-                        <input type="text" id="fechaHastaEgresos" class="form-control" style="width: 175px;"
-                            placeholder="Ej: 1601-2010-99999" maxlength="15">
+                        <label for="fechaHastaEgresos" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Hasta:</label>
+                        <input type="text" id="fechaHastaEgresos" class="form-control" style="width: 145px;"
+                            placeholder="DD-MM-YYYY" maxlength="10">
                     </div>
                     <button class="btn btn-outline-secondary" onclick="limpiarFiltrosEgresos()" title="Limpiar filtros" style="height:38px;">
                         <i class="fas fa-times me-1"></i>Limpiar
@@ -251,46 +251,53 @@
         document.addEventListener('DOMContentLoaded', () => {
             cargarEgresos();
 
-            // Filtro combinado: texto + rango
+            // Filtro combinado: texto + rango de fechas
             document.getElementById('buscadorEgresos').addEventListener('input', aplicarFiltrosEgresos);
 
-            // Auto-formato DNI (####-####-#####) en Desde y Hasta
+            // Auto-formato de fecha (DD-MM-YYYY) en Desde y Hasta
             const inputDesde = document.getElementById('fechaDesdeEgresos');
             const inputHasta = document.getElementById('fechaHastaEgresos');
-            inputDesde.addEventListener('input', () => { aplicarFormatoDNIEg(inputDesde); aplicarFiltrosEgresos(); });
-            inputHasta.addEventListener('input', () => { aplicarFormatoDNIEg(inputHasta); aplicarFiltrosEgresos(); });
+            inputDesde.addEventListener('input', () => { aplicarFormatoFechaEg(inputDesde); aplicarFiltrosEgresos(); });
+            inputHasta.addEventListener('input', () => { aplicarFormatoFechaEg(inputHasta); aplicarFiltrosEgresos(); });
         });
 
-        function formatearDNIEg(valor) {
-            let d = valor.replace(/\D/g, '').substring(0, 13);
-            if (d.length <= 4)  return d;
-            if (d.length <= 8)  return d.substring(0, 4) + '-' + d.substring(4);
-            return d.substring(0, 4) + '-' + d.substring(4, 8) + '-' + d.substring(8);
+        // Formatea ##-##-#### conforme el usuario escribe
+        function formatearFechaEg(valor) {
+            let d = valor.replace(/\D/g, '').substring(0, 8);
+            if (d.length <= 2)  return d;
+            if (d.length <= 4)  return d.substring(0, 2) + '-' + d.substring(2);
+            return d.substring(0, 2) + '-' + d.substring(2, 4) + '-' + d.substring(4);
         }
 
-        function aplicarFormatoDNIEg(input) {
+        function aplicarFormatoFechaEg(input) {
             const pos   = input.selectionStart;
             const antes = input.value;
-            const nuevo = formatearDNIEg(antes);
+            const nuevo = formatearFechaEg(antes);
             input.value = nuevo;
             const diff  = nuevo.length - antes.length;
             input.setSelectionRange(pos + diff, pos + diff);
         }
 
+        // Convierte DD-MM-YYYY a YYYY-MM-DD para comparar con la BD
+        function ddmmyyyyToISOEg(str) {
+            if (!str || str.length < 10) return '';
+            return str.substring(6) + '-' + str.substring(3, 5) + '-' + str.substring(0, 2);
+        }
+
         function aplicarFiltrosEgresos() {
             const term  = document.getElementById('buscadorEgresos').value.toLowerCase().trim();
-            const desde = document.getElementById('fechaDesdeEgresos').value.trim();
-            const hasta = document.getElementById('fechaHastaEgresos').value.trim();
+            const desde = ddmmyyyyToISOEg(document.getElementById('fechaDesdeEgresos').value.trim());
+            const hasta = ddmmyyyyToISOEg(document.getElementById('fechaHastaEgresos').value.trim());
 
             const filtrada = egresosLista.filter(e => {
                 const texto = [e.descripcion, e.numero_comprobante, e.fecha]
                     .map(v => (v || '').toLowerCase()).join(' ');
                 if (term && !texto.includes(term)) return false;
 
-                // Rango por Nº Comprobante
-                const comp = (e.numero_comprobante || '').trim();
-                if (desde && comp < desde) return false;
-                if (hasta && comp > hasta)  return false;
+                // Filtro por rango de fecha del egreso (YYYY-MM-DD en BD)
+                const fechaReg = (e.fecha || '').trim();
+                if (desde && fechaReg < desde) return false;
+                if (hasta && fechaReg > hasta)  return false;
 
                 return true;
             });
