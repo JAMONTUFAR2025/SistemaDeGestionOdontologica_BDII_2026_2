@@ -290,6 +290,8 @@
 
     <!-- Scripts Locales -->
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 debe cargarse ANTES del script principal que usa Swal.fire() -->
+    <script src="application/assets/js/sweetalert2.all.min.js"></script>
 
     <script>
         let listaPacientes = [];
@@ -578,11 +580,6 @@
             }
         });
     </script>
-    <!-- Librería local para mensajes emergentes HTML (SweetAlert2) -->
-    <script src="application/assets/js/sweetalert2.all.min.js"></script>
-
-    <!-- Tu script actual de Bootstrap -->
-    <script src="application/assets/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
