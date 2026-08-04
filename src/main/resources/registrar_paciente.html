@@ -11,7 +11,8 @@
 
     <style>
         /* === ESTILOS GENERALES Y DE TABLA === */
-        html, body {
+        html,
+        body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('fondo-clinica.jpg');
             background-size: cover;
@@ -444,20 +445,41 @@
 
             const jsonStr = JSON.stringify(paciente);
 
-            if ((window.pacienteController)) {
+            if (window.pacienteController) {
                 const respuesta = window.pacienteController.registrarPaciente(jsonStr);
                 const partes = respuesta.split("|");
-                alert(partes[1]);
 
+                // Reemplazamos los alert nativos por SweetAlert2
                 if (partes[0] === "OK") {
-                    form.reset();
-                    let modalEl = document.getElementById('modalAgregarPaciente');
-                    let modal = bootstrap.Modal.getInstance(modalEl);
-                    if (modal) modal.hide();
-                    cargarPacientes();
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then((result) => {
+                        form.reset();
+                        let modalEl = document.getElementById('modalAgregarPaciente');
+                        let modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                        cargarPacientes();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
                 }
             } else {
-                alert("Error: El puente con Java no está inicializado.");
+                Swal.fire({
+                    title: 'Error de Conexión',
+                    text: 'El puente con Java no está inicializado.',
+                    icon: 'warning',
+                    confirmButtonColor: '#ffc107'
+                });
             }
         }
 
@@ -556,6 +578,11 @@
             }
         });
     </script>
+    <!-- Librería local para mensajes emergentes HTML (SweetAlert2) -->
+    <script src="application/assets/js/sweetalert2.all.min.js"></script>
+
+    <!-- Tu script actual de Bootstrap -->
+    <script src="application/assets/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

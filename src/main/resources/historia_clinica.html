@@ -735,13 +735,47 @@
         // ============================================================
         // INIT
         // ============================================================
+        // ============================================================
+        // FORMATO AUTOMÁTICO DNI (####-####-#####)
+        // ============================================================
+        function formatearDNI(valor) {
+            // Solo dígitos, máximo 13
+            let soloDigitos = valor.replace(/\D/g, '').substring(0, 13);
+            let resultado = '';
+            if (soloDigitos.length <= 4) {
+                resultado = soloDigitos;
+            } else if (soloDigitos.length <= 8) {
+                resultado = soloDigitos.substring(0, 4) + '-' + soloDigitos.substring(4);
+            } else {
+                resultado = soloDigitos.substring(0, 4) + '-' + soloDigitos.substring(4, 8) + '-' + soloDigitos.substring(8);
+            }
+            return resultado;
+        }
+
+        function aplicarFormatoDNI(input) {
+            const pos = input.selectionStart;
+            const valorAnterior = input.value;
+            const nuevoValor = formatearDNI(valorAnterior);
+            input.value = nuevoValor;
+            // Ajustar posición del cursor
+            const diff = nuevoValor.length - valorAnterior.length;
+            input.setSelectionRange(pos + diff, pos + diff);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             inicializarOdontograma();
             cargarMedicosSelector();
 
-            document.getElementById('inputBuscar').addEventListener('keypress', e => {
+            const inputBuscar = document.getElementById('inputBuscar');
+            inputBuscar.addEventListener('input', () => aplicarFormatoDNI(inputBuscar));
+            inputBuscar.addEventListener('keypress', e => {
                 if (e.key === 'Enter') buscarExpediente();
             });
+
+            const hcIdentidad = document.getElementById('hc_identidad');
+            if (hcIdentidad) {
+                hcIdentidad.addEventListener('input', () => aplicarFormatoDNI(hcIdentidad));
+            }
         });
 
         // ============================================================

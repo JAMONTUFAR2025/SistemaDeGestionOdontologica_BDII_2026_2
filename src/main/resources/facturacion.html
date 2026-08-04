@@ -142,12 +142,25 @@
             <i class="fa-solid fa-file-invoice-dollar"></i> Facturación y Recibos
         </h3>
 
-        <!-- Barra de búsqueda + botón Nuevo -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="d-flex align-items-center gap-2">
-                <label for="buscadorFacturas" class="fw-bold text-dark mb-0">Buscar:</label>
-                <input type="text" id="buscadorFacturas" class="form-control" style="width: 260px;"
-                    placeholder="Nombre, recibo, concepto...">
+        <!-- Barra de búsqueda + filtro fechas + botón Nuevo -->
+        <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+            <div class="d-flex flex-wrap align-items-end gap-2">
+                <div>
+                    <label for="buscadorFacturas" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Buscar:</label>
+                    <input type="text" id="buscadorFacturas" class="form-control" style="width: 220px;"
+                        placeholder="Nombre, recibo, concepto...">
+                </div>
+                <div>
+                    <label for="fechaDesdeFacturas" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Desde:</label>
+                    <input type="date" id="fechaDesdeFacturas" class="form-control" style="width: 150px;">
+                </div>
+                <div>
+                    <label for="fechaHastaFacturas" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Hasta:</label>
+                    <input type="date" id="fechaHastaFacturas" class="form-control" style="width: 150px;">
+                </div>
+                <button class="btn btn-outline-secondary" onclick="limpiarFiltrosFacturas()" title="Limpiar filtros" style="height:38px;">
+                    <i class="fas fa-times me-1"></i>Limpiar
+                </button>
             </div>
             <button class="btn btn-success fw-bold" onclick="abrirModalFactura(null)">
                 <i class="fas fa-plus me-1"></i> Nuevo Recibo
@@ -337,16 +350,40 @@
             cargarFacturas();
             cargarPacientesSelector();
 
-            // Buscador en tiempo real
-            document.getElementById('buscadorFacturas').addEventListener('input', function () {
-                const term = this.value.toLowerCase();
-                const trs = document.getElementById('tablaFacturasBody').querySelectorAll('tr');
-                trs.forEach(tr => {
-                    if (tr.children.length <= 1) return;
-                    tr.style.display = tr.innerText.toLowerCase().includes(term) ? '' : 'none';
-                });
-            });
+            // Filtro combinado: texto + rango de fechas
+            document.getElementById('buscadorFacturas').addEventListener('input', aplicarFiltrosFacturas);
+            document.getElementById('fechaDesdeFacturas').addEventListener('change', aplicarFiltrosFacturas);
+            document.getElementById('fechaHastaFacturas').addEventListener('change', aplicarFiltrosFacturas);
         });
+
+        function aplicarFiltrosFacturas() {
+            const term    = document.getElementById('buscadorFacturas').value.toLowerCase().trim();
+            const desde   = document.getElementById('fechaDesdeFacturas').value;  // 'YYYY-MM-DD' o ''
+            const hasta   = document.getElementById('fechaHastaFacturas').value;
+
+            const filtrada = facturasLista.filter(f => {
+                // Filtro de texto
+                const texto = [f.numero_recibo, f.nombre_paciente, f.concepto, f.metodo_pago, f.fecha_emision]
+                    .map(v => (v || '').toLowerCase()).join(' ');
+                if (term && !texto.includes(term)) return false;
+
+                // Filtro de fecha (la fecha en BD viene como 'YYYY-MM-DD')
+                const fechaReg = f.fecha_emision || '';
+                if (desde && fechaReg < desde) return false;
+                if (hasta && fechaReg > hasta)  return false;
+
+                return true;
+            });
+
+            renderTablaFacturas(filtrada, true); // true = no reaplicar filtros (evitar recursión)
+        }
+
+        function limpiarFiltrosFacturas() {
+            document.getElementById('buscadorFacturas').value = '';
+            document.getElementById('fechaDesdeFacturas').value = '';
+            document.getElementById('fechaHastaFacturas').value = '';
+            renderTablaFacturas(facturasLista, true);
+        }
 
         // -------------------------------------------------------
         // CARGAR DATOS DEL BACKEND
@@ -382,7 +419,7 @@
         // -------------------------------------------------------
         // RENDERIZAR TABLA
         // -------------------------------------------------------
-        function renderTablaFacturas(lista) {
+        function renderTablaFacturas(lista, sinRefiltro) {
             const tbody = document.getElementById('tablaFacturasBody');
             if (!lista || lista.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No hay recibos activos registrados.</td></tr>';
@@ -420,9 +457,13 @@
             });
             tbody.innerHTML = html;
 
-            // Reaplicar filtro si hay búsqueda activa
-            const term = document.getElementById('buscadorFacturas').value.toLowerCase();
-            if (term) document.getElementById('buscadorFacturas').dispatchEvent(new Event('input'));
+            // Reaplicar filtros si hay criterios activos (y no venimos del propio filtro)
+            if (!sinRefiltro) {
+                const term  = document.getElementById('buscadorFacturas').value;
+                const desde = document.getElementById('fechaDesdeFacturas').value;
+                const hasta = document.getElementById('fechaHastaFacturas').value;
+                if (term || desde || hasta) aplicarFiltrosFacturas();
+            }
         }
 
         // -------------------------------------------------------
