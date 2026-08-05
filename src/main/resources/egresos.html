@@ -247,6 +247,7 @@
 
     <!-- Scripts -->
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="application/assets/js/sweetalert2.all.min.js"></script>
     <script>
         let egresosLista = [];
         let idEgresoEliminar = null;
@@ -294,7 +295,7 @@
         // BÚSQL CON FILTROS (llamada al backend Java)
         // -------------------------------------------------------
         function buscarEgresos() {
-            if (!window.finanzasController) { alert('Conector Java no disponible.'); return; }
+            if (!window.finanzasController) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Conector Java no disponible.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Conector Java no disponible.'); return; }
 
             const termino    = document.getElementById('buscadorEgresos').value.trim();
             const fechaDesde = ddmmyyyyToISOEg(document.getElementById('fechaDesdeEgresos').value.trim());
@@ -393,7 +394,7 @@
         }
 
         function guardarEgreso() {
-            if ((!window.finanzasController)) { alert('Conector Java no encontrado.'); return; }
+            if ((!window.finanzasController)) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Conector Java no encontrado.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Conector Java no encontrado.'); return; }
             
             const id = document.getElementById('eg_id').value;
             const fecha = document.getElementById('eg_fecha').value;
@@ -402,7 +403,7 @@
             const comprobante = document.getElementById('eg_comprobante').value.trim();
             
             if (!fecha || !descripcion || !monto) {
-                alert('Por favor complete los campos obligatorios (*).');
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor complete los campos obligatorios (*).', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor complete los campos obligatorios (*).');
                 return;
             }
 
@@ -422,11 +423,35 @@
             }
             
             const partes = respuesta.split('|');
-            alert(partes[1]);
-            
             if (partes[0] === 'OK') {
-                bootstrap.Modal.getInstance(document.getElementById('modalAgregarEgreso')).hide();
-                cargarEgresos();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('modalAgregarEgreso')).hide();
+                        cargarEgresos();
+                    });
+                } else {
+                    alert(partes[1]);
+                    bootstrap.Modal.getInstance(document.getElementById('modalAgregarEgreso')).hide();
+                    cargarEgresos();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
             }
         }
         
@@ -441,10 +466,35 @@
             if ((!window.finanzasController) || !idEgresoEliminar) return;
             const respuesta = window.finanzasController.inactivarEgreso(String(idEgresoEliminar));
             const partes = respuesta.split('|');
-            alert(partes[1]);
             if (partes[0] === 'OK') {
-                bootstrap.Modal.getInstance(document.getElementById('modalEliminarEgreso')).hide();
-                cargarEgresos();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('modalEliminarEgreso')).hide();
+                        cargarEgresos();
+                    });
+                } else {
+                    alert(partes[1]);
+                    bootstrap.Modal.getInstance(document.getElementById('modalEliminarEgreso')).hide();
+                    cargarEgresos();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
             }
         }
     </script>

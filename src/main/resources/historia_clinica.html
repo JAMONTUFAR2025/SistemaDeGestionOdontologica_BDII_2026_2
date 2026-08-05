@@ -721,6 +721,7 @@
     </div>
 
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="application/assets/js/sweetalert2.all.min.js"></script>
     <script>
         // ============================================================
         // ESTADO GLOBAL
@@ -871,8 +872,8 @@
         // ============================================================
         function buscarExpediente() {
             const query = document.getElementById('inputBuscar').value.trim();
-            if (!query) { alert('Por favor ingrese un número de identidad.'); return; }
-            if (!window.historiaClinicaController) { alert('Conector Java no disponible aún.'); return; }
+            if (!query) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor ingrese un número de identidad.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor ingrese un número de identidad.'); return; }
+            if (!window.historiaClinicaController) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Conector Java no disponible aún.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Conector Java no disponible aún.'); return; }
 
             // Mostrar spinner
             document.getElementById('contenedorExpediente').style.display = 'none';
@@ -899,7 +900,7 @@
             } catch (e) {
                 document.getElementById('spinnerBuscar').style.display = 'none';
                 console.error('Error al buscar expediente:', e);
-                alert('Error al realizar la búsqueda: ' + e.message);
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Error al realizar la búsqueda: ' + e.message, icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Error al realizar la búsqueda: ' + e.message);
             }
         }
 
@@ -1094,10 +1095,10 @@
         // ============================================================
         document.getElementById('formHistoriaClinica').addEventListener('submit', function (e) {
             e.preventDefault();
-            if (!window.historiaClinicaController) { alert('Conector Java no disponible.'); return; }
+            if (!window.historiaClinicaController) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Conector Java no disponible.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Conector Java no disponible.'); return; }
 
             const identidad = document.getElementById('hc_identidad').value.trim();
-            if (!identidad) { alert('El DNI del paciente es obligatorio.'); return; }
+            if (!identidad) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'El DNI del paciente es obligatorio.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('El DNI del paciente es obligatorio.'); return; }
 
             const data = {
                 identidad_paciente: identidad,
@@ -1125,24 +1126,61 @@
 
             const respuesta = window.historiaClinicaController.registrarExpediente(JSON.stringify(data));
             const partes = respuesta.split('|');
-            alert(partes[1]);
-
             if (partes[0] === 'OK') {
-                this.reset();
-                // Resetear odontograma
-                const todasDientes = [...document.querySelectorAll('.diente-item')];
-                todasDientes.forEach(d => {
-                    const num = d.id.replace('diente-', '');
-                    odontogramaEstado[num] = null;
-                    d.className = 'diente-item diente-neutro';
-                    document.getElementById('simb-' + num).innerHTML = '•';
-                });
-                actualizarJSONOdontograma();
-                cambiarSubPaso('paso-anamnesis', document.getElementById('tab-paso-anamnesis'));
-                // Ir al buscador para verificar
-                cambiarPestana('panel-expedientes', document.getElementById('btnTab1'));
-                document.getElementById('inputBuscar').value = identidad;
-                buscarExpediente();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        this.reset();
+                        // Resetear odontograma
+                        const todasDientes = [...document.querySelectorAll('.diente-item')];
+                        todasDientes.forEach(d => {
+                            const num = d.id.replace('diente-', '');
+                            odontogramaEstado[num] = null;
+                            d.className = 'diente-item diente-neutro';
+                            document.getElementById('simb-' + num).innerHTML = '•';
+                        });
+                        actualizarJSONOdontograma();
+                        cambiarSubPaso('paso-anamnesis', document.getElementById('tab-paso-anamnesis'));
+                        // Ir al buscador para verificar
+                        cambiarPestana('panel-expedientes', document.getElementById('btnTab1'));
+                        document.getElementById('inputBuscar').value = identidad;
+                        buscarExpediente();
+                    });
+                } else {
+                    alert(partes[1]);
+                    this.reset();
+                    // Resetear odontograma
+                    const todasDientes = [...document.querySelectorAll('.diente-item')];
+                    todasDientes.forEach(d => {
+                        const num = d.id.replace('diente-', '');
+                        odontogramaEstado[num] = null;
+                        d.className = 'diente-item diente-neutro';
+                        document.getElementById('simb-' + num).innerHTML = '•';
+                    });
+                    actualizarJSONOdontograma();
+                    cambiarSubPaso('paso-anamnesis', document.getElementById('tab-paso-anamnesis'));
+                    // Ir al buscador para verificar
+                    cambiarPestana('panel-expedientes', document.getElementById('btnTab1'));
+                    document.getElementById('inputBuscar').value = identidad;
+                    buscarExpediente();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
             }
         });
 
@@ -1165,17 +1203,17 @@
         }
 
         function guardarEvolucion() {
-            if (!window.historiaClinicaController) { alert('Conector Java no disponible.'); return; }
+            if (!window.historiaClinicaController) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Conector Java no disponible.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Conector Java no disponible.'); return; }
 
             const identidad = document.getElementById('ev_identidad').value.trim();
             const idMedico = document.getElementById('ev_id_medico').value;
             const fecha = document.getElementById('ev_fecha').value;
             const motivo = document.getElementById('ev_motivo').value.trim();
 
-            if (!identidad) { alert('Identidad del paciente faltante.'); return; }
-            if (!idMedico) { alert('Seleccione un médico tratante.'); return; }
-            if (!fecha) { alert('La fecha de consulta es obligatoria.'); return; }
-            if (!motivo) { alert('El motivo de consulta es obligatorio.'); return; }
+            if (!identidad) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Identidad del paciente faltante.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Identidad del paciente faltante.'); return; }
+            if (!idMedico) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Seleccione un médico tratante.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Seleccione un médico tratante.'); return; }
+            if (!fecha) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'La fecha de consulta es obligatoria.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('La fecha de consulta es obligatoria.'); return; }
+            if (!motivo) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'El motivo de consulta es obligatorio.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('El motivo de consulta es obligatorio.'); return; }
 
             const data = {
                 identidad_paciente: identidad,
@@ -1195,14 +1233,41 @@
 
             const respuesta = window.historiaClinicaController.agregarEvolucion(JSON.stringify(data));
             const partes = respuesta.split('|');
-            alert(partes[1]);
-
             if (partes[0] === 'OK') {
-                bootstrap.Modal.getInstance(document.getElementById('modalNuevaConsulta')).hide();
-                document.getElementById('formNuevaConsulta').reset();
-                // Recargar expediente
-                document.getElementById('inputBuscar').value = identidad;
-                buscarExpediente();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('modalNuevaConsulta')).hide();
+                        document.getElementById('formNuevaConsulta').reset();
+                        // Recargar expediente
+                        document.getElementById('inputBuscar').value = identidad;
+                        buscarExpediente();
+                    });
+                } else {
+                    alert(partes[1]);
+                    bootstrap.Modal.getInstance(document.getElementById('modalNuevaConsulta')).hide();
+                    document.getElementById('formNuevaConsulta').reset();
+                    // Recargar expediente
+                    document.getElementById('inputBuscar').value = identidad;
+                    buscarExpediente();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
             }
         }
 
@@ -1430,7 +1495,7 @@
 
         function imprimirDocumento() {
             if (!document.getElementById('selectTipoPlantilla').value) {
-                alert('Por favor seleccione un documento primero.');
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor seleccione un documento primero.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor seleccione un documento primero.');
                 return;
             }
             window.print();
