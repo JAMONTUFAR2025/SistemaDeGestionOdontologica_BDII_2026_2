@@ -67,7 +67,7 @@
             color: #0d6efd;
         }
 
-        /* === ESTILOS DEL FORMULARIO (Tu código adaptado) === */
+        /* === ESTILOS DEL FORMULARIO === */
         .section-title {
             background: #e9ecef;
             padding: 8px 15px;
@@ -147,9 +147,8 @@
     </div>
 
     <!-- ======================================================= -->
-    <!-- VENTANA FLOTANTE (MODAL): TU FORMULARIO                 -->
+    <!-- VENTANA FLOTANTE (MODAL): FORMULARIO                    -->
     <!-- ======================================================= -->
-    <!-- data-bs-backdrop="false" evita la pantalla negra en Java -->
     <div class="modal fade" id="modalAgregarPaciente" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content shadow-lg">
@@ -160,7 +159,6 @@
                 </div>
 
                 <div class="modal-body p-4">
-                    <!-- TU FORMULARIO EXACTO -->
                     <form id="registroPacienteForm" onsubmit="registrarPaciente(event)">
 
                         <div class="section-title mt-0">1. Datos Generales del Paciente</div>
@@ -264,6 +262,7 @@
             </div>
         </div>
     </div>
+
     <!-- Modal de Confirmación de Borrado -->
     <div class="modal fade" id="modalEliminarPaciente" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -288,18 +287,12 @@
         </div>
     </div>
 
-    <!-- Scripts Locales -->
-    <script src="application/assets/js/bootstrap.bundle.min.js"></script>
-    <!-- SweetAlert2 debe cargarse ANTES del script principal que usa Swal.fire() -->
-    <script src="application/assets/js/sweetalert2.all.min.js"></script>
-
     <script>
         let listaPacientes = [];
 
         // === 1. CARGAR PACIENTES DESDE LA BASE DE DATOS ===
         function cargarPacientes() {
             if ((!window.pacienteController)) {
-                // Esperar a que JavaFX WebView inyecte el conector
                 setTimeout(cargarPacientes, 100);
                 return;
             }
@@ -358,7 +351,6 @@
             }
             document.getElementById('nombre_completo').value = p.nombreCompleto || '';
 
-            // Asignar fecha en formato DD-MM-AAAA
             let fechaStr = '';
             if (p.fechaNacimiento) {
                 if (typeof p.fechaNacimiento === 'object') {
@@ -409,20 +401,52 @@
 
         function confirmarEliminacion() {
             if (!identidadAEliminar) return;
-            if ((window.pacienteController)) {
-                const respuesta = window.pacienteController.eliminarPaciente(identidadAEliminar);
+            
+            if (window.pacienteController) {
+                const respuesta = String(window.pacienteController.eliminarPaciente(identidadAEliminar));
                 const partes = respuesta.split("|");
-                alert(partes[1]);
+
                 if (partes[0] === 'OK') {
-                    let modalEl = document.getElementById('modalEliminarPaciente');
-                    let modalInst = bootstrap.Modal.getInstance(modalEl);
-                    if (modalInst) modalInst.hide();
-                    cargarPacientes();
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: partes[1],
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar',
+                            confirmButtonColor: '#28a745'
+                        }).then(() => {
+                            let modalEl = document.getElementById('modalEliminarPaciente');
+                            let modalInst = bootstrap.Modal.getInstance(modalEl);
+                            if (modalInst) modalInst.hide();
+                            
+                            cargarPacientes();
+                        });
+                    } else {
+                        // Fallback de seguridad si SweetAlert falla al cargar
+                        alert(partes[1]);
+                        let modalEl = document.getElementById('modalEliminarPaciente');
+                        let modalInst = bootstrap.Modal.getInstance(modalEl);
+                        if (modalInst) modalInst.hide();
+                        cargarPacientes();
+                    }
+                } else {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Error',
+                            text: partes[1],
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    } else {
+                        alert("Error: " + partes[1]);
+                    }
                 }
+            } else {
+                alert('El puente con Java no está inicializado.');
             }
         }
 
-        // === 4. LÓGICA DE BÚSQUEDA UNIVERSAL (LIKE) ===
+        // === 4. BÚSQUEDA UNIVERSAL ===
         document.getElementById('buscadorPacientes').addEventListener('keyup', function () {
             let filtro = this.value.toLowerCase();
             let filas = document.querySelectorAll('#cuerpoTabla tr');
@@ -437,7 +461,7 @@
             });
         });
 
-        // === 5. REGISTRO/EDICIÓN A JAVA ===
+        // === 5. REGISTRO/EDICIÓN A JAVA (FLIJO Y REFRESCO CORREGIDOS) ===
         function registrarPaciente(event) {
             event.preventDefault();
 
@@ -448,44 +472,53 @@
             const jsonStr = JSON.stringify(paciente);
 
             if (window.pacienteController) {
-                const respuesta = window.pacienteController.registrarPaciente(jsonStr);
+                const respuesta = String(window.pacienteController.registrarPaciente(jsonStr));
                 const partes = respuesta.split("|");
 
-                // Reemplazamos los alert nativos por SweetAlert2
                 if (partes[0] === "OK") {
-                    Swal.fire({
-                        title: '¡Éxito!',
-                        text: partes[1],
-                        icon: 'success',
-                        confirmButtonText: 'Aceptar',
-                        confirmButtonColor: '#28a745'
-                    }).then((result) => {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: partes[1],
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar',
+                            confirmButtonColor: '#28a745'
+                        }).then((result) => {
+                            form.reset();
+                            let modalEl = document.getElementById('modalAgregarPaciente');
+                            let modal = bootstrap.Modal.getInstance(modalEl);
+                            if (modal) modal.hide();
+                            
+                            cargarPacientes();
+                        });
+                    } else {
+                        // Fallback de seguridad si SweetAlert falla
+                        alert(partes[1]);
                         form.reset();
                         let modalEl = document.getElementById('modalAgregarPaciente');
                         let modal = bootstrap.Modal.getInstance(modalEl);
                         if (modal) modal.hide();
                         cargarPacientes();
-                    });
+                    }
                 } else {
-                    Swal.fire({
-                        title: 'Error',
-                        text: partes[1],
-                        icon: 'error',
-                        confirmButtonText: 'Revisar',
-                        confirmButtonColor: '#dc3545'
-                    });
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Error',
+                            text: partes[1],
+                            icon: 'error',
+                            confirmButtonText: 'Revisar',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    } else {
+                        alert("Error: " + partes[1]);
+                    }
                 }
             } else {
-                Swal.fire({
-                    title: 'Error de Conexión',
-                    text: 'El puente con Java no está inicializado.',
-                    icon: 'warning',
-                    confirmButtonColor: '#ffc107'
-                });
+                alert('El puente con Java no está inicializado.');
             }
         }
 
-        // === 6. FUNCIONES DE VALIDACION Y FORMATO ===
+        // === 6. VALIDACIONES Y FORMATO ===
         function formatTelefono(e) {
             let val = e.target.value.replace(/\D/g, '');
             let newVal = '';
@@ -553,7 +586,7 @@
             }
         }
 
-        // Inicializar eventos y cargar datos al abrir la página
+        // Inicializar eventos
         document.addEventListener('DOMContentLoaded', () => {
             cargarPacientes();
 
@@ -580,6 +613,12 @@
             }
         });
     </script>
+
+    <!-- Librería local para mensajes emergentes HTML (SweetAlert2) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+    <!-- Tu script actual de Bootstrap -->
+    <script src="application/assets/js/bootstrap.bundle.min.js"></script>
 
 </body>
 
