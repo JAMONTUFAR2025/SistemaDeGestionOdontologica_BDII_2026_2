@@ -377,7 +377,7 @@
         // ==========================================
         function guardarUsuario() {
             if ((!window.personalController)) {
-                alert("Error: Puente Java no inicializado.");
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Puente Java no inicializado.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert("Error: Puente Java no inicializado.");
                 return;
             }
 
@@ -386,8 +386,14 @@
             var rolSistema = document.getElementById('usu_rol_sistema').value;
             var estado = document.getElementById('usu_estado').value;
 
-            if (!correo) { alert("Por favor, ingresa el correo electrónico."); return; }
-            if (!contrasenia) { alert("Por favor, ingresa la contraseña."); return; }
+            if (!correo) { 
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el correo electrónico.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert("Por favor, ingresa el correo electrónico."); 
+                return; 
+            }
+            if (!contrasenia) { 
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa la contraseña.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert("Por favor, ingresa la contraseña."); 
+                return; 
+            }
 
             var data = {
                 correo: correo,
@@ -398,14 +404,39 @@
 
             var respuesta = window.personalController.registrarUsuarioSolo(JSON.stringify(data));
             if (!respuesta) {
-                alert("Error: Java no devolvió respuesta.");
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Java no devolvió respuesta.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert("Error: Java no devolvió respuesta.");
                 return;
             }
+            
             var partes = respuesta.split("|");
-            alert(partes[1]);
-
+            
             if (partes[0] === "OK") {
-                document.getElementById('formUsuario').reset();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        document.getElementById('formUsuario').reset();
+                    });
+                } else {
+                    alert(partes[1]);
+                    document.getElementById('formUsuario').reset();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
             }
         }
 
@@ -414,7 +445,7 @@
         // ==========================================
         function guardarMedico() {
             if ((!window.personalController)) {
-                alert("Error: Puente Java no inicializado.");
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Puente Java no inicializado.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert("Error: Puente Java no inicializado.");
                 return;
             }
 
@@ -424,11 +455,26 @@
             var telefono = document.getElementById('med_telefono').value.trim();
             var especialidad = document.getElementById('med_especialidad').value;
 
-            if (!idUsuario) { alert("Por favor, selecciona un usuario para vincular."); return; }
-            if (!nombre) { alert("Por favor, ingresa el nombre completo."); return; }
-            if (!identidad) { alert("Por favor, ingresa la identidad (DNI)."); return; }
-            if (!telefono) { alert("Por favor, ingresa el teléfono."); return; }
-            if (!especialidad) { alert("Por favor, selecciona la especialidad."); return; }
+            if (!idUsuario) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, selecciona un usuario para vincular.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert("Por favor, selecciona un usuario para vincular.");
+                return;
+            }
+            if (!nombre) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el nombre completo.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert("Por favor, ingresa el nombre completo.");
+                return;
+            }
+            if (!identidad) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa la identidad (DNI).', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert("Por favor, ingresa la identidad (DNI).");
+                return;
+            }
+            if (!telefono) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el teléfono.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert("Por favor, ingresa el teléfono.");
+                return;
+            }
+            if (!especialidad) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, selecciona la especialidad.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert("Por favor, selecciona la especialidad.");
+                return;
+            }
 
             // Obtener el correo del usuario seleccionado
             var selectUsuario = document.getElementById('med_id_usuario');
@@ -445,15 +491,41 @@
 
             var respuesta = window.personalController.registrarMedicoConUsuario(JSON.stringify(data));
             if (!respuesta) {
-                alert("Error: Java no devolvió respuesta.");
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Java no devolvió respuesta.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert("Error: Java no devolvió respuesta.");
                 return;
             }
+            
             var partes = respuesta.split("|");
-            alert(partes[1]);
-
+            
             if (partes[0] === "OK") {
-                document.getElementById('formMedico').reset();
-                cargarUsuariosSinMedico(); // Refrescar la lista
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        document.getElementById('formMedico').reset();
+                        cargarUsuariosSinMedico(); // Refrescar la lista
+                    });
+                } else {
+                    alert(partes[1]);
+                    document.getElementById('formMedico').reset();
+                    cargarUsuariosSinMedico(); // Refrescar la lista
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
             }
         }
 
@@ -484,6 +556,9 @@
             });
         });
     </script>
+    
+    <!-- Librería local para mensajes emergentes HTML (SweetAlert2) -->
+    <script src="application/assets/js/sweetalert2.all.min.js"></script>
 </body>
 
 </html>
