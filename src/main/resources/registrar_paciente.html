@@ -401,7 +401,7 @@
 
         function confirmarEliminacion() {
             if (!identidadAEliminar) return;
-            
+
             if (window.pacienteController) {
                 const respuesta = String(window.pacienteController.eliminarPaciente(identidadAEliminar));
                 const partes = respuesta.split("|");
@@ -418,7 +418,7 @@
                             let modalEl = document.getElementById('modalEliminarPaciente');
                             let modalInst = bootstrap.Modal.getInstance(modalEl);
                             if (modalInst) modalInst.hide();
-                            
+
                             cargarPacientes();
                         });
                     } else {
@@ -488,7 +488,7 @@
                             let modalEl = document.getElementById('modalAgregarPaciente');
                             let modal = bootstrap.Modal.getInstance(modalEl);
                             if (modal) modal.hide();
-                            
+
                             cargarPacientes();
                         });
                     } else {
@@ -615,7 +615,7 @@
     </script>
 
     <!-- Librería local para mensajes emergentes HTML (SweetAlert2) -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src="application/assets/js/sweetalert2.all.min.js"></script>
 
     <!-- Tu script actual de Bootstrap -->
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
