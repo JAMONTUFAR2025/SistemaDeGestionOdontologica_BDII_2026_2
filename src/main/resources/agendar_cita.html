@@ -272,168 +272,6 @@
         </div>
     </div>
 
-    <script>
-        // Función para juntar la fecha y la hora en el input oculto
-        function actualizarFechaHoraOculta() {
-            let fecha = document.getElementById('fecha_cita').value;
-            let hora = document.getElementById('hora_cita').value;
-
-            if (fecha && hora) {
-                document.getElementById('fecha_hora').value = fecha + ' ' + hora + ':00';
-            }
-        }
-
-        document.getElementById('fecha_cita').addEventListener('change', actualizarFechaHoraOculta);
-        document.getElementById('hora_cita').addEventListener('change', actualizarFechaHoraOculta);
-
-        function setFechaHoraActual() {
-            let now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            let isoStr = now.toISOString();
-            document.getElementById('fecha_cita').value = isoStr.slice(0, 10);
-            document.getElementById('hora_cita').value = isoStr.slice(11, 16);
-            actualizarFechaHoraOculta();
-        }
-        setFechaHoraActual();
-
-        function sumarDias(dias) {
-            let fecha = new Date();
-            fecha.setDate(fecha.getDate() + dias);
-            fecha.setMinutes(fecha.getMinutes() - fecha.getTimezoneOffset());
-            document.getElementById('fecha_cita').value = fecha.toISOString().slice(0, 10);
-            actualizarFechaHoraOculta();
-        }
-
-        function enviarWhatsApp() {
-            let selectPaciente = document.getElementById('identidad_paciente');
-            let option = selectPaciente.options[selectPaciente.selectedIndex];
-
-            if (!selectPaciente.value) {
-                alert("Por favor selecciona un paciente primero.");
-                return;
-            }
-
-            let telefono = option.getAttribute('data-telefono');
-            let nombre = option.text;
-            let fecha = document.getElementById('fecha_cita').value;
-            let hora = document.getElementById('hora_cita').value;
-
-            if (!telefono) {
-                alert("El paciente seleccionado no tiene un teléfono registrado.");
-                return;
-            }
-
-            let numLimpio = telefono.replace(/[^0-9]/g, '');
-            if (numLimpio.length === 8) {
-                numLimpio = '504' + numLimpio;
-            }
-
-            let mensaje = `Hola ${nombre.trim()}, le saludamos de SOE Odontología. Le recordamos su cita agendada para el día ${fecha} a las ${hora}. Por favor confirmarnos su asistencia.`;
-            let url = `https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`;
-            window.open(url, '_blank');
-        }
-
-        $(document).ready(function () {
-            $('#identidad_paciente').select2({
-                placeholder: "-- Buscar o seleccionar paciente --",
-                allowClear: true
-            });
-
-            // Cargar pacientes y médicos desde JavaConnector
-            if ((window.pacienteController && window.personalController && window.citaController)) {
-                try {
-                    let pacientesJson = window.pacienteController.obtenerPacientes();
-                    let pacientes = JSON.parse(pacientesJson);
-                    let selPaciente = document.getElementById("identidad_paciente");
-                    pacientes.forEach(p => {
-                        let opt = new Option(p.nombreCompleto + " (" + p.identidad + ")", p.idPaciente);
-                        opt.setAttribute("data-telefono", p.telefono || "");
-                        selPaciente.appendChild(opt);
-                    });
-
-                    let medicosJson = window.personalController.obtenerPersonalMedico();
-                    let medicos = JSON.parse(medicosJson);
-                    let selMedico = document.getElementById("id_medico");
-                    medicos.forEach(m => {
-                        let opt = new Option(m.nombreCompleto + " (" + m.especialidadNombre + ")", m.idPersonalMedico);
-                        selMedico.appendChild(opt);
-                    });
-                } catch (e) {
-                    console.error("Error cargando datos:", e);
-                }
-            }
-
-            // Manejar submit del formulario de cita
-            $('#agendarCitaForm').on('submit', function (e) {
-                e.preventDefault();
-                if ((!window.pacienteController || !window.personalController || !window.citaController)) {
-                    alert("Error: Puente Java no inicializado.");
-                    return;
-                }
-
-                let idPaciente = $('#identidad_paciente').val();
-                let idMedico = $('#id_medico').val();
-                let fechaHora = $('#fecha_hora').val();
-                let estado = $('#estado').val();
-                let motivo = $('#motivo_cita').val();
-
-                if (!idPaciente || !idMedico || !fechaHora) {
-                    alert("Complete todos los campos obligatorios.");
-                    return;
-                }
-
-                let data = {
-                    id_pacientes: parseInt(idPaciente),
-                    id_personal_medico: parseInt(idMedico),
-                    fecha_hora: fechaHora,
-                    estado: estado,
-                    motivoCita: motivo
-                };
-
-                let respuesta = window.citaController.agendarCita(JSON.stringify(data));
-                let partes = respuesta.split("|");
-                alert(partes[1]);
-
-                if (partes[0] === "OK") {
-                    this.reset();
-                    $('#identidad_paciente').val(null).trigger('change');
-                    setFechaHoraActual();
-                }
-            });
-        });
-
-        $(document).ready(function () {
-            $('#formNuevoPacienteModal').on('submit', function (e) {
-                e.preventDefault();
-                $('#btnGuardarModal').prop('disabled', true).text('Guardando...');
-
-                setTimeout(function () {
-                    let idIngresado = $('#modal_identidad').val();
-                    let nombreIngresado = $('input[name="nombre_completo"]').val();
-                    let telIngresado = $('input[name="telefono"]').val();
-
-                    var newOption = new Option(nombreIngresado + " (" + idIngresado + ")", idIngresado, true, true);
-                    $(newOption).attr('data-telefono', telIngresado);
-                    $('#identidad_paciente').append(newOption).trigger('change');
-
-                    $('#formNuevoPacienteModal')[0].reset();
-                    cerrarModalPaciente();
-                    alert('¡Paciente registrado! (Simulación de diseño exitosa)');
-                    $('#btnGuardarModal').prop('disabled', false).text('Guardar Paciente');
-                }, 800);
-            });
-        });
-
-        function abrirModalPaciente() {
-            $('#msgModalPaciente').hide();
-            $('#modalPaciente').css('display', 'flex');
-        }
-
-        function cerrarModalPaciente() {
-            $('#modalPaciente').hide();
-        }
-    </script>
-
     <!-- VENTANA MODAL PARA REGISTRAR NUEVO PACIENTE ACTUALIZADA -->
     <div id="modalPaciente"
         style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; overflow-y: auto; padding: 20px 0;">
@@ -552,6 +390,218 @@
         </div>
     </div>
 
+    <!-- Librería local SweetAlert2 v10 (Compatible con JavaFX) -->
+    <script src="application/assets/js/sweetalert2.all.min.js"></script>
+
+    <script>
+        // Función para juntar la fecha y la hora en el input oculto
+        function actualizarFechaHoraOculta() {
+            let fecha = document.getElementById('fecha_cita').value;
+            let hora = document.getElementById('hora_cita').value;
+
+            if (fecha && hora) {
+                document.getElementById('fecha_hora').value = fecha + ' ' + hora + ':00';
+            }
+        }
+
+        document.getElementById('fecha_cita').addEventListener('change', actualizarFechaHoraOculta);
+        document.getElementById('hora_cita').addEventListener('change', actualizarFechaHoraOculta);
+
+        function setFechaHoraActual() {
+            let now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            let isoStr = now.toISOString();
+            document.getElementById('fecha_cita').value = isoStr.slice(0, 10);
+            document.getElementById('hora_cita').value = isoStr.slice(11, 16);
+            actualizarFechaHoraOculta();
+        }
+        setFechaHoraActual();
+
+        function sumarDias(dias) {
+            let fecha = new Date();
+            fecha.setDate(fecha.getDate() + dias);
+            fecha.setMinutes(fecha.getMinutes() - fecha.getTimezoneOffset());
+            document.getElementById('fecha_cita').value = fecha.toISOString().slice(0, 10);
+            actualizarFechaHoraOculta();
+        }
+
+        function enviarWhatsApp() {
+            let selectPaciente = document.getElementById('identidad_paciente');
+
+            if (!selectPaciente.value) {
+                Swal.fire({
+                    title: 'Atención',
+                    text: 'Por favor selecciona un paciente primero.',
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#ffc107'
+                });
+                return;
+            }
+
+            let option = selectPaciente.options[selectPaciente.selectedIndex];
+            let telefono = option.getAttribute('data-telefono');
+            let nombre = option.text;
+            let fecha = document.getElementById('fecha_cita').value;
+            let hora = document.getElementById('hora_cita').value;
+
+            if (!telefono) {
+                Swal.fire({
+                    title: 'Sin Teléfono',
+                    text: 'El paciente seleccionado no tiene un teléfono registrado.',
+                    icon: 'info',
+                    confirmButtonText: 'Cerrar',
+                    confirmButtonColor: '#17a2b8'
+                });
+                return;
+            }
+
+            let numLimpio = telefono.replace(/[^0-9]/g, '');
+            if (numLimpio.length === 8) {
+                numLimpio = '504' + numLimpio;
+            }
+
+            let mensaje = `Hola ${nombre.trim()}, le saludamos de SOE Odontología. Le recordamos su cita agendada para el día ${fecha} a las ${hora}. Por favor confirmarnos su asistencia.`;
+            let url = `https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+        }
+
+        $(document).ready(function () {
+            $('#identidad_paciente').select2({
+                placeholder: "-- Buscar o seleccionar paciente --",
+                allowClear: true
+            });
+
+            // Cargar pacientes y médicos desde JavaConnector
+            if ((window.pacienteController && window.personalController && window.citaController)) {
+                try {
+                    let pacientesJson = window.pacienteController.obtenerPacientes();
+                    let pacientes = JSON.parse(pacientesJson);
+                    let selPaciente = document.getElementById("identidad_paciente");
+                    pacientes.forEach(p => {
+                        let opt = new Option(p.nombreCompleto + " (" + p.identidad + ")", p.idPaciente);
+                        opt.setAttribute("data-telefono", p.telefono || "");
+                        selPaciente.appendChild(opt);
+                    });
+
+                    let medicosJson = window.personalController.obtenerPersonalMedico();
+                    let medicos = JSON.parse(medicosJson);
+                    let selMedico = document.getElementById("id_medico");
+                    medicos.forEach(m => {
+                        let opt = new Option(m.nombreCompleto + " (" + m.especialidadNombre + ")", m.idPersonalMedico);
+                        selMedico.appendChild(opt);
+                    });
+                } catch (e) {
+                    console.error("Error cargando datos:", e);
+                }
+            }
+
+            // Manejar submit del formulario de cita
+            $('#agendarCitaForm').on('submit', function (e) {
+                e.preventDefault();
+
+                if ((!window.pacienteController || !window.personalController || !window.citaController)) {
+                    Swal.fire({
+                        title: 'Error de Conexión',
+                        text: 'El puente Java no está inicializado.',
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                    return;
+                }
+
+                let idPaciente = $('#identidad_paciente').val();
+                let idMedico = $('#id_medico').val();
+                let fechaHora = $('#fecha_hora').val();
+                let estado = $('#estado').val();
+                let motivo = $('#motivo_cita').val();
+
+                if (!idPaciente || !idMedico || !fechaHora) {
+                    Swal.fire({
+                        title: 'Faltan Datos',
+                        text: 'Complete todos los campos obligatorios.',
+                        icon: 'warning',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#ffc107'
+                    });
+                    return;
+                }
+
+                let data = {
+                    id_pacientes: parseInt(idPaciente),
+                    id_personal_medico: parseInt(idMedico),
+                    fecha_hora: fechaHora,
+                    estado: estado,
+                    motivoCita: motivo
+                };
+
+                let respuesta = window.citaController.agendarCita(JSON.stringify(data));
+                let partes = respuesta.split("|");
+
+                if (partes[0] === "OK") {
+                    Swal.fire({
+                        title: '¡Cita Agendada!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        this.reset();
+                        $('#identidad_paciente').val(null).trigger('change');
+                        setFechaHoraActual();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error al agendar',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            $('#formNuevoPacienteModal').on('submit', function (e) {
+                e.preventDefault();
+                $('#btnGuardarModal').prop('disabled', true).text('Guardando...');
+
+                setTimeout(function () {
+                    let idIngresado = $('#modal_identidad').val();
+                    let nombreIngresado = $('input[name="nombre_completo"]').val();
+                    let telIngresado = $('input[name="telefono"]').val();
+
+                    var newOption = new Option(nombreIngresado + " (" + idIngresado + ")", idIngresado, true, true);
+                    $(newOption).attr('data-telefono', telIngresado);
+                    $('#identidad_paciente').append(newOption).trigger('change');
+
+                    $('#formNuevoPacienteModal')[0].reset();
+                    cerrarModalPaciente();
+
+                    Swal.fire({
+                        title: '¡Paciente Registrado!',
+                        text: 'El paciente ha sido añadido a la lista exitosamente.',
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    });
+
+                    $('#btnGuardarModal').prop('disabled', false).text('Guardar Paciente');
+                }, 800);
+            });
+        });
+
+        function abrirModalPaciente() {
+            $('#msgModalPaciente').hide();
+            $('#modalPaciente').css('display', 'flex');
+        }
+
+        function cerrarModalPaciente() {
+            $('#modalPaciente').hide();
+        }
+    </script>
 </body>
 
 </html>
