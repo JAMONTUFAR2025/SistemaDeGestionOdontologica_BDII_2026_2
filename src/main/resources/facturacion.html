@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,8 @@
     <link href="application/assets/css/all.min.css" rel="stylesheet">
     <style>
         /* === ESTILOS GENERALES === */
-        html, body {
+        html,
+        body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('fondo-clinica.jpg');
             background-size: cover;
@@ -66,10 +68,21 @@
             margin-right: 12px;
         }
 
-        .fa-edit { color: #0d6efd; }
-        .fa-edit:hover { color: #0a53be; }
-        .fa-trash { color: #dc3545; }
-        .fa-trash:hover { color: #b02a37; }
+        .fa-edit {
+            color: #0d6efd;
+        }
+
+        .fa-edit:hover {
+            color: #0a53be;
+        }
+
+        .fa-trash {
+            color: #dc3545;
+        }
+
+        .fa-trash:hover {
+            color: #b02a37;
+        }
 
         /* === MODAL === */
         .modal-content {
@@ -79,7 +92,7 @@
         }
 
         .modal-header-verde {
-            background: linear-gradient(135deg, #198754, #20c997);
+            background: linear-gradient(135deg, #28a745, #28a745);
             color: white;
             border-top-left-radius: 14px;
             border-top-right-radius: 14px;
@@ -95,7 +108,7 @@
         }
 
         .btn-guardar-verde {
-            background-color: #198754;
+            background-color: #28a745;
             color: white;
             font-weight: bold;
             padding: 10px;
@@ -104,13 +117,17 @@
             border-radius: 6px;
             transition: background 0.2s;
         }
-        .btn-guardar-verde:hover { background-color: #146c43; color: white; }
+
+        .btn-guardar-verde:hover {
+            background-color: #28a745;
+            color: white;
+        }
 
         .section-title {
-            color: #198754;
+            color: #28a745;
             font-weight: 700;
             margin-bottom: 14px;
-            border-bottom: 2px solid #198754;
+            border-bottom: 2px solid #28a745;
             padding-bottom: 5px;
             font-size: 1rem;
         }
@@ -122,23 +139,40 @@
             border-radius: 20px;
             font-weight: 600;
         }
-        .badge-efectivo    { background-color: #d1fae5; color: #065f46; }
-        .badge-transferencia { background-color: #dbeafe; color: #1e40af; }
-        .badge-pos         { background-color: #ede9fe; color: #5b21b6; }
 
-        .neto-col { color: #198754; font-weight: 700; font-size: 0.97rem; }
+        .badge-efectivo {
+            background-color: #d1fae5;
+            color: #28a745;
+        }
+
+        .badge-transferencia {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-pos {
+            background-color: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .neto-col {
+            color: #28a745;
+            font-weight: 700;
+            font-size: 0.97rem;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="container card-container">
 
         <!-- Encabezado -->
-        <a href="menu.html" class="text-decoration-none mb-3 d-inline-block fw-bold" style="color: #198754;">
+        <a href="menu.html" class="text-decoration-none mb-3 d-inline-block fw-bold" style="color: #28a745;">
             ← Volver al Menú Principal
         </a>
 
-        <h3 class="fw-bold text-start mb-4" style="color: #198754;">
+        <h3 class="fw-bold text-start mb-4" style="color: #28a745;">
             <i class="fa-solid fa-file-invoice-dollar"></i> Facturación y Recibos
         </h3>
 
@@ -146,24 +180,28 @@
         <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
             <div class="d-flex flex-wrap align-items-end gap-2">
                 <div>
-                    <label for="buscadorFacturas" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Buscar:</label>
+                    <label for="buscadorFacturas" class="form-label fw-bold text-dark mb-1"
+                        style="font-size:0.85rem;">Buscar:</label>
                     <input type="text" id="buscadorFacturas" class="form-control" style="width: 220px;"
                         placeholder="Nombre, recibo, concepto...">
                 </div>
                 <div>
-                    <label for="fechaDesdeFacturas" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Desde:</label>
+                    <label for="fechaDesdeFacturas" class="form-label fw-bold text-dark mb-1"
+                        style="font-size:0.85rem;">Desde:</label>
                     <input type="text" id="fechaDesdeFacturas" class="form-control" style="width: 145px;"
                         placeholder="DD-MM-YYYY" maxlength="10">
                 </div>
                 <div>
-                    <label for="fechaHastaFacturas" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Hasta:</label>
+                    <label for="fechaHastaFacturas" class="form-label fw-bold text-dark mb-1"
+                        style="font-size:0.85rem;">Hasta:</label>
                     <input type="text" id="fechaHastaFacturas" class="form-control" style="width: 145px;"
                         placeholder="DD-MM-YYYY" maxlength="10">
                 </div>
                 <button class="btn btn-success" onclick="buscarFacturas()" style="height:38px;">
                     <i class="fas fa-search me-1"></i>Buscar
                 </button>
-                <button class="btn btn-outline-secondary" onclick="limpiarFiltrosFacturas()" title="Limpiar filtros" style="height:38px;">
+                <button class="btn btn-outline-secondary" onclick="limpiarFiltrosFacturas()" title="Limpiar filtros"
+                    style="height:38px;">
                     <i class="fas fa-times me-1"></i>Limpiar
                 </button>
             </div>
@@ -205,7 +243,8 @@
                     <h5 class="modal-title fw-bold" id="tituloModalFactura">
                         <i class="fa-solid fa-cash-register me-2"></i> Nuevo Recibo / Factura
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body p-4">
                     <form id="formFactura" autocomplete="off">
@@ -218,14 +257,17 @@
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold">N° Recibo:</label>
-                                <input type="text" id="fac_numero_recibo" class="form-control" placeholder="Ej: REC-001">
+                                <input type="text" id="fac_numero_recibo" class="form-control"
+                                    placeholder="Ej: REC-001">
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Fecha Emisión: <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">Fecha Emisión: <span
+                                        class="text-danger">*</span></label>
                                 <input type="date" id="fac_fecha_emision" class="form-control" required>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Método de Pago: <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">Método de Pago: <span
+                                        class="text-danger">*</span></label>
                                 <select id="fac_metodo_pago" class="form-select">
                                     <option value="Efectivo">Efectivo</option>
                                     <option value="Transferencia">Transferencia</option>
@@ -268,18 +310,18 @@
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold">Suma Neta:</label>
-                                <input type="number" step="0.01" min="0" id="fac_suma_neta"
-                                    class="form-control" value="0.00" oninput="calcularNetoFactura()">
+                                <input type="number" step="0.01" min="0" id="fac_suma_neta" class="form-control"
+                                    value="0.00" oninput="calcularNetoFactura()">
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold">Total Honorarios:</label>
-                                <input type="number" step="0.01" min="0" id="fac_total_honorarios"
-                                    class="form-control" value="0.00" oninput="calcularNetoFactura()">
+                                <input type="number" step="0.01" min="0" id="fac_total_honorarios" class="form-control"
+                                    value="0.00" oninput="calcularNetoFactura()">
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold">Total Retenido:</label>
-                                <input type="number" step="0.01" min="0" id="fac_total_retenido"
-                                    class="form-control" value="0.00" oninput="calcularNetoFactura()">
+                                <input type="number" step="0.01" min="0" id="fac_total_retenido" class="form-control"
+                                    value="0.00" oninput="calcularNetoFactura()">
                             </div>
                         </div>
                         <div class="row">
@@ -302,8 +344,7 @@
                                     data-bs-dismiss="modal">Cancelar</button>
                             </div>
                             <div class="col-md-7">
-                                <button type="button" class="btn-guardar-verde rounded"
-                                    onclick="guardarFactura()">
+                                <button type="button" class="btn-guardar-verde rounded" onclick="guardarFactura()">
                                     <i class="fa-solid fa-save me-2"></i>Guardar Recibo
                                 </button>
                             </div>
@@ -324,19 +365,20 @@
                     <h5 class="modal-title fw-bold">
                         <i class="fas fa-exclamation-triangle me-2"></i> Confirmar Eliminación
                     </h5>
-                    <button type="button" class="btn-close btn-close-white"
-                        data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body text-center py-4">
                     <i class="fa-solid fa-trash-can fa-3x text-danger mb-3"></i>
                     <h5 class="mb-2">¿Desea eliminar este recibo?</h5>
-                    <p class="text-muted small mb-0">El recibo será marcado como inactivo y no aparecerá en el historial.</p>
+                    <p class="text-muted small mb-0">El recibo será marcado como inactivo y no aparecerá en el
+                        historial.</p>
                 </div>
                 <div class="modal-footer justify-content-center border-0 pb-4">
-                    <button type="button" class="btn btn-secondary px-5 fw-bold"
-                        data-bs-dismiss="modal">No, cancelar</button>
-                    <button type="button" class="btn btn-danger px-5 fw-bold"
-                        onclick="confirmarEliminarFactura()">Sí, eliminar</button>
+                    <button type="button" class="btn btn-secondary px-5 fw-bold" data-bs-dismiss="modal">No,
+                        cancelar</button>
+                    <button type="button" class="btn btn-danger px-5 fw-bold" onclick="confirmarEliminarFactura()">Sí,
+                        eliminar</button>
                 </div>
             </div>
         </div>
@@ -371,17 +413,17 @@
         // -------------------------------------------------------
         function formatearFecha(valor) {
             let d = valor.replace(/\D/g, '').substring(0, 8);
-            if (d.length <= 2)  return d;
-            if (d.length <= 4)  return d.substring(0, 2) + '-' + d.substring(2);
+            if (d.length <= 2) return d;
+            if (d.length <= 4) return d.substring(0, 2) + '-' + d.substring(2);
             return d.substring(0, 2) + '-' + d.substring(2, 4) + '-' + d.substring(4);
         }
 
         function aplicarFormatoFecha(input) {
-            const pos   = input.selectionStart;
+            const pos = input.selectionStart;
             const antes = input.value;
             const nuevo = formatearFecha(antes);
             input.value = nuevo;
-            const diff  = nuevo.length - antes.length;
+            const diff = nuevo.length - antes.length;
             input.setSelectionRange(pos + diff, pos + diff);
         }
 
@@ -397,7 +439,7 @@
         function buscarFacturas() {
             if (!window.finanzasController) { alert('Conector Java no disponible.'); return; }
 
-            const termino    = document.getElementById('buscadorFacturas').value.trim();
+            const termino = document.getElementById('buscadorFacturas').value.trim();
             const fechaDesde = ddmmyyyyToISO(document.getElementById('fechaDesdeFacturas').value.trim());
             const fechaHasta = ddmmyyyyToISO(document.getElementById('fechaHastaFacturas').value.trim());
 
@@ -498,7 +540,7 @@
         function abrirModalFactura(facturaJson) {
             document.getElementById('formFactura').reset();
             // Resetear valores numéricos
-            ['fac_suma_neta','fac_total_honorarios','fac_total_retenido','fac_total_neto_recibido']
+            ['fac_suma_neta', 'fac_total_honorarios', 'fac_total_retenido', 'fac_total_neto_recibido']
                 .forEach(id => document.getElementById(id).value = '0.00');
 
             const titulo = document.getElementById('tituloModalFactura');
@@ -524,7 +566,7 @@
             }
 
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalFactura'))
-                       || new bootstrap.Modal(document.getElementById('modalFactura'));
+                || new bootstrap.Modal(document.getElementById('modalFactura'));
             modal.show();
         }
 
@@ -532,9 +574,9 @@
         // CÁLCULO AUTOMÁTICO DEL NETO
         // -------------------------------------------------------
         function calcularNetoFactura() {
-            const neta       = parseFloat(document.getElementById('fac_suma_neta').value)          || 0;
-            const honorarios = parseFloat(document.getElementById('fac_total_honorarios').value)    || 0;
-            const retenido   = parseFloat(document.getElementById('fac_total_retenido').value)      || 0;
+            const neta = parseFloat(document.getElementById('fac_suma_neta').value) || 0;
+            const honorarios = parseFloat(document.getElementById('fac_total_honorarios').value) || 0;
+            const retenido = parseFloat(document.getElementById('fac_total_retenido').value) || 0;
             document.getElementById('fac_total_neto_recibido').value = ((neta + honorarios) - retenido).toFixed(2);
         }
 
@@ -544,28 +586,28 @@
         function guardarFactura() {
             if (!window.finanzasController) { alert('Conector Java no encontrado.'); return; }
 
-            const id          = document.getElementById('fac_id').value;
-            const idPaciente  = document.getElementById('fac_id_paciente').value;
-            const fechaEmision= document.getElementById('fac_fecha_emision').value.trim();
-            const concepto    = document.getElementById('fac_concepto').value.trim();
-            const neto        = parseFloat(document.getElementById('fac_total_neto_recibido').value) || 0;
+            const id = document.getElementById('fac_id').value;
+            const idPaciente = document.getElementById('fac_id_paciente').value;
+            const fechaEmision = document.getElementById('fac_fecha_emision').value.trim();
+            const concepto = document.getElementById('fac_concepto').value.trim();
+            const neto = parseFloat(document.getElementById('fac_total_neto_recibido').value) || 0;
 
             if (!idPaciente) { alert('Debe seleccionar un paciente.'); return; }
             if (!fechaEmision) { alert('La fecha de emisión es obligatoria.'); return; }
             if (!concepto) { alert('El concepto es obligatorio.'); return; }
 
             const data = {
-                id_factura:           id ? parseInt(id) : null,
-                numero_recibo:        document.getElementById('fac_numero_recibo').value.trim(),
-                id_paciente:          parseInt(idPaciente),
-                rtn_cliente:          document.getElementById('fac_rtn_cliente').value.trim(),
-                fecha_emision:        fechaEmision,
-                concepto:             concepto,
-                suma_neta:            parseFloat(document.getElementById('fac_suma_neta').value)         || 0,
-                total_honorarios:     parseFloat(document.getElementById('fac_total_honorarios').value)  || 0,
-                total_retenido:       parseFloat(document.getElementById('fac_total_retenido').value)    || 0,
-                total_neto_recibido:  neto,
-                metodo_pago:          document.getElementById('fac_metodo_pago').value
+                id_factura: id ? parseInt(id) : null,
+                numero_recibo: document.getElementById('fac_numero_recibo').value.trim(),
+                id_paciente: parseInt(idPaciente),
+                rtn_cliente: document.getElementById('fac_rtn_cliente').value.trim(),
+                fecha_emision: fechaEmision,
+                concepto: concepto,
+                suma_neta: parseFloat(document.getElementById('fac_suma_neta').value) || 0,
+                total_honorarios: parseFloat(document.getElementById('fac_total_honorarios').value) || 0,
+                total_retenido: parseFloat(document.getElementById('fac_total_retenido').value) || 0,
+                total_neto_recibido: neto,
+                metodo_pago: document.getElementById('fac_metodo_pago').value
             };
 
             let respuesta;
@@ -590,7 +632,7 @@
         function pedirEliminarFactura(id) {
             idFacturaEliminar = id;
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminarFactura'))
-                       || new bootstrap.Modal(document.getElementById('modalEliminarFactura'));
+                || new bootstrap.Modal(document.getElementById('modalEliminarFactura'));
             modal.show();
         }
 
@@ -610,8 +652,9 @@
         // -------------------------------------------------------
         function escHtml(str) {
             if (!str) return '';
-            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
     </script>
 </body>
+
 </html>
