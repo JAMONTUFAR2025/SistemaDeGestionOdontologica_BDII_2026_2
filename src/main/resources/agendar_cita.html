@@ -230,7 +230,7 @@
 
                         <div class="form-group">
                             <label>Doctor / Especialista:*</label>
-                            <select id="id_medico" name="id_medico" required>
+                            <select id="id_medico" name="id_medico" required style="width: 100%;">
                                 <option value="">-- Seleccionar Doctor --</option>
                             </select>
                         </div>
@@ -470,6 +470,10 @@
         $(document).ready(function () {
             $('#identidad_paciente').select2({
                 placeholder: "-- Buscar o seleccionar paciente --",
+                allowClear: true
+            });
+            $('#id_medico').select2({
+                placeholder: "-- Seleccionar Doctor --",
                 allowClear: true
             });
 
