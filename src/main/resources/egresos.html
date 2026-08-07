@@ -276,6 +276,11 @@
             const fechaDesde = document.getElementById('fechaDesdeEgresos').value;
             const fechaHasta = document.getElementById('fechaHastaEgresos').value;
 
+            if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Seleccione un rango valido', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Seleccione un rango valido');
+                return;
+            }
+
             const filtros = JSON.stringify({ termino, fechaDesde, fechaHasta });
 
             try {
