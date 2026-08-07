@@ -7,7 +7,30 @@
     <title>Historia Clínica - Clínica SOE</title>
     <link href="application/assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="application/assets/css/all.min.css" rel="stylesheet">
+    <!-- jQuery y Select2 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <style>
+        /* Ajuste de altura para Select2 en input-group-lg */
+        .input-group-lg .select2-container .select2-selection--single {
+            height: 48px !important;
+            display: flex;
+            align-items: center;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border: 1px solid #ced4da;
+            padding-left: 10px;
+        }
+        .input-group-lg .select2-container .select2-selection__arrow {
+            height: 46px !important;
+            right: 5px !important;
+        }
+        .input-group-lg .select2-container .select2-selection__clear {
+            height: 46px !important;
+            line-height: 46px !important;
+            margin-right: 15px;
+        }
         html,
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -279,9 +302,10 @@
                             <i class="fa-solid fa-magnifying-glass me-2"></i>Buscar Expediente de Paciente
                         </h4>
                         <div class="input-group input-group-lg shadow-sm">
-                            <input type="text" id="inputBuscar" class="form-control"
-                                placeholder="Ingrese el DNI del Paciente (Ej: 1601-2010-00271)...">
-                            <button class="btn btn-primary px-4" type="button" onclick="buscarExpediente()">
+                            <select id="inputBuscar" class="form-control" style="width: 70%; border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                                <option value="">-- Buscar paciente --</option>
+                            </select>
+                            <button class="btn btn-primary px-4" type="button" onclick="buscarExpediente()" style="width: 30%;">
                                 <i class="fa-solid fa-magnifying-glass me-2"></i>Buscar
                             </button>
                         </div>
@@ -767,11 +791,7 @@
             inicializarOdontograma();
             cargarMedicosSelector();
 
-            const inputBuscar = document.getElementById('inputBuscar');
-            inputBuscar.addEventListener('input', () => aplicarFormatoDNI(inputBuscar));
-            inputBuscar.addEventListener('keypress', e => {
-                if (e.key === 'Enter') buscarExpediente();
-            });
+            // Input buscar es ahora Select2, no requiere listeners de teclado nativos.
 
             const hcIdentidad = document.getElementById('hc_identidad');
             if (hcIdentidad) {
@@ -1510,6 +1530,31 @@
                 .replace(/&/g, '&amp;').replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
+        
+        $(document).ready(function () {
+            $('#inputBuscar').select2({
+                placeholder: "-- Buscar expediente de paciente --",
+                allowClear: true
+            });
+
+            if (window.pacienteController) {
+                try {
+                    let pacientesJson = window.pacienteController.obtenerPacientes();
+                    let pacientes = JSON.parse(pacientesJson);
+                    let selPaciente = document.getElementById("inputBuscar");
+                    pacientes.forEach(p => {
+                        let opt = new Option(p.nombreCompleto + " (" + p.identidad + ")", p.identidad);
+                        selPaciente.appendChild(opt);
+                    });
+                } catch (e) {
+                    console.error("Error cargando pacientes para buscar:", e);
+                }
+            }
+
+            $('#inputBuscar').on('select2:select', function (e) {
+                buscarExpediente();
+            });
+        });
     </script>
 </body>
 
