@@ -96,7 +96,8 @@
             color: white;
         }
     </style>
-</head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    </head>
 
 <body>
 
@@ -213,8 +214,8 @@
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label for="fecha_nacimiento">Fecha de nacimiento:</label>
-                                <input type="text" id="fecha_nacimiento" name="fechaNacimiento" class="form-control"
-                                    placeholder="DD-MM-AAAA">
+                                <input type="date" id="fecha_nacimiento" name="fechaNacimiento" class="form-control"
+                                    required>
                             </div>
                         </div>
 
@@ -357,20 +358,20 @@
                     const y = p.fechaNacimiento.year;
                     const m = String(p.fechaNacimiento.month).padStart(2, '0');
                     const d = String(p.fechaNacimiento.day).padStart(2, '0');
-                    fechaStr = `${d}-${m}-${y}`;
+                    fechaStr = `${y}-${m}-${d}`;
                 } else {
                     const partes = p.fechaNacimiento.split('-');
                     if (partes.length === 3) {
                         if (partes[0].length === 4) {
-                            fechaStr = `${partes[2]}-${partes[1]}-${partes[0]}`;
-                        } else {
                             fechaStr = `${partes[0]}-${partes[1]}-${partes[2]}`;
+                        } else {
+                            fechaStr = `${partes[2]}-${partes[1]}-${partes[0]}`;
                         }
                     }
                 }
             }
             document.getElementById('fecha_nacimiento').value = fechaStr;
-            if (fechaStr.length === 10) {
+            if (fechaStr) {
                 calcularEdad(fechaStr);
             }
             document.getElementById('genero').value = p.genero || 'M';
@@ -546,33 +547,16 @@
             e.target.value = newVal;
         }
 
-        function formatFecha(e) {
-            let val = e.target.value.replace(/\D/g, '');
-            let newVal = '';
-            if (val.length > 0) {
-                newVal += val.substring(0, 2);
-            }
-            if (val.length >= 3) {
-                newVal += '-' + val.substring(2, 4);
-            }
-            if (val.length >= 5) {
-                newVal += '-' + val.substring(4, 8);
-            }
-            e.target.value = newVal;
-
-            if (newVal.length === 10) {
-                calcularEdad(newVal);
-            } else {
-                document.getElementById('edad').value = '';
-            }
-        }
-
         function calcularEdad(fechaStr) {
+            if (!fechaStr) {
+                document.getElementById('edad').value = '';
+                return;
+            }
             const partes = fechaStr.split('-');
             if (partes.length === 3) {
-                const dia = parseInt(partes[0], 10);
+                const ano = parseInt(partes[0], 10);
                 const mes = parseInt(partes[1], 10) - 1;
-                const ano = parseInt(partes[2], 10);
+                const dia = parseInt(partes[2], 10);
                 if (!isNaN(dia) && !isNaN(mes) && !isNaN(ano)) {
                     const cumpleanos = new Date(ano, mes, dia);
                     const hoy = new Date();
@@ -608,8 +592,7 @@
                 inputTelefonoResp.maxLength = 9;
             }
             if (inputFechaNacimiento) {
-                inputFechaNacimiento.addEventListener('input', formatFecha);
-                inputFechaNacimiento.maxLength = 10;
+                inputFechaNacimiento.addEventListener('change', (e) => calcularEdad(e.target.value));
             }
         });
     </script>
@@ -620,6 +603,16 @@
     <!-- Tu script actual de Bootstrap -->
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if(typeof flatpickr !== 'undefined') {
+      flatpickr('#fecha_nacimiento');
+    }
+  });
+</script>
 </body>
 
 </html>
+

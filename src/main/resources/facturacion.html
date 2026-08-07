@@ -161,7 +161,8 @@
             font-size: 0.97rem;
         }
     </style>
-</head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    </head>
 
 <body>
 
@@ -188,14 +189,12 @@
                 <div>
                     <label for="fechaDesdeFacturas" class="form-label fw-bold text-dark mb-1"
                         style="font-size:0.85rem;">Desde:</label>
-                    <input type="text" id="fechaDesdeFacturas" class="form-control" style="width: 145px;"
-                        placeholder="DD-MM-YYYY" maxlength="10">
+                    <input type="date" id="fechaDesdeFacturas" class="form-control" style="width: 145px;">
                 </div>
                 <div>
                     <label for="fechaHastaFacturas" class="form-label fw-bold text-dark mb-1"
                         style="font-size:0.85rem;">Hasta:</label>
-                    <input type="text" id="fechaHastaFacturas" class="form-control" style="width: 145px;"
-                        placeholder="DD-MM-YYYY" maxlength="10">
+                    <input type="date" id="fechaHastaFacturas" class="form-control" style="width: 145px;">
                 </div>
                 <button class="btn text-white" onclick="buscarFacturas()"
                     style="height: 38px; background-color: #28a745; border-color: #28a745;">
@@ -400,41 +399,17 @@
             cargarFacturas();
             cargarPacientesSelector();
 
-            // Auto-formato de fecha (DD-MM-YYYY) — solo formatea, no busca
-            const inputDesde = document.getElementById('fechaDesdeFacturas');
-            const inputHasta = document.getElementById('fechaHastaFacturas');
-            inputDesde.addEventListener('input', () => aplicarFormatoFecha(inputDesde));
-            inputHasta.addEventListener('input', () => aplicarFormatoFecha(inputHasta));
-
             // Enter en cualquier campo dispara la búsqueda
-            [document.getElementById('buscadorFacturas'), inputDesde, inputHasta]
-                .forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') buscarFacturas(); }));
+            [
+                document.getElementById('buscadorFacturas'),
+                document.getElementById('fechaDesdeFacturas'),
+                document.getElementById('fechaHastaFacturas')
+            ].forEach(el => {
+                if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') buscarFacturas(); });
+            });
         });
 
-        // -------------------------------------------------------
-        // FORMATO DE FECHA (DD-MM-YYYY)
-        // -------------------------------------------------------
-        function formatearFecha(valor) {
-            let d = valor.replace(/\D/g, '').substring(0, 8);
-            if (d.length <= 2) return d;
-            if (d.length <= 4) return d.substring(0, 2) + '-' + d.substring(2);
-            return d.substring(0, 2) + '-' + d.substring(2, 4) + '-' + d.substring(4);
-        }
 
-        function aplicarFormatoFecha(input) {
-            const pos = input.selectionStart;
-            const antes = input.value;
-            const nuevo = formatearFecha(antes);
-            input.value = nuevo;
-            const diff = nuevo.length - antes.length;
-            input.setSelectionRange(pos + diff, pos + diff);
-        }
-
-        // Convierte DD-MM-YYYY → YYYY-MM-DD para la BD
-        function ddmmyyyyToISO(str) {
-            if (!str || str.length < 10) return '';
-            return str.substring(6) + '-' + str.substring(3, 5) + '-' + str.substring(0, 2);
-        }
 
         // -------------------------------------------------------
         // BÚSQL CON FILTROS (llamada al backend Java)
@@ -443,8 +418,8 @@
             if (!window.finanzasController) { alert('Conector Java no disponible.'); return; }
 
             const termino = document.getElementById('buscadorFacturas').value.trim();
-            const fechaDesde = ddmmyyyyToISO(document.getElementById('fechaDesdeFacturas').value.trim());
-            const fechaHasta = ddmmyyyyToISO(document.getElementById('fechaHastaFacturas').value.trim());
+            const fechaDesde = document.getElementById('fechaDesdeFacturas').value;
+            const fechaHasta = document.getElementById('fechaHastaFacturas').value;
 
             const filtros = JSON.stringify({ termino, fechaDesde, fechaHasta });
 
@@ -658,6 +633,18 @@
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
     </script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if(typeof flatpickr !== 'undefined') {
+      flatpickr('#fechaDesdeFacturas');
+      flatpickr('#fechaHastaFacturas');
+      flatpickr('#fac_fecha_emision');
+    }
+  });
+</script>
 </body>
 
 </html>
+

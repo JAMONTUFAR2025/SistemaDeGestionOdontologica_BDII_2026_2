@@ -174,7 +174,8 @@
             background: #0056b3;
         }
     </style>
-</head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    </head>
 
 <body>
 
@@ -602,6 +603,17 @@
             $('#modalPaciente').hide();
         }
     </script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if(typeof flatpickr !== 'undefined') {
+      flatpickr('#fecha_cita');
+      flatpickr('#modal_fecha_nac');
+    }
+  });
+</script>
 </body>
 
 </html>
+
