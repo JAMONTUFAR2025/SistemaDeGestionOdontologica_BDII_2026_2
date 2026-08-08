@@ -13,7 +13,8 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        html, body {
+        html,
+        body {
             background: url('fondo-clinica.jpg') no-repeat center center;
             background-size: cover;
             background-color: #e9f0f5;
@@ -227,6 +228,9 @@
         </div>
     </div>
 
+    <!-- Librería local SweetAlert2 v10 (Compatible con JavaFX) -->
+    <script src="application/assets/js/sweetalert2.all.min.js"></script>
+
     <script>
         // Variables globales para guardar el estado del proceso
         var correoUsuarioActual = "";
@@ -264,12 +268,31 @@
             if ((window.personalController && window.authController)) {
                 var exito = window.authController.login(correo, pass);
                 if (exito) {
-                    window.location.href = 'menu.html';
+                    Swal.fire({
+                        title: '¡Bienvenido!',
+                        text: 'Inicio de sesión exitoso.',
+                        icon: 'success',
+                        confirmButtonText: 'Continuar',
+                        confirmButtonColor: '#28a745'
+                    }).then((result) => {
+                        window.location.href = 'menu.html';
+                    });
                 } else {
-                    alert("Credenciales incorrectas o usuario inactivo.");
+                    Swal.fire({
+                        title: 'Acceso Denegado',
+                        text: 'Credenciales incorrectas o usuario inactivo.',
+                        icon: 'error',
+                        confirmButtonText: 'Intentar de nuevo',
+                        confirmButtonColor: '#dc3545'
+                    });
                 }
             } else {
-                alert("Error: El puente con Java no está inicializado.");
+                Swal.fire({
+                    title: 'Error de Conexión',
+                    text: 'El puente con Java no está inicializado.',
+                    icon: 'warning',
+                    confirmButtonColor: '#ffc107'
+                });
             }
         }
 
@@ -278,26 +301,45 @@
             var correo = document.getElementById('recovery-input').value;
 
             if ((window.personalController && window.authController)) {
-                // Notificar al usuario que estamos cargando (puede tardar un par de segundos en enviar el correo)
                 document.querySelector('#recovery-section button').innerText = "Enviando...";
                 document.querySelector('#recovery-section button').disabled = true;
 
                 setTimeout(function () {
                     var respuesta = window.authController.enviarCodigoRecuperacion(correo);
                     var partes = respuesta.split("|");
-                    alert(partes[1]);
 
                     document.querySelector('#recovery-section button').innerText = "Enviar Código";
                     document.querySelector('#recovery-section button').disabled = false;
 
                     if (partes[0] === "OK") {
-                        correoUsuarioActual = correo; // Guardamos el correo en memoria
-                        ocultarTodasLasSecciones();
-                        document.getElementById('code-section').classList.remove('hidden');
+                        Swal.fire({
+                            title: 'Correo Enviado',
+                            text: partes[1],
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar',
+                            confirmButtonColor: '#28a745'
+                        }).then(() => {
+                            correoUsuarioActual = correo;
+                            ocultarTodasLasSecciones();
+                            document.getElementById('code-section').classList.remove('hidden');
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Atención',
+                            text: partes[1],
+                            icon: 'error',
+                            confirmButtonText: 'Revisar',
+                            confirmButtonColor: '#dc3545'
+                        });
                     }
-                }, 100); // Pequeño delay para que la UI se actualice a "Enviando..."
+                }, 100);
             } else {
-                alert("Error: El puente con Java no está inicializado.");
+                Swal.fire({
+                    title: 'Error de Conexión',
+                    text: 'El puente con Java não está inicializado.',
+                    icon: 'warning',
+                    confirmButtonColor: '#ffc107'
+                });
             }
         }
 
@@ -310,11 +352,17 @@
                 var partes = respuesta.split("|");
 
                 if (partes[0] === "OK") {
-                    codigoRecuperacionActual = codigo; // Guardamos el codigo validado
+                    codigoRecuperacionActual = codigo;
                     ocultarTodasLasSecciones();
                     document.getElementById('new-password-section').classList.remove('hidden');
                 } else {
-                    alert(partes[1]); // Mostrar el error
+                    Swal.fire({
+                        title: 'Código Incorrecto',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Intentar',
+                        confirmButtonColor: '#dc3545'
+                    });
                 }
             }
         }
@@ -325,17 +373,38 @@
             var pass2 = document.getElementById('confirm-password').value;
 
             if (pass1 !== pass2) {
-                alert("Las contraseñas no coinciden. Por favor, verifícalas.");
+                Swal.fire({
+                    title: 'Contraseñas no coinciden',
+                    text: 'Por favor, verifícalas.',
+                    icon: 'warning',
+                    confirmButtonText: 'Corregir',
+                    confirmButtonColor: '#ffc107'
+                });
                 return;
             }
 
             if ((window.personalController && window.authController)) {
                 var respuesta = window.authController.restablecerContrasenia(correoUsuarioActual, codigoRecuperacionActual, pass1);
                 var partes = respuesta.split("|");
-                alert(partes[1]);
 
                 if (partes[0] === "OK") {
-                    mostrarLogin(); // Lo regresamos al login para que entre con su nueva contraseña
+                    Swal.fire({
+                        title: '¡Contraseña Actualizada!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Iniciar Sesión',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        mostrarLogin();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#dc3545'
+                    });
                 }
             }
         }
@@ -345,7 +414,7 @@
             const inputCode = document.getElementById('code-input');
             if (inputCode) {
                 inputCode.addEventListener('input', function (e) {
-                    this.value = this.value.replace(/\D/g, ''); // Quita todo lo que no sea numero
+                    this.value = this.value.replace(/\D/g, '');
                 });
             }
 
@@ -358,7 +427,7 @@
         // Lógica de Autocompletado (Sugerencias)
         // ==========================================
         var correosGuardados = [];
-        
+
         function cargarCorreosSiEsNecesario() {
             if (correosGuardados.length === 0 && (window.personalController && window.authController)) {
                 var jsonCorreos = window.personalController.obtenerCorreosActivos();
@@ -396,7 +465,6 @@
                 }
             });
 
-            // Si dan clic para ver sugerencias aunque no hayan escrito nada
             inp.addEventListener("click", function (e) {
                 cargarCorreosSiEsNecesario();
                 if (this.value == "") {
@@ -432,6 +500,9 @@
             closeAllLists(e.target);
         });
     </script>
+
+    <!-- Librería local SweetAlert2 v10 (Compatible con JavaFX) -->
+    <script src="application/assets/js/sweetalert2.all.min.js"></script>
 
 </body>
 

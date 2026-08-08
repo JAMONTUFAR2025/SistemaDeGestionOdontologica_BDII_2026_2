@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facturación y Recibos - SOE Odontología</title>
+    <title>Facturación - SOE Odontología</title>
     <!-- Estilos locales (Offline) -->
     <link href="application/assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="application/assets/css/all.min.css" rel="stylesheet">
     <style>
         /* === ESTILOS GENERALES === */
-        html, body {
+        html,
+        body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('fondo-clinica.jpg');
             background-size: cover;
@@ -79,7 +81,7 @@
         }
 
         .modal-header-verde {
-            background: linear-gradient(135deg, #198754, #20c997);
+            background: linear-gradient(135deg, #28a745, #28a745);
             color: white;
             border-top-left-radius: 14px;
             border-top-right-radius: 14px;
@@ -95,7 +97,7 @@
         }
 
         .btn-guardar-verde {
-            background-color: #198754;
+            background-color: #28a745;
             color: white;
             font-weight: bold;
             padding: 10px;
@@ -104,13 +106,17 @@
             border-radius: 6px;
             transition: background 0.2s;
         }
-        .btn-guardar-verde:hover { background-color: #146c43; color: white; }
+
+        .btn-guardar-verde:hover {
+            background-color: #28a745;
+            color: white;
+        }
 
         .section-title {
-            color: #198754;
+            color: #28a745;
             font-weight: 700;
             margin-bottom: 14px;
-            border-bottom: 2px solid #198754;
+            border-bottom: 2px solid #28a745;
             padding-bottom: 5px;
             font-size: 1rem;
         }
@@ -122,36 +128,77 @@
             border-radius: 20px;
             font-weight: 600;
         }
-        .badge-efectivo    { background-color: #d1fae5; color: #065f46; }
-        .badge-transferencia { background-color: #dbeafe; color: #1e40af; }
-        .badge-pos         { background-color: #ede9fe; color: #5b21b6; }
 
-        .neto-col { color: #198754; font-weight: 700; font-size: 0.97rem; }
+        .badge-efectivo {
+            background-color: #d1fae5;
+            color: #28a745;
+        }
+
+        .badge-transferencia {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-pos {
+            background-color: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .neto-col {
+            color: #28a745;
+            font-weight: 700;
+            font-size: 0.97rem;
+        }
     </style>
-</head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    </head>
+
 <body>
 
     <div class="container card-container">
 
         <!-- Encabezado -->
-        <a href="menu.html" class="text-decoration-none mb-3 d-inline-block fw-bold" style="color: #198754;">
+        <a href="menu.html" class="text-decoration-none mb-3 d-inline-block fw-bold" style="color: #28a745;">
             ← Volver al Menú Principal
         </a>
 
-        <h3 class="fw-bold text-start mb-4" style="color: #198754;">
-            <i class="fa-solid fa-file-invoice-dollar"></i> Facturación y Recibos
+        <h3 class="fw-bold text-start mb-4" style="color: #28a745;">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Facturación
         </h3>
 
-        <!-- Barra de búsqueda + botón Nuevo -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="d-flex align-items-center gap-2">
-                <label for="buscadorFacturas" class="fw-bold text-dark mb-0">Buscar:</label>
-                <input type="text" id="buscadorFacturas" class="form-control" style="width: 260px;"
-                    placeholder="Nombre, recibo, concepto...">
+        <!-- Barra de búsqueda + filtro fechas + botón Nuevo -->
+        <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+            <div class="d-flex flex-wrap align-items-end gap-2">
+                <div>
+                    <label for="buscadorFacturas" class="form-label fw-bold text-dark mb-1"
+                        style="font-size:0.85rem;">Buscar:</label>
+                    <input type="text" id="buscadorFacturas" class="form-control" style="width: 220px;"
+                        placeholder="Nombre, recibo, concepto...">
+                </div>
+                <div>
+                    <label for="fechaDesdeFacturas" class="form-label fw-bold text-dark mb-1"
+                        style="font-size:0.85rem;">Desde:</label>
+                    <input type="date" id="fechaDesdeFacturas" class="form-control" style="width: 145px;">
+                </div>
+                <div>
+                    <label for="fechaHastaFacturas" class="form-label fw-bold text-dark mb-1"
+                        style="font-size:0.85rem;">Hasta:</label>
+                    <input type="date" id="fechaHastaFacturas" class="form-control" style="width: 145px;">
+                </div>
+                <button class="btn text-white" onclick="buscarFacturas()"
+                    style="height: 38px; background-color: #28a745; border-color: #28a745;">
+                    <i class="fas fa-search me-1"></i>Buscar
+                </button>
+                <button class="btn btn-outline-secondary" onclick="limpiarFiltrosFacturas()" title="Limpiar filtros"
+                    style="height:38px;">
+                    <i class="fas fa-times me-1"></i>Limpiar
+                </button>
             </div>
-            <button class="btn btn-success fw-bold" onclick="abrirModalFactura(null)">
+            <button class="btn fw-bold text-white" onclick="abrirModalFactura(null)"
+                style="background-color: #28a745; border-color: #28a745;">
                 <i class="fas fa-plus me-1"></i> Nuevo Recibo
             </button>
+
         </div>
 
         <!-- Tabla de recibos -->
@@ -187,7 +234,8 @@
                     <h5 class="modal-title fw-bold" id="tituloModalFactura">
                         <i class="fa-solid fa-cash-register me-2"></i> Nuevo Recibo / Factura
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body p-4">
                     <form id="formFactura" autocomplete="off">
@@ -200,14 +248,17 @@
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold">N° Recibo:</label>
-                                <input type="text" id="fac_numero_recibo" class="form-control" placeholder="Ej: REC-001">
+                                <input type="text" id="fac_numero_recibo" class="form-control"
+                                    placeholder="Ej: REC-001">
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Fecha Emisión: <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">Fecha Emisión: <span
+                                        class="text-danger">*</span></label>
                                 <input type="date" id="fac_fecha_emision" class="form-control" required>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Método de Pago: <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">Método de Pago: <span
+                                        class="text-danger">*</span></label>
                                 <select id="fac_metodo_pago" class="form-select">
                                     <option value="Efectivo">Efectivo</option>
                                     <option value="Transferencia">Transferencia</option>
@@ -250,18 +301,18 @@
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold">Suma Neta:</label>
-                                <input type="number" step="0.01" min="0" id="fac_suma_neta"
-                                    class="form-control" value="0.00" oninput="calcularNetoFactura()">
+                                <input type="number" step="0.01" min="0" id="fac_suma_neta" class="form-control"
+                                    value="0.00" oninput="calcularNetoFactura()">
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold">Total Honorarios:</label>
-                                <input type="number" step="0.01" min="0" id="fac_total_honorarios"
-                                    class="form-control" value="0.00" oninput="calcularNetoFactura()">
+                                <input type="number" step="0.01" min="0" id="fac_total_honorarios" class="form-control"
+                                    value="0.00" oninput="calcularNetoFactura()">
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold">Total Retenido:</label>
-                                <input type="number" step="0.01" min="0" id="fac_total_retenido"
-                                    class="form-control" value="0.00" oninput="calcularNetoFactura()">
+                                <input type="number" step="0.01" min="0" id="fac_total_retenido" class="form-control"
+                                    value="0.00" oninput="calcularNetoFactura()">
                             </div>
                         </div>
                         <div class="row">
@@ -306,8 +357,8 @@
                     <h5 class="modal-title fw-bold">
                         <i class="fas fa-exclamation-triangle me-2"></i> Confirmar Anulación
                     </h5>
-                    <button type="button" class="btn-close btn-close-white"
-                        data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body text-center py-4">
                     <i class="fa-solid fa-ban fa-3x text-danger mb-3"></i>
@@ -326,6 +377,7 @@
 
     <!-- Scripts -->
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="application/assets/js/sweetalert2.all.min.js"></script>
     <script>
         let facturasLista = [];
         let idFacturaAnular = null;
@@ -337,16 +389,50 @@
             cargarFacturas();
             cargarPacientesSelector();
 
-            // Buscador en tiempo real
-            document.getElementById('buscadorFacturas').addEventListener('input', function () {
-                const term = this.value.toLowerCase();
-                const trs = document.getElementById('tablaFacturasBody').querySelectorAll('tr');
-                trs.forEach(tr => {
-                    if (tr.children.length <= 1) return;
-                    tr.style.display = tr.innerText.toLowerCase().includes(term) ? '' : 'none';
-                });
+            // Enter en cualquier campo dispara la búsqueda
+            [
+                document.getElementById('buscadorFacturas'),
+                document.getElementById('fechaDesdeFacturas'),
+                document.getElementById('fechaHastaFacturas')
+            ].forEach(el => {
+                if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') buscarFacturas(); });
             });
         });
+
+
+
+        // -------------------------------------------------------
+        // BÚSQL CON FILTROS (llamada al backend Java)
+        // -------------------------------------------------------
+        function buscarFacturas() {
+            if (!window.finanzasController) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Conector Java no disponible.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Conector Java no disponible.'); return; }
+
+            const termino = document.getElementById('buscadorFacturas').value.trim();
+            const fechaDesde = document.getElementById('fechaDesdeFacturas').value;
+            const fechaHasta = document.getElementById('fechaHastaFacturas').value;
+
+            if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Seleccione un rango valido', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Seleccione un rango valido');
+                return;
+            }
+
+            const filtros = JSON.stringify({ termino, fechaDesde, fechaHasta });
+
+            try {
+                const json = window.finanzasController.buscarRecibos(filtros);
+                const lista = JSON.parse(json || '[]');
+                renderTablaFacturas(lista);
+            } catch (e) {
+                console.error('Error al buscar facturas:', e);
+            }
+        }
+
+        function limpiarFiltrosFacturas() {
+            document.getElementById('buscadorFacturas').value = '';
+            document.getElementById('fechaDesdeFacturas').value = '';
+            document.getElementById('fechaHastaFacturas').value = '';
+            cargarFacturas(); // recarga la lista completa desde el backend
+        }
 
         // -------------------------------------------------------
         // CARGAR DATOS DEL BACKEND
@@ -385,7 +471,7 @@
         function renderTablaFacturas(lista) {
             const tbody = document.getElementById('tablaFacturasBody');
             if (!lista || lista.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No hay recibos activos registrados.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No se encontraron recibos con los filtros aplicados.</td></tr>';
                 return;
             }
 
@@ -419,10 +505,6 @@
                     </tr>`;
             });
             tbody.innerHTML = html;
-
-            // Reaplicar filtro si hay búsqueda activa
-            const term = document.getElementById('buscadorFacturas').value.toLowerCase();
-            if (term) document.getElementById('buscadorFacturas').dispatchEvent(new Event('input'));
         }
 
         // -------------------------------------------------------
@@ -435,7 +517,7 @@
         function abrirModalFactura(facturaJson, isView = false) {
             document.getElementById('formFactura').reset();
             // Resetear valores numéricos
-            ['fac_suma_neta','fac_total_honorarios','fac_total_retenido','fac_total_neto_recibido']
+            ['fac_suma_neta', 'fac_total_honorarios', 'fac_total_retenido', 'fac_total_neto_recibido']
                 .forEach(id => document.getElementById(id).value = '0.00');
 
             const titulo = document.getElementById('tituloModalFactura');
@@ -474,7 +556,7 @@
             inputs.forEach(input => input.disabled = isView);
 
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalFactura'))
-                       || new bootstrap.Modal(document.getElementById('modalFactura'));
+                || new bootstrap.Modal(document.getElementById('modalFactura'));
             modal.show();
         }
 
@@ -482,9 +564,9 @@
         // CÁLCULO AUTOMÁTICO DEL NETO
         // -------------------------------------------------------
         function calcularNetoFactura() {
-            const neta       = parseFloat(document.getElementById('fac_suma_neta').value)          || 0;
-            const honorarios = parseFloat(document.getElementById('fac_total_honorarios').value)    || 0;
-            const retenido   = parseFloat(document.getElementById('fac_total_retenido').value)      || 0;
+            const neta = parseFloat(document.getElementById('fac_suma_neta').value) || 0;
+            const honorarios = parseFloat(document.getElementById('fac_total_honorarios').value) || 0;
+            const retenido = parseFloat(document.getElementById('fac_total_retenido').value) || 0;
             document.getElementById('fac_total_neto_recibido').value = ((neta + honorarios) - retenido).toFixed(2);
         }
 
@@ -492,16 +574,16 @@
         // GUARDAR (NUEVO)
         // -------------------------------------------------------
         function guardarFactura() {
-            if (!window.finanzasController) { alert('Conector Java no encontrado.'); return; }
+            if (!window.finanzasController) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Conector Java no encontrado.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Conector Java no encontrado.'); return; }
 
             const idPaciente  = document.getElementById('fac_id_paciente').value;
             const fechaEmision= document.getElementById('fac_fecha_emision').value.trim();
             const concepto    = document.getElementById('fac_concepto').value.trim();
             const neto        = parseFloat(document.getElementById('fac_total_neto_recibido').value) || 0;
 
-            if (!idPaciente) { alert('Debe seleccionar un paciente.'); return; }
-            if (!fechaEmision) { alert('La fecha de emisión es obligatoria.'); return; }
-            if (!concepto) { alert('El concepto es obligatorio.'); return; }
+            if (!idPaciente) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Debe seleccionar un paciente.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Debe seleccionar un paciente.'); return; }
+            if (!fechaEmision) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'La fecha de emisión es obligatoria.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('La fecha de emisión es obligatoria.'); return; }
+            if (!concepto) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'El concepto es obligatorio.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('El concepto es obligatorio.'); return; }
 
             const data = {
                 numero_recibo:        document.getElementById('fac_numero_recibo').value.trim(),
@@ -518,11 +600,13 @@
 
             const respuesta = window.finanzasController.registrarRecibo(JSON.stringify(data));
             const partes = respuesta.split('|');
-            alert(partes[1]);
 
             if (partes[0] === 'OK') {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Éxito', text: partes[1], icon: 'success', confirmButtonColor: '#28a745' }); else alert(partes[1]);
                 bootstrap.Modal.getInstance(document.getElementById('modalFactura')).hide();
                 cargarFacturas();
+            } else {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: partes[1], icon: 'error', confirmButtonColor: '#dc3545' }); else alert(partes[1]);
             }
         }
 
@@ -540,10 +624,12 @@
             if (!window.finanzasController || !idFacturaAnular) return;
             const respuesta = window.finanzasController.anularRecibo(String(idFacturaAnular));
             const partes = respuesta.split('|');
-            alert(partes[1]);
             if (partes[0] === 'OK') {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Éxito', text: partes[1], icon: 'success', confirmButtonColor: '#28a745' }); else alert(partes[1]);
                 bootstrap.Modal.getInstance(document.getElementById('modalAnularFactura')).hide();
                 cargarFacturas();
+            } else {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: partes[1], icon: 'error', confirmButtonColor: '#dc3545' }); else alert(partes[1]);
             }
         }
 
@@ -552,8 +638,21 @@
         // -------------------------------------------------------
         function escHtml(str) {
             if (!str) return '';
-            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
     </script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if(typeof flatpickr !== 'undefined') {
+      flatpickr('#fechaDesdeFacturas');
+      flatpickr('#fechaHastaFacturas');
+      flatpickr('#fac_fecha_emision');
+    }
+  });
+</script>
 </body>
+
 </html>
+

@@ -156,4 +156,81 @@ public class FacturacionReciboDAO {
         }
         return lista;
     }
+
+    // ------------------------------------------------------------------
+    // BÚSQUEDA CON FILTROS DINÁMICOS (texto y/o rango de fechas)
+    // termino    : busca en numero_recibo, nombre_paciente, concepto (LIKE)
+    // fechaDesde : fecha mínima de emisión (YYYY-MM-DD), ignorado si vacío
+    // fechaHasta : fecha máxima de emisión (YYYY-MM-DD), ignorado si vacío
+    // ------------------------------------------------------------------
+    public List<Map<String, Object>> buscarRecibos(String termino, String fechaDesde, String fechaHasta) {
+        List<Map<String, Object>> lista = new ArrayList<>();
+
+        boolean hayTermino   = termino    != null && !termino.trim().isEmpty();
+        boolean hayDesde     = fechaDesde != null && !fechaDesde.trim().isEmpty();
+        boolean hayHasta     = fechaHasta != null && !fechaHasta.trim().isEmpty();
+
+        StringBuilder sb = new StringBuilder(
+            "SELECT fr.id_facturacion_recibos, fr.numero_recibo, fr.id_pacientes, " +
+            "p.nombre_completo AS nombre_paciente, p.identidad AS identidad_paciente, " +
+            "fr.rtn_cliente, fr.fecha_emision, fr.concepto, " +
+            "fr.suma_neta, fr.total_honorarios, fr.total_retenido, " +
+            "fr.total_neto_recibido, fr.metodo_pago " +
+            "FROM Facturacion_Recibos fr " +
+            "INNER JOIN Pacientes p ON fr.id_pacientes = p.id_pacientes " +
+            "WHERE fr.borrado = 'No'"
+        );
+
+        List<Object> params = new ArrayList<>();
+
+        if (hayTermino) {
+            sb.append(" AND (fr.numero_recibo LIKE ? OR p.nombre_completo LIKE ? OR fr.concepto LIKE ?)");
+            String like = "%" + termino.trim() + "%";
+            params.add(like);
+            params.add(like);
+            params.add(like);
+        }
+        if (hayDesde) {
+            sb.append(" AND fr.fecha_emision >= ?");
+            params.add(fechaDesde.trim());
+        }
+        if (hayHasta) {
+            sb.append(" AND fr.fecha_emision <= ?");
+            params.add(fechaHasta.trim());
+        }
+
+        sb.append(" ORDER BY fr.id_facturacion_recibos DESC");
+
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sb.toString())) {
+                for (int i = 0; i < params.size(); i++) {
+                    stmt.setObject(i + 1, params.get(i));
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        Map<String, Object> map = new LinkedHashMap<>();
+                        map.put("id_factura",          rs.getInt("id_facturacion_recibos"));
+                        map.put("numero_recibo",        rs.getString("numero_recibo"));
+                        map.put("id_paciente",          rs.getInt("id_pacientes"));
+                        map.put("nombre_paciente",      rs.getString("nombre_paciente"));
+                        map.put("identidad_paciente",   rs.getString("identidad_paciente"));
+                        map.put("rtn_cliente",          rs.getString("rtn_cliente"));
+                        map.put("fecha_emision",        rs.getString("fecha_emision"));
+                        map.put("concepto",             rs.getString("concepto"));
+                        map.put("suma_neta",            rs.getDouble("suma_neta"));
+                        map.put("total_honorarios",     rs.getDouble("total_honorarios"));
+                        map.put("total_retenido",       rs.getDouble("total_retenido"));
+                        map.put("total_neto_recibido",  rs.getDouble("total_neto_recibido"));
+                        map.put("metodo_pago",          rs.getString("metodo_pago"));
+                        lista.add(map);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al buscar recibos: " + e.getMessage());
+        }
+        return lista;
+    }
 }
+

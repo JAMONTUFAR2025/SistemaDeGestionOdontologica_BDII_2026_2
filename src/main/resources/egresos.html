@@ -106,7 +106,8 @@
             font-size: 1.1rem;
         }
     </style>
-</head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    </head>
 <body>
 
     <div class="container card-container">
@@ -119,12 +120,28 @@
                 <i class="fa-solid fa-wallet"></i> Control de Egresos y Gastos
             </h3>
 
-            <!-- Buscador universal y botón Agregar -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div class="d-flex align-items-center">
-                    <label for="buscadorEgresos" class="me-2 fw-bold text-dark mb-0">Buscar:</label>
-                    <input type="text" id="buscadorEgresos" class="form-control" style="width: 250px;"
-                        placeholder="Escriba para buscar...">
+            <!-- Buscador universal, filtro fechas y botón Agregar -->
+            <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+                <div class="d-flex flex-wrap align-items-end gap-2">
+                    <div>
+                        <label for="buscadorEgresos" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Buscar:</label>
+                        <input type="text" id="buscadorEgresos" class="form-control" style="width: 210px;"
+                            placeholder="Descripción, comprobante...">
+                    </div>
+                    <div>
+                        <label for="fechaDesdeEgresos" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Desde:</label>
+                        <input type="date" id="fechaDesdeEgresos" class="form-control" style="width: 145px;">
+                    </div>
+                    <div>
+                        <label for="fechaHastaEgresos" class="form-label fw-bold text-dark mb-1" style="font-size:0.85rem;">Hasta:</label>
+                        <input type="date" id="fechaHastaEgresos" class="form-control" style="width: 145px;">
+                    </div>
+                    <button class="btn btn-primary" onclick="buscarEgresos()" style="height:38px;">
+                        <i class="fas fa-search me-1"></i>Buscar
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="limpiarFiltrosEgresos()" title="Limpiar filtros" style="height:38px;">
+                        <i class="fas fa-times me-1"></i>Limpiar
+                    </button>
                 </div>
                 <div>
                     <button class="btn btn-primary" onclick="abrirModalEgreso(null)">
@@ -229,23 +246,58 @@
 
     <!-- Scripts -->
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="application/assets/js/sweetalert2.all.min.js"></script>
     <script>
         let egresosLista = [];
         let idEgresoEliminar = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             cargarEgresos();
-            
-            document.getElementById('buscadorEgresos').addEventListener('input', function() {
-                const term = this.value.toLowerCase();
-                const trs = document.getElementById('tablaEgresosBody').querySelectorAll('tr');
-                trs.forEach(tr => {
-                    if (tr.children.length === 1) return; // ignore loading/empty rows
-                    const text = tr.innerText.toLowerCase();
-                    tr.style.display = text.includes(term) ? '' : 'none';
-                });
+
+            // Enter en cualquier campo dispara la búsqueda
+            [
+                document.getElementById('buscadorEgresos'),
+                document.getElementById('fechaDesdeEgresos'),
+                document.getElementById('fechaHastaEgresos')
+            ].forEach(el => {
+                if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') buscarEgresos(); });
             });
         });
+
+
+
+        // -------------------------------------------------------
+        // BÚSQL CON FILTROS (llamada al backend Java)
+        // -------------------------------------------------------
+        function buscarEgresos() {
+            if (!window.finanzasController) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Conector Java no disponible.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Conector Java no disponible.'); return; }
+
+            const termino    = document.getElementById('buscadorEgresos').value.trim();
+            const fechaDesde = document.getElementById('fechaDesdeEgresos').value;
+            const fechaHasta = document.getElementById('fechaHastaEgresos').value;
+
+            if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Seleccione un rango valido', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Seleccione un rango valido');
+                return;
+            }
+
+            const filtros = JSON.stringify({ termino, fechaDesde, fechaHasta });
+
+            try {
+                const json = window.finanzasController.buscarEgresos(filtros);
+                const lista = JSON.parse(json || '[]');
+                renderTabla(lista);
+            } catch (e) {
+                console.error('Error al buscar egresos:', e);
+            }
+        }
+
+        function limpiarFiltrosEgresos() {
+            document.getElementById('buscadorEgresos').value = '';
+            document.getElementById('fechaDesdeEgresos').value = '';
+            document.getElementById('fechaHastaEgresos').value = '';
+            cargarEgresos(); // recarga la lista completa desde el backend
+        }
 
         function abrirModalEgreso(egresoJson) {
             document.getElementById('formEgreso').reset();
@@ -288,7 +340,7 @@
         function renderTabla(lista) {
             const tbody = document.getElementById('tablaEgresosBody');
             if (!lista || lista.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No hay egresos activos registrados.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No se encontraron egresos con los filtros aplicados.</td></tr>';
                 return;
             }
             
@@ -312,15 +364,17 @@
             });
             tbody.innerHTML = html;
             
-            // Reaplicar filtro si hay busqueda
-            const term = document.getElementById('buscadorEgresos').value.toLowerCase();
-            if(term) {
-                document.getElementById('buscadorEgresos').dispatchEvent(new Event('input'));
+            // Reaplicar filtros si hay criterios activos (y no venimos del propio filtro)
+            if (!sinRefiltro) {
+                const term  = document.getElementById('buscadorEgresos').value;
+                const desde = document.getElementById('fechaDesdeEgresos').value;
+                const hasta = document.getElementById('fechaHastaEgresos').value;
+                if (term || desde || hasta) aplicarFiltrosEgresos();
             }
         }
 
         function guardarEgreso() {
-            if ((!window.finanzasController)) { alert('Conector Java no encontrado.'); return; }
+            if ((!window.finanzasController)) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Conector Java no encontrado.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Conector Java no encontrado.'); return; }
             
             const id = document.getElementById('eg_id').value;
             const fecha = document.getElementById('eg_fecha').value;
@@ -329,7 +383,7 @@
             const comprobante = document.getElementById('eg_comprobante').value.trim();
             
             if (!fecha || !descripcion || !monto) {
-                alert('Por favor complete los campos obligatorios (*).');
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor complete los campos obligatorios (*).', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor complete los campos obligatorios (*).');
                 return;
             }
 
@@ -349,11 +403,35 @@
             }
             
             const partes = respuesta.split('|');
-            alert(partes[1]);
-            
             if (partes[0] === 'OK') {
-                bootstrap.Modal.getInstance(document.getElementById('modalAgregarEgreso')).hide();
-                cargarEgresos();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('modalAgregarEgreso')).hide();
+                        cargarEgresos();
+                    });
+                } else {
+                    alert(partes[1]);
+                    bootstrap.Modal.getInstance(document.getElementById('modalAgregarEgreso')).hide();
+                    cargarEgresos();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
             }
         }
         
@@ -368,12 +446,49 @@
             if ((!window.finanzasController) || !idEgresoEliminar) return;
             const respuesta = window.finanzasController.inactivarEgreso(String(idEgresoEliminar));
             const partes = respuesta.split('|');
-            alert(partes[1]);
             if (partes[0] === 'OK') {
-                bootstrap.Modal.getInstance(document.getElementById('modalEliminarEgreso')).hide();
-                cargarEgresos();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('modalEliminarEgreso')).hide();
+                        cargarEgresos();
+                    });
+                } else {
+                    alert(partes[1]);
+                    bootstrap.Modal.getInstance(document.getElementById('modalEliminarEgreso')).hide();
+                    cargarEgresos();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
             }
         }
     </script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if(typeof flatpickr !== 'undefined') {
+      flatpickr('#fechaDesdeEgresos');
+      flatpickr('#fechaHastaEgresos');
+      flatpickr('#eg_fecha');
+    }
+  });
+</script>
 </body>
 </html>
+

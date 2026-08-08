@@ -11,7 +11,8 @@
 
     <style>
         /* === ESTILOS GENERALES Y DE TABLA === */
-        html, body {
+        html,
+        body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('fondo-clinica.jpg');
             background-size: cover;
@@ -66,7 +67,7 @@
             color: #0d6efd;
         }
 
-        /* === ESTILOS DEL FORMULARIO (Tu código adaptado) === */
+        /* === ESTILOS DEL FORMULARIO === */
         .section-title {
             background: #e9ecef;
             padding: 8px 15px;
@@ -95,7 +96,8 @@
             color: white;
         }
     </style>
-</head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    </head>
 
 <body>
 
@@ -146,9 +148,8 @@
     </div>
 
     <!-- ======================================================= -->
-    <!-- VENTANA FLOTANTE (MODAL): TU FORMULARIO                 -->
+    <!-- VENTANA FLOTANTE (MODAL): FORMULARIO                    -->
     <!-- ======================================================= -->
-    <!-- data-bs-backdrop="false" evita la pantalla negra en Java -->
     <div class="modal fade" id="modalAgregarPaciente" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content shadow-lg">
@@ -159,7 +160,6 @@
                 </div>
 
                 <div class="modal-body p-4">
-                    <!-- TU FORMULARIO EXACTO -->
                     <form id="registroPacienteForm" onsubmit="registrarPaciente(event)">
 
                         <div class="section-title mt-0">1. Datos Generales del Paciente</div>
@@ -214,8 +214,8 @@
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label for="fecha_nacimiento">Fecha de nacimiento:</label>
-                                <input type="text" id="fecha_nacimiento" name="fechaNacimiento" class="form-control"
-                                    placeholder="DD-MM-AAAA">
+                                <input type="date" id="fecha_nacimiento" name="fechaNacimiento" class="form-control"
+                                    required>
                             </div>
                         </div>
 
@@ -263,6 +263,7 @@
             </div>
         </div>
     </div>
+
     <!-- Modal de Confirmación de Borrado -->
     <div class="modal fade" id="modalEliminarPaciente" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -287,16 +288,12 @@
         </div>
     </div>
 
-    <!-- Scripts Locales -->
-    <script src="application/assets/js/bootstrap.bundle.min.js"></script>
-
     <script>
         let listaPacientes = [];
 
         // === 1. CARGAR PACIENTES DESDE LA BASE DE DATOS ===
         function cargarPacientes() {
             if ((!window.pacienteController)) {
-                // Esperar a que JavaFX WebView inyecte el conector
                 setTimeout(cargarPacientes, 100);
                 return;
             }
@@ -355,27 +352,26 @@
             }
             document.getElementById('nombre_completo').value = p.nombreCompleto || '';
 
-            // Asignar fecha en formato DD-MM-AAAA
             let fechaStr = '';
             if (p.fechaNacimiento) {
                 if (typeof p.fechaNacimiento === 'object') {
                     const y = p.fechaNacimiento.year;
                     const m = String(p.fechaNacimiento.month).padStart(2, '0');
                     const d = String(p.fechaNacimiento.day).padStart(2, '0');
-                    fechaStr = `${d}-${m}-${y}`;
+                    fechaStr = `${y}-${m}-${d}`;
                 } else {
                     const partes = p.fechaNacimiento.split('-');
                     if (partes.length === 3) {
                         if (partes[0].length === 4) {
-                            fechaStr = `${partes[2]}-${partes[1]}-${partes[0]}`;
-                        } else {
                             fechaStr = `${partes[0]}-${partes[1]}-${partes[2]}`;
+                        } else {
+                            fechaStr = `${partes[2]}-${partes[1]}-${partes[0]}`;
                         }
                     }
                 }
             }
             document.getElementById('fecha_nacimiento').value = fechaStr;
-            if (fechaStr.length === 10) {
+            if (fechaStr) {
                 calcularEdad(fechaStr);
             }
             document.getElementById('genero').value = p.genero || 'M';
@@ -406,20 +402,52 @@
 
         function confirmarEliminacion() {
             if (!identidadAEliminar) return;
-            if ((window.pacienteController)) {
-                const respuesta = window.pacienteController.eliminarPaciente(identidadAEliminar);
+
+            if (window.pacienteController) {
+                const respuesta = String(window.pacienteController.eliminarPaciente(identidadAEliminar));
                 const partes = respuesta.split("|");
-                alert(partes[1]);
+
                 if (partes[0] === 'OK') {
-                    let modalEl = document.getElementById('modalEliminarPaciente');
-                    let modalInst = bootstrap.Modal.getInstance(modalEl);
-                    if (modalInst) modalInst.hide();
-                    cargarPacientes();
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: partes[1],
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar',
+                            confirmButtonColor: '#28a745'
+                        }).then(() => {
+                            let modalEl = document.getElementById('modalEliminarPaciente');
+                            let modalInst = bootstrap.Modal.getInstance(modalEl);
+                            if (modalInst) modalInst.hide();
+
+                            cargarPacientes();
+                        });
+                    } else {
+                        // Fallback de seguridad si SweetAlert falla al cargar
+                        alert(partes[1]);
+                        let modalEl = document.getElementById('modalEliminarPaciente');
+                        let modalInst = bootstrap.Modal.getInstance(modalEl);
+                        if (modalInst) modalInst.hide();
+                        cargarPacientes();
+                    }
+                } else {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Error',
+                            text: partes[1],
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    } else {
+                        alert("Error: " + partes[1]);
+                    }
                 }
+            } else {
+                alert('El puente con Java no está inicializado.');
             }
         }
 
-        // === 4. LÓGICA DE BÚSQUEDA UNIVERSAL (LIKE) ===
+        // === 4. BÚSQUEDA UNIVERSAL ===
         document.getElementById('buscadorPacientes').addEventListener('keyup', function () {
             let filtro = this.value.toLowerCase();
             let filas = document.querySelectorAll('#cuerpoTabla tr');
@@ -434,7 +462,7 @@
             });
         });
 
-        // === 5. REGISTRO/EDICIÓN A JAVA ===
+        // === 5. REGISTRO/EDICIÓN A JAVA (FLIJO Y REFRESCO CORREGIDOS) ===
         function registrarPaciente(event) {
             event.preventDefault();
 
@@ -444,24 +472,54 @@
 
             const jsonStr = JSON.stringify(paciente);
 
-            if ((window.pacienteController)) {
-                const respuesta = window.pacienteController.registrarPaciente(jsonStr);
+            if (window.pacienteController) {
+                const respuesta = String(window.pacienteController.registrarPaciente(jsonStr));
                 const partes = respuesta.split("|");
-                alert(partes[1]);
 
                 if (partes[0] === "OK") {
-                    form.reset();
-                    let modalEl = document.getElementById('modalAgregarPaciente');
-                    let modal = bootstrap.Modal.getInstance(modalEl);
-                    if (modal) modal.hide();
-                    cargarPacientes();
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: partes[1],
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar',
+                            confirmButtonColor: '#28a745'
+                        }).then((result) => {
+                            form.reset();
+                            let modalEl = document.getElementById('modalAgregarPaciente');
+                            let modal = bootstrap.Modal.getInstance(modalEl);
+                            if (modal) modal.hide();
+
+                            cargarPacientes();
+                        });
+                    } else {
+                        // Fallback de seguridad si SweetAlert falla
+                        alert(partes[1]);
+                        form.reset();
+                        let modalEl = document.getElementById('modalAgregarPaciente');
+                        let modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                        cargarPacientes();
+                    }
+                } else {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Error',
+                            text: partes[1],
+                            icon: 'error',
+                            confirmButtonText: 'Revisar',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    } else {
+                        alert("Error: " + partes[1]);
+                    }
                 }
             } else {
-                alert("Error: El puente con Java no está inicializado.");
+                alert('El puente con Java no está inicializado.');
             }
         }
 
-        // === 6. FUNCIONES DE VALIDACION Y FORMATO ===
+        // === 6. VALIDACIONES Y FORMATO ===
         function formatTelefono(e) {
             let val = e.target.value.replace(/\D/g, '');
             let newVal = '';
@@ -489,33 +547,16 @@
             e.target.value = newVal;
         }
 
-        function formatFecha(e) {
-            let val = e.target.value.replace(/\D/g, '');
-            let newVal = '';
-            if (val.length > 0) {
-                newVal += val.substring(0, 2);
-            }
-            if (val.length >= 3) {
-                newVal += '-' + val.substring(2, 4);
-            }
-            if (val.length >= 5) {
-                newVal += '-' + val.substring(4, 8);
-            }
-            e.target.value = newVal;
-
-            if (newVal.length === 10) {
-                calcularEdad(newVal);
-            } else {
-                document.getElementById('edad').value = '';
-            }
-        }
-
         function calcularEdad(fechaStr) {
+            if (!fechaStr) {
+                document.getElementById('edad').value = '';
+                return;
+            }
             const partes = fechaStr.split('-');
             if (partes.length === 3) {
-                const dia = parseInt(partes[0], 10);
+                const ano = parseInt(partes[0], 10);
                 const mes = parseInt(partes[1], 10) - 1;
-                const ano = parseInt(partes[2], 10);
+                const dia = parseInt(partes[2], 10);
                 if (!isNaN(dia) && !isNaN(mes) && !isNaN(ano)) {
                     const cumpleanos = new Date(ano, mes, dia);
                     const hoy = new Date();
@@ -529,7 +570,7 @@
             }
         }
 
-        // Inicializar eventos y cargar datos al abrir la página
+        // Inicializar eventos
         document.addEventListener('DOMContentLoaded', () => {
             cargarPacientes();
 
@@ -551,11 +592,27 @@
                 inputTelefonoResp.maxLength = 9;
             }
             if (inputFechaNacimiento) {
-                inputFechaNacimiento.addEventListener('input', formatFecha);
-                inputFechaNacimiento.maxLength = 10;
+                inputFechaNacimiento.addEventListener('change', (e) => calcularEdad(e.target.value));
             }
         });
     </script>
+
+    <!-- Librería local para mensajes emergentes HTML (SweetAlert2) -->
+    <script src="application/assets/js/sweetalert2.all.min.js"></script>
+
+    <!-- Tu script actual de Bootstrap -->
+    <script src="application/assets/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if(typeof flatpickr !== 'undefined') {
+      flatpickr('#fecha_nacimiento');
+    }
+  });
+</script>
 </body>
 
 </html>
+

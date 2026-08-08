@@ -471,6 +471,7 @@
     </div>
 
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="application/assets/js/sweetalert2.all.min.js"></script>
     <script>
         // ==========================================
         // ESTADO GLOBAL
@@ -711,7 +712,7 @@
         // GUARDAR USUARIO (crear o actualizar)
         // ==========================================
         function guardarUsuario() {
-            if ((!window.personalController)) { alert('Error: Puente Java no inicializado.'); return; }
+            if ((!window.personalController)) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Puente Java no inicializado.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Error: Puente Java no inicializado.'); return; }
 
             const correo = document.getElementById('usu_correo').value.trim();
             const contrasenia = document.getElementById('usu_contrasenia').value;
@@ -719,10 +720,10 @@
             const rolSistema = document.getElementById('usu_rol_sistema').value;
             const idUsuario = document.getElementById('usu_id_editar').value;
 
-            if (!correo) { alert('Por favor, ingresa el correo electrónico.'); return; }
-            if (!modoEdicionUsuario && !contrasenia) { alert('Por favor, ingresa la contraseña.'); return; }
+            if (!correo) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el correo electrónico.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa el correo electrónico.'); return; }
+            if (!modoEdicionUsuario && !contrasenia) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa la contraseña.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa la contraseña.'); return; }
             if (contrasenia && contrasenia !== confirmar) {
-                alert('Las contraseñas no coinciden. Por favor verifica.');
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Las contraseñas no coinciden. Por favor verifica.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Las contraseñas no coinciden. Por favor verifica.');
                 return;
             }
 
@@ -736,10 +737,35 @@
             }
 
             const partes = respuesta.split('|');
-            alert(partes[1]);
             if (partes[0] === 'OK') {
-                bootstrap.Modal.getInstance(document.getElementById('modalAgregarUsuario')).hide();
-                cargarUsuarios();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('modalAgregarUsuario')).hide();
+                        cargarUsuarios();
+                    });
+                } else {
+                    alert(partes[1]);
+                    bootstrap.Modal.getInstance(document.getElementById('modalAgregarUsuario')).hide();
+                    cargarUsuarios();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
             }
         }
 
@@ -747,17 +773,17 @@
         // GUARDAR MÉDICO (crear o actualizar)
         // ==========================================
         function guardarMedico() {
-            if ((!window.personalController)) { alert('Error: Puente Java no inicializado.'); return; }
+            if ((!window.personalController)) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Puente Java no inicializado.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Error: Puente Java no inicializado.'); return; }
 
             const nombre = document.getElementById('med_nombre').value.trim();
             const identidad = document.getElementById('med_identidad').value.trim();
             const telefono = document.getElementById('med_telefono').value.trim();
             const especialidad = document.getElementById('med_especialidad').value;
 
-            if (!nombre) { alert('Por favor, ingresa el nombre completo.'); return; }
-            if (!identidad) { alert('Por favor, ingresa la identidad (DNI).'); return; }
-            if (!telefono) { alert('Por favor, ingresa el teléfono.'); return; }
-            if (!especialidad) { alert('Por favor, selecciona la especialidad.'); return; }
+            if (!nombre) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el nombre completo.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa el nombre completo.'); return; }
+            if (!identidad) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa la identidad (DNI).', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa la identidad (DNI).'); return; }
+            if (!telefono) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el teléfono.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa el teléfono.'); return; }
+            if (!especialidad) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, selecciona la especialidad.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, selecciona la especialidad.'); return; }
 
             let respuesta;
             if (modoEdicionMedico) {
@@ -766,7 +792,7 @@
                 respuesta = window.personalController.actualizarPersonalMedico(JSON.stringify(data));
             } else {
                 const idUsuario = document.getElementById('med_id_usuario').value;
-                if (!idUsuario) { alert('Por favor, selecciona un usuario para vincular.'); return; }
+                if (!idUsuario) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, selecciona un usuario para vincular.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, selecciona un usuario para vincular.'); return; }
                 const selectUsuario = document.getElementById('med_id_usuario');
                 const correoUsuario = selectUsuario.options[selectUsuario.selectedIndex].text.split(' (')[0];
                 const data = {
@@ -781,10 +807,35 @@
             }
 
             const partes = respuesta.split('|');
-            alert(partes[1]);
             if (partes[0] === 'OK') {
-                bootstrap.Modal.getInstance(document.getElementById('modalAgregarMedico')).hide();
-                cargarMedicos();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('modalAgregarMedico')).hide();
+                        cargarMedicos();
+                    });
+                } else {
+                    alert(partes[1]);
+                    bootstrap.Modal.getInstance(document.getElementById('modalAgregarMedico')).hide();
+                    cargarMedicos();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
             }
         }
 
@@ -809,10 +860,35 @@
             if ((!window.personalController) || !idUsuarioAEliminar) return;
             const respuesta = window.personalController.inactivarUsuario(String(idUsuarioAEliminar));
             const partes = respuesta.split('|');
-            alert(partes[1]);
             if (partes[0] === 'OK') {
-                bootstrap.Modal.getInstance(document.getElementById('modalEliminarUsuario')).hide();
-                cargarUsuarios();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('modalEliminarUsuario')).hide();
+                        cargarUsuarios();
+                    });
+                } else {
+                    alert(partes[1]);
+                    bootstrap.Modal.getInstance(document.getElementById('modalEliminarUsuario')).hide();
+                    cargarUsuarios();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
             }
         }
 
@@ -820,10 +896,35 @@
             if ((!window.personalController) || !identidadMedicoAEliminar) return;
             const respuesta = window.personalController.inactivarPersonalMedico(identidadMedicoAEliminar);
             const partes = respuesta.split('|');
-            alert(partes[1]);
             if (partes[0] === 'OK') {
-                bootstrap.Modal.getInstance(document.getElementById('modalEliminarMedico')).hide();
-                cargarMedicos();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('modalEliminarMedico')).hide();
+                        cargarMedicos();
+                    });
+                } else {
+                    alert(partes[1]);
+                    bootstrap.Modal.getInstance(document.getElementById('modalEliminarMedico')).hide();
+                        cargarMedicos();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
             }
         }
 
@@ -873,9 +974,9 @@
 
         // GUARDAR ESPECIALIDAD
         function guardarEspecialidad() {
-            if ((!window.personalController)) { alert('Error: Puente Java no inicializado.'); return; }
+            if ((!window.personalController)) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Puente Java no inicializado.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Error: Puente Java no inicializado.'); return; }
             const nombre = document.getElementById('esp_nombre').value.trim();
-            if (!nombre) { alert('Por favor, ingresa el nombre de la especialidad.'); return; }
+            if (!nombre) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el nombre de la especialidad.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa el nombre de la especialidad.'); return; }
 
             let respuesta;
             if (modoEdicionEspecialidad) {
@@ -886,11 +987,37 @@
             }
 
             const partes = respuesta.split('|');
-            alert(partes[1]);
             if (partes[0] === 'OK') {
-                bootstrap.Modal.getInstance(document.getElementById('modalAgregarEspecialidad')).hide();
-                cargarTablaEspecialidades();
-                intentarCargarEspecialidades();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('modalAgregarEspecialidad')).hide();
+                        cargarTablaEspecialidades();
+                        intentarCargarEspecialidades();
+                    });
+                } else {
+                    alert(partes[1]);
+                    bootstrap.Modal.getInstance(document.getElementById('modalAgregarEspecialidad')).hide();
+                    cargarTablaEspecialidades();
+                    intentarCargarEspecialidades();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
             }
         }
 
@@ -906,11 +1033,37 @@
             if ((!window.personalController) || !idEspecialidadAEliminar) return;
             const respuesta = window.personalController.eliminarEspecialidad(String(idEspecialidadAEliminar));
             const partes = respuesta.split('|');
-            alert(partes[1]);
             if (partes[0] === 'OK') {
-                bootstrap.Modal.getInstance(document.getElementById('modalEliminarEspecialidad')).hide();
-                cargarTablaEspecialidades();
-                intentarCargarEspecialidades();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('modalEliminarEspecialidad')).hide();
+                        cargarTablaEspecialidades();
+                        intentarCargarEspecialidades();
+                    });
+                } else {
+                    alert(partes[1]);
+                    bootstrap.Modal.getInstance(document.getElementById('modalEliminarEspecialidad')).hide();
+                    cargarTablaEspecialidades();
+                    intentarCargarEspecialidades();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
             }
         }
 
