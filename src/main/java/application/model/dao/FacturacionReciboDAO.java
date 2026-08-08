@@ -93,44 +93,12 @@ public class FacturacionReciboDAO {
         return lista;
     }
 
-    // ------------------------------------------------------------------
-    // ACTUALIZAR (UPDATE)
-    // ------------------------------------------------------------------
-    public boolean actualizarRecibo(int id, String numeroRecibo, int idPaciente, String rtnCliente,
-                                    String fechaEmision, String concepto,
-                                    double sumaNeta, double totalHonorarios,
-                                    double totalRetenido, double totalNetoRecibido,
-                                    String metodoPago) {
-        String query = "UPDATE Facturacion_Recibos SET " +
-                "numero_recibo=?, id_pacientes=?, rtn_cliente=?, fecha_emision=?, concepto=?, " +
-                "suma_neta=?, total_honorarios=?, total_retenido=?, total_neto_recibido=?, metodo_pago=? " +
-                "WHERE id_facturacion_recibos=?";
-        try {
-            Connection conn = DBConnection.getInstance().getConnection();
-            try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, numeroRecibo != null ? numeroRecibo : "");
-                stmt.setInt(2, idPaciente);
-                stmt.setString(3, rtnCliente != null ? rtnCliente : "");
-                stmt.setString(4, fechaEmision);
-                stmt.setString(5, concepto);
-                stmt.setDouble(6, sumaNeta);
-                stmt.setDouble(7, totalHonorarios);
-                stmt.setDouble(8, totalRetenido);
-                stmt.setDouble(9, totalNetoRecibido);
-                stmt.setString(10, metodoPago);
-                stmt.setInt(11, id);
-                return stmt.executeUpdate() > 0;
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al actualizar recibo: " + e.getMessage());
-            return false;
-        }
-    }
+
 
     // ------------------------------------------------------------------
-    // ELIMINAR LÓGICO (borrado = 'Si')
+    // ANULAR LÓGICO (borrado = 'Si')
     // ------------------------------------------------------------------
-    public boolean inactivarRecibo(int id) {
+    public boolean anularRecibo(int id) {
         String query = "UPDATE Facturacion_Recibos SET borrado = 'Si', fecha_borrado = NOW() " +
                        "WHERE id_facturacion_recibos = ?";
         try {
@@ -140,7 +108,7 @@ public class FacturacionReciboDAO {
                 return stmt.executeUpdate() > 0;
             }
         } catch (SQLException e) {
-            System.err.println("Error al inactivar recibo: " + e.getMessage());
+            System.err.println("Error al anular recibo: " + e.getMessage());
             return false;
         }
     }

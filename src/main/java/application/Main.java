@@ -59,6 +59,7 @@ public class Main extends Application {
         primaryStage.setTitle("SOE Odontología - Inicio de Sesión");
         primaryStage.setScene(scene);
         primaryStage.setResizable(true);
+        primaryStage.setMaximized(true); // Maximizar pantalla sin tapar la barra de tareas
         primaryStage.show();
     }
 

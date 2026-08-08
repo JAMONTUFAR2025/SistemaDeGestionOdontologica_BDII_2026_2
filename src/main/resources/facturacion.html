@@ -66,10 +66,10 @@
             margin-right: 12px;
         }
 
-        .fa-edit { color: #0d6efd; }
-        .fa-edit:hover { color: #0a53be; }
-        .fa-trash { color: #dc3545; }
-        .fa-trash:hover { color: #b02a37; }
+        .fa-eye { color: #0d6efd; }
+        .fa-eye:hover { color: #0a53be; }
+        .fa-ban { color: #dc3545; }
+        .fa-ban:hover { color: #b02a37; }
 
         /* === MODAL === */
         .modal-content {
@@ -178,7 +178,7 @@
     </div>
 
     <!-- =====================================================
-         MODAL: REGISTRAR / EDITAR RECIBO
+         MODAL: REGISTRAR / VISUALIZAR RECIBO
          ===================================================== -->
     <div class="modal fade" id="modalFactura" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -280,11 +280,11 @@
                         <!-- Botones -->
                         <div class="row mt-3">
                             <div class="col-md-5 mb-2">
-                                <button type="button" class="btn btn-secondary w-100 py-2"
+                                <button type="button" id="btnCancelarRecibo" class="btn btn-secondary w-100 py-2"
                                     data-bs-dismiss="modal">Cancelar</button>
                             </div>
                             <div class="col-md-7">
-                                <button type="button" class="btn-guardar-verde rounded"
+                                <button type="button" id="btnGuardarRecibo" class="btn-guardar-verde rounded"
                                     onclick="guardarFactura()">
                                     <i class="fa-solid fa-save me-2"></i>Guardar Recibo
                                 </button>
@@ -297,28 +297,28 @@
     </div>
 
     <!-- =====================================================
-         MODAL: CONFIRMAR ELIMINACIÓN
+         MODAL: CONFIRMAR ANULACIÓN
          ===================================================== -->
-    <div class="modal fade" id="modalEliminarFactura" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="modalAnularFactura" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header modal-header-rojo">
                     <h5 class="modal-title fw-bold">
-                        <i class="fas fa-exclamation-triangle me-2"></i> Confirmar Eliminación
+                        <i class="fas fa-exclamation-triangle me-2"></i> Confirmar Anulación
                     </h5>
                     <button type="button" class="btn-close btn-close-white"
                         data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body text-center py-4">
-                    <i class="fa-solid fa-trash-can fa-3x text-danger mb-3"></i>
-                    <h5 class="mb-2">¿Desea eliminar este recibo?</h5>
-                    <p class="text-muted small mb-0">El recibo será marcado como inactivo y no aparecerá en el historial.</p>
+                    <i class="fa-solid fa-ban fa-3x text-danger mb-3"></i>
+                    <h5 class="mb-2">¿Desea anular este recibo?</h5>
+                    <p class="text-muted small mb-0">El recibo será marcado como anulado y no aparecerá en el historial.</p>
                 </div>
                 <div class="modal-footer justify-content-center border-0 pb-4">
                     <button type="button" class="btn btn-secondary px-5 fw-bold"
                         data-bs-dismiss="modal">No, cancelar</button>
                     <button type="button" class="btn btn-danger px-5 fw-bold"
-                        onclick="confirmarEliminarFactura()">Sí, eliminar</button>
+                        onclick="confirmarAnularFactura()">Sí, anular</button>
                 </div>
             </div>
         </div>
@@ -328,7 +328,7 @@
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
     <script>
         let facturasLista = [];
-        let idFacturaEliminar = null;
+        let idFacturaAnular = null;
 
         // -------------------------------------------------------
         // INICIALIZACIÓN
@@ -411,10 +411,10 @@
                         <td><span class="badge-pago ${badgeClass}">${f.metodo_pago}</span></td>
                         <td class="neto-col">${netoFmt}</td>
                         <td class="action-icons">
-                            <i class="fas fa-edit" title="Editar recibo"
-                               onclick="abrirModalFactura('${jsonStr}')"></i>
-                            <i class="fas fa-trash" title="Eliminar recibo"
-                               onclick="pedirEliminarFactura(${f.id_factura})"></i>
+                            <i class="fas fa-eye" title="Visualizar recibo"
+                               onclick="abrirModalVisualizarFactura('${jsonStr}')"></i>
+                            <i class="fas fa-ban" title="Anular recibo"
+                               onclick="pedirAnularFactura(${f.id_factura})"></i>
                         </td>
                     </tr>`;
             });
@@ -426,15 +426,21 @@
         }
 
         // -------------------------------------------------------
-        // ABRIR MODAL (nuevo o edición)
+        // ABRIR MODAL (nuevo o visualizar)
         // -------------------------------------------------------
-        function abrirModalFactura(facturaJson) {
+        function abrirModalVisualizarFactura(facturaJson) {
+            abrirModalFactura(facturaJson, true);
+        }
+
+        function abrirModalFactura(facturaJson, isView = false) {
             document.getElementById('formFactura').reset();
             // Resetear valores numéricos
             ['fac_suma_neta','fac_total_honorarios','fac_total_retenido','fac_total_neto_recibido']
                 .forEach(id => document.getElementById(id).value = '0.00');
 
             const titulo = document.getElementById('tituloModalFactura');
+            const btnGuardar = document.getElementById('btnGuardarRecibo');
+            const btnCancelar = document.getElementById('btnCancelarRecibo');
 
             if (facturaJson) {
                 const f = JSON.parse(decodeURIComponent(facturaJson));
@@ -449,12 +455,23 @@
                 document.getElementById('fac_total_retenido').value = f.total_retenido || 0;
                 document.getElementById('fac_total_neto_recibido').value = f.total_neto_recibido || 0;
                 document.getElementById('fac_metodo_pago').value = f.metodo_pago || 'Efectivo';
-                titulo.innerHTML = '<i class="fa-solid fa-edit me-2"></i> Editar Recibo';
+                
+                if (isView) {
+                    titulo.innerHTML = '<i class="fa-solid fa-eye me-2"></i> Visualizar Recibo';
+                    if (btnGuardar) btnGuardar.style.display = 'none';
+                    if (btnCancelar) btnCancelar.textContent = 'Cerrar';
+                }
             } else {
                 document.getElementById('fac_id').value = '';
                 document.getElementById('fac_fecha_emision').value = new Date().toISOString().split('T')[0];
                 titulo.innerHTML = '<i class="fa-solid fa-cash-register me-2"></i> Nuevo Recibo / Factura';
+                if (btnGuardar) btnGuardar.style.display = 'block';
+                if (btnCancelar) btnCancelar.textContent = 'Cancelar';
             }
+            
+            // Habilitar/Deshabilitar inputs
+            const inputs = document.getElementById('formFactura').querySelectorAll('input, select, textarea');
+            inputs.forEach(input => input.disabled = isView);
 
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalFactura'))
                        || new bootstrap.Modal(document.getElementById('modalFactura'));
@@ -472,12 +489,11 @@
         }
 
         // -------------------------------------------------------
-        // GUARDAR (NUEVO o EDICIÓN)
+        // GUARDAR (NUEVO)
         // -------------------------------------------------------
         function guardarFactura() {
             if (!window.finanzasController) { alert('Conector Java no encontrado.'); return; }
 
-            const id          = document.getElementById('fac_id').value;
             const idPaciente  = document.getElementById('fac_id_paciente').value;
             const fechaEmision= document.getElementById('fac_fecha_emision').value.trim();
             const concepto    = document.getElementById('fac_concepto').value.trim();
@@ -488,7 +504,6 @@
             if (!concepto) { alert('El concepto es obligatorio.'); return; }
 
             const data = {
-                id_factura:           id ? parseInt(id) : null,
                 numero_recibo:        document.getElementById('fac_numero_recibo').value.trim(),
                 id_paciente:          parseInt(idPaciente),
                 rtn_cliente:          document.getElementById('fac_rtn_cliente').value.trim(),
@@ -501,13 +516,7 @@
                 metodo_pago:          document.getElementById('fac_metodo_pago').value
             };
 
-            let respuesta;
-            if (id) {
-                respuesta = window.finanzasController.actualizarRecibo(JSON.stringify(data));
-            } else {
-                respuesta = window.finanzasController.registrarRecibo(JSON.stringify(data));
-            }
-
+            const respuesta = window.finanzasController.registrarRecibo(JSON.stringify(data));
             const partes = respuesta.split('|');
             alert(partes[1]);
 
@@ -518,22 +527,22 @@
         }
 
         // -------------------------------------------------------
-        // ELIMINAR
+        // ANULAR
         // -------------------------------------------------------
-        function pedirEliminarFactura(id) {
-            idFacturaEliminar = id;
-            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminarFactura'))
-                       || new bootstrap.Modal(document.getElementById('modalEliminarFactura'));
+        function pedirAnularFactura(id) {
+            idFacturaAnular = id;
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalAnularFactura'))
+                       || new bootstrap.Modal(document.getElementById('modalAnularFactura'));
             modal.show();
         }
 
-        function confirmarEliminarFactura() {
-            if (!window.finanzasController || !idFacturaEliminar) return;
-            const respuesta = window.finanzasController.inactivarRecibo(String(idFacturaEliminar));
+        function confirmarAnularFactura() {
+            if (!window.finanzasController || !idFacturaAnular) return;
+            const respuesta = window.finanzasController.anularRecibo(String(idFacturaAnular));
             const partes = respuesta.split('|');
             alert(partes[1]);
             if (partes[0] === 'OK') {
-                bootstrap.Modal.getInstance(document.getElementById('modalEliminarFactura')).hide();
+                bootstrap.Modal.getInstance(document.getElementById('modalAnularFactura')).hide();
                 cargarFacturas();
             }
         }
