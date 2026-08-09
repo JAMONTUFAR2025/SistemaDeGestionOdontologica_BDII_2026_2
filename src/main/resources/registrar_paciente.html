@@ -604,11 +604,18 @@
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    var dateInputs = document.querySelectorAll('input[type="date"]');
+    dateInputs.forEach(function(input) {
+        input.type = 'text';
+        input.classList.add('datepicker');
+    });
+
     if(typeof flatpickr !== 'undefined') {
-      flatpickr('#fecha_nacimiento');
+      flatpickr('.datepicker', {
+          dateFormat: "d-M-Y"
+      });
     }
   });
 </script>

@@ -6,6 +6,7 @@
     <title>Módulo Financiero - SOE Odontología</title>
     <link href="application/assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="application/assets/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         :root {
             --verde: #28a745;
@@ -1291,6 +1292,22 @@ function cerrarModal(id) {
     const m = bootstrap.Modal.getInstance(document.getElementById(id));
     if (m) m.hide();
 }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var dateInputs = document.querySelectorAll('input[type="date"]');
+    dateInputs.forEach(function(input) {
+        input.type = 'text';
+        input.classList.add('datepicker');
+    });
+
+    if(typeof flatpickr !== 'undefined') {
+        flatpickr('.datepicker', {
+            dateFormat: "d-M-Y"
+        });
+    }
+});
 </script>
 </body>
 </html>
