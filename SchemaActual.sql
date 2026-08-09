@@ -450,3 +450,12 @@ INSERT INTO Constancias_Medicas (id_evolucion_clinica, fecha_emision, hora_emisi
 (3, '2026-08-05', '15:15:00', 'Se realizó extracción quirúrgica simple de pieza temporal bajo anestesia local.'),
 (4, '2026-08-06', '12:45:00', 'Se inició tratamiento de conducto (Endodoncia) en pieza 24. Se indica reposo por 24 horas.'),
 (5, '2026-08-08', '11:00:00', 'Se realizó sesión de blanqueamiento dental clínico con luz LED.');
+
+-- ==========================================
+-- ACTUALIZACIÓN DE TELÉFONOS (A petición del usuario)
+-- ==========================================
+UPDATE Pacientes SET telefono = '9675-8450' WHERE identidad = '0801200001122';
+UPDATE Pacientes SET telefono = '9284-8995' WHERE identidad = '0501199503344';
+UPDATE Pacientes SET telefono = '9391-1698' WHERE identidad = '1601201505566';
+UPDATE Pacientes SET telefono = '9750-5512' WHERE identidad = '0801198807788';
+UPDATE Pacientes SET telefono = '3377-6892' WHERE identidad = '0501200209900';

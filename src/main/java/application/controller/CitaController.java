@@ -12,8 +12,7 @@ public class CitaController extends BaseController {
             application.model.entity.Cita cita = gson.fromJson(jsonCita, application.model.entity.Cita.class);
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonCita).getAsJsonObject();
             String fechaHoraStr = obj.get("fecha_hora").getAsString(); 
-            fechaHoraStr = fechaHoraStr.replace(" ", "T");
-            cita.setFechaHora(java.time.LocalDateTime.parse(fechaHoraStr));
+            cita.setFechaHora(application.controller.BaseController.parseDateTimeRobust(fechaHoraStr));
 
             cita.setIdPacientes(obj.get("id_pacientes").getAsInt());
             cita.setIdPersonalMedico(obj.get("id_personal_medico").getAsInt());
@@ -64,8 +63,8 @@ public class CitaController extends BaseController {
                     && !obj.get("id_personal_medico").getAsString().isEmpty()) {
                 cita.setIdPersonalMedico(obj.get("id_personal_medico").getAsInt());
             }
-            String fechaHoraStr = obj.get("fecha_hora").getAsString().replace(" ", "T");
-            cita.setFechaHora(java.time.LocalDateTime.parse(fechaHoraStr));
+            String fechaHoraStr = obj.get("fecha_hora").getAsString();
+            cita.setFechaHora(application.controller.BaseController.parseDateTimeRobust(fechaHoraStr));
             cita.setEstado(obj.get("estado").getAsString());
             cita.setMotivoCita(obj.has("motivoCita") ? obj.get("motivoCita").getAsString() : "");
 

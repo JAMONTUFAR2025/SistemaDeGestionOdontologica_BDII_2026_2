@@ -50,8 +50,20 @@ public abstract class BaseController {
                                 return LocalDate.parse(dateStr,
                                         java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"));
                             } catch (Exception ex) {
-                                return LocalDate.parse(dateStr,
-                                        java.time.format.DateTimeFormatter.ofPattern("MM-dd-yyyy"));
+                                try {
+                                    return LocalDate.parse(dateStr,
+                                            java.time.format.DateTimeFormatter.ofPattern("MM-dd-yyyy"));
+                                } catch (Exception ex2) {
+                                    try {
+                                        java.time.format.DateTimeFormatter fmtEn = new java.time.format.DateTimeFormatterBuilder()
+                                                .parseCaseInsensitive().appendPattern("dd-MMM-yyyy").toFormatter(java.util.Locale.ENGLISH);
+                                        return LocalDate.parse(dateStr, fmtEn);
+                                    } catch (Exception ex3) {
+                                        java.time.format.DateTimeFormatter fmtEs = new java.time.format.DateTimeFormatterBuilder()
+                                                .parseCaseInsensitive().appendPattern("dd-MMM-yyyy").toFormatter(new java.util.Locale("es", "ES"));
+                                        return LocalDate.parse(dateStr, fmtEs);
+                                    }
+                                }
                             }
                         }
                     }
@@ -79,9 +91,42 @@ public abstract class BaseController {
                                 if (dateStr == null || dateStr.trim().isEmpty()) {
                                     return null;
                                 }
-                                return java.time.LocalDateTime.parse(dateStr);
+                                return parseDateTimeRobust(dateStr);
                             }
                         })
                 .create();
+    }
+
+    protected static java.time.LocalDateTime parseDateTimeRobust(String str) {
+        if (str == null || str.trim().isEmpty()) return null;
+        str = str.trim();
+        // Arreglar si el frontend pegó un ":00" después del AM/PM (ej: 01:30 PM:00 -> 01:30 PM)
+        if (str.toUpperCase().endsWith("PM:00") || str.toUpperCase().endsWith("AM:00")) {
+            str = str.substring(0, str.length() - 3);
+        }
+        
+        java.time.format.DateTimeFormatter[] formatters = {
+            java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME,
+            java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
+            java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"),
+            new java.time.format.DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yyyy HH:mm:ss").toFormatter(java.util.Locale.ENGLISH),
+            new java.time.format.DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yyyy hh:mm a").toFormatter(java.util.Locale.ENGLISH),
+            new java.time.format.DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yyyy HH:mm:ss").toFormatter(new java.util.Locale("es", "ES")),
+            new java.time.format.DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yyyy hh:mm a").toFormatter(new java.util.Locale("es", "ES")),
+            new java.time.format.DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MM-yyyy HH:mm:ss").toFormatter(java.util.Locale.ENGLISH),
+            new java.time.format.DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MM-yyyy hh:mm a").toFormatter(java.util.Locale.ENGLISH)
+        };
+        
+        for (java.time.format.DateTimeFormatter fmt : formatters) {
+            try {
+                return java.time.LocalDateTime.parse(str, fmt);
+            } catch (Exception ignored) {}
+        }
+        
+        try {
+            return java.time.LocalDateTime.parse(str.replace(" ", "T"));
+        } catch (Exception ignored) {}
+        
+        throw new java.time.format.DateTimeParseException("Text '" + str + "' could not be parsed", str, 0);
     }
 }
