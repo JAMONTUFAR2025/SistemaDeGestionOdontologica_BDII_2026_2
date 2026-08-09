@@ -5,9 +5,27 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
+const fs = require('fs');
+const path = require('path');
+
+// Busca Chrome o Edge en las rutas por defecto de Windows
+function getBrowserExecutablePath() {
+    const browserPaths = [
+        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+        "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+        "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+        "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe"
+    ];
+    for (let p of browserPaths) {
+        if (fs.existsSync(p)) return p;
+    }
+    return undefined; 
+}
+
 const client = new Client({
     authStrategy: new LocalAuth({ dataPath: 'sessions' }),
     puppeteer: {
+        executablePath: getBrowserExecutablePath(),
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
