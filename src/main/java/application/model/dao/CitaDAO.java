@@ -48,7 +48,7 @@ public class CitaDAO {
             "FROM Citas c " +
             "JOIN Pacientes p ON c.id_pacientes = p.id_pacientes " +
             "WHERE DATE(c.fecha_hora) = CURDATE() " +
-            "AND c.estado != 'Cancelada' AND c.estado != 'Ausente'"
+            "AND c.estado != 'Cancelada' AND c.estado != 'Ausente' AND c.estado != 'Completada'"
         );
 
         boolean esMedico = "Medico".equalsIgnoreCase(rol) || "Médico".equalsIgnoreCase(rol);
@@ -94,7 +94,7 @@ public class CitaDAO {
             "FROM Citas c " +
             "JOIN Pacientes p ON c.id_pacientes = p.id_pacientes " +
             "WHERE DATE(c.fecha_hora) > CURDATE() " +
-            "AND c.estado != 'Cancelada' AND c.estado != 'Ausente'"
+            "AND c.estado != 'Cancelada' AND c.estado != 'Ausente' AND c.estado != 'Completada'"
         );
 
         boolean esMedico = "Medico".equalsIgnoreCase(rol) || "Médico".equalsIgnoreCase(rol);

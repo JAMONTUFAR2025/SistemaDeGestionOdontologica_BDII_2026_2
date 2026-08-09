@@ -286,12 +286,9 @@
             <!-- Panel Izquierdo: Comunicación -->
             <div class="sidebar-menu">
                 <h3>📢 Comunicación</h3>
-                <a href="#" onclick="enviarWhatsApp()" class="btn-canal btn-ws">
-                    <span>💬</span> WhatsApp Directo
+                <a href="#" onclick="enviarWhatsApp()" class="btn-canal btn-ws" id="btnWsDirecto">
+                    <span>💬</span> WhatsApp Individual
                 </a>
-                <div class="btn-canal"><span>📧</span> Correo Electrónico</div>
-                <div class="btn-canal"><span>📱</span> SMS</div>
-                <div class="btn-canal"><span>📞</span> Llamada Registrada</div>
             </div>
 
             <!-- Panel Derecho: Formulario de Cita -->
@@ -592,11 +589,20 @@
         document.getElementById('fecha_cita').addEventListener('change', actualizarFechaHoraOculta);
         document.getElementById('hora_cita').addEventListener('change', actualizarFechaHoraOculta);
 
+        function formatearFechaEspecial(date) {
+            const meses = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            let d = date.getDate().toString().padStart(2, '0');
+            let m = meses[date.getMonth()];
+            let y = date.getFullYear();
+            return `${d}-${m}-${y}`;
+        }
+
         function setFechaHoraActual() {
             let now = new Date();
+            document.getElementById('fecha_cita').value = formatearFechaEspecial(now);
+            
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             let isoStr = now.toISOString();
-            document.getElementById('fecha_cita').value = isoStr.slice(0, 10);
             document.getElementById('hora_cita').value = isoStr.slice(11, 16);
             actualizarFechaHoraOculta();
         }
@@ -605,8 +611,7 @@
         function sumarDias(dias) {
             let fecha = new Date();
             fecha.setDate(fecha.getDate() + dias);
-            fecha.setMinutes(fecha.getMinutes() - fecha.getTimezoneOffset());
-            document.getElementById('fecha_cita').value = fecha.toISOString().slice(0, 10);
+            document.getElementById('fecha_cita').value = formatearFechaEspecial(fecha);
             actualizarFechaHoraOculta();
         }
 
@@ -630,8 +635,36 @@
             }
             let numLimpio = telefono.replace(/[^0-9]/g, '');
             if (numLimpio.length === 8) numLimpio = '504' + numLimpio;
-            let mensaje = `Hola ${nombre.trim()}, le saludamos de SOE Odontología. Le recordamos su cita agendada para el día ${fecha} a las ${hora}. Por favor confirmarnos su asistencia.`;
-            window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`, '_blank');
+            
+            let horaFormateada = hora;
+            if (hora) {
+                let [h, m] = hora.split(':');
+                let ampm = h >= 12 ? 'PM' : 'AM';
+                h = h % 12;
+                h = h ? h : 12;
+                horaFormateada = h + ':' + m + ' ' + ampm;
+            }
+
+            let mensaje = `Hola ${nombre.trim()}, le saludamos de SOE Odontología. Le recordamos su cita agendada para el día ${fecha} a las ${horaFormateada}. Por favor confirmar su asistencia.`;
+            
+            if (window.whatsAppController) {
+                $('#btnWsDirecto').html('<span>⏳</span> Enviando...').css('pointer-events', 'none');
+                setTimeout(() => {
+                    let res = window.whatsAppController.enviarMensaje(numLimpio, mensaje);
+                    $('#btnWsDirecto').html('<span>💬</span> WhatsApp Individual').css('pointer-events', 'auto');
+                    
+                    if (res.startsWith("OK|")) {
+                        Swal.fire({ title: 'Enviado', text: 'Recordatorio enviado silenciosamente por WhatsApp.', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+                    } else if (res.includes("Node.js no está instalado")) {
+                        // FALLBACK: Si no tiene Node.js, abrimos wa.me como antes
+                        window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`, '_blank');
+                    } else {
+                        Swal.fire({ title: 'Error de WhatsApp', text: res.split("|")[1], icon: 'error' });
+                    }
+                }, 100);
+            } else {
+                window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`, '_blank');
+            }
         }
 
         // ============================================================
@@ -647,6 +680,13 @@
         $(document).ready(function () {
             $('#identidad_paciente').select2({ placeholder: "-- Buscar o seleccionar paciente --", allowClear: true });
             $('#id_medico').select2({ placeholder: "-- Seleccionar Doctor --", allowClear: true });
+
+            // Restringir el calendario para no permitir fechas pasadas
+            let hoy = new Date();
+            // Ajuste por zona horaria para obtener la fecha local correcta
+            hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
+            let hoyStr = hoy.toISOString().slice(0, 10);
+            document.getElementById('fecha_cita').setAttribute('min', hoyStr);
 
             // Cargar pacientes y médicos desde JavaConnector
             function intentarCargar() {

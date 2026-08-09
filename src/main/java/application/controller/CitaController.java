@@ -12,7 +12,11 @@ public class CitaController extends BaseController {
             application.model.entity.Cita cita = gson.fromJson(jsonCita, application.model.entity.Cita.class);
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonCita).getAsJsonObject();
             String fechaHoraStr = obj.get("fecha_hora").getAsString(); 
-            cita.setFechaHora(application.controller.BaseController.parseDateTimeRobust(fechaHoraStr));
+            java.time.LocalDateTime dt = application.controller.BaseController.parseDateTimeRobust(fechaHoraStr);
+            if (dt.toLocalDate().isBefore(java.time.LocalDate.now())) {
+                return "ERR|No puedes agendar citas en días anteriores. Por favor, selecciona una fecha actual o futura.";
+            }
+            cita.setFechaHora(dt);
 
             cita.setIdPacientes(obj.get("id_pacientes").getAsInt());
             cita.setIdPersonalMedico(obj.get("id_personal_medico").getAsInt());
@@ -64,7 +68,11 @@ public class CitaController extends BaseController {
                 cita.setIdPersonalMedico(obj.get("id_personal_medico").getAsInt());
             }
             String fechaHoraStr = obj.get("fecha_hora").getAsString();
-            cita.setFechaHora(application.controller.BaseController.parseDateTimeRobust(fechaHoraStr));
+            java.time.LocalDateTime dt = application.controller.BaseController.parseDateTimeRobust(fechaHoraStr);
+            if (dt.toLocalDate().isBefore(java.time.LocalDate.now())) {
+                return "ERR|No puedes agendar citas en días anteriores. Por favor, selecciona una fecha actual o futura.";
+            }
+            cita.setFechaHora(dt);
             cita.setEstado(obj.get("estado").getAsString());
             cita.setMotivoCita(obj.has("motivoCita") ? obj.get("motivoCita").getAsString() : "");
 
