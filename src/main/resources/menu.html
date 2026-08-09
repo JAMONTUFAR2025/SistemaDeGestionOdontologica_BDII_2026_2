@@ -174,18 +174,11 @@
             <p>Odontograma y diagnósticos</p>
         </a>
 
-        <!-- Módulo: Facturación -->
-        <a href="facturacion.html" class="card" id="card-facturacion">
-            <div class="icon"><i class="fas fa-file-invoice-dollar"></i></div>
-            <h3>Facturación</h3>
-            <p>Cobros, recibos del SAR y pagos</p>
-        </a>
-
-        <!-- Módulo: Control de Egresos -->
-        <a href="egresos.html" class="card" id="card-egresos">
-            <div class="icon"><i class="fas fa-chart-line"></i></div>
-            <h3>Egresos y Gastos</h3>
-            <p>Registro de compras e insumos</p>
+        <!-- Módulo: Finanzas (Facturación + Egresos + Caja) -->
+        <a href="finanzas.html" class="card" id="card-facturacion">
+            <div class="icon"><i class="fas fa-cash-register"></i></div>
+            <h3>Finanzas</h3>
+            <p>Caja chica, cobros, recibos y egresos</p>
         </a>
 
         <!-- Módulo: Personal Médico -->
@@ -230,24 +223,21 @@
         });
 
         function aplicarPermisos(rol) {
-            const cardHistoria = document.getElementById('card-historia');
-            const cardFacturacion = document.getElementById('card-facturacion');
-            const cardEgresos = document.getElementById('card-egresos');
-            const cardPersonal = document.getElementById('card-personal');
-            const cardCitas = document.getElementById('card-citas');
+            const cardHistoria    = document.getElementById('card-historia');
+            const cardFacturacion = document.getElementById('card-facturacion'); // finanzas.html
+            const cardPersonal    = document.getElementById('card-personal');
+            const cardCitas       = document.getElementById('card-citas');
 
             let rolNormalizado = rol ? rol.trim().toLowerCase() : "";
 
             if (rolNormalizado === 'recepcionista') {
-                if (cardHistoria) cardHistoria.style.display = 'none';
-                if (cardEgresos) cardEgresos.style.display = 'none';
-                if (cardPersonal) cardPersonal.style.display = 'none';
+                if (cardHistoria)    cardHistoria.style.display    = 'none';
+                if (cardPersonal)   cardPersonal.style.display    = 'none';
 
             } else if (rolNormalizado === 'médico' || rolNormalizado === 'medico') {
-                if (cardCitas) cardCitas.style.display = 'none';
+                if (cardCitas)       cardCitas.style.display       = 'none';
                 if (cardFacturacion) cardFacturacion.style.display = 'none';
-                if (cardEgresos) cardEgresos.style.display = 'none';
-                if (cardPersonal) cardPersonal.style.display = 'none';
+                if (cardPersonal)   cardPersonal.style.display    = 'none';
             }
         }
 

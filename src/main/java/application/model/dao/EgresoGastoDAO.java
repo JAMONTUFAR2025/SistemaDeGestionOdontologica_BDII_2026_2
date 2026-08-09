@@ -5,16 +5,26 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class EgresoGastoDAO {
 
-    public boolean registrarEgreso(int idCajaSesion, int idUsuario, String fecha, String descripcion, double monto, String metodoPago, String numeroComprobante) {
-        // SchemaActual: columnas id_egresos_gastos, id_caja_sesion, id_usuario, metodo_pago, anulado ENUM('Si','No') DEFAULT 'No'
-        String query = "INSERT INTO Egresos_Gastos (id_caja_sesion, id_usuario, fecha, descripcion, monto, metodo_pago, numero_comprobante) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    /**
+     * @param idCajaSesion NULL si el gasto no afecta caja chica; valor entero si sí afecta.
+     */
+    public boolean registrarEgreso(Integer idCajaSesion, int idUsuario, String fecha, String descripcion,
+                                   double monto, String metodoPago, String numeroComprobante) {
+        String query = "INSERT INTO Egresos_Gastos " +
+                       "(id_caja_sesion, id_usuario, fecha, descripcion, monto, metodo_pago, numero_comprobante) " +
+                       "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setInt(1, idCajaSesion);
+                if (idCajaSesion != null) stmt.setInt(1, idCajaSesion);
+                else                      stmt.setNull(1, java.sql.Types.INTEGER);
                 stmt.setInt(2, idUsuario);
                 stmt.setString(3, fecha);
                 stmt.setString(4, descripcion);
@@ -29,27 +39,18 @@ public class EgresoGastoDAO {
         }
     }
 
-    public java.util.List<java.util.Map<String, Object>> obtenerEgresos() {
-        java.util.List<java.util.Map<String, Object>> lista = new java.util.ArrayList<>();
-        // SchemaActual: PK = id_egresos_gastos, anulado ENUM('Si','No')
-        String query = "SELECT id_egresos_gastos, id_caja_sesion, id_usuario, fecha, descripcion, monto, metodo_pago, numero_comprobante, anulado " +
-                       "FROM Egresos_Gastos WHERE anulado = 'No' ORDER BY id_egresos_gastos DESC";
+    /** Devuelve TODOS los egresos (activos e inactivos) con campo "estado" = Activo / Inactivo */
+    public List<Map<String, Object>> obtenerEgresos() {
+        List<Map<String, Object>> lista = new ArrayList<>();
+        String query = "SELECT id_egresos_gastos, id_caja_sesion, id_usuario, fecha, " +
+                       "descripcion, monto, metodo_pago, numero_comprobante, anulado " +
+                       "FROM Egresos_Gastos ORDER BY id_egresos_gastos DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
                  ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
-                    map.put("id_egreso", rs.getInt("id_egresos_gastos"));
-                    map.put("id_caja_sesion", rs.getInt("id_caja_sesion"));
-                    map.put("id_usuario", rs.getInt("id_usuario"));
-                    map.put("fecha", rs.getString("fecha"));
-                    map.put("descripcion", rs.getString("descripcion"));
-                    map.put("monto", rs.getDouble("monto"));
-                    map.put("metodo_pago", rs.getString("metodo_pago"));
-                    map.put("numero_comprobante", rs.getString("numero_comprobante"));
-                    map.put("estado", rs.getString("anulado"));
-                    lista.add(map);
+                    lista.add(mapRow(rs));
                 }
             }
         } catch (SQLException e) {
@@ -58,14 +59,20 @@ public class EgresoGastoDAO {
         return lista;
     }
 
-    public boolean actualizarEgreso(int id, int idCajaSesion, int idUsuario, String fecha, String descripcion, double monto, String metodoPago, String numeroComprobante) {
-        // SchemaActual: WHERE id_egresos_gastos = ?
-        String query = "UPDATE Egresos_Gastos SET id_caja_sesion = ?, id_usuario = ?, fecha = ?, descripcion = ?, monto = ?, metodo_pago = ?, numero_comprobante = ? " +
+    /**
+     * @param idCajaSesion NULL si el gasto no afecta caja chica.
+     */
+    public boolean actualizarEgreso(int id, Integer idCajaSesion, int idUsuario, String fecha,
+                                    String descripcion, double monto, String metodoPago, String numeroComprobante) {
+        String query = "UPDATE Egresos_Gastos " +
+                       "SET id_caja_sesion = ?, id_usuario = ?, fecha = ?, descripcion = ?, " +
+                       "monto = ?, metodo_pago = ?, numero_comprobante = ? " +
                        "WHERE id_egresos_gastos = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setInt(1, idCajaSesion);
+                if (idCajaSesion != null) stmt.setInt(1, idCajaSesion);
+                else                      stmt.setNull(1, java.sql.Types.INTEGER);
                 stmt.setInt(2, idUsuario);
                 stmt.setString(3, fecha);
                 stmt.setString(4, descripcion);
@@ -82,8 +89,8 @@ public class EgresoGastoDAO {
     }
 
     public boolean inactivarEgreso(int id) {
-        // SchemaActual: anulado='Si', fecha_anulado
-        String query = "UPDATE Egresos_Gastos SET anulado = 'Si', fecha_anulado = NOW() WHERE id_egresos_gastos = ?";
+        String query = "UPDATE Egresos_Gastos SET anulado = 'Si', fecha_anulado = NOW() " +
+                       "WHERE id_egresos_gastos = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -96,27 +103,21 @@ public class EgresoGastoDAO {
         }
     }
 
-    // ------------------------------------------------------------------
-    // BÚSQUEDA CON FILTROS DINÁMICOS (texto y/o rango de fechas)
-    // termino    : busca en descripcion y numero_comprobante (LIKE)
-    // fechaDesde : fecha mínima del gasto (YYYY-MM-DD), ignorado si vacío
-    // fechaHasta : fecha máxima del gasto (YYYY-MM-DD), ignorado si vacío
-    // ------------------------------------------------------------------
-    public java.util.List<java.util.Map<String, Object>> buscarEgresos(
-            String termino, String fechaDesde, String fechaHasta) {
-
-        java.util.List<java.util.Map<String, Object>> lista = new java.util.ArrayList<>();
+    /** Búsqueda con filtros (texto y/o rango de fechas). Devuelve activos e inactivos. */
+    public List<Map<String, Object>> buscarEgresos(String termino, String fechaDesde, String fechaHasta) {
+        List<Map<String, Object>> lista = new ArrayList<>();
 
         boolean hayTermino = termino    != null && !termino.trim().isEmpty();
         boolean hayDesde   = fechaDesde != null && !fechaDesde.trim().isEmpty();
         boolean hayHasta   = fechaHasta != null && !fechaHasta.trim().isEmpty();
 
         StringBuilder sb = new StringBuilder(
-            "SELECT id_egresos_gastos, id_caja_sesion, id_usuario, fecha, descripcion, monto, metodo_pago, numero_comprobante, anulado " +
-            "FROM Egresos_Gastos WHERE anulado = 'No'"
+            "SELECT id_egresos_gastos, id_caja_sesion, id_usuario, fecha, " +
+            "descripcion, monto, metodo_pago, numero_comprobante, anulado " +
+            "FROM Egresos_Gastos WHERE 1=1"
         );
 
-        java.util.List<Object> params = new java.util.ArrayList<>();
+        List<Object> params = new ArrayList<>();
 
         if (hayTermino) {
             sb.append(" AND (descripcion LIKE ? OR numero_comprobante LIKE ?)");
@@ -132,28 +133,17 @@ public class EgresoGastoDAO {
             sb.append(" AND fecha <= ?");
             params.add(fechaHasta.trim());
         }
-
         sb.append(" ORDER BY id_egresos_gastos DESC");
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
-            try (java.sql.PreparedStatement stmt = conn.prepareStatement(sb.toString())) {
+            try (PreparedStatement stmt = conn.prepareStatement(sb.toString())) {
                 for (int i = 0; i < params.size(); i++) {
                     stmt.setObject(i + 1, params.get(i));
                 }
-                try (java.sql.ResultSet rs = stmt.executeQuery()) {
+                try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
-                        map.put("id_egreso",          rs.getInt("id_egresos_gastos"));
-                        map.put("id_caja_sesion",     rs.getInt("id_caja_sesion"));
-                        map.put("id_usuario",         rs.getInt("id_usuario"));
-                        map.put("fecha",              rs.getString("fecha"));
-                        map.put("descripcion",        rs.getString("descripcion"));
-                        map.put("monto",              rs.getDouble("monto"));
-                        map.put("metodo_pago",        rs.getString("metodo_pago"));
-                        map.put("numero_comprobante", rs.getString("numero_comprobante"));
-                        map.put("estado",             rs.getString("anulado"));
-                        lista.add(map);
+                        lista.add(mapRow(rs));
                     }
                 }
             }
@@ -162,5 +152,21 @@ public class EgresoGastoDAO {
         }
         return lista;
     }
-}
 
+    /** Helper: mapea una fila del ResultSet a Map, con "estado" como Activo/Inactivo */
+    private Map<String, Object> mapRow(ResultSet rs) throws SQLException {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("id_egreso",          rs.getInt("id_egresos_gastos"));
+        int cajaSesion = rs.getInt("id_caja_sesion");
+        map.put("id_caja_sesion",     rs.wasNull() ? null : cajaSesion);
+        map.put("id_usuario",         rs.getInt("id_usuario"));
+        map.put("fecha",              rs.getString("fecha"));
+        map.put("descripcion",        rs.getString("descripcion"));
+        map.put("monto",              rs.getDouble("monto"));
+        map.put("metodo_pago",        rs.getString("metodo_pago"));
+        map.put("numero_comprobante", rs.getString("numero_comprobante"));
+        String anulado = rs.getString("anulado");
+        map.put("estado",             "Si".equals(anulado) ? "Inactivo" : "Activo");
+        return map;
+    }
+}

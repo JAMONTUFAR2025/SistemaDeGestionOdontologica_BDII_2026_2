@@ -45,6 +45,7 @@ public class FacturacionDAO {
         }
     }
 
+    /** Devuelve TODOS los recibos (activos e inactivos) con campo "estado" = Activo / Inactivo */
     public List<Map<String, Object>> obtenerRecibos() {
         List<Map<String, Object>> lista = new ArrayList<>();
         String query = "SELECT fr.id_facturacion_recibos, fr.numero_recibo, fr.id_pacientes, " +
@@ -55,30 +56,13 @@ public class FacturacionDAO {
                        "fr.total_neto_recibido, fr.metodo_pago, fr.anulado " +
                        "FROM Facturacion fr " +
                        "INNER JOIN Pacientes p ON fr.id_pacientes = p.id_pacientes " +
-                       "WHERE fr.anulado = 'No' ORDER BY fr.id_facturacion_recibos DESC";
+                       "ORDER BY fr.id_facturacion_recibos DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
                  ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Map<String, Object> map = new LinkedHashMap<>();
-                    map.put("id_factura", rs.getInt("id_facturacion_recibos"));
-                    map.put("numero_recibo", rs.getString("numero_recibo"));
-                    map.put("id_paciente", rs.getInt("id_pacientes"));
-                    map.put("id_caja_sesion", rs.getInt("id_caja_sesion"));
-                    map.put("id_usuario", rs.getInt("id_usuario"));
-                    map.put("nombre_paciente", rs.getString("nombre_paciente"));
-                    map.put("identidad_paciente", rs.getString("identidad_paciente"));
-                    map.put("rtn_cliente", rs.getString("rtn_cliente"));
-                    map.put("fecha_emision", rs.getString("fecha_emision"));
-                    map.put("concepto", rs.getString("concepto"));
-                    map.put("suma_neta", rs.getDouble("suma_neta"));
-                    map.put("total_honorarios", rs.getDouble("total_honorarios"));
-                    map.put("total_retenido", rs.getDouble("total_retenido"));
-                    map.put("total_neto_recibido", rs.getDouble("total_neto_recibido"));
-                    map.put("metodo_pago", rs.getString("metodo_pago"));
-                    map.put("estado", rs.getString("anulado"));
-                    lista.add(map);
+                    lista.add(mapRow(rs));
                 }
             }
         } catch (SQLException e) {
@@ -156,7 +140,7 @@ public class FacturacionDAO {
             "fr.total_neto_recibido, fr.metodo_pago, fr.anulado " +
             "FROM Facturacion fr " +
             "INNER JOIN Pacientes p ON fr.id_pacientes = p.id_pacientes " +
-            "WHERE fr.anulado = 'No'"
+            "WHERE 1=1"
         );
 
         List<Object> params = new ArrayList<>();
@@ -187,24 +171,7 @@ public class FacturacionDAO {
                 }
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        Map<String, Object> map = new LinkedHashMap<>();
-                        map.put("id_factura",          rs.getInt("id_facturacion_recibos"));
-                        map.put("numero_recibo",        rs.getString("numero_recibo"));
-                        map.put("id_paciente",          rs.getInt("id_pacientes"));
-                        map.put("id_caja_sesion",       rs.getInt("id_caja_sesion"));
-                        map.put("id_usuario",           rs.getInt("id_usuario"));
-                        map.put("nombre_paciente",      rs.getString("nombre_paciente"));
-                        map.put("identidad_paciente",   rs.getString("identidad_paciente"));
-                        map.put("rtn_cliente",          rs.getString("rtn_cliente"));
-                        map.put("fecha_emision",        rs.getString("fecha_emision"));
-                        map.put("concepto",             rs.getString("concepto"));
-                        map.put("suma_neta",            rs.getDouble("suma_neta"));
-                        map.put("total_honorarios",     rs.getDouble("total_honorarios"));
-                        map.put("total_retenido",       rs.getDouble("total_retenido"));
-                        map.put("total_neto_recibido",  rs.getDouble("total_neto_recibido"));
-                        map.put("metodo_pago",          rs.getString("metodo_pago"));
-                        map.put("estado",               rs.getString("anulado"));
-                        lista.add(map);
+                        lista.add(mapRow(rs));
                     }
                 }
             }
@@ -212,5 +179,28 @@ public class FacturacionDAO {
             System.err.println("Error al buscar recibos: " + e.getMessage());
         }
         return lista;
+    }
+
+    /** Helper: mapea una fila del ResultSet a Map, con "estado" como Activo/Inactivo */
+    private Map<String, Object> mapRow(ResultSet rs) throws SQLException {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("id_factura",          rs.getInt("id_facturacion_recibos"));
+        map.put("numero_recibo",       rs.getString("numero_recibo"));
+        map.put("id_paciente",         rs.getInt("id_pacientes"));
+        map.put("id_caja_sesion",      rs.getInt("id_caja_sesion"));
+        map.put("id_usuario",          rs.getInt("id_usuario"));
+        map.put("nombre_paciente",     rs.getString("nombre_paciente"));
+        map.put("identidad_paciente",  rs.getString("identidad_paciente"));
+        map.put("rtn_cliente",         rs.getString("rtn_cliente"));
+        map.put("fecha_emision",       rs.getString("fecha_emision"));
+        map.put("concepto",            rs.getString("concepto"));
+        map.put("suma_neta",           rs.getDouble("suma_neta"));
+        map.put("total_honorarios",    rs.getDouble("total_honorarios"));
+        map.put("total_retenido",      rs.getDouble("total_retenido"));
+        map.put("total_neto_recibido", rs.getDouble("total_neto_recibido"));
+        map.put("metodo_pago",         rs.getString("metodo_pago"));
+        String anulado = rs.getString("anulado");
+        map.put("estado",              "Si".equals(anulado) ? "Inactivo" : "Activo");
+        return map;
     }
 }

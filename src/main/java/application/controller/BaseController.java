@@ -11,6 +11,14 @@ public abstract class BaseController {
     // Variables compartidas (estáticas) para mantener la sesión actual
     protected static String rolUsuarioActual = "";
     protected static Integer idPersonalMedicoActual = null;
+    protected static Integer idUsuarioLoginActual = null;
+
+    /** Limpia todos los datos de sesión (llamar al hacer logout) */
+    public static void clearSession() {
+        rolUsuarioActual = "";
+        idPersonalMedicoActual = null;
+        idUsuarioLoginActual = null;
+    }
 
     public BaseController() {
         this.gson = new GsonBuilder()

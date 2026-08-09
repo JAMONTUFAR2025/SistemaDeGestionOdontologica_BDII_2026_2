@@ -22,14 +22,24 @@ public class AuthController extends BaseController {
         boolean exito = userDAO.autenticarUsuario(correo, contrasenia);
         if (exito) {
             System.out.println("-> Inicio de sesion EXITOSO para: " + correo);
-            rolUsuarioActual = userDAO.obtenerRolPorCorreo(correo); 
+            rolUsuarioActual = userDAO.obtenerRolPorCorreo(correo);
             idPersonalMedicoActual = userDAO.obtenerIdMedicoPorCorreo(correo);
+            idUsuarioLoginActual = userDAO.obtenerIdLoginPorCorreo(correo);
         } else {
             System.out.println("-> Fila no encontrada o credenciales INCORRECTAS para: " + correo);
-            rolUsuarioActual = ""; 
-            idPersonalMedicoActual = null;
+            clearSession();
         }
         return exito;
+    }
+
+    /** Cierra la sesión limpiando todas las variables estáticas. */
+    public void logout() {
+        clearSession();
+    }
+
+    /** Retorna el id_usuarios_login del usuario actualmente en sesión. */
+    public String obtenerIdUsuarioActual() {
+        return idUsuarioLoginActual != null ? String.valueOf(idUsuarioLoginActual) : "0";
     }
 
     public String enviarCodigoRecuperacion(String correo) {
