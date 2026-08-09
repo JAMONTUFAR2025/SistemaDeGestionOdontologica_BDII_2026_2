@@ -399,29 +399,6 @@ INSERT INTO Expediente_Archivos (id_pacientes, tipo_archivo, nombre_archivo, rut
 (4, 'Radiografia', 'Rx_Periapical_Pieza24_Rosa.png', '/uploads/pacientes/4/rx_24.png', 'Proceso osteolítico periapical'),
 (5, 'Fotografia', 'Foto_Sonrisa_David.jpg', '/uploads/pacientes/5/sonrisa.jpg', 'Registro previo a blanqueamiento');
 
-INSERT INTO Evolucion_Clinica (id_pacientes, id_expediente_base, id_citas, id_personal_medico, numero_cita, fecha_consulta, motivo_consulta, sintoma_principal, presion_arterial, pulso_cardiaco, temperatura, tejidos_blandos_observacion, diagnostico, id_catalogo_procedimientos, estado_odontograma, pago_abono, observaciones) VALUES 
-(1, 1, 1, 1, 1, '2026-08-04 09:30:00', 'Limpieza general', 'Ninguno', '120/80', '72 bpm', '36.5 °C', 'Encías con ligero eritema marginal', 'Gingivitis marginal', 1, '{"piezas_afectadas": []}', 800.00, 'Paciente tolera bien el procedimiento'),
-(2, 2, 2, 1, 1, '2026-08-04 11:00:00', 'Dolor al masticar', 'Sensibilidad al frío y dulce', '130/85', '78 bpm', '36.6 °C', 'Tejidos blandos normales', 'Caries de III Grado pieza 16', 2, '{"pieza_16": "caries_oclusal"}', 1200.00, 'Se colocó base protectora y resina'),
-(3, 3, 3, 4, 1, '2026-08-05 14:30:00', 'Evaluación de molestia', 'Dolor a la presión', '110/70', '85 bpm', '36.4 °C', 'Loma alveolar inflamada zona molar', 'Pieza decidua hiperreabsorbida', 3, '{"pieza_75": "indicada_extraccion"}', 700.00, 'Extracción exitosa sin complicaciones'),
-(4, 4, 4, 2, 1, '2026-08-06 11:30:00', 'Dolor pulsátil e intenso', 'Dolor espontáneo nocturno', '125/80', '80 bpm', '36.7 °C', 'Sin fístula visible', 'Pulpitis Irreversible pieza 24', 4, '{"pieza_24": "endodoncia_iniciada"}', 2000.00, 'Se realizó biopulpectomía y conductometría'),
-(5, 5, NULL, 3, 1, '2026-08-08 09:30:00', 'Estética dental', 'Dientes amarillentos', '118/75', '70 bpm', '36.5 °C', 'Mucosa sana', 'Manchas extrínsecas', 5, '{"piezas_anteriores": "blanqueamiento"}', 2500.00, 'Aclaramiento de 3 tonos en escala Vita');
-
-INSERT INTO Consentimientos_Informados (id_evolucion_clinica, tipo_procedimiento, representante_legal, identidad_representante, fecha_firma) VALUES 
-(1, 'Otro', NULL, NULL, '2026-08-04'),
-(2, 'Otro', NULL, NULL, '2026-08-04'),
-(3, 'Cirugia Bucal', 'Marta Paz', '0501198001122', '2026-08-05'),
-(4, 'Endodoncia', NULL, NULL, '2026-08-06'),
-(5, 'Otro', NULL, NULL, '2026-08-08');
-
-INSERT INTO Constancias_Medicas (id_evolucion_clinica, fecha_emision, hora_emision, tratamiento_realizado) VALUES 
-(1, '2026-08-04', '10:15:00', 'Se realizó detartraje ultrasónico y profiilaxis dental.'),
-(2, '2026-08-04', '12:00:00', 'Se realizó preparación cavitaria y restauración con resina fotocurable en pieza 16.'),
-(3, '2026-08-05', '15:15:00', 'Se realizó extracción quirúrgica simple de pieza temporal bajo anestesia local.'),
-(4, '2026-08-06', '12:45:00', 'Se inició tratamiento de conducto (Endodoncia) en pieza 24. Se indica reposo por 24 horas.'),
-(5, '2026-08-08', '11:00:00', 'Se realizó sesión de blanqueamiento dental clínico con luz LED.');
-
-USE soe_odontologia_final;
-
 -- ==========================================
 -- INSERCIÓN DE 20 CITAS DE PRUEBA
 -- ==========================================
@@ -452,3 +429,24 @@ INSERT INTO Citas (id_pacientes, id_personal_medico, fecha_hora, motivo_cita, es
 (3, 2, '2026-08-11 10:30:00', 'Evaluación de perno y corona', 'Programada'),
 (4, 1, '2026-08-12 14:00:00', 'Blanqueamiento dental sesión 1', 'Programada'),
 (5, 5, '2026-08-13 15:00:00', 'Control de higiene infantil', 'Programada');
+
+INSERT INTO Evolucion_Clinica (id_pacientes, id_expediente_base, id_citas, id_personal_medico, numero_cita, fecha_consulta, motivo_consulta, sintoma_principal, presion_arterial, pulso_cardiaco, temperatura, tejidos_blandos_observacion, diagnostico, id_catalogo_procedimientos, estado_odontograma, pago_abono, observaciones) VALUES 
+(1, 1, 1, 1, 1, '2026-08-04 09:30:00', 'Limpieza general', 'Ninguno', '120/80', '72 bpm', '36.5 °C', 'Encías con ligero eritema marginal', 'Gingivitis marginal', 1, '{"piezas_afectadas": []}', 800.00, 'Paciente tolera bien el procedimiento'),
+(2, 2, 2, 1, 1, '2026-08-04 11:00:00', 'Dolor al masticar', 'Sensibilidad al frío y dulce', '130/85', '78 bpm', '36.6 °C', 'Tejidos blandos normales', 'Caries de III Grado pieza 16', 2, '{"pieza_16": "caries_oclusal"}', 1200.00, 'Se colocó base protectora y resina'),
+(3, 3, 3, 4, 1, '2026-08-05 14:30:00', 'Evaluación de molestia', 'Dolor a la presión', '110/70', '85 bpm', '36.4 °C', 'Loma alveolar inflamada zona molar', 'Pieza decidua hiperreabsorbida', 3, '{"pieza_75": "indicada_extraccion"}', 700.00, 'Extracción exitosa sin complicaciones'),
+(4, 4, 4, 2, 1, '2026-08-06 11:30:00', 'Dolor pulsátil e intenso', 'Dolor espontáneo nocturno', '125/80', '80 bpm', '36.7 °C', 'Sin fístula visible', 'Pulpitis Irreversible pieza 24', 4, '{"pieza_24": "endodoncia_iniciada"}', 2000.00, 'Se realizó biopulpectomía y conductometría'),
+(5, 5, NULL, 3, 1, '2026-08-08 09:30:00', 'Estética dental', 'Dientes amarillentos', '118/75', '70 bpm', '36.5 °C', 'Mucosa sana', 'Manchas extrínsecas', 5, '{"piezas_anteriores": "blanqueamiento"}', 2500.00, 'Aclaramiento de 3 tonos en escala Vita');
+
+INSERT INTO Consentimientos_Informados (id_evolucion_clinica, tipo_procedimiento, representante_legal, identidad_representante, fecha_firma) VALUES 
+(1, 'Otro', NULL, NULL, '2026-08-04'),
+(2, 'Otro', NULL, NULL, '2026-08-04'),
+(3, 'Cirugia Bucal', 'Marta Paz', '0501198001122', '2026-08-05'),
+(4, 'Endodoncia', NULL, NULL, '2026-08-06'),
+(5, 'Otro', NULL, NULL, '2026-08-08');
+
+INSERT INTO Constancias_Medicas (id_evolucion_clinica, fecha_emision, hora_emision, tratamiento_realizado) VALUES 
+(1, '2026-08-04', '10:15:00', 'Se realizó detartraje ultrasónico y profiilaxis dental.'),
+(2, '2026-08-04', '12:00:00', 'Se realizó preparación cavitaria y restauración con resina fotocurable en pieza 16.'),
+(3, '2026-08-05', '15:15:00', 'Se realizó extracción quirúrgica simple de pieza temporal bajo anestesia local.'),
+(4, '2026-08-06', '12:45:00', 'Se inició tratamiento de conducto (Endodoncia) en pieza 24. Se indica reposo por 24 horas.'),
+(5, '2026-08-08', '11:00:00', 'Se realizó sesión de blanqueamiento dental clínico con luz LED.');
