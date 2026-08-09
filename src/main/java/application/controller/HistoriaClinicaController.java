@@ -157,6 +157,121 @@ public class HistoriaClinicaController extends BaseController {
     }
 
     // ------------------------------------------------------------------
+    // ACTUALIZAR Y ELIMINAR EXPEDIENTE BASE
+    // ------------------------------------------------------------------
+
+    public String actualizarExpediente(String jsonData) {
+        try {
+            com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonData).getAsJsonObject();
+
+            String identidad = obj.has("identidad_paciente") ? obj.get("identidad_paciente").getAsString() : "";
+            if (identidad.trim().isEmpty()) return "ERR|La identidad del paciente es obligatoria.";
+
+            int idPacientes = resolverIdPaciente(identidad.trim());
+            if (idPacientes <= 0) {
+                return "ERR|No se encontró ningún paciente con identidad: " + identidad;
+            }
+
+            String remitidoPor       = str(obj, "remitido_por");
+            String antPatologicos    = str(obj, "antecedentes_patologicos");
+            String antOdontologicos  = str(obj, "antecedentes_odontologicos");
+            String antQuirurgicos    = str(obj, "antecedentes_quirurgicos");
+            String antGineco         = str(obj, "antecedentes_ginecobstetros");
+            String habitosToxicos    = str(obj, "habitos_toxicos");
+            String farmacos          = str(obj, "farmacos_uso_habitual");
+            String reaccionAnest     = str(obj, "reaccion_anestesicos");
+            String especAnest        = str(obj, "especifique_anestesia");
+            String complicaciones    = str(obj, "complicaciones_tratamientos_previos");
+            String habitosBucales    = str(obj, "habitos_bucales");
+            String frecCepillado     = str(obj, "frecuencia_cepillado");
+            String tipoCerdas        = str(obj, "tipo_cepillo_cerdas");
+            String usoHilo           = str(obj, "uso_hilo_dental");
+            String tipoMordida       = str(obj, "tipo_mordida");
+            String tejidosBlandos    = str(obj, "tejidos_blandos_observacion");
+            String diagPresuntivo    = str(obj, "diagnostico_presuntivo");
+            String observaciones     = str(obj, "observaciones_generales");
+
+            application.model.dao.HistoriaClinicaDAO dao = new application.model.dao.HistoriaClinicaDAO();
+            return dao.actualizarExpedienteBase(idPacientes, remitidoPor,
+                    antPatologicos, antOdontologicos, antQuirurgicos, antGineco,
+                    habitosToxicos, farmacos, reaccionAnest, especAnest, complicaciones,
+                    habitosBucales, frecCepillado, tipoCerdas, usoHilo, tipoMordida,
+                    tejidosBlandos, diagPresuntivo, observaciones);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en actualizarExpediente: " + t.getMessage());
+            return "ERR|Error procesando datos: " + t.getMessage();
+        }
+    }
+
+    public String eliminarExpediente(String identidad) {
+        try {
+            if (identidad == null || identidad.trim().isEmpty()) {
+                return "ERR|La identidad del paciente es obligatoria.";
+            }
+            int idPacientes = resolverIdPaciente(identidad.trim());
+            if (idPacientes <= 0) {
+                return "ERR|No se encontró ningún paciente con identidad: " + identidad;
+            }
+
+            application.model.dao.HistoriaClinicaDAO dao = new application.model.dao.HistoriaClinicaDAO();
+            return dao.eliminarExpedienteBase(idPacientes);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en eliminarExpediente: " + t.getMessage());
+            return "ERR|Error al eliminar expediente: " + t.getMessage();
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // ACTUALIZAR Y ELIMINAR EVOLUCIÓN CLÍNICA
+    // ------------------------------------------------------------------
+
+    public String actualizarEvolucion(String jsonData) {
+        try {
+            com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonData).getAsJsonObject();
+
+            int idEvolucion = obj.has("id_evolucion") ? obj.get("id_evolucion").getAsInt() : 0;
+            if (idEvolucion <= 0) return "ERR|El ID de evolución es obligatorio.";
+
+            int idMedico = obj.has("id_medico") ? obj.get("id_medico").getAsInt() : 0;
+            if (idMedico <= 0) return "ERR|Debe seleccionar un médico tratante.";
+
+            String fechaConsulta    = str(obj, "fecha_consulta");
+            if (fechaConsulta.isEmpty()) return "ERR|La fecha de consulta es obligatoria.";
+
+            String motivoConsulta   = str(obj, "motivo_consulta");
+            String sintomaPrincipal = str(obj, "sintoma_principal");
+            String presionArterial  = str(obj, "presion_arterial");
+            String pulsoCardiaco    = str(obj, "pulso_cardiaco");
+            String temperatura      = str(obj, "temperatura");
+            String tejidosBlandos   = str(obj, "tejidos_blandos_observacion");
+            String diagnostico      = str(obj, "diagnostico");
+            String odontograma      = str(obj, "estado_odontograma");
+            double pagoAbono        = obj.has("pago_abono") ? obj.get("pago_abono").getAsDouble() : 0.0;
+            String observaciones    = str(obj, "observaciones");
+
+            application.model.dao.HistoriaClinicaDAO dao = new application.model.dao.HistoriaClinicaDAO();
+            return dao.actualizarEvolucion(idEvolucion, idMedico, fechaConsulta, motivoConsulta, 
+                    sintomaPrincipal, presionArterial, pulsoCardiaco, temperatura, tejidosBlandos, 
+                    diagnostico, odontograma, pagoAbono, observaciones);
+
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en actualizarEvolucion: " + t.getMessage());
+            return "ERR|Error procesando datos: " + t.getMessage();
+        }
+    }
+
+    public String eliminarEvolucion(int idEvolucion) {
+        try {
+            if (idEvolucion <= 0) return "ERR|El ID de evolución no es válido.";
+            application.model.dao.HistoriaClinicaDAO dao = new application.model.dao.HistoriaClinicaDAO();
+            return dao.eliminarEvolucion(idEvolucion);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en eliminarEvolucion: " + t.getMessage());
+            return "ERR|Error al eliminar evolución: " + t.getMessage();
+        }
+    }
+
+    // ------------------------------------------------------------------
     // OBTENER MÉDICOS ACTIVOS (para el selector)
     // ------------------------------------------------------------------
 

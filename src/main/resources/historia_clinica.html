@@ -932,6 +932,9 @@
             const exp = data.expediente;
             const evoluciones = data.evoluciones || [];
 
+            window.currentExpedienteData = exp;
+            window.currentEvoluciones = evoluciones;
+
             tempPacienteNombre = p.nombre_completo || '—';
             tempPacienteIdentidad = p.identidad || ultimoBusquedaIdentidad;
 
@@ -971,7 +974,15 @@
             contenedor.innerHTML = `
         <!-- Bloque 1: Datos Básicos -->
         <div class="col-12">
-            <div class="seccion-bloque shadow-sm">
+            <div class="seccion-bloque shadow-sm position-relative">
+                <div class="position-absolute top-0 end-0 p-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="editarExpedienteActual()">
+                        <i class="fa-solid fa-pen"></i> Editar Expediente
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger ms-1" onclick="eliminarExpedienteActual()">
+                        <i class="fa-solid fa-trash"></i> Eliminar
+                    </button>
+                </div>
                 <h5 class="fw-bold text-primary border-bottom pb-2 mb-3">
                     <i class="fa-solid fa-notes-medical me-2"></i>1. Anamnesis
                 </h5>
@@ -1070,9 +1081,17 @@
                                 <i class="fa-regular fa-calendar-check me-1"></i>
                                 Cita #${ev.numero_cita} — ${ev.fecha_consulta || '—'}
                             </h6>
-                            <span class="badge bg-secondary">
-                                <i class="fa-solid fa-user-doctor me-1"></i>${ev.nombre_medico || 'Médico ID:' + ev.id_medico}
-                            </span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-secondary">
+                                    <i class="fa-solid fa-user-doctor me-1"></i>${ev.nombre_medico || 'Médico ID:' + ev.id_medico}
+                                </span>
+                                <button class="btn btn-sm btn-outline-primary" onclick="editarEvolucion(${ev.id_evolucion})">
+                                    <i class="fa-solid fa-pen"></i> Editar
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="eliminarEvolucion(${ev.id_evolucion})">
+                                    <i class="fa-solid fa-trash"></i> Eliminar
+                                </button>
+                            </div>
                         </div>
                         <div class="row text-muted small mb-2">
                             <div class="col-auto"><strong>PA:</strong> ${ev.presion_arterial || 'N/A'}</div>
@@ -1144,9 +1163,15 @@
                 observaciones_generales: document.getElementById('hc_observaciones_gen').value
             };
 
-            const respuesta = window.historiaClinicaController.registrarExpediente(JSON.stringify(data));
+            let respuesta;
+            if (window.isEditingExpediente) {
+                respuesta = window.historiaClinicaController.actualizarExpediente(JSON.stringify(data));
+            } else {
+                respuesta = window.historiaClinicaController.registrarExpediente(JSON.stringify(data));
+            }
             const partes = respuesta.split('|');
             if (partes[0] === 'OK') {
+                window.isEditingExpediente = false;
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         title: '¡Éxito!',
@@ -1208,6 +1233,7 @@
         // MODAL EVOLUCIÓN
         // ============================================================
         function abrirModalEvolucion(identidad) {
+            window.id_evolucion_editando = null;
             document.getElementById('formNuevaConsulta').reset();
             document.getElementById('ev_identidad').value = identidad;
             document.getElementById('ev_pago_abono').value = '0.00';
@@ -1251,9 +1277,20 @@
                 observaciones: document.getElementById('ev_observaciones').value
             };
 
-            const respuesta = window.historiaClinicaController.agregarEvolucion(JSON.stringify(data));
+            if (window.id_evolucion_editando) {
+                data.id_evolucion = window.id_evolucion_editando;
+            }
+
+            let respuesta;
+            if (window.id_evolucion_editando) {
+                respuesta = window.historiaClinicaController.actualizarEvolucion(JSON.stringify(data));
+            } else {
+                respuesta = window.historiaClinicaController.agregarEvolucion(JSON.stringify(data));
+            }
+            
             const partes = respuesta.split('|');
             if (partes[0] === 'OK') {
+                window.id_evolucion_editando = null;
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         title: '¡Éxito!',
@@ -1288,6 +1325,152 @@
                 } else {
                     alert("Error: " + partes[1]);
                 }
+            }
+        }
+
+        // ============================================================
+        // EDITAR Y ELIMINAR EXPEDIENTE
+        // ============================================================
+        function editarExpedienteActual() {
+            if (!window.currentExpedienteData) return;
+            const exp = window.currentExpedienteData;
+            
+            // Llenar el formulario
+            document.getElementById('hc_identidad').value = tempPacienteIdentidad;
+            document.getElementById('hc_remitido_por').value = exp.remitido_por || '';
+            document.getElementById('hc_motivo').value = '';
+            document.getElementById('hc_sintoma').value = '';
+            document.getElementById('hc_ant_patologicos').value = exp.antecedentes_patologicos || '';
+            document.getElementById('hc_ant_odontologicos').value = exp.antecedentes_odontologicos || '';
+            document.getElementById('hc_habitos_toxicos').value = exp.habitos_toxicos || '';
+            document.getElementById('hc_farmacos').value = exp.farmacos_uso_habitual || '';
+            document.getElementById('hc_gineco').value = exp.antecedentes_ginecobstetros || '';
+            document.getElementById('hc_ant_quirurgicos').value = exp.antecedentes_quirurgicos || '';
+            document.getElementById('hc_complicaciones').value = exp.complicaciones_tratamientos_previos || '';
+            document.getElementById('hc_reaccion_anest').value = exp.reaccion_anestesicos || 'No';
+            document.getElementById('hc_especifica_anest').value = exp.especifique_anestesia || '';
+            document.getElementById('hc_habitos_bucales').value = exp.habitos_bucales || '';
+            document.getElementById('hc_frec_cepillado').value = exp.frecuencia_cepillado || '';
+            document.getElementById('hc_tipo_cerdas').value = exp.tipo_cepillo_cerdas || '';
+            document.getElementById('hc_hilo_dental').value = exp.uso_hilo_dental || '';
+            document.getElementById('hc_tipo_mordida').value = exp.tipo_mordida || '';
+            document.getElementById('hc_tejidos_blandos').value = exp.tejidos_blandos_observacion || '';
+            document.getElementById('hc_diagnostico').value = exp.diagnostico_presuntivo || '';
+            document.getElementById('hc_observaciones_gen').value = exp.observaciones_generales || '';
+
+            window.isEditingExpediente = true;
+
+            // Cambiar a la pestaña de registro
+            cambiarPestana('panel-nuevo-registro', document.getElementById('btnTab2'));
+            cambiarSubPaso('paso-anamnesis', document.getElementById('tab-paso-anamnesis'));
+            
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ title: 'Modo Edición', text: 'Puede modificar los datos del expediente base.', icon: 'info', timer: 2000, showConfirmButton: false });
+            }
+        }
+
+        function eliminarExpedienteActual() {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: '¿Eliminar Expediente?',
+                    text: 'Se eliminará el expediente base y todas sus evoluciones clínicas (citas). Esta acción no se puede deshacer.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Sí, eliminar todo',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        ejecutarEliminarExpediente();
+                    }
+                });
+            } else {
+                if (confirm('¿Está seguro de eliminar el expediente completo y todas sus evoluciones? Esta acción no se puede deshacer.')) {
+                    ejecutarEliminarExpediente();
+                }
+            }
+        }
+
+        function ejecutarEliminarExpediente() {
+            if (!window.historiaClinicaController) return;
+            const respuesta = window.historiaClinicaController.eliminarExpediente(tempPacienteIdentidad);
+            const partes = respuesta.split('|');
+            if (partes[0] === 'OK') {
+                if (typeof Swal !== 'undefined') Swal.fire('Eliminado', partes[1], 'success');
+                else alert(partes[1]);
+                document.getElementById('contenedorExpediente').style.display = 'none';
+                document.getElementById('inputBuscar').value = '';
+            } else {
+                if (typeof Swal !== 'undefined') Swal.fire('Error', partes[1], 'error');
+                else alert(partes[1]);
+            }
+        }
+
+        // ============================================================
+        // EDITAR Y ELIMINAR EVOLUCION
+        // ============================================================
+        function editarEvolucion(idEvolucion) {
+            if (!window.currentEvoluciones) return;
+            const ev = window.currentEvoluciones.find(e => e.id_evolucion === idEvolucion);
+            if (!ev) return;
+
+            document.getElementById('formNuevaConsulta').reset();
+            document.getElementById('ev_identidad').value = tempPacienteIdentidad;
+            document.getElementById('ev_id_medico').value = ev.id_medico || '';
+            document.getElementById('ev_fecha').value = ev.fecha_consulta ? ev.fecha_consulta.replace(' ', 'T').substring(0,16) : '';
+            document.getElementById('ev_motivo').value = ev.motivo_consulta || '';
+            document.getElementById('ev_sintoma').value = ev.sintoma_principal || '';
+            document.getElementById('ev_presion').value = ev.presion_arterial || '';
+            document.getElementById('ev_pulso').value = ev.pulso_cardiaco || '';
+            document.getElementById('ev_temperatura').value = ev.temperatura || '';
+            document.getElementById('ev_tejidos').value = ev.tejidos_blandos || '';
+            document.getElementById('ev_diagnostico').value = ev.diagnostico || '';
+            document.getElementById('ev_odontograma').value = ev.estado_odontograma || '';
+            document.getElementById('ev_pago_abono').value = ev.pago_abono || '0.00';
+            document.getElementById('ev_observaciones').value = ev.observaciones || '';
+
+            window.id_evolucion_editando = idEvolucion;
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevaConsulta'))
+                || new bootstrap.Modal(document.getElementById('modalNuevaConsulta'));
+            modal.show();
+        }
+
+        function eliminarEvolucion(idEvolucion) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: '¿Eliminar Evolución?',
+                    text: '¿Está seguro de eliminar esta evolución clínica?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        ejecutarEliminarEvolucion(idEvolucion);
+                    }
+                });
+            } else {
+                if (confirm('¿Está seguro de eliminar esta evolución clínica?')) {
+                    ejecutarEliminarEvolucion(idEvolucion);
+                }
+            }
+        }
+
+        function ejecutarEliminarEvolucion(idEvolucion) {
+            if (!window.historiaClinicaController) return;
+            const respuesta = window.historiaClinicaController.eliminarEvolucion(idEvolucion);
+            const partes = respuesta.split('|');
+            if (partes[0] === 'OK') {
+                if (typeof Swal !== 'undefined') Swal.fire('Eliminada', partes[1], 'success');
+                else alert(partes[1]);
+                buscarExpediente(); // Recargar expediente
+            } else {
+                if (typeof Swal !== 'undefined') Swal.fire('Error', partes[1], 'error');
+                else alert(partes[1]);
             }
         }
 

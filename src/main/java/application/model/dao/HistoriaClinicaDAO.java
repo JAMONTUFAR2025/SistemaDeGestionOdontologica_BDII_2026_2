@@ -331,6 +331,159 @@ public class HistoriaClinicaDAO {
     }
 
     // ==============================================================
+    // ACTUALIZAR Y ELIMINAR EXPEDIENTE BASE
+    // ==============================================================
+
+    public String actualizarExpedienteBase(int idPacientes, String remitidoPor,
+            String antPatologicos, String antOdontologicos, String antQuirurgicos,
+            String antGinecoObstetros, String habitosToxicos, String farmacosHabituales,
+            String reaccionAnest, String especAnest, String complicaciones,
+            String habitosBucales, String frecuenciaCepillado, String tipoCerdas,
+            String usoHiloDental, String tipoMordida,
+            String tejidosBlandos, String diagnosticoPresuntivo, String observacionesGenerales) {
+
+        String query = "UPDATE Expediente_Base SET " +
+                "remitido_por = ?, antecedentes_patologicos = ?, antecedentes_odontologicos = ?, " +
+                "antecedentes_quirurgicos = ?, antecedentes_ginecobstetros = ?, habitos_toxicos = ?, " +
+                "farmacos_uso_habitual = ?, reaccion_anestesicos = ?, especifique_anestesia = ?, " +
+                "complicaciones_tratamientos_previos = ?, habitos_bucales = ?, frecuencia_cepillado = ?, " +
+                "tipo_cepillo_cerdas = ?, uso_hilo_dental = ?, tipo_mordida = ?, " +
+                "diagnostico_presuntivo = ?, observaciones_generales = ? " +
+                "WHERE id_pacientes = ?";
+
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, nullIfEmpty(remitidoPor));
+                stmt.setString(2, nullIfEmpty(antPatologicos));
+                stmt.setString(3, nullIfEmpty(antOdontologicos));
+                stmt.setString(4, nullIfEmpty(antQuirurgicos));
+                stmt.setString(5, nullIfEmpty(antGinecoObstetros));
+                stmt.setString(6, nullIfEmpty(habitosToxicos));
+                stmt.setString(7, nullIfEmpty(farmacosHabituales));
+                stmt.setString(8, "Si".equals(reaccionAnest) ? "Si" : "No");
+                stmt.setString(9, nullIfEmpty(especAnest));
+                stmt.setString(10, nullIfEmpty(complicaciones));
+                stmt.setString(11, nullIfEmpty(habitosBucales));
+                stmt.setString(12, nullIfEmpty(frecuenciaCepillado));
+                stmt.setString(13, nullIfEmpty(tipoCerdas));
+                stmt.setString(14, nullIfEmpty(usoHiloDental));
+                stmt.setString(15, nullIfEmpty(tipoMordida));
+                stmt.setString(16, nullIfEmpty(diagnosticoPresuntivo));
+                stmt.setString(17, nullIfEmpty(observacionesGenerales));
+                stmt.setInt(18, idPacientes);
+
+                int rows = stmt.executeUpdate();
+                return rows > 0 ? "OK|Historia Clínica actualizada exitosamente." :
+                                  "ERR|No se encontró el expediente para actualizar.";
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar expediente: " + e.getMessage());
+            return "ERR|Error de base de datos: " + e.getMessage();
+        }
+    }
+
+    public String eliminarExpedienteBase(int idPacientes) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getInstance().getConnection();
+            conn.setAutoCommit(false); // Iniciar transacción
+
+            // 1. Eliminar evoluciones clínicas dependientes
+            String delEvoluciones = "DELETE FROM Evolucion_Clinica WHERE id_pacientes = ?";
+            try (PreparedStatement stmt1 = conn.prepareStatement(delEvoluciones)) {
+                stmt1.setInt(1, idPacientes);
+                stmt1.executeUpdate();
+            }
+
+            // 2. Eliminar expediente base
+            String delExpediente = "DELETE FROM Expediente_Base WHERE id_pacientes = ?";
+            try (PreparedStatement stmt2 = conn.prepareStatement(delExpediente)) {
+                stmt2.setInt(1, idPacientes);
+                int rows = stmt2.executeUpdate();
+                
+                if (rows > 0) {
+                    conn.commit();
+                    return "OK|Expediente y sus evoluciones eliminados correctamente.";
+                } else {
+                    conn.rollback();
+                    return "ERR|No se encontró el expediente a eliminar.";
+                }
+            }
+        } catch (SQLException e) {
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { }
+            }
+            System.err.println("Error al eliminar expediente: " + e.getMessage());
+            return "ERR|Error al eliminar expediente: " + e.getMessage();
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); } catch (SQLException ex) { }
+            }
+        }
+    }
+
+    // ==============================================================
+    // ACTUALIZAR Y ELIMINAR EVOLUCION CLINICA
+    // ==============================================================
+
+    public String actualizarEvolucion(int idEvolucion, int idMedico,
+            String fechaConsulta, String motivoConsulta, String sintomaPrincipal,
+            String presionArterial, String pulsoCardiaco, String temperatura,
+            String tejidosBlandos, String diagnostico, String estadoOdontograma,
+            double pagoAbono, String observaciones) {
+        
+        String query = "UPDATE Evolucion_Clinica SET " +
+                "id_personal_medico = ?, fecha_consulta = ?, motivo_consulta = ?, " +
+                "sintoma_principal = ?, presion_arterial = ?, pulso_cardiaco = ?, " +
+                "temperatura = ?, tejidos_blandos_observacion = ?, diagnostico = ?, " +
+                "estado_odontograma = ?, pago_abono = ?, observaciones = ? " +
+                "WHERE id_evolucion_clinica = ?";
+
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, idMedico);
+                stmt.setString(2, fechaConsulta);
+                stmt.setString(3, nullIfEmpty(motivoConsulta));
+                stmt.setString(4, nullIfEmpty(sintomaPrincipal));
+                stmt.setString(5, nullIfEmpty(presionArterial));
+                stmt.setString(6, nullIfEmpty(pulsoCardiaco));
+                stmt.setString(7, nullIfEmpty(temperatura));
+                stmt.setString(8, nullIfEmpty(tejidosBlandos));
+                stmt.setString(9, nullIfEmpty(diagnostico));
+                stmt.setString(10, nullIfEmpty(estadoOdontograma));
+                stmt.setDouble(11, pagoAbono);
+                stmt.setString(12, nullIfEmpty(observaciones));
+                stmt.setInt(13, idEvolucion);
+
+                int rows = stmt.executeUpdate();
+                return rows > 0 ? "OK|Evolución clínica actualizada exitosamente." :
+                                  "ERR|No se pudo actualizar la evolución.";
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar evolución: " + e.getMessage());
+            return "ERR|Error de base de datos: " + e.getMessage();
+        }
+    }
+
+    public String eliminarEvolucion(int idEvolucion) {
+        String query = "DELETE FROM Evolucion_Clinica WHERE id_evolucion_clinica = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, idEvolucion);
+                int rows = stmt.executeUpdate();
+                return rows > 0 ? "OK|Evolución clínica eliminada exitosamente." :
+                                  "ERR|No se encontró la evolución clínica a eliminar.";
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar evolución: " + e.getMessage());
+            return "ERR|Error de base de datos: " + e.getMessage();
+        }
+    }
+
+    // ==============================================================
     // HELPER
     // ==============================================================
 
