@@ -160,6 +160,7 @@
                             <th>Descripción</th>
                             <th>N° Comprobante</th>
                             <th>Monto (Lps)</th>
+                            <th>Método</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -200,11 +201,19 @@
                         </div>
                         
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label fw-bold">Monto (Lps):*</label>
                                 <input type="number" id="eg_monto" step="0.01" min="0.01" class="form-control" placeholder="0.00" required>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Método de Pago:*</label>
+                                <select id="eg_metodo_pago" class="form-select">
+                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="Transferencia">Transferencia</option>
+                                    <option value="POS">POS</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label fw-bold">N° Factura:</label>
                                 <input type="text" id="eg_comprobante" class="form-control" placeholder="Opcional">
                             </div>
@@ -309,6 +318,7 @@
                 document.getElementById('eg_fecha').value = e.fecha;
                 document.getElementById('eg_descripcion').value = e.descripcion;
                 document.getElementById('eg_monto').value = e.monto;
+                document.getElementById('eg_metodo_pago').value = e.metodo_pago || 'Efectivo';
                 document.getElementById('eg_comprobante').value = e.numero_comprobante || '';
                 titulo.innerHTML = '<i class="fa-solid fa-edit"></i> Editar Egreso';
             } else {
@@ -340,7 +350,7 @@
         function renderTabla(lista) {
             const tbody = document.getElementById('tablaEgresosBody');
             if (!lista || lista.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No se encontraron egresos con los filtros aplicados.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No se encontraron egresos con los filtros aplicados.</td></tr>';
                 return;
             }
             
@@ -355,6 +365,7 @@
                         <td>${e.descripcion}</td>
                         <td>${e.numero_comprobante || '-'}</td>
                         <td class="fw-bold text-danger">${montoFormateado}</td>
+                        <td><span class="badge bg-light text-dark border">${e.metodo_pago || 'Efectivo'}</span></td>
                         <td class="action-icons">
                             <i class="fas fa-edit" title="Editar" onclick="abrirModalEgreso('${jsonStr}')"></i>
                             <i class="fas fa-trash" title="Eliminar" onclick="borrarEgreso(${e.id_egreso})"></i>
@@ -380,6 +391,7 @@
             const fecha = document.getElementById('eg_fecha').value;
             const descripcion = document.getElementById('eg_descripcion').value.trim();
             const monto = document.getElementById('eg_monto').value;
+            const metodoPago = document.getElementById('eg_metodo_pago').value;
             const comprobante = document.getElementById('eg_comprobante').value.trim();
             
             if (!fecha || !descripcion || !monto) {
@@ -389,9 +401,12 @@
 
             const data = {
                 id_egreso: id ? parseInt(id) : null,
+                id_caja_sesion: 1, // TODO: Reemplazar con ID de caja actual
+                id_usuario: 1,     // TODO: Reemplazar con ID de usuario actual
                 fecha: fecha,
                 descripcion: descripcion,
                 monto: parseFloat(monto),
+                metodo_pago: metodoPago,
                 numero_comprobante: comprobante
             };
             

@@ -9,41 +9,34 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * DAO para la tabla Facturacion_Recibos.
- * Esquema: id_facturacion_recibos, numero_recibo, id_pacientes, rtn_cliente,
- *          fecha_emision, concepto, suma_neta, total_honorarios, total_retenido,
- *          total_neto_recibido, metodo_pago, borrado ENUM('Si','No'), fecha_borrado.
- *
- * La FK es id_pacientes (entero). Para facilitar la búsqueda desde el frontend
- * se resuelve el nombre del paciente con un JOIN.
+ * DAO para la tabla Facturacion.
  */
-public class FacturacionReciboDAO {
+public class FacturacionDAO {
 
-    // ------------------------------------------------------------------
-    // REGISTRAR (INSERT)
-    // ------------------------------------------------------------------
-    public boolean registrarRecibo(String numeroRecibo, int idPaciente, String rtnCliente,
+    public boolean registrarRecibo(String numeroRecibo, int idPaciente, int idCajaSesion, int idUsuario, String rtnCliente,
                                    String fechaEmision, String concepto,
                                    double sumaNeta, double totalHonorarios,
                                    double totalRetenido, double totalNetoRecibido,
                                    String metodoPago) {
-        String query = "INSERT INTO Facturacion_Recibos " +
-                "(numero_recibo, id_pacientes, rtn_cliente, fecha_emision, concepto, " +
+        String query = "INSERT INTO Facturacion " +
+                "(numero_recibo, id_pacientes, id_caja_sesion, id_usuario, rtn_cliente, fecha_emision, concepto, " +
                 "suma_neta, total_honorarios, total_retenido, total_neto_recibido, metodo_pago) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setString(1, numeroRecibo != null ? numeroRecibo : "");
                 stmt.setInt(2, idPaciente);
-                stmt.setString(3, rtnCliente != null ? rtnCliente : "");
-                stmt.setString(4, fechaEmision);
-                stmt.setString(5, concepto);
-                stmt.setDouble(6, sumaNeta);
-                stmt.setDouble(7, totalHonorarios);
-                stmt.setDouble(8, totalRetenido);
-                stmt.setDouble(9, totalNetoRecibido);
-                stmt.setString(10, metodoPago);
+                stmt.setInt(3, idCajaSesion);
+                stmt.setInt(4, idUsuario);
+                stmt.setString(5, rtnCliente != null ? rtnCliente : "");
+                stmt.setString(6, fechaEmision);
+                stmt.setString(7, concepto);
+                stmt.setDouble(8, sumaNeta);
+                stmt.setDouble(9, totalHonorarios);
+                stmt.setDouble(10, totalRetenido);
+                stmt.setDouble(11, totalNetoRecibido);
+                stmt.setString(12, metodoPago);
                 return stmt.executeUpdate() > 0;
             }
         } catch (SQLException e) {
@@ -52,19 +45,17 @@ public class FacturacionReciboDAO {
         }
     }
 
-    // ------------------------------------------------------------------
-    // OBTENER TODOS (SELECT activos) con JOIN para nombre del paciente
-    // ------------------------------------------------------------------
     public List<Map<String, Object>> obtenerRecibos() {
         List<Map<String, Object>> lista = new ArrayList<>();
         String query = "SELECT fr.id_facturacion_recibos, fr.numero_recibo, fr.id_pacientes, " +
+                       "fr.id_caja_sesion, fr.id_usuario, " +
                        "p.nombre_completo AS nombre_paciente, p.identidad AS identidad_paciente, " +
                        "fr.rtn_cliente, fr.fecha_emision, fr.concepto, " +
                        "fr.suma_neta, fr.total_honorarios, fr.total_retenido, " +
-                       "fr.total_neto_recibido, fr.metodo_pago " +
-                       "FROM Facturacion_Recibos fr " +
+                       "fr.total_neto_recibido, fr.metodo_pago, fr.anulado " +
+                       "FROM Facturacion fr " +
                        "INNER JOIN Pacientes p ON fr.id_pacientes = p.id_pacientes " +
-                       "WHERE fr.borrado = 'No' ORDER BY fr.id_facturacion_recibos DESC";
+                       "WHERE fr.anulado = 'No' ORDER BY fr.id_facturacion_recibos DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
@@ -74,6 +65,8 @@ public class FacturacionReciboDAO {
                     map.put("id_factura", rs.getInt("id_facturacion_recibos"));
                     map.put("numero_recibo", rs.getString("numero_recibo"));
                     map.put("id_paciente", rs.getInt("id_pacientes"));
+                    map.put("id_caja_sesion", rs.getInt("id_caja_sesion"));
+                    map.put("id_usuario", rs.getInt("id_usuario"));
                     map.put("nombre_paciente", rs.getString("nombre_paciente"));
                     map.put("identidad_paciente", rs.getString("identidad_paciente"));
                     map.put("rtn_cliente", rs.getString("rtn_cliente"));
@@ -84,6 +77,7 @@ public class FacturacionReciboDAO {
                     map.put("total_retenido", rs.getDouble("total_retenido"));
                     map.put("total_neto_recibido", rs.getDouble("total_neto_recibido"));
                     map.put("metodo_pago", rs.getString("metodo_pago"));
+                    map.put("estado", rs.getString("anulado"));
                     lista.add(map);
                 }
             }
@@ -93,13 +87,8 @@ public class FacturacionReciboDAO {
         return lista;
     }
 
-
-
-    // ------------------------------------------------------------------
-    // ANULAR LÓGICO (borrado = 'Si')
-    // ------------------------------------------------------------------
     public boolean anularRecibo(int id) {
-        String query = "UPDATE Facturacion_Recibos SET borrado = 'Si', fecha_borrado = NOW() " +
+        String query = "UPDATE Facturacion SET anulado = 'Si', fecha_anulado = NOW() " +
                        "WHERE id_facturacion_recibos = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -113,9 +102,6 @@ public class FacturacionReciboDAO {
         }
     }
 
-    // ------------------------------------------------------------------
-    // BUSCAR id_pacientes por identidad (para resolución en el frontend)
-    // ------------------------------------------------------------------
     public int obtenerIdPacientePorIdentidad(String identidad) {
         String query = "SELECT id_pacientes FROM Pacientes WHERE identidad = ? AND borrado = 'No'";
         try {
@@ -132,9 +118,6 @@ public class FacturacionReciboDAO {
         return -1;
     }
 
-    // ------------------------------------------------------------------
-    // LISTAR PACIENTES activos (para el selector del formulario)
-    // ------------------------------------------------------------------
     public List<Map<String, Object>> obtenerPacientesActivos() {
         List<Map<String, Object>> lista = new ArrayList<>();
         String query = "SELECT id_pacientes, identidad, nombre_completo FROM Pacientes " +
@@ -157,12 +140,6 @@ public class FacturacionReciboDAO {
         return lista;
     }
 
-    // ------------------------------------------------------------------
-    // BÚSQUEDA CON FILTROS DINÁMICOS (texto y/o rango de fechas)
-    // termino    : busca en numero_recibo, nombre_paciente, concepto (LIKE)
-    // fechaDesde : fecha mínima de emisión (YYYY-MM-DD), ignorado si vacío
-    // fechaHasta : fecha máxima de emisión (YYYY-MM-DD), ignorado si vacío
-    // ------------------------------------------------------------------
     public List<Map<String, Object>> buscarRecibos(String termino, String fechaDesde, String fechaHasta) {
         List<Map<String, Object>> lista = new ArrayList<>();
 
@@ -172,13 +149,14 @@ public class FacturacionReciboDAO {
 
         StringBuilder sb = new StringBuilder(
             "SELECT fr.id_facturacion_recibos, fr.numero_recibo, fr.id_pacientes, " +
+            "fr.id_caja_sesion, fr.id_usuario, " +
             "p.nombre_completo AS nombre_paciente, p.identidad AS identidad_paciente, " +
             "fr.rtn_cliente, fr.fecha_emision, fr.concepto, " +
             "fr.suma_neta, fr.total_honorarios, fr.total_retenido, " +
-            "fr.total_neto_recibido, fr.metodo_pago " +
-            "FROM Facturacion_Recibos fr " +
+            "fr.total_neto_recibido, fr.metodo_pago, fr.anulado " +
+            "FROM Facturacion fr " +
             "INNER JOIN Pacientes p ON fr.id_pacientes = p.id_pacientes " +
-            "WHERE fr.borrado = 'No'"
+            "WHERE fr.anulado = 'No'"
         );
 
         List<Object> params = new ArrayList<>();
@@ -213,6 +191,8 @@ public class FacturacionReciboDAO {
                         map.put("id_factura",          rs.getInt("id_facturacion_recibos"));
                         map.put("numero_recibo",        rs.getString("numero_recibo"));
                         map.put("id_paciente",          rs.getInt("id_pacientes"));
+                        map.put("id_caja_sesion",       rs.getInt("id_caja_sesion"));
+                        map.put("id_usuario",           rs.getInt("id_usuario"));
                         map.put("nombre_paciente",      rs.getString("nombre_paciente"));
                         map.put("identidad_paciente",   rs.getString("identidad_paciente"));
                         map.put("rtn_cliente",          rs.getString("rtn_cliente"));
@@ -223,6 +203,7 @@ public class FacturacionReciboDAO {
                         map.put("total_retenido",       rs.getDouble("total_retenido"));
                         map.put("total_neto_recibido",  rs.getDouble("total_neto_recibido"));
                         map.put("metodo_pago",          rs.getString("metodo_pago"));
+                        map.put("estado",               rs.getString("anulado"));
                         lista.add(map);
                     }
                 }
@@ -233,4 +214,3 @@ public class FacturacionReciboDAO {
         return lista;
     }
 }
-

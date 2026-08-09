@@ -33,20 +33,6 @@ CREATE TABLE Catalogo_Procedimientos (
     CONSTRAINT CHK_CatProc_Precio CHECK (precio_sugerido >= 0)
 );
 
-CREATE TABLE Egresos_Gastos (
-    id_egresos_gastos INT AUTO_INCREMENT,
-    fecha DATE NOT NULL,
-    descripcion TEXT NOT NULL,
-    monto DECIMAL(10,2) NOT NULL,
-    numero_comprobante VARCHAR(100),
-    borrado ENUM('Si', 'No') DEFAULT 'No',
-    fecha_borrado DATETIME NULL,
-    
-    -- Restricciones
-    CONSTRAINT PK_Egresos_Gastos PRIMARY KEY (id_egresos_gastos),
-    CONSTRAINT CHK_Egresos_Monto CHECK (monto >= 0)
-);
-
 -- ==========================================
 -- 2. TABLAS DE USUARIOS Y PACIENTES
 -- ==========================================
@@ -107,6 +93,72 @@ CREATE TABLE Pacientes (
 -- ==========================================
 -- 3. TABLAS RELACIONALES (DEPENDIENTES)
 -- ==========================================
+
+-- 1. TABLA CAJA_SESIONES (Con usuarios de apertura y cierre)
+CREATE TABLE Caja_Sesiones (
+    id_caja_sesion INT AUTO_INCREMENT,
+    id_usuario_apertura INT NOT NULL,         -- Cajero que abre la sesión
+    id_usuario_cierre INT NULL,             -- Usuario/Supervisor que realiza el cierre
+    monto_apertura DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    monto_cierre_real DECIMAL(10,2) NULL,     -- Dinero físico contado
+    diferencia DECIMAL(10,2) NULL,           -- (monto_cierre_real - monto_cierre_esperado)
+    estado ENUM('Abierta', 'Cerrada') NOT NULL DEFAULT 'Abierta',
+    fecha_apertura DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_cierre DATETIME NULL,
+    observaciones TEXT NULL,
+
+    -- Restricciones
+    CONSTRAINT PK_Caja_Sesiones PRIMARY KEY (id_caja_sesion),
+    CONSTRAINT FK_Caja_Usuario_Apertura FOREIGN KEY (id_usuario_apertura) REFERENCES Usuarios_Login(id_usuarios_login),
+    CONSTRAINT FK_Caja_Usuario_Cierre FOREIGN KEY (id_usuario_cierre) REFERENCES Usuarios_Login(id_usuarios_login),
+    CONSTRAINT CHK_Caja_Apertura CHECK (monto_apertura >= 0)
+);
+
+-- 2. TABLA FACTURACION (Con trazabilidad de quién cobró)
+CREATE TABLE Facturacion (
+    id_facturacion_recibos INT AUTO_INCREMENT,
+    numero_recibo VARCHAR(50),
+    id_pacientes INT NOT NULL,
+    id_caja_sesion INT NOT NULL,
+    id_usuario INT NOT NULL,                  -- Usuario/Recepcionista que procesó la factura
+    rtn_cliente VARCHAR(20),
+    fecha_emision DATE NOT NULL,
+    concepto TEXT NOT NULL,
+    suma_neta DECIMAL(10,2),
+    total_honorarios DECIMAL(10,2),
+    total_retenido DECIMAL(10,2),
+    total_neto_recibido DECIMAL(10,2) NOT NULL,
+    metodo_pago ENUM('Efectivo', 'Transferencia', 'POS') NOT NULL,
+    anulado ENUM('Si', 'No') DEFAULT 'No',
+    fecha_anulado DATETIME NULL,
+    
+    -- Restricciones
+    CONSTRAINT PK_Facturacion_Recibos PRIMARY KEY (id_facturacion_recibos),
+    CONSTRAINT FK_Facturacion_Paciente FOREIGN KEY (id_pacientes) REFERENCES Pacientes(id_pacientes),
+    CONSTRAINT FK_Facturacion_Caja FOREIGN KEY (id_caja_sesion) REFERENCES Caja_Sesiones(id_caja_sesion) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT FK_Facturacion_Usuario FOREIGN KEY (id_usuario) REFERENCES Usuarios_Login(id_usuarios_login),
+    CONSTRAINT CHK_Facturacion_TotalNeto CHECK (total_neto_recibido >= 0)
+);
+
+-- 3. TABLA EGRESOS_GASTOS (Con trazabilidad de quién entregó o autorizó el dinero)
+CREATE TABLE Egresos_Gastos (
+    id_egresos_gastos INT AUTO_INCREMENT,
+    id_caja_sesion INT NULL,
+    id_usuario INT NOT NULL,                  -- Usuario que registró el gasto
+    fecha DATE NOT NULL,
+    descripcion TEXT NOT NULL,
+    monto DECIMAL(10,2) NOT NULL,
+    metodo_pago ENUM('Efectivo', 'Transferencia', 'POS') NOT NULL DEFAULT 'Efectivo',
+    numero_comprobante VARCHAR(100),
+    anulado ENUM('Si', 'No') DEFAULT 'No',
+    fecha_anulado DATETIME NULL,
+    
+    -- Restricciones
+    CONSTRAINT PK_Egresos_Gastos PRIMARY KEY (id_egresos_gastos),
+    CONSTRAINT FK_Egresos_Caja FOREIGN KEY (id_caja_sesion) REFERENCES Caja_Sesiones(id_caja_sesion) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT FK_Egresos_Usuario FOREIGN KEY (id_usuario) REFERENCES Usuarios_Login(id_usuarios_login),
+    CONSTRAINT CHK_Egresos_Monto CHECK (monto >= 0)
+);
 
 CREATE TABLE Paciente_Alergias (
     id_paciente_alergias INT AUTO_INCREMENT,
@@ -234,27 +286,6 @@ CREATE TABLE Constancias_Medicas (
     CONSTRAINT FK_Constancias_Evolucion FOREIGN KEY (id_evolucion_clinica) REFERENCES Evolucion_Clinica(id_evolucion_clinica)
 );
 
-CREATE TABLE Facturacion_Recibos (
-    id_facturacion_recibos INT AUTO_INCREMENT,
-    numero_recibo VARCHAR(50),
-    id_pacientes INT NOT NULL,
-    rtn_cliente VARCHAR(20),
-    fecha_emision DATE NOT NULL,
-    concepto TEXT NOT NULL,
-    suma_neta DECIMAL(10,2),
-    total_honorarios DECIMAL(10,2),
-    total_retenido DECIMAL(10,2),
-    total_neto_recibido DECIMAL(10,2) NOT NULL,
-    metodo_pago ENUM('Efectivo', 'Transferencia', 'POS') NOT NULL,
-    borrado ENUM('Si', 'No') DEFAULT 'No',
-    fecha_borrado DATETIME NULL,
-    
-    -- Restricciones
-    CONSTRAINT PK_Facturacion_Recibos PRIMARY KEY (id_facturacion_recibos),
-    CONSTRAINT FK_Facturacion_Paciente FOREIGN KEY (id_pacientes) REFERENCES Pacientes(id_pacientes),
-    CONSTRAINT CHK_Facturacion_TotalNeto CHECK (total_neto_recibido >= 0)
-);
-
 -- ========================================== 
 -- 4. DATOS INICIALES (INSERTS)
 -- ==========================================
@@ -263,7 +294,7 @@ INSERT INTO Usuarios_Login (correo, contrasenia, rol_sistema, borrado)
 VALUES ('erickfernandochavezcardona@gmail.com', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'Administrador', 'No');
 
 INSERT INTO Especialidades (nombre_especialidad) VALUES 
-('Odontologa General'),
+('Odontologo General'),
 ('Ortodoncia'),
 ('Endodoncia'),
 ('Periodoncia'),

@@ -17,9 +17,12 @@ public class FinanzasController extends BaseController {
             String descripcion = obj.has("descripcion") ? obj.get("descripcion").getAsString() : "";
             double monto = obj.has("monto") ? obj.get("monto").getAsDouble() : 0.0;
             String numeroComprobante = obj.has("numero_comprobante") ? obj.get("numero_comprobante").getAsString() : "";
+            int idCajaSesion = obj.has("id_caja_sesion") ? obj.get("id_caja_sesion").getAsInt() : 0;
+            int idUsuario = obj.has("id_usuario") ? obj.get("id_usuario").getAsInt() : 0;
+            String metodoPago = obj.has("metodo_pago") ? obj.get("metodo_pago").getAsString() : "Efectivo";
 
             application.model.dao.EgresoGastoDAO dao = new application.model.dao.EgresoGastoDAO();
-            boolean exito = dao.registrarEgreso(fecha, descripcion, monto, numeroComprobante);
+            boolean exito = dao.registrarEgreso(idCajaSesion, idUsuario, fecha, descripcion, monto, metodoPago, numeroComprobante);
             return exito ? "OK|Egreso registrado con éxito." : "ERR|Ocurrió un error al registrar el egreso.";
         } catch (Throwable t) {
             return "ERR|Error procesando datos: " + t.getMessage();
@@ -45,9 +48,12 @@ public class FinanzasController extends BaseController {
             String descripcion = obj.has("descripcion") ? obj.get("descripcion").getAsString() : "";
             double monto = obj.has("monto") ? obj.get("monto").getAsDouble() : 0.0;
             String numeroComprobante = obj.has("numero_comprobante") ? obj.get("numero_comprobante").getAsString() : "";
+            int idCajaSesion = obj.has("id_caja_sesion") ? obj.get("id_caja_sesion").getAsInt() : 0;
+            int idUsuario = obj.has("id_usuario") ? obj.get("id_usuario").getAsInt() : 0;
+            String metodoPago = obj.has("metodo_pago") ? obj.get("metodo_pago").getAsString() : "Efectivo";
 
             application.model.dao.EgresoGastoDAO dao = new application.model.dao.EgresoGastoDAO();
-            boolean exito = dao.actualizarEgreso(id, fecha, descripcion, monto, numeroComprobante);
+            boolean exito = dao.actualizarEgreso(id, idCajaSesion, idUsuario, fecha, descripcion, monto, metodoPago, numeroComprobante);
             return exito ? "OK|Egreso actualizado con éxito." : "ERR|Ocurrió un error al actualizar el egreso.";
         } catch (Throwable t) {
             return "ERR|Error procesando datos: " + t.getMessage();
@@ -80,6 +86,8 @@ public class FinanzasController extends BaseController {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonRecibo).getAsJsonObject();
             String numeroRecibo      = obj.has("numero_recibo")      ? obj.get("numero_recibo").getAsString()      : "";
             int    idPaciente        = obj.has("id_paciente")        ? obj.get("id_paciente").getAsInt()           : -1;
+            int    idCajaSesion      = obj.has("id_caja_sesion")     ? obj.get("id_caja_sesion").getAsInt()        : 0;
+            int    idUsuario         = obj.has("id_usuario")         ? obj.get("id_usuario").getAsInt()            : 0;
             String rtnCliente        = obj.has("rtn_cliente")        ? obj.get("rtn_cliente").getAsString()        : "";
             String fechaEmision      = obj.has("fecha_emision")      ? obj.get("fecha_emision").getAsString()      : "";
             String concepto          = obj.has("concepto")           ? obj.get("concepto").getAsString()           : "";
@@ -93,8 +101,8 @@ public class FinanzasController extends BaseController {
             if (fechaEmision.isEmpty()) return "ERR|La fecha de emisión es obligatoria.";
             if (concepto.isEmpty())     return "ERR|El concepto es obligatorio.";
 
-            application.model.dao.FacturacionReciboDAO dao = new application.model.dao.FacturacionReciboDAO();
-            boolean exito = dao.registrarRecibo(numeroRecibo, idPaciente, rtnCliente, fechaEmision,
+            application.model.dao.FacturacionDAO dao = new application.model.dao.FacturacionDAO();
+            boolean exito = dao.registrarRecibo(numeroRecibo, idPaciente, idCajaSesion, idUsuario, rtnCliente, fechaEmision,
                     concepto, sumaNeta, totalHonorarios, totalRetenido, totalNetoRecibido, metodoPago);
             return exito ? "OK|Recibo registrado con éxito." : "ERR|Ocurrió un error al registrar el recibo.";
         } catch (Throwable t) {
@@ -107,7 +115,7 @@ public class FinanzasController extends BaseController {
      */
     public String obtenerRecibos() {
         try {
-            application.model.dao.FacturacionReciboDAO dao = new application.model.dao.FacturacionReciboDAO();
+            application.model.dao.FacturacionDAO dao = new application.model.dao.FacturacionDAO();
             java.util.List<java.util.Map<String, Object>> lista = dao.obtenerRecibos();
             return gson.toJson(lista);
         } catch (Throwable t) {
@@ -125,7 +133,7 @@ public class FinanzasController extends BaseController {
     public String anularRecibo(String idStr) {
         try {
             int id = Integer.parseInt(idStr.trim());
-            application.model.dao.FacturacionReciboDAO dao = new application.model.dao.FacturacionReciboDAO();
+            application.model.dao.FacturacionDAO dao = new application.model.dao.FacturacionDAO();
             boolean exito = dao.anularRecibo(id);
             return exito ? "OK|Recibo anulado correctamente." : "ERR|No se pudo anular el recibo.";
         } catch (Throwable t) {
@@ -138,7 +146,7 @@ public class FinanzasController extends BaseController {
      */
     public String obtenerPacientesParaFactura() {
         try {
-            application.model.dao.FacturacionReciboDAO dao = new application.model.dao.FacturacionReciboDAO();
+            application.model.dao.FacturacionDAO dao = new application.model.dao.FacturacionDAO();
             java.util.List<java.util.Map<String, Object>> lista = dao.obtenerPacientesActivos();
             return gson.toJson(lista);
         } catch (Throwable t) {
@@ -161,7 +169,7 @@ public class FinanzasController extends BaseController {
             String fechaDesde = obj.has("fechaDesde") ? obj.get("fechaDesde").getAsString().trim() : "";
             String fechaHasta = obj.has("fechaHasta") ? obj.get("fechaHasta").getAsString().trim() : "";
 
-            application.model.dao.FacturacionReciboDAO dao = new application.model.dao.FacturacionReciboDAO();
+            application.model.dao.FacturacionDAO dao = new application.model.dao.FacturacionDAO();
             java.util.List<java.util.Map<String, Object>> lista =
                     dao.buscarRecibos(
                         termino.isEmpty()    ? null : termino,

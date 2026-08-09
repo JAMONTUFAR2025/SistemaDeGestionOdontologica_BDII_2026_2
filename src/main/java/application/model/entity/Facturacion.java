@@ -4,11 +4,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class FacturacionRecibo {
+public class Facturacion {
 
     private Integer idFactura;
     private String numeroRecibo;
-    private String identidadPaciente;
+    private Integer idPaciente;
+    private Integer idCajaSesion;
+    private Integer idUsuario;
     private String rtnCliente;
     private LocalDate fechaEmision;
     private String concepto;
@@ -17,16 +19,18 @@ public class FacturacionRecibo {
     private BigDecimal totalRetenido;
     private BigDecimal totalNetoRecibido;
     private String metodoPago;
-    private String estado;
-    private LocalDateTime fechaInactivacion;
+    private String anulado;
+    private LocalDateTime fechaAnulado;
 
-    public FacturacionRecibo() {
+    public Facturacion() {
     }
 
-    public FacturacionRecibo(Integer idFactura, String numeroRecibo, String identidadPaciente, String rtnCliente, LocalDate fechaEmision, String concepto, BigDecimal sumaNeta, BigDecimal totalHonorarios, BigDecimal totalRetenido, BigDecimal totalNetoRecibido, String metodoPago, String estado, LocalDateTime fechaInactivacion) {
+    public Facturacion(Integer idFactura, String numeroRecibo, Integer idPaciente, Integer idCajaSesion, Integer idUsuario, String rtnCliente, LocalDate fechaEmision, String concepto, BigDecimal sumaNeta, BigDecimal totalHonorarios, BigDecimal totalRetenido, BigDecimal totalNetoRecibido, String metodoPago, String anulado, LocalDateTime fechaAnulado) {
         this.idFactura = idFactura;
         this.numeroRecibo = numeroRecibo;
-        this.identidadPaciente = identidadPaciente;
+        this.idPaciente = idPaciente;
+        this.idCajaSesion = idCajaSesion;
+        this.idUsuario = idUsuario;
         this.rtnCliente = rtnCliente;
         this.fechaEmision = fechaEmision;
         this.concepto = concepto;
@@ -35,8 +39,8 @@ public class FacturacionRecibo {
         this.totalRetenido = totalRetenido;
         this.totalNetoRecibido = totalNetoRecibido;
         this.metodoPago = metodoPago;
-        this.estado = estado;
-        this.fechaInactivacion = fechaInactivacion;
+        this.anulado = anulado;
+        this.fechaAnulado = fechaAnulado;
     }
 
     public Integer getIdFactura() {
@@ -55,12 +59,28 @@ public class FacturacionRecibo {
         this.numeroRecibo = numeroRecibo;
     }
 
-    public String getIdentidadPaciente() {
-        return identidadPaciente;
+    public Integer getIdPaciente() {
+        return idPaciente;
     }
 
-    public void setIdentidadPaciente(String identidadPaciente) {
-        this.identidadPaciente = identidadPaciente;
+    public void setIdPaciente(Integer idPaciente) {
+        this.idPaciente = idPaciente;
+    }
+
+    public Integer getIdCajaSesion() {
+        return idCajaSesion;
+    }
+
+    public void setIdCajaSesion(Integer idCajaSesion) {
+        this.idCajaSesion = idCajaSesion;
+    }
+
+    public Integer getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(Integer idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
     public String getRtnCliente() {
@@ -127,30 +147,30 @@ public class FacturacionRecibo {
         this.metodoPago = metodoPago;
     }
 
-    public String getEstado() {
-        return estado;
+    public String getAnulado() {
+        return anulado;
     }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public void setAnulado(String anulado) {
+        this.anulado = anulado;
     }
 
-    public LocalDateTime getFechaInactivacion() {
-        return fechaInactivacion;
+    public LocalDateTime getFechaAnulado() {
+        return fechaAnulado;
     }
 
-    public void setFechaInactivacion(LocalDateTime fechaInactivacion) {
-        this.fechaInactivacion = fechaInactivacion;
+    public void setFechaAnulado(LocalDateTime fechaAnulado) {
+        this.fechaAnulado = fechaAnulado;
     }
 
     @Override
     public String toString() {
-        return "FacturacionRecibo{" +
+        return "Facturacion{" +
                 "idFactura=" + idFactura +
                 ", numeroRecibo='" + numeroRecibo + '\'' +
-                ", identidadPaciente='" + identidadPaciente + '\'' +
+                ", idPaciente=" + idPaciente +
                 ", totalNetoRecibido=" + totalNetoRecibido +
-                ", estado='" + estado + '\'' +
+                ", anulado='" + anulado + '\'' +
                 '}';
     }
 }
