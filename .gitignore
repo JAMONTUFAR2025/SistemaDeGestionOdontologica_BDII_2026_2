@@ -48,3 +48,7 @@ buildNumber.properties
 
 # Custom configurations
 database.properties
+
+# Node y WhatsApp Server
+whatsapp-server/sessions/
+whatsapp-server/.wwebjs_cache/
