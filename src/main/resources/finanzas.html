@@ -911,14 +911,31 @@ function confirmarCerrarCaja() {
     const obs = document.getElementById('inp_observaciones').value.trim();
     const payload = { id_caja_sesion: cajaActiva.id_caja_sesion, monto_cierre_real: montoCierre, observaciones: obs };
     const r = window.finanzasController.cerrarCaja(JSON.stringify(payload));
-    const [ok, msg] = r.split('|');
-    if (ok === 'OK') {
+    if (r && r !== 'false') {
+        let msg = r;
+        try { msg = JSON.parse(r).mensaje || r; } catch(e){}
+        const lastSessionId = cajaActiva.id_caja_sesion;
+        
+        Swal.fire({
+            title: '¡Caja cerrada!',
+            text: msg,
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-file-pdf"></i> Generar Reporte PDF',
+            cancelButtonText: 'Cerrar',
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.finanzasController.generarPdfCierreCaja(lastSessionId);
+            }
+        });
+
         cerrarModal('modalArqueo');
-        swal('¡Caja cerrada!', msg, 'success');
         cajaActiva = null;
         cargarEstadoCaja();
     } else {
-        swal('Error', msg, 'error');
+        swal('Error', 'No se pudo cerrar la caja.', 'error');
     }
 }
 
@@ -991,6 +1008,7 @@ function renderTablaFacturas(lista) {
             <td class="neto-col">${fmtLps(f.total_neto_recibido)}</td>
             <td><span class="badge-estado ${activo ? 'badge-activo' : 'badge-inactivo'}">${f.estado}</span></td>
             <td class="action-icons">
+                <i class="fas fa-file-pdf" title="Exportar PDF" style="color: #dc3545; cursor:pointer; margin-right: 8px;" onclick="window.finanzasController.generarPdfFactura(${f.id_factura})"></i>
                 <i class="fas fa-eye" title="Ver detalle" onclick="verDetalleFactura('${encodeURIComponent(JSON.stringify(f))}')"></i>
                 ${activo ? `<i class="fas fa-ban" title="Anular" onclick="pedirAnularFactura(${f.id_factura})"></i>` : ''}
             </td>

@@ -313,4 +313,59 @@ public class FinanzasController extends BaseController {
             return "[]";
         }
     }
+
+    // =========================================================
+    // MÉTODOS PARA GENERACIÓN DE PDF
+    // =========================================================
+
+    public String generarPdfFactura(int facturaId) {
+        javafx.application.Platform.runLater(() -> {
+            try {
+                application.model.dao.FacturacionDAO dao = new application.model.dao.FacturacionDAO();
+                java.util.Map<String, Object> factura = dao.obtenerReciboPorId(facturaId);
+                if (factura != null) {
+                    javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+                    fileChooser.setTitle("Guardar Recibo PDF");
+                    fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Archivos PDF", "*.pdf"));
+                    fileChooser.setInitialFileName("Recibo_" + (factura.get("numero_recibo") != null ? factura.get("numero_recibo") : facturaId) + ".pdf");
+                    java.io.File file = fileChooser.showSaveDialog(null);
+                    
+                    if (file != null) {
+                        application.util.PDFGenerator.generarReciboPago(factura, file.getAbsolutePath());
+                        java.awt.Desktop.getDesktop().open(file);
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error en generarPdfFactura: " + e.getMessage());
+            }
+        });
+        return "{\"status\":\"ok\"}";
+    }
+
+    public String generarPdfCierreCaja(int sessionId) {
+        javafx.application.Platform.runLater(() -> {
+            try {
+                application.model.dao.CajaSesionDAO cajaDao = new application.model.dao.CajaSesionDAO();
+                java.util.Map<String, Object> caja = cajaDao.obtenerCajaPorId(sessionId);
+                if (caja != null) {
+                    java.util.Map<String, Object> arqueo = cajaDao.calcularArqueoCaja(sessionId);
+                    java.util.List<java.util.Map<String, Object>> movimientos = cajaDao.obtenerMovimientosDeSesion(sessionId);
+                    
+                    javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+                    fileChooser.setTitle("Guardar Reporte Cierre de Caja");
+                    fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Archivos PDF", "*.pdf"));
+                    fileChooser.setInitialFileName("Cierre_Caja_" + sessionId + ".pdf");
+                    java.io.File file = fileChooser.showSaveDialog(null);
+                    
+                    if (file != null) {
+                        application.util.PDFGenerator.generarReporteCierreCaja(caja, arqueo, movimientos, file.getAbsolutePath());
+                        java.awt.Desktop.getDesktop().open(file);
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error en generarPdfCierreCaja: " + e.getMessage());
+            }
+        });
+        return "{\"status\":\"ok\"}";
+    }
 }

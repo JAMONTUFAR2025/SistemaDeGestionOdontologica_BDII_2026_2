@@ -36,6 +36,41 @@ public class CajaSesionDAO {
         return null;
     }
 
+    public Map<String, Object> obtenerCajaPorId(int idCajaSesion) {
+        String query = "SELECT c.id_caja_sesion, c.monto_apertura, c.monto_cierre_real, c.diferencia, " +
+                       "c.estado, c.fecha_apertura, c.fecha_cierre, c.observaciones, " +
+                       "u1.username AS usuario_apertura, u2.username AS usuario_cierre " +
+                       "FROM Caja_Sesiones c " +
+                       "LEFT JOIN Usuarios u1 ON c.id_usuario_apertura = u1.id_usuario " +
+                       "LEFT JOIN Usuarios u2 ON c.id_usuario_cierre = u2.id_usuario " +
+                       "WHERE c.id_caja_sesion = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, idCajaSesion);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        Map<String, Object> map = new LinkedHashMap<>();
+                        map.put("id_caja_sesion",      rs.getInt("id_caja_sesion"));
+                        map.put("monto_apertura",      rs.getDouble("monto_apertura"));
+                        map.put("monto_cierre_real",   rs.getDouble("monto_cierre_real"));
+                        map.put("diferencia",          rs.getDouble("diferencia"));
+                        map.put("estado",              rs.getString("estado"));
+                        map.put("fecha_apertura",      rs.getString("fecha_apertura"));
+                        map.put("fecha_cierre",        rs.getString("fecha_cierre"));
+                        map.put("observaciones",       rs.getString("observaciones"));
+                        map.put("usuario_apertura",    rs.getString("usuario_apertura"));
+                        map.put("usuario_cierre",      rs.getString("usuario_cierre"));
+                        return map;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener caja por id: " + e.getMessage());
+        }
+        return null;
+    }
+
     // ------------------------------------------------------------------
     // Abrir nueva caja — solo si NO hay ninguna abierta
     // ------------------------------------------------------------------

@@ -71,6 +71,32 @@ public class FacturacionDAO {
         return lista;
     }
 
+    public Map<String, Object> obtenerReciboPorId(int idFactura) {
+        String query = "SELECT fr.id_facturacion_recibos, fr.numero_recibo, fr.id_pacientes, " +
+                       "fr.id_caja_sesion, fr.id_usuario, " +
+                       "p.nombre_completo AS nombre_paciente, p.identidad AS identidad_paciente, " +
+                       "fr.rtn_cliente, fr.fecha_emision, fr.concepto, " +
+                       "fr.suma_neta, fr.total_honorarios, fr.total_retenido, " +
+                       "fr.total_neto_recibido, fr.metodo_pago, fr.anulado " +
+                       "FROM Facturacion fr " +
+                       "INNER JOIN Pacientes p ON fr.id_pacientes = p.id_pacientes " +
+                       "WHERE fr.id_facturacion_recibos = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, idFactura);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return mapRow(rs);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener recibo por id: " + e.getMessage());
+        }
+        return null;
+    }
+
     public boolean anularRecibo(int id) {
         String query = "UPDATE Facturacion SET anulado = 'Si', fecha_anulado = NOW() " +
                        "WHERE id_facturacion_recibos = ?";
