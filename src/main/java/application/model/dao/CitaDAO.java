@@ -134,4 +134,71 @@ public class CitaDAO {
         }
         return citas;
     }
+
+    public Map<String, String> obtenerCitaPorId(int idCita) {
+        Map<String, String> map = new HashMap<>();
+        String query =
+            "SELECT c.id_citas, c.id_pacientes, c.id_personal_medico, c.fecha_hora, " +
+            "c.motivo_cita, c.estado, " +
+            "p.nombre_completo AS paciente, p.telefono, " +
+            "pm.nombre_completo AS medico " +
+            "FROM Citas c " +
+            "JOIN Pacientes p ON c.id_pacientes = p.id_pacientes " +
+            "LEFT JOIN Personal_Medico pm ON c.id_personal_medico = pm.id_personal_medico " +
+            "WHERE c.id_citas = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) return map;
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, idCita);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        map.put("id_citas", String.valueOf(rs.getInt("id_citas")));
+                        map.put("id_pacientes", String.valueOf(rs.getInt("id_pacientes")));
+                        Object idMedico = rs.getObject("id_personal_medico");
+                        map.put("id_personal_medico", idMedico != null ? idMedico.toString() : "");
+                        Timestamp ts = rs.getTimestamp("fecha_hora");
+                        if (ts != null) {
+                            map.put("fecha", new java.text.SimpleDateFormat("yyyy-MM-dd").format(ts));
+                            map.put("hora", new java.text.SimpleDateFormat("HH:mm").format(ts));
+                        }
+                        map.put("motivo_cita", rs.getString("motivo_cita") != null ? rs.getString("motivo_cita") : "");
+                        map.put("estado", rs.getString("estado") != null ? rs.getString("estado") : "");
+                        map.put("paciente", rs.getString("paciente") != null ? rs.getString("paciente") : "");
+                        map.put("telefono", rs.getString("telefono") != null ? rs.getString("telefono") : "");
+                        map.put("medico", rs.getString("medico") != null ? rs.getString("medico") : "");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener cita por id: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+    public boolean actualizarCita(Cita cita) {
+        String query = "UPDATE Citas SET id_pacientes = ?, id_personal_medico = ?, fecha_hora = ?, motivo_cita = ?, estado = ? WHERE id_citas = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) return false;
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, cita.getIdPacientes());
+                if (cita.getIdPersonalMedico() != null) {
+                    stmt.setInt(2, cita.getIdPersonalMedico());
+                } else {
+                    stmt.setNull(2, java.sql.Types.INTEGER);
+                }
+                stmt.setTimestamp(3, Timestamp.valueOf(cita.getFechaHora()));
+                stmt.setString(4, cita.getMotivoCita());
+                stmt.setString(5, cita.getEstado() != null ? cita.getEstado() : "Programada");
+                stmt.setInt(6, cita.getIdCitas());
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar cita: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

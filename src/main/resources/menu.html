@@ -12,14 +12,20 @@
 
 
     <style>
-        html, body {
+        /* REQ 2: Separar html y body para que el fondo quede fijo al viewport */
+        html {
+            height: 100%;
+        }
+
+        body {
             font-family: Arial, sans-serif;
             background-image: url('fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            background-attachment: fixed; /* Fondo estático: no se mueve ni deforma con el scroll */
             background-color: #e9f0f5;
-            min-height: 100vh;
+            min-height: 100%;
             margin: 0;
             padding: 20px;
         }
@@ -93,6 +99,51 @@
             color: #666;
             margin: 0;
         }
+
+        /* REQ 3 + REQ 4: Estilos de tablas de citas */
+        .citas-tabla tr.fila-cita {
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .citas-tabla tr.fila-cita:hover {
+            background: #eef6ff !important;
+        }
+        .citas-tabla tr.fila-cita:active {
+            background: #d0e8ff !important;
+        }
+
+        /* REQ 4: Controles de paginación */
+        .paginacion-controls {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #555;
+        }
+        .paginacion-controls button {
+            background: #007bf0;
+            color: white;
+            border: none;
+            padding: 5px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .paginacion-controls button:hover:not(:disabled) {
+            background: #0056b3;
+        }
+        .paginacion-controls button:disabled {
+            background: #aaa;
+            cursor: default;
+        }
+        .paginacion-controls span {
+            font-weight: bold;
+            color: #333;
+        }
     </style>
 </head>
 
@@ -113,9 +164,13 @@
     <!-- Panel de Citas del Día -->
     <div
         style="max-width: 900px; margin: 0 auto 30px auto; background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
-        <h3 style="color: #007bf0; margin-top: 0;"><i class="fas fa-bell"></i> Citas Programadas para Hoy</h3>
+        <h3 style="color: #007bf0; margin-top: 0;"><i class="fas fa-bell"></i> Citas Programadas para Hoy
+            <small style="font-size: 12px; color: #888; font-weight: normal; margin-left: 8px;">
+                (doble clic en una fila para gestionarla)
+            </small>
+        </h3>
 
-        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">
+        <table class="citas-tabla" style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">
             <thead>
                 <tr style="background: #007bf0; color: white; text-align: left;">
                     <th style="padding: 10px;">Hora</th>
@@ -128,14 +183,24 @@
                 <!-- Se llenará dinámicamente -->
             </tbody>
         </table>
+        <!-- REQ 4: Controles de paginación Citas Hoy -->
+        <div id="paginacionHoy" class="paginacion-controls" style="display:none;">
+            <button id="btnAnteriorHoy" onclick="cambiarPaginaHoy(-1)">← Anterior</button>
+            <span id="infoPaginaHoy">Página 1 de 1</span>
+            <button id="btnSiguienteHoy" onclick="cambiarPaginaHoy(1)">Siguiente →</button>
+        </div>
     </div>
 
     <!-- Panel de Próximas Citas -->
     <div id="panelProximasCitas"
         style="max-width: 900px; margin: 0 auto 30px auto; background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
-        <h3 style="color: #28a745; margin-top: 0;"><i class="fas fa-calendar-check"></i> Próximas Citas</h3>
+        <h3 style="color: #28a745; margin-top: 0;"><i class="fas fa-calendar-check"></i> Próximas Citas
+            <small style="font-size: 12px; color: #888; font-weight: normal; margin-left: 8px;">
+                (doble clic en una fila para gestionarla)
+            </small>
+        </h3>
 
-        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">
+        <table class="citas-tabla" style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">
             <thead>
                 <tr style="background: #28a745; color: white; text-align: left;">
                     <th style="padding: 10px;">Fecha</th>
@@ -149,6 +214,12 @@
                 <!-- Se llenará dinámicamente -->
             </tbody>
         </table>
+        <!-- REQ 4: Controles de paginación Próximas Citas -->
+        <div id="paginacionProximas" class="paginacion-controls" style="display:none;">
+            <button id="btnAnteriorProximas" onclick="cambiarPaginaProximas(-1)">← Anterior</button>
+            <span id="infoPaginaProximas">Página 1 de 1</span>
+            <button id="btnSiguienteProximas" onclick="cambiarPaginaProximas(1)">Siguiente →</button>
+        </div>
     </div>
 
     <div class="dashboard-grid">
@@ -197,6 +268,15 @@
     <script>
         // 1. Ocultamos la página mientras calculamos los permisos
         document.body.style.visibility = 'hidden';
+
+        // ====================================================
+        // REQ 4: Variables de paginación
+        // ====================================================
+        const POR_PAGINA = 5;
+        let citasHoyData = [];
+        let paginaHoy = 1;
+        let citasProximasData = [];
+        let paginaProximas = 1;
 
         document.addEventListener('DOMContentLoaded', () => {
 
@@ -255,54 +335,132 @@
             }
         }
 
-        // Cargar citas de la BD
+        // ====================================================
+        // REQ 3: Navegar a gestión de cita al hacer doble clic
+        // ====================================================
+        function abrirGestionCita(idCita) {
+            window.location.href = 'agendar_cita.html?id_cita=' + idCita;
+        }
+
+        // ====================================================
+        // Cargar citas de la BD y guardar en arrays
+        // ====================================================
         function cargarCitas() {
             try {
-                // Citas de Hoy
+                // --- CITAS DE HOY ---
                 let jsonHoy = window.citaController.obtenerCitasHoyDelUsuario();
-                let citasHoy = JSON.parse(jsonHoy);
-                let tbodyHoy = document.getElementById('tbodyCitasHoy');
-                
-                if (citasHoy.length === 0) {
-                    tbodyHoy.innerHTML = '<tr><td colspan="4" style="padding: 10px; text-align: center; color: #666;">No hay citas programadas para hoy.</td></tr>';
-                } else {
-                    let htmlHoy = "";
-                    citasHoy.forEach(c => {
-                        htmlHoy += `<tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 10px; font-weight: bold; color: #007bf0;">${c.hora}</td>
-                            <td style="padding: 10px;">${c.paciente}</td>
-                            <td style="padding: 10px;">${c.motivo_cita}</td>
-                            <td style="padding: 10px;">${c.telefono}</td>
-                        </tr>`;
-                    });
-                    tbodyHoy.innerHTML = htmlHoy;
-                }
+                citasHoyData = JSON.parse(jsonHoy);
+                paginaHoy = 1;
+                renderizarCitasHoy();
 
-                // Próximas Citas
+                // --- PRÓXIMAS CITAS ---
                 let jsonProximas = window.citaController.obtenerProximasCitasDelUsuario();
-                let citasProximas = JSON.parse(jsonProximas);
-                let tbodyProximas = document.getElementById('tbodyProximasCitas');
+                citasProximasData = JSON.parse(jsonProximas);
+                paginaProximas = 1;
+                renderizarProximasCitas();
 
-                if (citasProximas.length === 0) {
-                    tbodyProximas.innerHTML = '<tr><td colspan="5" style="padding: 10px; text-align: center; color: #666;">No hay citas programadas para los próximos días.</td></tr>';
-                } else {
-                    let htmlProximas = "";
-                    citasProximas.forEach(c => {
-                        htmlProximas += `<tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 10px; font-weight: bold; color: #28a745;">${c.fecha}</td>
-                            <td style="padding: 10px; color: #555;">${c.hora}</td>
-                            <td style="padding: 10px;">${c.paciente}</td>
-                            <td style="padding: 10px;">${c.motivo_cita}</td>
-                            <td style="padding: 10px;">
-                                <span style="background: #eef6ff; color: #007bf0; padding: 3px 8px; border-radius: 4px; font-size: 12px; border: 1px solid #007bf0;">${c.estado}</span>
-                            </td>
-                        </tr>`;
-                    });
-                    tbodyProximas.innerHTML = htmlProximas;
-                }
             } catch (e) {
                 console.error("Error al cargar citas:", e);
             }
+        }
+
+        // ====================================================
+        // REQ 4: Renderizar página de Citas Hoy
+        // ====================================================
+        function renderizarCitasHoy() {
+            let tbodyHoy = document.getElementById('tbodyCitasHoy');
+            let ctrlHoy  = document.getElementById('paginacionHoy');
+
+            if (citasHoyData.length === 0) {
+                tbodyHoy.innerHTML = '<tr><td colspan="4" style="padding: 10px; text-align: center; color: #666;">No hay citas programadas para hoy.</td></tr>';
+                ctrlHoy.style.display = 'none';
+                return;
+            }
+
+            let totalPaginas = Math.ceil(citasHoyData.length / POR_PAGINA);
+            let inicio = (paginaHoy - 1) * POR_PAGINA;
+            let pagina = citasHoyData.slice(inicio, inicio + POR_PAGINA);
+
+            let htmlHoy = "";
+            pagina.forEach(c => {
+                // REQ 3: ondblclick navega a gestión de esa cita
+                htmlHoy += `<tr class="fila-cita" style="border-bottom: 1px solid #ddd;"
+                                ondblclick="abrirGestionCita(${c.id_citas})"
+                                title="Doble clic para gestionar esta cita">
+                    <td style="padding: 10px; font-weight: bold; color: #007bf0;">${c.hora}</td>
+                    <td style="padding: 10px;">${c.paciente}</td>
+                    <td style="padding: 10px;">${c.motivo_cita}</td>
+                    <td style="padding: 10px;">${c.telefono}</td>
+                </tr>`;
+            });
+            tbodyHoy.innerHTML = htmlHoy;
+
+            // REQ 4: Mostrar/ocultar paginación
+            if (citasHoyData.length > POR_PAGINA) {
+                ctrlHoy.style.display = 'flex';
+                document.getElementById('infoPaginaHoy').textContent = `Página ${paginaHoy} de ${totalPaginas}`;
+                document.getElementById('btnAnteriorHoy').disabled = paginaHoy === 1;
+                document.getElementById('btnSiguienteHoy').disabled = paginaHoy === totalPaginas;
+            } else {
+                ctrlHoy.style.display = 'none';
+            }
+        }
+
+        function cambiarPaginaHoy(delta) {
+            let totalPaginas = Math.ceil(citasHoyData.length / POR_PAGINA);
+            paginaHoy = Math.max(1, Math.min(totalPaginas, paginaHoy + delta));
+            renderizarCitasHoy();
+        }
+
+        // ====================================================
+        // REQ 4: Renderizar página de Próximas Citas
+        // ====================================================
+        function renderizarProximasCitas() {
+            let tbodyProximas = document.getElementById('tbodyProximasCitas');
+            let ctrlProximas  = document.getElementById('paginacionProximas');
+
+            if (citasProximasData.length === 0) {
+                tbodyProximas.innerHTML = '<tr><td colspan="5" style="padding: 10px; text-align: center; color: #666;">No hay citas programadas para los próximos días.</td></tr>';
+                ctrlProximas.style.display = 'none';
+                return;
+            }
+
+            let totalPaginas = Math.ceil(citasProximasData.length / POR_PAGINA);
+            let inicio = (paginaProximas - 1) * POR_PAGINA;
+            let pagina = citasProximasData.slice(inicio, inicio + POR_PAGINA);
+
+            let htmlProximas = "";
+            pagina.forEach(c => {
+                // REQ 3: ondblclick navega a gestión de esa cita
+                htmlProximas += `<tr class="fila-cita" style="border-bottom: 1px solid #ddd;"
+                                     ondblclick="abrirGestionCita(${c.id_citas})"
+                                     title="Doble clic para gestionar esta cita">
+                    <td style="padding: 10px; font-weight: bold; color: #28a745;">${c.fecha}</td>
+                    <td style="padding: 10px; color: #555;">${c.hora}</td>
+                    <td style="padding: 10px;">${c.paciente}</td>
+                    <td style="padding: 10px;">${c.motivo_cita}</td>
+                    <td style="padding: 10px;">
+                        <span style="background: #eef6ff; color: #007bf0; padding: 3px 8px; border-radius: 4px; font-size: 12px; border: 1px solid #007bf0;">${c.estado}</span>
+                    </td>
+                </tr>`;
+            });
+            tbodyProximas.innerHTML = htmlProximas;
+
+            // REQ 4: Mostrar/ocultar paginación
+            if (citasProximasData.length > POR_PAGINA) {
+                ctrlProximas.style.display = 'flex';
+                document.getElementById('infoPaginaProximas').textContent = `Página ${paginaProximas} de ${totalPaginas}`;
+                document.getElementById('btnAnteriorProximas').disabled = paginaProximas === 1;
+                document.getElementById('btnSiguienteProximas').disabled = paginaProximas === totalPaginas;
+            } else {
+                ctrlProximas.style.display = 'none';
+            }
+        }
+
+        function cambiarPaginaProximas(delta) {
+            let totalPaginas = Math.ceil(citasProximasData.length / POR_PAGINA);
+            paginaProximas = Math.max(1, Math.min(totalPaginas, paginaProximas + delta));
+            renderizarProximasCitas();
         }
     </script>
 </body>
