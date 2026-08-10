@@ -174,4 +174,26 @@ public class UserDAO {
         }
         return idLogin;
     }
+
+    public String obtenerNombreMedicoPorCorreo(String correo) {
+        String nombre = null;
+        String query = "SELECT pm.nombre_completo FROM Usuarios_Login ul " +
+                       "JOIN Personal_Medico pm ON ul.id_personal_medico = pm.id_medico " +
+                       "WHERE ul.correo = ? AND ul.borrado = 'No' AND pm.borrado = 'No'";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) return null;
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, correo);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        nombre = rs.getString("nombre_completo");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener nombre_completo de médico: " + e.getMessage());
+        }
+        return nombre;
+    }
 }

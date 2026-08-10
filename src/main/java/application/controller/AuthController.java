@@ -25,11 +25,21 @@ public class AuthController extends BaseController {
             rolUsuarioActual = userDAO.obtenerRolPorCorreo(correo);
             idPersonalMedicoActual = userDAO.obtenerIdMedicoPorCorreo(correo);
             idUsuarioLoginActual = userDAO.obtenerIdLoginPorCorreo(correo);
+            correoUsuarioActual = correo;
+            nombreMedicoActual = userDAO.obtenerNombreMedicoPorCorreo(correo);
         } else {
             System.out.println("-> Fila no encontrada o credenciales INCORRECTAS para: " + correo);
             clearSession();
         }
         return exito;
+    }
+
+    /** Retorna el nombre del médico si está asignado, de lo contrario devuelve el correo del usuario */
+    public String obtenerNombreBienvenida() {
+        if (nombreMedicoActual != null && !nombreMedicoActual.trim().isEmpty()) {
+            return "Dr(a). " + nombreMedicoActual;
+        }
+        return correoUsuarioActual;
     }
 
     /** Cierra la sesión limpiando todas las variables estáticas. */

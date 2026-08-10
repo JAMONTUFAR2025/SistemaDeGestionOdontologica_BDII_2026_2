@@ -12,12 +12,16 @@ public abstract class BaseController {
     protected static String rolUsuarioActual = "";
     protected static Integer idPersonalMedicoActual = null;
     protected static Integer idUsuarioLoginActual = null;
+    protected static String correoUsuarioActual = "";
+    protected static String nombreMedicoActual = null;
 
     /** Limpia todos los datos de sesión (llamar al hacer logout) */
     public static void clearSession() {
         rolUsuarioActual = "";
         idPersonalMedicoActual = null;
         idUsuarioLoginActual = null;
+        correoUsuarioActual = "";
+        nombreMedicoActual = null;
     }
 
     public BaseController() {

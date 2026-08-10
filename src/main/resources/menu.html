@@ -335,11 +335,20 @@
             if (!rol) return;
 
             let rolFormateado = rol.charAt(0).toUpperCase() + rol.slice(1).toLowerCase();
+            let nombreUsuario = "Usuario";
+            try {
+                if (window.authController) {
+                    nombreUsuario = window.authController.obtenerNombreBienvenida() || "Usuario";
+                }
+            } catch (e) {
+                console.error("Error obteniendo nombre:", e);
+            }
 
             let parrafos = document.getElementsByTagName('p');
             for (let p of parrafos) {
                 if (p.innerHTML.includes('Bienvenido(a):')) {
-                    p.innerHTML = p.innerHTML.replace('(Administrador)', '(' + rolFormateado + ')');
+                    p.innerHTML = `Bienvenido(a): ${nombreUsuario} (${rolFormateado}) 
+                                   | <a href="login.html" style="color: #dc3545; text-decoration: none;">Cerrar Sesión</a>`;
                 }
             }
         }
