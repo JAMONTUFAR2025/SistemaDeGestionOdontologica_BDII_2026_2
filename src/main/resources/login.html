@@ -13,12 +13,18 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        html,
+        html {
+            height: 100%;
+        }
+
         body {
-            background: url('fondo-clinica.jpg') no-repeat center center;
+            background-image: url('fondo-clinica.jpg');
             background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             background-color: #e9f0f5;
-            min-height: 100vh;
+            min-height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;

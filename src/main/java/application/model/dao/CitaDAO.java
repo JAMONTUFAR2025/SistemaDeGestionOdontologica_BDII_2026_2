@@ -135,6 +135,53 @@ public class CitaDAO {
         return citas;
     }
 
+    public List<Map<String, String>> obtenerHistorialCitas(Integer idPersonalMedico, String rol) {
+        List<Map<String, String>> citas = new ArrayList<>();
+        StringBuilder queryBuilder = new StringBuilder(
+            "SELECT c.id_citas, c.fecha_hora, p.nombre_completo AS paciente, p.telefono, c.motivo_cita, c.estado " +
+            "FROM Citas c " +
+            "JOIN Pacientes p ON c.id_pacientes = p.id_pacientes " +
+            "WHERE 1=1 "
+        );
+
+        boolean esMedico = "Medico".equalsIgnoreCase(rol) || "Médico".equalsIgnoreCase(rol);
+        if (esMedico && idPersonalMedico != null) {
+            queryBuilder.append("AND c.id_personal_medico = ? ");
+        }
+        
+        queryBuilder.append("ORDER BY c.fecha_hora DESC");
+
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) return citas;
+            try (PreparedStatement stmt = conn.prepareStatement(queryBuilder.toString())) {
+                if (esMedico && idPersonalMedico != null) {
+                    stmt.setInt(1, idPersonalMedico);
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        Map<String, String> map = new HashMap<>();
+                        map.put("id_citas", String.valueOf(rs.getInt("id_citas")));
+                        Timestamp ts = rs.getTimestamp("fecha_hora");
+                        String fecha = new java.text.SimpleDateFormat("dd/MM/yyyy").format(ts);
+                        String hora = new java.text.SimpleDateFormat("hh:mm a").format(ts);
+                        map.put("fecha", fecha);
+                        map.put("hora", hora);
+                        map.put("paciente", rs.getString("paciente"));
+                        map.put("telefono", rs.getString("telefono") != null ? rs.getString("telefono") : "");
+                        map.put("motivo_cita", rs.getString("motivo_cita") != null ? rs.getString("motivo_cita") : "");
+                        map.put("estado", rs.getString("estado"));
+                        citas.add(map);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener historial de citas: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return citas;
+    }
+
     public Map<String, String> obtenerCitaPorId(int idCita) {
         Map<String, String> map = new HashMap<>();
         String query =

@@ -31,28 +31,21 @@
             line-height: 46px !important;
             margin-right: 15px;
         }
-        html,
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            background-color: transparent;
+        html {
+            height: 100%;
         }
 
-        #bg-fixed {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -10;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            pointer-events: none;
+            background-attachment: fixed;
+            background-color: #e9f0f5;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
         }
 
         .modal-backdrop.show {
@@ -278,7 +271,6 @@
 </head>
 
 <body>
-    <div id="bg-fixed"></div>
     <div class="container card-container">
 
         <!-- CABECERA DE LA PÁGINA -->

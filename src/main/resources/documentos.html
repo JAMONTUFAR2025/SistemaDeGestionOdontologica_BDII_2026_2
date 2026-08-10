@@ -16,43 +16,30 @@
             --bg-card: rgba(255, 255, 255, 0.97);
             --shadow: 0 4px 18px rgba(0,0,0,0.13);
         }
-        html { height: 100%; }
+        html {
+            height: 100%;
+        }
+
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
             background-attachment: fixed;
             background-color: #e9f0f5;
             min-height: 100%;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
-        .page-header {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 18px 28px;
-            box-shadow: var(--shadow);
+
+        .card-container {
             max-width: 1050px;
-            margin: 0 auto 24px auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-        .page-header h1 {
-            color: var(--primary);
-            font-size: 24px;
-            margin: 0;
-        }
-        .main-card {
-            background: var(--bg-card);
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px;
             border-radius: 12px;
-            padding: 26px;
-            box-shadow: var(--shadow);
-            max-width: 1050px;
-            margin: 0 auto 24px auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         /* --- BUSCADOR DE PACIENTE --- */
@@ -70,32 +57,32 @@
         }
         .patient-badge .nombre { font-weight: bold; color: var(--primary); font-size: 16px; }
 
-        /* --- TABS --- */
-        .tab-nav {
+        /* === TABS === */
+        .nav-tabs-custom {
             display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
+            gap: 0;
             border-bottom: 2px solid #dee2e6;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             margin-top: 20px;
         }
-        .tab-btn {
-            padding: 9px 18px;
+        .nav-tabs-custom .btn-tab-main {
+            padding: 12px 30px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
             border: none;
             border-bottom: 3px solid transparent;
-            background: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            color: #555;
-            border-radius: 6px 6px 0 0;
+            background: transparent;
+            color: #666;
             transition: all 0.2s;
+            border-radius: 0;
         }
-        .tab-btn:hover { background: #eef6ff; color: var(--primary); }
-        .tab-btn.active {
-            color: var(--primary);
-            border-bottom: 3px solid var(--primary);
-            background: #eef6ff;
+        .nav-tabs-custom .btn-tab-main:hover { color: var(--primary); }
+        .nav-tabs-custom .btn-tab-main.active { 
+            color: var(--primary); 
+            border-bottom-color: var(--primary); 
+            background: transparent; 
+            box-shadow: none;
         }
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
@@ -169,19 +156,18 @@
 </head>
 <body>
 
-    <!-- CABECERA -->
-    <div class="page-header">
-        <div>
-            <h1><i class="fas fa-folder-open"></i> Documentos Clínicos</h1>
-            <p style="margin:0; color:#666; font-size:13px;">Archivos, alergias, consentimientos y constancias por paciente</p>
-        </div>
-        <a href="menu.html" style="color: var(--primary); text-decoration:none; font-size:14px;">
-            <i class="fas fa-arrow-left"></i> Volver al Menú
-        </a>
-    </div>
+    <div class="container card-container">
 
-    <!-- BUSCADOR DE PACIENTE -->
-    <div class="main-card">
+        <!-- CABECERA DE LA PÁGINA -->
+        <a href="menu.html" class="text-decoration-none mb-3 d-inline-block fw-bold" style="color: var(--primary);">
+            ← Volver al Menú Principal
+        </a>
+        <h3 class="fw-bold mb-1" style="color: var(--primary);">
+            <i class="fas fa-folder-open"></i> Documentos Clínicos
+        </h3>
+        <p style="color:#666; font-size:14px; margin-bottom: 25px;">Archivos, alergias, consentimientos y constancias por paciente</p>
+
+        <!-- BUSCADOR DE PACIENTE -->
         <h5 style="color:var(--primary); margin-bottom:14px;"><i class="fas fa-search"></i> Buscar Paciente</h5>
         <div class="search-bar">
             <input type="text" id="inputIdentidad" class="form-control" placeholder="Número de identidad del paciente..."
@@ -199,19 +185,19 @@
     </div>
 
     <!-- CONTENEDOR DE TABS (aparece tras buscar) -->
-    <div class="main-card" id="contenedorTabs" style="display:none;">
+    <div id="contenedorTabs" style="display:none;">
 
-        <div class="tab-nav">
-            <button class="tab-btn active" onclick="cambiarTab('archivos', this)">
+        <div class="nav-tabs-custom">
+            <button class="btn-tab-main active" onclick="cambiarTab('archivos', this)">
                 <i class="fas fa-paperclip"></i> Archivos del Expediente
             </button>
-            <button class="tab-btn" onclick="cambiarTab('alergias', this)">
+            <button class="btn-tab-main" onclick="cambiarTab('alergias', this)">
                 <i class="fas fa-allergies"></i> Alergias
             </button>
-            <button class="tab-btn" onclick="cambiarTab('consentimientos', this)">
+            <button class="btn-tab-main" onclick="cambiarTab('consentimientos', this)">
                 <i class="fas fa-file-signature"></i> Consentimientos
             </button>
-            <button class="tab-btn" onclick="cambiarTab('constancias', this)">
+            <button class="btn-tab-main" onclick="cambiarTab('constancias', this)">
                 <i class="fas fa-file-medical"></i> Constancias Médicas
             </button>
         </div>
@@ -372,6 +358,8 @@
         </div>
     </div>
 
+    </div>
+
     <script src="application/assets/js/bootstrap.bundle.min.js"></script>
     <script>
         // =====================================================
@@ -447,7 +435,7 @@
         // =====================================================
         function cambiarTab(tabId, btn) {
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.btn-tab-main').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.add('active');
             btn.classList.add('active');
         }

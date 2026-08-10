@@ -16,13 +16,19 @@
             --bg: #e9f0f5;
         }
 
-        html, body {
+        html {
+            height: 100%;
+        }
+
+        body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             background-color: var(--bg);
-            min-height: 100vh;
+            min-height: 100%;
             margin: 0;
         }
 

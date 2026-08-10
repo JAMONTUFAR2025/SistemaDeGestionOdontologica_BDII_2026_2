@@ -44,6 +44,12 @@ public class CitaController extends BaseController {
         return gson.toJson(citas);
     }
 
+    public String obtenerHistorialCitasDelUsuario() {
+        application.model.dao.CitaDAO citaDAO = new application.model.dao.CitaDAO();
+        java.util.List<java.util.Map<String, String>> citas = citaDAO.obtenerHistorialCitas(idPersonalMedicoActual, rolUsuarioActual);
+        return gson.toJson(citas);
+    }
+
     public String obtenerCitaPorId(String idStr) {
         try {
             int id = Integer.parseInt(idStr.trim());

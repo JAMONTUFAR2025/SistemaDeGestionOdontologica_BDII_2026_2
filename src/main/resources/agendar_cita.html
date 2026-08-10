@@ -11,36 +11,30 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <style>
-        html,
+        html {
+            height: 100%;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
             background-color: #e9f0f5;
+            min-height: 100%;
             margin: 0;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            box-sizing: border-box;
+            padding: 0;
         }
 
-        .modal-backdrop.show {
-            opacity: 0.35 !important;
-            background-color: rgba(0, 0, 0, 0.4) !important;
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            width: 100%;
-            max-width: 950px;
-            padding: 25px;
+        .card-container {
+            max-width: 1050px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .layout {
@@ -228,28 +222,34 @@
             color: #155724;
         }
 
-        /* Tabs del modal médico */
-        .modal-tabs {
+        /* === TABS === */
+        .nav-tabs-custom {
             display: flex;
             gap: 0;
-            margin-bottom: 20px;
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 25px;
         }
-        .modal-tab-btn {
+        .nav-tabs-custom .btn-tab-main {
             flex: 1;
-            padding: 12px;
+            padding: 12px 30px;
+            font-weight: bold;
+            font-size: 14px;
             text-align: center;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 13px;
-            border: 2px solid #ddd;
-            background: #f8f9fa;
+            border: none;
+            border-bottom: 3px solid transparent;
+            background: transparent;
             color: #666;
-            transition: all 0.3s;
+            transition: all 0.2s;
+            border-radius: 0;
         }
-        .modal-tab-btn:first-child { border-radius: 8px 0 0 8px; }
-        .modal-tab-btn:last-child  { border-radius: 0 8px 8px 0; }
-        .modal-tab-btn.active-blue  { background: #007bf0; color: white; border-color: #007bf0; }
-        .modal-tab-btn.active-green { background: #28a745; color: white; border-color: #28a745; }
+        .nav-tabs-custom .btn-tab-main:hover { color: #007bf0; }
+        .nav-tabs-custom .btn-tab-main.active { 
+            color: #007bf0; 
+            border-bottom-color: #007bf0; 
+            background: transparent; 
+            box-shadow: none;
+        }
         .modal-tab-content { display: none; }
         .modal-tab-content.active { display: block; }
 
@@ -270,8 +270,7 @@
     </head>
 
 <body>
-
-    <div class="container">
+    <div class="card-container">
         <div style="margin-bottom: 15px;">
             <a href="menu.html" style="text-decoration: none; color: #007bf0; font-weight: bold; font-size: 14px;">←
                 Volver al Menú Principal</a>
@@ -282,7 +281,13 @@
             ✏️ Modo Edición — Cita #<span id="numeroCitaEdicion"></span>. Modifica los datos y pulsa "Actualizar Cita".
         </div>
 
-        <div class="layout">
+        <div class="nav-tabs-custom">
+            <button class="btn-tab-main active" onclick="cambiarTabAgenda('panel-agendar', this)">📅 Agendar Cita</button>
+            <button class="btn-tab-main" onclick="cambiarTabAgenda('panel-historial', this)">📜 Historial de Citas</button>
+        </div>
+
+        <div id="panel-agendar" class="tab-panel active" style="display: block;">
+            <div class="layout">
             <!-- Panel Izquierdo: Comunicación -->
             <div class="sidebar-menu">
                 <h3>📢 Comunicación</h3>
@@ -374,6 +379,34 @@
 
                     <button type="submit" id="btnGuardarCita" class="btn-guardar">Guardar Cita</button>
                 </form>
+            </div>
+        </div>
+        </div> <!-- Fin panel-agendar -->
+
+        <!-- Panel Historial -->
+        <div id="panel-historial" class="tab-panel" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="color: #007bf0; margin: 0;">Historial Completo de Citas</h3>
+                <input type="text" id="busquedaHistorial" placeholder="Buscar paciente, estado..." 
+                       style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 250px;"
+                       onkeyup="filtrarHistorial()">
+            </div>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px; background: white;">
+                    <thead>
+                        <tr style="background: #007bf0; color: white; text-align: left;">
+                            <th style="padding: 10px;">ID</th>
+                            <th style="padding: 10px;">Fecha</th>
+                            <th style="padding: 10px;">Hora</th>
+                            <th style="padding: 10px;">Paciente</th>
+                            <th style="padding: 10px;">Motivo</th>
+                            <th style="padding: 10px;">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyHistorial">
+                        <tr><td colspan="6" style="padding: 10px; text-align: center; color: #666;">Cargando historial...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -475,13 +508,13 @@
             <h2 style="color: #007bf0; text-align: center; margin-top: 0; margin-bottom: 20px;">Registrar Nuevo Médico</h2>
 
             <!-- Tabs -->
-            <div class="modal-tabs">
-                <div class="modal-tab-btn active-blue" id="tabBtnUsuario"
-                     onclick="mostrarTabMedico('tabModalUsuario', 'blue')">
+            <div class="nav-tabs-custom">
+                <div class="btn-tab-main active" id="tabBtnUsuario"
+                     onclick="mostrarTabMedico('tabModalUsuario')">
                     👤 Paso 1: Crear Usuario
                 </div>
-                <div class="modal-tab-btn" id="tabBtnMedico"
-                     onclick="mostrarTabMedico('tabModalMedico', 'green')">
+                <div class="btn-tab-main" id="tabBtnMedico"
+                     onclick="mostrarTabMedico('tabModalMedico')">
                     🩺 Paso 2: Datos Médico
                 </div>
             </div>
@@ -966,7 +999,7 @@
                     });
                 } catch(e) { console.error("Error cargando especialidades:", e); }
             }
-            mostrarTabMedico('tabModalUsuario', 'blue');
+            mostrarTabMedico('tabModalUsuario');
             $('#modalMedico').css('display', 'flex');
         }
 
@@ -976,14 +1009,14 @@
             document.getElementById('formModalMedico').reset();
         }
 
-        function mostrarTabMedico(tabId, color) {
+        function mostrarTabMedico(tabId) {
             document.querySelectorAll('.modal-tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active-blue', 'active-green'));
+            document.querySelectorAll('.btn-tab-main').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             if (tabId === 'tabModalUsuario') {
-                document.getElementById('tabBtnUsuario').classList.add('active-blue');
+                document.getElementById('tabBtnUsuario').classList.add('active');
             } else {
-                document.getElementById('tabBtnMedico').classList.add('active-green');
+                document.getElementById('tabBtnMedico').classList.add('active');
                 // Cargar usuarios sin médico al ir al paso 2
                 cargarUsuariosSinMedicoModal();
             }
@@ -1028,7 +1061,7 @@
 
             if (partes[0] === "OK") {
                 Swal.fire({ title: '¡Usuario Creado!', text: partes[1] + ' Ahora completa el Paso 2.', icon: 'success', confirmButtonText: 'Ir al Paso 2', confirmButtonColor: '#28a745' })
-                    .then(() => mostrarTabMedico('tabModalMedico', 'green'));
+                    .then(() => mostrarTabMedico('tabModalMedico'));
             } else {
                 Swal.fire({ title: 'Error', text: partes[1], icon: 'error', confirmButtonColor: '#dc3545' });
             }
@@ -1085,6 +1118,66 @@
             } else {
                 Swal.fire({ title: 'Error', text: partes[1], icon: 'error', confirmButtonText: 'Revisar', confirmButtonColor: '#dc3545' });
             }
+        }
+
+        // ============================================================
+        // NUEVO: Funciones para Pestañas e Historial
+        // ============================================================
+        function cambiarTabAgenda(tabId, btn) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+            document.querySelectorAll('.nav-tabs-custom > .btn-tab-main').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabId).style.display = 'block';
+            btn.classList.add('active');
+
+            if (tabId === 'panel-historial') {
+                cargarHistorialCitas();
+            }
+        }
+
+        function cargarHistorialCitas() {
+            if (!window.citaController) return;
+            
+            try {
+                let json = window.citaController.obtenerHistorialCitasDelUsuario();
+                let citas = JSON.parse(json);
+                let tbody = document.getElementById('tbodyHistorial');
+                
+                if (citas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="padding: 10px; text-align: center; color: #666;">No hay citas registradas en el historial.</td></tr>';
+                    return;
+                }
+
+                let html = '';
+                citas.forEach(c => {
+                    let colorEstado = '#555';
+                    if (c.estado === 'Confirmada') colorEstado = '#28a745';
+                    else if (c.estado === 'Cancelada' || c.estado === 'Ausente') colorEstado = '#dc3545';
+                    else if (c.estado === 'Completada') colorEstado = '#17a2b8';
+
+                    html += `<tr class="fila-historial" style="border-bottom: 1px solid #ddd; transition: background 0.2s;" onmouseover="this.style.background='#f1f8ff'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 10px;">${c.id_citas}</td>
+                        <td style="padding: 10px; font-weight: bold; color: #007bf0;">${c.fecha}</td>
+                        <td style="padding: 10px;">${c.hora}</td>
+                        <td style="padding: 10px;">${c.paciente}</td>
+                        <td style="padding: 10px;">${c.motivo_cita}</td>
+                        <td style="padding: 10px; font-weight: bold; color: ${colorEstado};">${c.estado}</td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html;
+            } catch (e) {
+                console.error("Error al cargar historial:", e);
+                document.getElementById('tbodyHistorial').innerHTML = '<tr><td colspan="6" style="padding: 10px; text-align: center; color: red;">Error al cargar datos.</td></tr>';
+            }
+        }
+
+        function filtrarHistorial() {
+            let input = document.getElementById('busquedaHistorial').value.toLowerCase();
+            let filas = document.querySelectorAll('#tbodyHistorial tr.fila-historial');
+            filas.forEach(fila => {
+                let texto = fila.innerText.toLowerCase();
+                fila.style.display = texto.includes(input) ? '' : 'none';
+            });
         }
     </script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
