@@ -97,6 +97,28 @@ public class FacturacionDAO {
         return null;
     }
 
+    public String obtenerMedicoDeCitaReciente(int idPaciente) {
+        String query = "SELECT pm.nombre_completo " +
+                       "FROM Citas c " +
+                       "INNER JOIN Personal_Medico pm ON c.id_personal_medico = pm.id_personal_medico " +
+                       "WHERE c.id_pacientes = ? AND c.estado = 'Completada' " +
+                       "ORDER BY c.fecha_hora DESC LIMIT 1";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, idPaciente);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getString("nombre_completo");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener medico de cita: " + e.getMessage());
+        }
+        return "N/D";
+    }
+
     public boolean anularRecibo(int id) {
         String query = "UPDATE Facturacion SET anulado = 'Si', fecha_anulado = NOW() " +
                        "WHERE id_facturacion_recibos = ?";

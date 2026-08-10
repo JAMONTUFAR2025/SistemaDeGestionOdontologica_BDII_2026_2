@@ -196,6 +196,9 @@
         <button class="tab-btn" id="tab-egresos" onclick="cambiarTab('egresos')">
             <i class="fas fa-wallet me-1"></i> Egresos y Gastos
         </button>
+        <button class="tab-btn" id="tab-historial" onclick="cambiarTab('historial')">
+            <i class="fas fa-history me-1"></i> Historial de Cierres
+        </button>
     </div>
 
     <!-- ════════════ TAB 1: DASHBOARD ════════════ -->
@@ -379,6 +382,52 @@
             </table>
         </div>
     </div><!-- /panel-egresos -->
+
+    <!-- ════════════ TAB 4: HISTORIAL DE CIERRES ════════════ -->
+    <div class="tab-panel" id="panel-historial">
+        <!-- Barra de herramientas -->
+        <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+            <div class="d-flex flex-wrap align-items-end gap-2">
+                <div>
+                    <label class="form-label fw-bold text-dark mb-1" style="font-size:.85rem;">Desde:</label>
+                    <input type="date" id="fechaDesdeHistorial" class="form-control" style="width:145px;">
+                </div>
+                <div>
+                    <label class="form-label fw-bold text-dark mb-1" style="font-size:.85rem;">Hasta:</label>
+                    <input type="date" id="fechaHastaHistorial" class="form-control" style="width:145px;">
+                </div>
+                <button class="btn btn-primary" onclick="cargarHistorial()" style="height:38px;">
+                    <i class="fas fa-search me-1"></i>Buscar
+                </button>
+                <button class="btn btn-outline-secondary" onclick="limpiarFiltrosHistorial()" style="height:38px;">
+                    <i class="fas fa-times me-1"></i>Limpiar
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabla de cierres -->
+        <div class="table-responsive">
+            <table class="table-custom text-center">
+                <thead>
+                    <tr>
+                        <th>ID Sesión</th>
+                        <th>Fecha Cierre</th>
+                        <th>Cajero/Apertura</th>
+                        <th>Monto Apertura</th>
+                        <th>Total Efectivo</th>
+                        <th>Tarjeta/Transfer</th>
+                        <th>Total General</th>
+                        <th>Diferencia</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaHistorialBody">
+                    <tr><td colspan="10" class="text-muted py-4">Haz clic en Buscar para cargar el historial.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div><!-- /panel-historial -->
 
 </div><!-- /page-card -->
 
@@ -726,6 +775,9 @@ function cambiarTab(nombre) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + nombre).classList.add('active');
     document.getElementById('panel-' + nombre).classList.add('active');
+    
+    if (nombre === 'historial') cargarHistorial();
+    
     // Actualizar URL sin recargar
     const url = new URL(window.location.href);
     url.searchParams.set('tab', nombre);
@@ -913,6 +965,7 @@ function confirmarCerrarCaja() {
         cerrarModal('modalArqueo');
         cajaActiva = null;
         cargarEstadoCaja();
+        cargarHistorial();
     } else {
         swal('Error', 'No se pudo cerrar la caja.', 'error');
     }
@@ -1252,6 +1305,53 @@ function confirmarEliminarEgreso() {
         swal('Error', msg, 'error');
     }
 }
+
+// ═══════════════════════════════════════════════════════════
+// ██ HISTORIAL DE CIERRES
+// ═══════════════════════════════════════════════════════════
+function cargarHistorial() {
+    const fechaDesde = document.getElementById('fechaDesdeHistorial').value;
+    const fechaHasta = document.getElementById('fechaHastaHistorial').value;
+    
+    if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
+        swal('Atención', 'Rango de fechas inválido.', 'warning');
+        return;
+    }
+    
+    const filtros = JSON.stringify({ fechaInicio: fechaDesde, fechaFin: fechaHasta, idUsuario: null });
+    const json = window.finanzasController.obtenerHistorialCierres(filtros);
+    const lista = JSON.parse(json || '[]');
+    
+    const tbody = document.getElementById('tablaHistorialBody');
+    if (!lista || lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="text-muted py-4">No se encontraron cierres en el rango seleccionado.</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = lista.map(c => `
+        <tr>
+            <td class="fw-bold">#${c.id_caja_sesion}</td>
+            <td>${c.fecha_cierre || '—'}</td>
+            <td><small>${c.usuario_apertura || '—'}</small></td>
+            <td class="text-primary fw-bold">${fmtLps(c.monto_apertura)}</td>
+            <td class="text-success fw-bold">${fmtLps(c.ingresos_efectivo)}</td>
+            <td class="text-info fw-bold">${fmtLps(c.ingresos_transferencia + c.ingresos_pos)}</td>
+            <td class="fw-bold text-success" style="font-size:1.05rem;">${fmtLps(c.total_general)}</td>
+            <td class="${c.diferencia < 0 ? 'text-danger' : 'text-success'} fw-bold">${fmtLps(c.diferencia)}</td>
+            <td><span class="badge-estado badge-inactivo">${c.estado}</span></td>
+            <td>
+                <i class="fas fa-file-pdf text-danger" style="cursor:pointer; font-size:1.15rem;" title="Ver PDF de Cierre" onclick="window.finanzasController.generarPdfCierreCaja(${c.id_caja_sesion})"></i>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function limpiarFiltrosHistorial() {
+    document.getElementById('fechaDesdeHistorial').value = '';
+    document.getElementById('fechaHastaHistorial').value = '';
+    cargarHistorial();
+}
+
 
 // ═══════════════════════════════════════════════════════════
 // UTILIDADES

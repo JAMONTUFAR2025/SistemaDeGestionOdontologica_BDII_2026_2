@@ -178,7 +178,7 @@ public class UserDAO {
     public String obtenerNombreMedicoPorCorreo(String correo) {
         String nombre = null;
         String query = "SELECT pm.nombre_completo FROM Usuarios_Login ul " +
-                       "JOIN Personal_Medico pm ON ul.id_personal_medico = pm.id_medico " +
+                       "JOIN Personal_Medico pm ON ul.id_personal_medico = pm.id_personal_medico " +
                        "WHERE ul.correo = ? AND ul.borrado = 'No' AND pm.borrado = 'No'";
         try {
             Connection conn = DBConnection.getInstance().getConnection();

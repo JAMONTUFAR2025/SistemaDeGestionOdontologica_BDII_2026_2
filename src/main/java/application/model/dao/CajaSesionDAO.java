@@ -123,7 +123,7 @@ public class CajaSesionDAO {
             Connection conn = DBConnection.getInstance().getConnection();
             String qIngr = "SELECT COALESCE(SUM(total_neto_recibido), 0) AS total " +
                            "FROM Facturacion WHERE id_caja_sesion = ? " +
-                           "AND metodo_pago = 'Efectivo' AND anulado = 'No'";
+                           "AND LOWER(metodo_pago) = 'efectivo' AND LOWER(anulado) = 'no'";
             try (PreparedStatement stmt = conn.prepareStatement(qIngr)) {
                 stmt.setInt(1, idCajaSesion);
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -140,7 +140,7 @@ public class CajaSesionDAO {
             Connection conn = DBConnection.getInstance().getConnection();
             String qEgr = "SELECT COALESCE(SUM(monto), 0) AS total " +
                           "FROM Egresos_Gastos WHERE id_caja_sesion = ? " +
-                          "AND metodo_pago = 'Efectivo' AND anulado = 'No'";
+                          "AND LOWER(metodo_pago) = 'efectivo' AND LOWER(anulado) = 'no'";
             try (PreparedStatement stmt = conn.prepareStatement(qEgr)) {
                 stmt.setInt(1, idCajaSesion);
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -151,12 +151,48 @@ public class CajaSesionDAO {
             System.err.println("Error al calcular egresos efectivo: " + e.getMessage());
         }
 
+        // 4. Total ingresos en Transferencia (Facturacion)
+        double ingresosTransferencia = 0;
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            String qIngrT = "SELECT COALESCE(SUM(total_neto_recibido), 0) AS total " +
+                            "FROM Facturacion WHERE id_caja_sesion = ? " +
+                            "AND LOWER(metodo_pago) = 'transferencia' AND LOWER(anulado) = 'no'";
+            try (PreparedStatement stmt = conn.prepareStatement(qIngrT)) {
+                stmt.setInt(1, idCajaSesion);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) ingresosTransferencia = rs.getDouble("total");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al calcular ingresos transferencia: " + e.getMessage());
+        }
+
+        // 5. Total ingresos en POS/Tarjeta (Facturacion)
+        double ingresosPos = 0;
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            String qIngrP = "SELECT COALESCE(SUM(total_neto_recibido), 0) AS total " +
+                            "FROM Facturacion WHERE id_caja_sesion = ? " +
+                            "AND LOWER(metodo_pago) IN ('pos', 'tarjeta') AND LOWER(anulado) = 'no'";
+            try (PreparedStatement stmt = conn.prepareStatement(qIngrP)) {
+                stmt.setInt(1, idCajaSesion);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) ingresosPos = rs.getDouble("total");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al calcular ingresos POS: " + e.getMessage());
+        }
+
         double efectivoEsperado = montoApertura + ingresosEfectivo - egresosEfectivo;
 
         resultado.put("monto_apertura",    montoApertura);
         resultado.put("ingresos_efectivo", ingresosEfectivo);
         resultado.put("egresos_efectivo",  egresosEfectivo);
         resultado.put("efectivo_esperado", efectivoEsperado);
+        resultado.put("ingresos_transferencia", ingresosTransferencia);
+        resultado.put("ingresos_pos",      ingresosPos);
         return resultado;
     }
 
@@ -171,7 +207,7 @@ public class CajaSesionDAO {
         String query = "UPDATE Caja_Sesiones SET " +
                        "id_usuario_cierre = ?, monto_cierre_real = ?, diferencia = ?, " +
                        "estado = 'Cerrada', fecha_cierre = NOW(), observaciones = ? " +
-                       "WHERE id_caja_sesion = ? AND estado = 'Abierta'";
+                       "WHERE id_caja_sesion = ? AND LOWER(estado) = 'abierta'";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -194,45 +230,27 @@ public class CajaSesionDAO {
     public java.util.List<Map<String, Object>> obtenerMovimientosDeSesion(int idCajaSesion) {
         java.util.List<Map<String, Object>> lista = new java.util.ArrayList<>();
 
-        // Ingresos (Facturacion)
-        String qFac = "SELECT 'Ingreso' AS tipo, fecha_emision AS fecha, " +
-                      "CONCAT('Cobro: ', p.nombre_completo) AS descripcion, " +
-                      "total_neto_recibido AS monto, metodo_pago " +
-                      "FROM Facturacion f INNER JOIN Pacientes p ON f.id_pacientes = p.id_pacientes " +
-                      "WHERE f.id_caja_sesion = ? AND f.anulado = 'No'";
-
-        // Egresos (Egresos_Gastos)
-        String qEgr = "SELECT 'Egreso' AS tipo, fecha, descripcion, monto, metodo_pago " +
-                      "FROM Egresos_Gastos WHERE id_caja_sesion = ? AND anulado = 'No'";
+        String query = "SELECT 'INGRESO' AS tipo, DATE_FORMAT(f.fecha_emision, '%H:%i') AS hora, " +
+                       "CONCAT('Cobro: ', p.nombre_completo) AS concepto, f.metodo_pago, f.total_neto_recibido AS monto " +
+                       "FROM Facturacion f INNER JOIN Pacientes p ON f.id_pacientes = p.id_pacientes " +
+                       "WHERE f.id_caja_sesion = ? AND LOWER(f.anulado) = 'no' " +
+                       "UNION ALL " +
+                       "SELECT 'EGRESO' AS tipo, DATE_FORMAT(fecha, '%H:%i') AS hora, " +
+                       "descripcion AS concepto, metodo_pago, monto " +
+                       "FROM Egresos_Gastos WHERE id_caja_sesion = ? AND LOWER(anulado) = 'no' " +
+                       "ORDER BY hora ASC";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
-
-            // Ingresos
-            try (PreparedStatement stmt = conn.prepareStatement(qFac)) {
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setInt(1, idCajaSesion);
+                stmt.setInt(2, idCajaSesion);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         Map<String, Object> m = new LinkedHashMap<>();
                         m.put("tipo",        rs.getString("tipo"));
-                        m.put("fecha",       rs.getString("fecha"));
-                        m.put("descripcion", rs.getString("descripcion"));
-                        m.put("monto",       rs.getDouble("monto"));
-                        m.put("metodo_pago", rs.getString("metodo_pago"));
-                        lista.add(m);
-                    }
-                }
-            }
-
-            // Egresos
-            try (PreparedStatement stmt = conn.prepareStatement(qEgr)) {
-                stmt.setInt(1, idCajaSesion);
-                try (ResultSet rs = stmt.executeQuery()) {
-                    while (rs.next()) {
-                        Map<String, Object> m = new LinkedHashMap<>();
-                        m.put("tipo",        rs.getString("tipo"));
-                        m.put("fecha",       rs.getString("fecha"));
-                        m.put("descripcion", rs.getString("descripcion"));
+                        m.put("hora",        rs.getString("hora") != null ? rs.getString("hora") : "");
+                        m.put("descripcion", rs.getString("concepto"));
                         m.put("monto",       rs.getDouble("monto"));
                         m.put("metodo_pago", rs.getString("metodo_pago"));
                         lista.add(m);
@@ -243,6 +261,81 @@ public class CajaSesionDAO {
             System.err.println("Error al obtener movimientos de sesión: " + e.getMessage());
         }
 
+        return lista;
+    }
+
+    // ------------------------------------------------------------------
+    // Historial de Cierres para Contabilidad
+    // ------------------------------------------------------------------
+    public java.util.List<Map<String, Object>> obtenerHistorialCierres(String fechaInicio, String fechaFin, Integer idUsuario) {
+        java.util.List<Map<String, Object>> lista = new java.util.ArrayList<>();
+        StringBuilder query = new StringBuilder(
+            "SELECT c.id_caja_sesion, c.monto_apertura, c.monto_cierre_real, c.diferencia, " +
+            "c.estado, c.fecha_apertura, c.fecha_cierre, " +
+            "u1.correo AS usuario_apertura, u2.correo AS usuario_cierre " +
+            "FROM Caja_Sesiones c " +
+            "LEFT JOIN Usuarios_Login u1 ON c.id_usuario_apertura = u1.id_usuarios_login " +
+            "LEFT JOIN Usuarios_Login u2 ON c.id_usuario_cierre = u2.id_usuarios_login " +
+            "WHERE LOWER(c.estado) = 'cerrada'"
+        );
+
+        java.util.List<Object> params = new java.util.ArrayList<>();
+        if (fechaInicio != null && !fechaInicio.trim().isEmpty() && fechaFin != null && !fechaFin.trim().isEmpty()) {
+            query.append(" AND DATE(c.fecha_cierre) BETWEEN ? AND ?");
+            params.add(fechaInicio.trim());
+            params.add(fechaFin.trim());
+        } else if (fechaInicio != null && !fechaInicio.trim().isEmpty()) {
+            query.append(" AND DATE(c.fecha_cierre) >= ?");
+            params.add(fechaInicio.trim());
+        } else if (fechaFin != null && !fechaFin.trim().isEmpty()) {
+            query.append(" AND DATE(c.fecha_cierre) <= ?");
+            params.add(fechaFin.trim());
+        }
+        if (idUsuario != null && idUsuario > 0) {
+            query.append(" AND c.id_usuario_cierre = ?");
+            params.add(idUsuario);
+        }
+
+        query.append(" ORDER BY c.id_caja_sesion DESC");
+
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+                for (int i = 0; i < params.size(); i++) {
+                    stmt.setObject(i + 1, params.get(i));
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        Map<String, Object> map = new LinkedHashMap<>();
+                        int idSesion = rs.getInt("id_caja_sesion");
+                        map.put("id_caja_sesion", idSesion);
+                        map.put("fecha_cierre", rs.getString("fecha_cierre"));
+                        map.put("usuario_apertura", rs.getString("usuario_apertura"));
+                        map.put("usuario_cierre", rs.getString("usuario_cierre"));
+                        map.put("monto_apertura", rs.getDouble("monto_apertura"));
+                        map.put("monto_cierre_real", rs.getDouble("monto_cierre_real"));
+                        map.put("diferencia", rs.getDouble("diferencia"));
+                        map.put("estado", rs.getString("estado"));
+
+                        // Obtener los totales agrupados desde calcularArqueoCaja para exportar completo
+                        Map<String, Object> arqueo = calcularArqueoCaja(idSesion);
+                        map.put("ingresos_efectivo", arqueo.get("ingresos_efectivo"));
+                        map.put("ingresos_transferencia", arqueo.get("ingresos_transferencia"));
+                        map.put("ingresos_pos", arqueo.get("ingresos_pos"));
+                        
+                        // Total General (Efectivo + Transferencia + POS)
+                        double totG = (double) arqueo.get("ingresos_efectivo") + 
+                                      (double) arqueo.get("ingresos_transferencia") + 
+                                      (double) arqueo.get("ingresos_pos");
+                        map.put("total_general", totG);
+
+                        lista.add(map);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener historial de cierres: " + e.getMessage());
+        }
         return lista;
     }
 }

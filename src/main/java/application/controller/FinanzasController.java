@@ -324,19 +324,20 @@ public class FinanzasController extends BaseController {
                 application.model.dao.FacturacionDAO dao = new application.model.dao.FacturacionDAO();
                 java.util.Map<String, Object> factura = dao.obtenerReciboPorId(facturaId);
                 if (factura != null) {
-                    javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
-                    fileChooser.setTitle("Guardar Recibo PDF");
-                    fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Archivos PDF", "*.pdf"));
-                    fileChooser.setInitialFileName("Recibo_" + (factura.get("numero_recibo") != null ? factura.get("numero_recibo") : facturaId) + ".pdf");
-                    java.io.File file = fileChooser.showSaveDialog(null);
+                    // Obtener médico tratante de la cita más reciente
+                    int idPaciente = (int) factura.get("id_paciente");
+                    String medico = dao.obtenerMedicoDeCitaReciente(idPaciente);
+
+                    // Generar PDF en archivo temporal
+                    java.io.File file = application.util.PDFGenerator.generarReciboPdf(factura, medico);
                     
-                    if (file != null) {
-                        application.util.PDFGenerator.generarReciboPago(factura, file.getAbsolutePath());
+                    if (file != null && file.exists()) {
                         java.awt.Desktop.getDesktop().open(file);
                     }
                 }
             } catch (Exception e) {
                 System.err.println("Error en generarPdfFactura: " + e.getMessage());
+                e.printStackTrace();
             }
         });
         return "{\"status\":\"ok\"}";
@@ -351,19 +352,92 @@ public class FinanzasController extends BaseController {
                     java.util.Map<String, Object> arqueo = cajaDao.calcularArqueoCaja(sessionId);
                     java.util.List<java.util.Map<String, Object>> movimientos = cajaDao.obtenerMovimientosDeSesion(sessionId);
                     
-                    javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
-                    fileChooser.setTitle("Guardar Reporte Cierre de Caja");
-                    fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Archivos PDF", "*.pdf"));
-                    fileChooser.setInitialFileName("Cierre_Caja_" + sessionId + ".pdf");
-                    java.io.File file = fileChooser.showSaveDialog(null);
+                    // Fusionar caja y arqueo para el PDF
+                    java.util.Map<String, Object> data = new java.util.HashMap<>(caja);
+                    if (arqueo != null) {
+                        data.putAll(arqueo);
+                    }
+
+                    // Generar PDF en archivo temporal
+                    java.io.File file = application.util.PDFGenerator.generarArqueoPdf(data, movimientos);
                     
-                    if (file != null) {
-                        application.util.PDFGenerator.generarReporteCierreCaja(caja, arqueo, movimientos, file.getAbsolutePath());
+                    if (file != null && file.exists()) {
                         java.awt.Desktop.getDesktop().open(file);
                     }
                 }
             } catch (Exception e) {
                 System.err.println("Error en generarPdfCierreCaja: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+        return "{\"status\":\"ok\"}";
+    }
+
+    public String obtenerHistorialCierres(String jsonFiltros) {
+        try {
+            com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(
+                    jsonFiltros == null ? "{}" : jsonFiltros).getAsJsonObject();
+            String fechaInicio = obj.has("fechaInicio") && !obj.get("fechaInicio").isJsonNull() ? obj.get("fechaInicio").getAsString().trim() : "";
+            String fechaFin = obj.has("fechaFin") && !obj.get("fechaFin").isJsonNull() ? obj.get("fechaFin").getAsString().trim() : "";
+            Integer idUsuario = obj.has("idUsuario") && !obj.get("idUsuario").isJsonNull() && !obj.get("idUsuario").getAsString().isEmpty() ? obj.get("idUsuario").getAsInt() : null;
+
+            application.model.dao.CajaSesionDAO dao = new application.model.dao.CajaSesionDAO();
+            java.util.List<java.util.Map<String, Object>> lista = dao.obtenerHistorialCierres(
+                    fechaInicio.isEmpty() ? null : fechaInicio,
+                    fechaFin.isEmpty() ? null : fechaFin,
+                    idUsuario);
+            return gson.toJson(lista);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en obtenerHistorialCierres: " + t.getMessage());
+            return "[]";
+        }
+    }
+
+    public String exportarHistorialCsv(String jsonFiltros) {
+        javafx.application.Platform.runLater(() -> {
+            try {
+                com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(
+                        jsonFiltros == null ? "{}" : jsonFiltros).getAsJsonObject();
+                String fechaDesde = obj.has("fechaDesde") && !obj.get("fechaDesde").isJsonNull() ? obj.get("fechaDesde").getAsString().trim() : "";
+                String fechaHasta = obj.has("fechaHasta") && !obj.get("fechaHasta").isJsonNull() ? obj.get("fechaHasta").getAsString().trim() : "";
+                Integer idUsuario = obj.has("idUsuario") && !obj.get("idUsuario").isJsonNull() && !obj.get("idUsuario").getAsString().isEmpty() ? obj.get("idUsuario").getAsInt() : null;
+
+                application.model.dao.CajaSesionDAO dao = new application.model.dao.CajaSesionDAO();
+                java.util.List<java.util.Map<String, Object>> lista = dao.obtenerHistorialCierres(
+                        fechaDesde.isEmpty() ? null : fechaDesde,
+                        fechaHasta.isEmpty() ? null : fechaHasta,
+                        idUsuario);
+
+                StringBuilder csv = new StringBuilder();
+                csv.append("\uFEFF"); // BOM for UTF-8 Excel support
+                csv.append("ID Sesion,Fecha Cierre,Usuario Apertura,Usuario Cierre,Monto Apertura,Total Efectivo,Total Transferencias,Total POS,TOTAL GENERAL,Monto Cierre Real,Diferencia,Estado\n");
+
+                for (java.util.Map<String, Object> fila : lista) {
+                    csv.append(fila.get("id_caja_sesion")).append(",");
+                    csv.append(fila.get("fecha_cierre")).append(",");
+                    csv.append(fila.get("usuario_apertura")).append(",");
+                    csv.append(fila.get("usuario_cierre")).append(",");
+                    csv.append(fila.get("monto_apertura")).append(",");
+                    csv.append(fila.get("ingresos_efectivo")).append(",");
+                    csv.append(fila.get("ingresos_transferencia")).append(",");
+                    csv.append(fila.get("ingresos_pos")).append(",");
+                    csv.append(fila.get("total_general")).append(",");
+                    csv.append(fila.get("monto_cierre_real")).append(",");
+                    csv.append(fila.get("diferencia")).append(",");
+                    csv.append(fila.get("estado")).append("\n");
+                }
+
+                java.io.File file = java.io.File.createTempFile("Historial_Cierres_", ".csv");
+                try (java.io.FileWriter writer = new java.io.FileWriter(file, java.nio.charset.StandardCharsets.UTF_8)) {
+                    writer.write(csv.toString());
+                }
+
+                if (file.exists()) {
+                    java.awt.Desktop.getDesktop().open(file);
+                }
+            } catch (Exception e) {
+                System.err.println("Error en exportarHistorialCsv: " + e.getMessage());
+                e.printStackTrace();
             }
         });
         return "{\"status\":\"ok\"}";
