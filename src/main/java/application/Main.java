@@ -15,6 +15,8 @@ public class Main extends Application {
     private application.controller.FinanzasController finanzasController = new application.controller.FinanzasController();
     private application.controller.HistoriaClinicaController historiaClinicaController = new application.controller.HistoriaClinicaController();
     private application.controller.WhatsAppController whatsAppController = new application.controller.WhatsAppController();
+    private application.controller.DocumentosController documentosController = new application.controller.DocumentosController();
+    private application.controller.CatalogoController catalogoController = new application.controller.CatalogoController();
 
     @Override
     public void start(Stage primaryStage) {
@@ -40,6 +42,8 @@ public class Main extends Application {
                 window.setMember("finanzasController", finanzasController);
                 window.setMember("historiaClinicaController", historiaClinicaController);
                 window.setMember("whatsAppController", whatsAppController);
+                window.setMember("documentosController", documentosController);
+                window.setMember("catalogoController", catalogoController);
             }
         });
 

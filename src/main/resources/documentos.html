@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentos Clínicos - SOE Odontología</title>
+    <link href="application/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="application/assets/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007bf0;
+            --primary-dark: #0056b3;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --bg-card: rgba(255, 255, 255, 0.97);
+            --shadow: 0 4px 18px rgba(0,0,0,0.13);
+        }
+        html { height: 100%; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-image: url('fondo-clinica.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #e9f0f5;
+            min-height: 100%;
+            margin: 0;
+            padding: 20px;
+        }
+        .page-header {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 18px 28px;
+            box-shadow: var(--shadow);
+            max-width: 1050px;
+            margin: 0 auto 24px auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .page-header h1 {
+            color: var(--primary);
+            font-size: 24px;
+            margin: 0;
+        }
+        .main-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 26px;
+            box-shadow: var(--shadow);
+            max-width: 1050px;
+            margin: 0 auto 24px auto;
+        }
+
+        /* --- BUSCADOR DE PACIENTE --- */
+        .search-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .search-bar input { flex: 1; min-width: 200px; }
+        .patient-badge {
+            display: none;
+            background: #eef6ff;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: #333;
+            font-size: 14px;
+            margin-top: 14px;
+        }
+        .patient-badge .nombre { font-weight: bold; color: var(--primary); font-size: 16px; }
+
+        /* --- TABS --- */
+        .tab-nav {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+        .tab-btn {
+            padding: 9px 18px;
+            border: none;
+            border-bottom: 3px solid transparent;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { background: #eef6ff; color: var(--primary); }
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            background: #eef6ff;
+        }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* --- TABLAS --- */
+        .tabla-docs {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .tabla-docs thead tr { background: var(--primary); color: white; }
+        .tabla-docs th, .tabla-docs td { padding: 10px 12px; text-align: left; }
+        .tabla-docs tbody tr { border-bottom: 1px solid #e9ecef; transition: background 0.15s; }
+        .tabla-docs tbody tr:hover { background: #f0f8ff; }
+        .tabla-docs .vacia td { text-align: center; color: #888; padding: 20px; font-style: italic; }
+
+        /* --- FORMULARIOS --- */
+        .form-seccion {
+            background: #f8fbff;
+            border: 1px solid #d6e8ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .form-seccion h5 {
+            color: var(--primary);
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+        label { font-size: 13px; font-weight: 600; color: #444; }
+        .form-control, .form-select { font-size: 14px; border-radius: 7px; }
+        .btn-primary-soe {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 9px 22px;
+            border-radius: 7px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-primary-soe:hover { background: var(--primary-dark); }
+        .btn-danger-soe {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-danger-soe:hover { background: #b02a37; }
+        .badge-tipo {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .badge-radio { background: #fff3cd; color: #856404; }
+        .badge-foto  { background: #d1e7dd; color: #0f5132; }
+        .badge-lab   { background: #cff4fc; color: #055160; }
+        .badge-otro  { background: #e2e3e5; color: #383d41; }
+        .alerta { display:none; border-radius: 8px; padding: 10px 16px; font-size: 13px; margin-top: 10px; }
+        .alerta-ok  { background: #d1e7dd; color: #0f5132; border: 1px solid #a3cfbb; }
+        .alerta-err { background: #f8d7da; color: #842029; border: 1px solid #f1aeb5; }
+    </style>
+</head>
+<body>
+
+    <!-- CABECERA -->
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-folder-open"></i> Documentos Clínicos</h1>
+            <p style="margin:0; color:#666; font-size:13px;">Archivos, alergias, consentimientos y constancias por paciente</p>
+        </div>
+        <a href="menu.html" style="color: var(--primary); text-decoration:none; font-size:14px;">
+            <i class="fas fa-arrow-left"></i> Volver al Menú
+        </a>
+    </div>
+
+    <!-- BUSCADOR DE PACIENTE -->
+    <div class="main-card">
+        <h5 style="color:var(--primary); margin-bottom:14px;"><i class="fas fa-search"></i> Buscar Paciente</h5>
+        <div class="search-bar">
+            <input type="text" id="inputIdentidad" class="form-control" placeholder="Número de identidad del paciente..."
+                   maxlength="20" onkeydown="if(event.key==='Enter') buscarPaciente()">
+            <button class="btn-primary-soe" onclick="buscarPaciente()"><i class="fas fa-search"></i> Buscar</button>
+            <button class="btn-primary-soe" style="background:#6c757d;" onclick="limpiarBusqueda()"><i class="fas fa-times"></i> Limpiar</button>
+        </div>
+        <div id="pacienteBadge" class="patient-badge">
+            <div class="nombre" id="nombrePaciente">—</div>
+            <div style="font-size:12px; color:#555; margin-top:4px;">
+                Identidad: <b id="identidadPaciente">—</b> &nbsp;|&nbsp; Tel: <b id="telefonoPaciente">—</b>
+            </div>
+        </div>
+        <div id="alertaBusqueda" class="alerta"></div>
+    </div>
+
+    <!-- CONTENEDOR DE TABS (aparece tras buscar) -->
+    <div class="main-card" id="contenedorTabs" style="display:none;">
+
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="cambiarTab('archivos', this)">
+                <i class="fas fa-paperclip"></i> Archivos del Expediente
+            </button>
+            <button class="tab-btn" onclick="cambiarTab('alergias', this)">
+                <i class="fas fa-allergies"></i> Alergias
+            </button>
+            <button class="tab-btn" onclick="cambiarTab('consentimientos', this)">
+                <i class="fas fa-file-signature"></i> Consentimientos
+            </button>
+            <button class="tab-btn" onclick="cambiarTab('constancias', this)">
+                <i class="fas fa-file-medical"></i> Constancias Médicas
+            </button>
+        </div>
+
+        <!-- ===================== TAB: ARCHIVOS ===================== -->
+        <div id="tab-archivos" class="tab-panel active">
+            <div class="form-seccion">
+                <h5><i class="fas fa-plus-circle"></i> Registrar Nuevo Archivo</h5>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label>Tipo de Archivo *</label>
+                        <select id="arTipo" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            <option value="Radiografia">Radiografía</option>
+                            <option value="Fotografia">Fotografía</option>
+                            <option value="Laboratorio">Laboratorio</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Nombre del Archivo *</label>
+                        <input type="text" id="arNombre" class="form-control" placeholder="Rx_Panoramica_Paciente.png">
+                    </div>
+                    <div class="col-md-5">
+                        <label>Ruta / Referencia *</label>
+                        <input type="text" id="arRuta" class="form-control" placeholder="/uploads/pacientes/1/rx.png">
+                    </div>
+                    <div class="col-md-12">
+                        <label>Observaciones</label>
+                        <input type="text" id="arObservaciones" class="form-control" placeholder="Descripción breve del archivo...">
+                    </div>
+                    <div class="col-md-12">
+                        <button class="btn-primary-soe" onclick="guardarArchivo()"><i class="fas fa-save"></i> Guardar Archivo</button>
+                    </div>
+                </div>
+                <div id="alertaArchivos" class="alerta mt-2"></div>
+            </div>
+
+            <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Archivos Registrados</h6>
+            <table class="tabla-docs">
+                <thead><tr>
+                    <th>Tipo</th><th>Nombre</th><th>Ruta/Referencia</th><th>Observaciones</th><th>Fecha</th><th>Acción</th>
+                </tr></thead>
+                <tbody id="tablaArchivos"></tbody>
+            </table>
+        </div>
+
+        <!-- ===================== TAB: ALERGIAS ===================== -->
+        <div id="tab-alergias" class="tab-panel">
+            <div class="form-seccion">
+                <h5><i class="fas fa-plus-circle"></i> Agregar Alergia al Paciente</h5>
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-8">
+                        <label>Seleccionar Alergia del Catálogo *</label>
+                        <select id="alSelectAlergia" class="form-select">
+                            <option value="">-- Cargando alergias... --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn-primary-soe" onclick="agregarAlergiaAlPaciente()"><i class="fas fa-plus"></i> Agregar</button>
+                    </div>
+                </div>
+                <div id="alertaAlergias" class="alerta mt-2"></div>
+            </div>
+
+            <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Alergias del Paciente</h6>
+            <table class="tabla-docs">
+                <thead><tr><th>Alergia</th><th>Acción</th></tr></thead>
+                <tbody id="tablaAlergias"></tbody>
+            </table>
+        </div>
+
+        <!-- ===================== TAB: CONSENTIMIENTOS ===================== -->
+        <div id="tab-consentimientos" class="tab-panel">
+            <div class="form-seccion">
+                <h5><i class="fas fa-plus-circle"></i> Registrar Consentimiento Informado</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label>Evolución Clínica *</label>
+                        <select id="coSelectEvolucion" class="form-select">
+                            <option value="">-- Seleccione Consulta --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Tipo de Procedimiento *</label>
+                        <select id="coTipo" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            <option value="Cirugia Bucal">Cirugía Bucal</option>
+                            <option value="Endodoncia">Endodoncia</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Fecha de Firma *</label>
+                        <input type="date" id="coFechaFirma" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label>Representante Legal (si aplica)</label>
+                        <input type="text" id="coRepresentante" class="form-control" placeholder="Nombre del tutor/representante...">
+                    </div>
+                    <div class="col-md-6">
+                        <label>Identidad del Representante</label>
+                        <input type="text" id="coIdentidadRep" class="form-control" placeholder="Número de identidad...">
+                    </div>
+                    <div class="col-12">
+                        <button class="btn-primary-soe" onclick="guardarConsentimiento()"><i class="fas fa-save"></i> Guardar Consentimiento</button>
+                    </div>
+                </div>
+                <div id="alertaConsentimientos" class="alerta mt-2"></div>
+            </div>
+
+            <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Consentimientos Registrados</h6>
+            <table class="tabla-docs">
+                <thead><tr><th>Tipo Procedimiento</th><th>Representante</th><th>Identidad Rep.</th><th>Fecha Firma</th><th>Acción</th></tr></thead>
+                <tbody id="tablaConsentimientos"></tbody>
+            </table>
+            <p id="msgConsentimientos" style="color:#888; font-style:italic; font-size:13px; display:none;">
+                Seleccione una evolución clínica para ver sus consentimientos.
+            </p>
+        </div>
+
+        <!-- ===================== TAB: CONSTANCIAS ===================== -->
+        <div id="tab-constancias" class="tab-panel">
+            <div class="form-seccion">
+                <h5><i class="fas fa-plus-circle"></i> Emitir Nueva Constancia Médica</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label>Evolución Clínica *</label>
+                        <select id="cnSelectEvolucion" class="form-select">
+                            <option value="">-- Seleccione Consulta --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Fecha de Emisión *</label>
+                        <input type="date" id="cnFecha" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label>Hora de Emisión *</label>
+                        <input type="time" id="cnHora" class="form-control">
+                    </div>
+                    <div class="col-md-12">
+                        <label>Tratamiento Realizado *</label>
+                        <textarea id="cnTratamiento" class="form-control" rows="3"
+                                  placeholder="Describa el tratamiento realizado..."></textarea>
+                    </div>
+                    <div class="col-12">
+                        <button class="btn-primary-soe" onclick="guardarConstancia()"><i class="fas fa-save"></i> Emitir Constancia</button>
+                    </div>
+                </div>
+                <div id="alertaConstancias" class="alerta mt-2"></div>
+            </div>
+
+            <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Historial de Constancias</h6>
+            <table class="tabla-docs">
+                <thead><tr><th>Fecha Emisión</th><th>Hora</th><th>Médico</th><th>Tratamiento</th><th>Acción</th></tr></thead>
+                <tbody id="tablaConstancias"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="application/assets/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // =====================================================
+        // ESTADO GLOBAL
+        // =====================================================
+        let pacienteActual = null; // { id_pacientes, identidad, nombre_completo, telefono }
+
+        // =====================================================
+        // INICIALIZACIÓN
+        // =====================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Fecha y hora de hoy por defecto
+            const hoy = new Date().toISOString().split('T')[0];
+            const hora = new Date().toTimeString().slice(0, 5);
+            document.getElementById('cnFecha').value = hoy;
+            document.getElementById('cnHora').value = hora;
+            document.getElementById('coFechaFirma').value = hoy;
+        });
+
+        // =====================================================
+        // BUSCAR PACIENTE
+        // =====================================================
+        function buscarPaciente() {
+            const identidad = document.getElementById('inputIdentidad').value.trim();
+            if (!identidad) { mostrarAlerta('alertaBusqueda', 'err', 'Ingrese un número de identidad.'); return; }
+
+            if (!window.documentosController) {
+                mostrarAlerta('alertaBusqueda', 'err', 'El sistema aún no está listo. Espere un momento.');
+                setTimeout(buscarPaciente, 300);
+                return;
+            }
+
+            const resp = window.documentosController.buscarPacienteParaDocumentos(identidad);
+            if (resp === 'NOT_FOUND') {
+                ocultarAlerta('alertaBusqueda');
+                mostrarAlerta('alertaBusqueda', 'err', 'No se encontró ningún paciente con esa identidad.');
+                ocultarTabs();
+                return;
+            }
+            if (resp.startsWith('ERR|')) {
+                mostrarAlerta('alertaBusqueda', 'err', resp.substring(4));
+                return;
+            }
+
+            pacienteActual = JSON.parse(resp);
+            document.getElementById('nombrePaciente').textContent    = pacienteActual.nombre_completo;
+            document.getElementById('identidadPaciente').textContent = pacienteActual.identidad;
+            document.getElementById('telefonoPaciente').textContent  = pacienteActual.telefono || 'N/A';
+            document.getElementById('pacienteBadge').style.display   = 'block';
+            ocultarAlerta('alertaBusqueda');
+
+            mostrarTabs();
+            cargarCatalogoAlergias();
+            cargarEvolucionesPaciente();
+            cargarArchivos();
+            cargarAlergiasPaciente();
+            cargarConstancias();
+        }
+
+        function limpiarBusqueda() {
+            pacienteActual = null;
+            document.getElementById('inputIdentidad').value = '';
+            document.getElementById('pacienteBadge').style.display = 'none';
+            ocultarTabs();
+            ocultarAlerta('alertaBusqueda');
+        }
+
+        function mostrarTabs()  { document.getElementById('contenedorTabs').style.display = 'block'; }
+        function ocultarTabs()  { document.getElementById('contenedorTabs').style.display = 'none'; }
+
+        // =====================================================
+        // CAMBIO DE TAB
+        // =====================================================
+        function cambiarTab(tabId, btn) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // =====================================================
+        // ARCHIVOS DEL EXPEDIENTE
+        // =====================================================
+        function cargarArchivos() {
+            if (!pacienteActual) return;
+            const resp = window.documentosController.obtenerArchivos(pacienteActual.id_pacientes);
+            const archivos = JSON.parse(resp);
+            const tbody = document.getElementById('tablaArchivos');
+            if (archivos.length === 0) {
+                tbody.innerHTML = '<tr class="vacia"><td colspan="6">No hay archivos registrados para este paciente.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = archivos.map(a => `
+                <tr>
+                    <td><span class="badge-tipo ${getBadgeTipo(a.tipo_archivo)}">${a.tipo_archivo}</span></td>
+                    <td>${a.nombre_archivo}</td>
+                    <td style="font-size:12px; color:#555; word-break:break-all;">${a.ruta_archivo}</td>
+                    <td style="font-size:12px;">${a.observaciones || '—'}</td>
+                    <td style="font-size:12px;">${a.fecha_subida || '—'}</td>
+                    <td><button class="btn-danger-soe" onclick="eliminarArchivo(${a.id_expediente_archivos})"><i class="fas fa-trash"></i></button></td>
+                </tr>`).join('');
+        }
+
+        function getBadgeTipo(tipo) {
+            if (tipo === 'Radiografia') return 'badge-radio';
+            if (tipo === 'Fotografia')  return 'badge-foto';
+            if (tipo === 'Laboratorio') return 'badge-lab';
+            return 'badge-otro';
+        }
+
+        function guardarArchivo() {
+            if (!pacienteActual) return;
+            const tipo   = document.getElementById('arTipo').value;
+            const nombre = document.getElementById('arNombre').value.trim();
+            const ruta   = document.getElementById('arRuta').value.trim();
+            const obs    = document.getElementById('arObservaciones').value.trim();
+
+            if (!tipo || !nombre || !ruta) {
+                mostrarAlerta('alertaArchivos', 'err', 'Tipo, nombre y ruta son obligatorios.');
+                return;
+            }
+
+            const data = JSON.stringify({
+                id_pacientes: pacienteActual.id_pacientes,
+                tipo_archivo: tipo, nombre_archivo: nombre,
+                ruta_archivo: ruta, observaciones: obs
+            });
+
+            const resp = window.documentosController.registrarArchivo(data);
+            if (resp.startsWith('OK|')) {
+                mostrarAlerta('alertaArchivos', 'ok', resp.substring(3));
+                document.getElementById('arTipo').value = '';
+                document.getElementById('arNombre').value = '';
+                document.getElementById('arRuta').value = '';
+                document.getElementById('arObservaciones').value = '';
+                cargarArchivos();
+            } else {
+                mostrarAlerta('alertaArchivos', 'err', resp.substring(4));
+            }
+        }
+
+        function eliminarArchivo(id) {
+            if (!confirm('¿Desea eliminar este archivo del expediente?')) return;
+            const resp = window.documentosController.eliminarArchivo(id);
+            if (resp.startsWith('OK|')) cargarArchivos();
+            else alert(resp.substring(4));
+        }
+
+        // =====================================================
+        // ALERGIAS
+        // =====================================================
+        function cargarCatalogoAlergias() {
+            const resp = window.catalogoController.obtenerAlergias();
+            const alergias = JSON.parse(resp);
+            const sel = document.getElementById('alSelectAlergia');
+            sel.innerHTML = '<option value="">-- Seleccione alergia --</option>' +
+                alergias.map(a => `<option value="${a.id_catalogo_alergias}">${a.nombre_alergia}</option>`).join('');
+        }
+
+        function cargarAlergiasPaciente() {
+            if (!pacienteActual) return;
+            const resp = window.documentosController.obtenerAlergiasDelPaciente(pacienteActual.id_pacientes);
+            const alergias = JSON.parse(resp);
+            const tbody = document.getElementById('tablaAlergias');
+            if (alergias.length === 0) {
+                tbody.innerHTML = '<tr class="vacia"><td colspan="2">No hay alergias registradas para este paciente.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = alergias.map(a => `
+                <tr>
+                    <td><span class="badge-tipo badge-otro"><i class="fas fa-exclamation-triangle" style="color:#dc3545;"></i> ${a.nombre_alergia}</span></td>
+                    <td><button class="btn-danger-soe" onclick="eliminarAlergia(${a.id_paciente_alergias})"><i class="fas fa-trash"></i></button></td>
+                </tr>`).join('');
+        }
+
+        function agregarAlergiaAlPaciente() {
+            if (!pacienteActual) return;
+            const idAlergia = parseInt(document.getElementById('alSelectAlergia').value);
+            if (!idAlergia) { mostrarAlerta('alertaAlergias', 'err', 'Seleccione una alergia.'); return; }
+
+            const resp = window.documentosController.agregarAlergiaPaciente(pacienteActual.id_pacientes, idAlergia);
+            if (resp.startsWith('OK|')) {
+                mostrarAlerta('alertaAlergias', 'ok', resp.substring(3));
+                cargarAlergiasPaciente();
+            } else {
+                mostrarAlerta('alertaAlergias', 'err', resp.substring(4));
+            }
+        }
+
+        function eliminarAlergia(id) {
+            if (!confirm('¿Desea eliminar esta alergia del paciente?')) return;
+            const resp = window.documentosController.eliminarAlergiaPaciente(id);
+            if (resp.startsWith('OK|')) cargarAlergiasPaciente();
+            else alert(resp.substring(4));
+        }
+
+        // =====================================================
+        // EVOLUCIONES (selector compartido)
+        // =====================================================
+        function cargarEvolucionesPaciente() {
+            if (!pacienteActual) return;
+            const resp = window.documentosController.obtenerEvolucionesDelPaciente(pacienteActual.id_pacientes);
+            const evoluciones = JSON.parse(resp);
+            const opts = '<option value="">-- Seleccione Consulta --</option>' +
+                evoluciones.map(e => `<option value="${e.id_evolucion_clinica}">
+                    Cita #${e.numero_cita} — ${e.fecha_consulta ? e.fecha_consulta.substring(0,10) : '?'} — ${e.nombre_medico || 'Sin médico'}
+                </option>`).join('');
+            document.getElementById('coSelectEvolucion').innerHTML = opts;
+            document.getElementById('cnSelectEvolucion').innerHTML = opts;
+        }
+
+        // =====================================================
+        // CONSENTIMIENTOS
+        // =====================================================
+        document.getElementById && (function(){
+            const sel = document.getElementById('coSelectEvolucion');
+            if (sel) sel.addEventListener('change', () => {
+                const id = parseInt(sel.value);
+                if (id) cargarConsentimientosPorEvolucion(id);
+                else document.getElementById('tablaConsentimientos').innerHTML = '';
+            });
+        })();
+
+        function cargarConsentimientosPorEvolucion(idEvolucion) {
+            const resp = window.documentosController.obtenerConsentimientos(idEvolucion);
+            const lista = JSON.parse(resp);
+            const tbody = document.getElementById('tablaConsentimientos');
+            if (lista.length === 0) {
+                tbody.innerHTML = '<tr class="vacia"><td colspan="5">No hay consentimientos para esta consulta.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = lista.map(c => `
+                <tr>
+                    <td>${c.tipo_procedimiento}</td>
+                    <td>${c.representante_legal || '—'}</td>
+                    <td>${c.identidad_representante || '—'}</td>
+                    <td>${c.fecha_firma}</td>
+                    <td><button class="btn-danger-soe" onclick="eliminarConsentimiento(${c.id_consentimientos_informados})"><i class="fas fa-trash"></i></button></td>
+                </tr>`).join('');
+        }
+
+        function guardarConsentimiento() {
+            const idEvolucion = parseInt(document.getElementById('coSelectEvolucion').value);
+            if (!idEvolucion) { mostrarAlerta('alertaConsentimientos', 'err', 'Seleccione la evolución clínica correspondiente.'); return; }
+
+            const tipo  = document.getElementById('coTipo').value;
+            const fecha = document.getElementById('coFechaFirma').value;
+            if (!tipo)  { mostrarAlerta('alertaConsentimientos', 'err', 'Seleccione el tipo de procedimiento.'); return; }
+            if (!fecha) { mostrarAlerta('alertaConsentimientos', 'err', 'Ingrese la fecha de firma.'); return; }
+
+            const data = JSON.stringify({
+                id_evolucion_clinica: idEvolucion,
+                tipo_procedimiento: tipo,
+                representante_legal: document.getElementById('coRepresentante').value.trim(),
+                identidad_representante: document.getElementById('coIdentidadRep').value.trim(),
+                fecha_firma: fecha
+            });
+
+            const resp = window.documentosController.registrarConsentimiento(data);
+            if (resp.startsWith('OK|')) {
+                mostrarAlerta('alertaConsentimientos', 'ok', resp.substring(3));
+                document.getElementById('coTipo').value = '';
+                document.getElementById('coRepresentante').value = '';
+                document.getElementById('coIdentidadRep').value = '';
+                cargarConsentimientosPorEvolucion(idEvolucion);
+            } else {
+                mostrarAlerta('alertaConsentimientos', 'err', resp.substring(4));
+            }
+        }
+
+        function eliminarConsentimiento(id) {
+            if (!confirm('¿Desea eliminar este consentimiento?')) return;
+            const idEv = parseInt(document.getElementById('coSelectEvolucion').value);
+            const resp = window.documentosController.eliminarConsentimiento(id);
+            if (resp.startsWith('OK|')) cargarConsentimientosPorEvolucion(idEv);
+            else alert(resp.substring(4));
+        }
+
+        // =====================================================
+        // CONSTANCIAS MÉDICAS
+        // =====================================================
+        function cargarConstancias() {
+            if (!pacienteActual) return;
+            const resp = window.documentosController.obtenerConstancias(pacienteActual.id_pacientes);
+            const lista = JSON.parse(resp);
+            const tbody = document.getElementById('tablaConstancias');
+            if (lista.length === 0) {
+                tbody.innerHTML = '<tr class="vacia"><td colspan="5">No hay constancias médicas para este paciente.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = lista.map(c => `
+                <tr>
+                    <td>${c.fecha_emision}</td>
+                    <td>${c.hora_emision}</td>
+                    <td style="font-size:12px;">${c.nombre_medico || '—'}</td>
+                    <td style="font-size:12px;">${c.tratamiento_realizado}</td>
+                    <td><button class="btn-danger-soe" onclick="eliminarConstanciaFn(${c.id_constancias_medicas})"><i class="fas fa-trash"></i></button></td>
+                </tr>`).join('');
+        }
+
+        function guardarConstancia() {
+            const idEvolucion = parseInt(document.getElementById('cnSelectEvolucion').value);
+            if (!idEvolucion) { mostrarAlerta('alertaConstancias', 'err', 'Seleccione la evolución clínica correspondiente.'); return; }
+
+            const fecha = document.getElementById('cnFecha').value;
+            const hora  = document.getElementById('cnHora').value;
+            const trat  = document.getElementById('cnTratamiento').value.trim();
+
+            if (!fecha) { mostrarAlerta('alertaConstancias', 'err', 'Ingrese la fecha de emisión.'); return; }
+            if (!hora)  { mostrarAlerta('alertaConstancias', 'err', 'Ingrese la hora de emisión.'); return; }
+            if (!trat)  { mostrarAlerta('alertaConstancias', 'err', 'Describa el tratamiento realizado.'); return; }
+
+            const data = JSON.stringify({
+                id_evolucion_clinica: idEvolucion,
+                fecha_emision: fecha,
+                hora_emision: hora + ':00',
+                tratamiento_realizado: trat
+            });
+
+            const resp = window.documentosController.registrarConstancia(data);
+            if (resp.startsWith('OK|')) {
+                mostrarAlerta('alertaConstancias', 'ok', resp.substring(3));
+                document.getElementById('cnTratamiento').value = '';
+                cargarConstancias();
+            } else {
+                mostrarAlerta('alertaConstancias', 'err', resp.substring(4));
+            }
+        }
+
+        function eliminarConstanciaFn(id) {
+            if (!confirm('¿Desea eliminar esta constancia médica?')) return;
+            const resp = window.documentosController.eliminarConstancia(id);
+            if (resp.startsWith('OK|')) cargarConstancias();
+            else alert(resp.substring(4));
+        }
+
+        // =====================================================
+        // HELPERS DE ALERTAS
+        // =====================================================
+        function mostrarAlerta(id, tipo, msg) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.className = 'alerta ' + (tipo === 'ok' ? 'alerta-ok' : 'alerta-err');
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 4000);
+        }
+        function ocultarAlerta(id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        }
+
+        // Adjuntar evento de selector de evolución para consentimientos (después del DOM)
+        document.addEventListener('DOMContentLoaded', () => {
+            const sel = document.getElementById('coSelectEvolucion');
+            if (sel) {
+                sel.addEventListener('change', () => {
+                    const id = parseInt(sel.value);
+                    const tbody = document.getElementById('tablaConsentimientos');
+                    if (id) cargarConsentimientosPorEvolucion(id);
+                    else tbody.innerHTML = '<tr class="vacia"><td colspan="5">Seleccione una consulta para ver sus consentimientos.</td></tr>';
+                });
+            }
+        });
+    </script>
+</body>
+</html>

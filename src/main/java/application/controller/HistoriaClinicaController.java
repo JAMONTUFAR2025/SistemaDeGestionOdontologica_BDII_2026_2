@@ -130,6 +130,12 @@ public class HistoriaClinicaController extends BaseController {
             int idMedico = obj.has("id_medico") ? obj.get("id_medico").getAsInt() : 0;
             if (idMedico <= 0) return "ERR|Debe seleccionar un médico tratante.";
 
+            // Nuevos campos opcionales
+            Integer idCitas = (obj.has("id_citas") && !obj.get("id_citas").isJsonNull())
+                    ? obj.get("id_citas").getAsInt() : null;
+            Integer idCatalogoProcedimientos = (obj.has("id_catalogo_procedimientos") && !obj.get("id_catalogo_procedimientos").isJsonNull())
+                    ? obj.get("id_catalogo_procedimientos").getAsInt() : null;
+
             String fechaConsulta    = str(obj, "fecha_consulta");
             if (fechaConsulta.isEmpty()) return "ERR|La fecha de consulta es obligatoria.";
 
@@ -146,6 +152,7 @@ public class HistoriaClinicaController extends BaseController {
 
             application.model.dao.HistoriaClinicaDAO dao = new application.model.dao.HistoriaClinicaDAO();
             return dao.registrarEvolucion(idPacientes, idExpediente, idMedico,
+                    idCitas, idCatalogoProcedimientos,
                     fechaConsulta, motivoConsulta, sintomaPrincipal,
                     presionArterial, pulsoCardiaco, temperatura,
                     tejidosBlandos, diagnostico, odontograma, pagoAbono, observaciones);
@@ -235,6 +242,9 @@ public class HistoriaClinicaController extends BaseController {
             int idMedico = obj.has("id_medico") ? obj.get("id_medico").getAsInt() : 0;
             if (idMedico <= 0) return "ERR|Debe seleccionar un médico tratante.";
 
+            Integer idCatalogoProcedimientos = (obj.has("id_catalogo_procedimientos") && !obj.get("id_catalogo_procedimientos").isJsonNull())
+                    ? obj.get("id_catalogo_procedimientos").getAsInt() : null;
+
             String fechaConsulta    = str(obj, "fecha_consulta");
             if (fechaConsulta.isEmpty()) return "ERR|La fecha de consulta es obligatoria.";
 
@@ -250,7 +260,8 @@ public class HistoriaClinicaController extends BaseController {
             String observaciones    = str(obj, "observaciones");
 
             application.model.dao.HistoriaClinicaDAO dao = new application.model.dao.HistoriaClinicaDAO();
-            return dao.actualizarEvolucion(idEvolucion, idMedico, fechaConsulta, motivoConsulta, 
+            return dao.actualizarEvolucion(idEvolucion, idMedico, idCatalogoProcedimientos,
+                    fechaConsulta, motivoConsulta, 
                     sintomaPrincipal, presionArterial, pulsoCardiaco, temperatura, tejidosBlandos, 
                     diagnostico, odontograma, pagoAbono, observaciones);
 

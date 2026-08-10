@@ -39,10 +39,10 @@ public class CajaSesionDAO {
     public Map<String, Object> obtenerCajaPorId(int idCajaSesion) {
         String query = "SELECT c.id_caja_sesion, c.monto_apertura, c.monto_cierre_real, c.diferencia, " +
                        "c.estado, c.fecha_apertura, c.fecha_cierre, c.observaciones, " +
-                       "u1.username AS usuario_apertura, u2.username AS usuario_cierre " +
+                       "u1.correo AS usuario_apertura, u2.correo AS usuario_cierre " +
                        "FROM Caja_Sesiones c " +
-                       "LEFT JOIN Usuarios u1 ON c.id_usuario_apertura = u1.id_usuario " +
-                       "LEFT JOIN Usuarios u2 ON c.id_usuario_cierre = u2.id_usuario " +
+                       "LEFT JOIN Usuarios_Login u1 ON c.id_usuario_apertura = u1.id_usuarios_login " +
+                       "LEFT JOIN Usuarios_Login u2 ON c.id_usuario_cierre = u2.id_usuarios_login " +
                        "WHERE c.id_caja_sesion = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();

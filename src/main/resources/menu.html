@@ -245,6 +245,13 @@
             <p>Odontograma y diagnósticos</p>
         </a>
 
+        <!-- Módulo: Documentos Clínicos -->
+        <a href="documentos.html" class="card" id="card-documentos">
+            <div class="icon" style="color:#6f42c1;"><i class="fas fa-folder-open"></i></div>
+            <h3 style="color:#6f42c1;">Documentos Clínicos</h3>
+            <p>Archivos, alergias, consentimientos y constancias</p>
+        </a>
+
         <!-- Módulo: Finanzas (Facturación + Egresos + Caja) -->
         <a href="finanzas.html" class="card" id="card-facturacion">
             <div class="icon"><i class="fas fa-cash-register"></i></div>
@@ -304,15 +311,17 @@
 
         function aplicarPermisos(rol) {
             const cardHistoria    = document.getElementById('card-historia');
-            const cardFacturacion = document.getElementById('card-facturacion'); // finanzas.html
+            const cardFacturacion = document.getElementById('card-facturacion');
             const cardPersonal    = document.getElementById('card-personal');
             const cardCitas       = document.getElementById('card-citas');
+            const cardDocumentos  = document.getElementById('card-documentos');
 
             let rolNormalizado = rol ? rol.trim().toLowerCase() : "";
 
             if (rolNormalizado === 'recepcionista') {
-                if (cardHistoria)    cardHistoria.style.display    = 'none';
-                if (cardPersonal)   cardPersonal.style.display    = 'none';
+                if (cardHistoria)   cardHistoria.style.display   = 'none';
+                if (cardPersonal)   cardPersonal.style.display   = 'none';
+                if (cardDocumentos) cardDocumentos.style.display = 'none';
 
             } else if (rolNormalizado === 'médico' || rolNormalizado === 'medico') {
                 if (cardCitas)       cardCitas.style.display       = 'none';

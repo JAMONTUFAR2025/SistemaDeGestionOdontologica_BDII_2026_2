@@ -628,6 +628,13 @@
                                     <option value="">-- Seleccione un médico --</option>
                                 </select>
                             </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Procedimiento Realizado:</label>
+                                <select id="ev_id_catalogo_procedimientos" class="form-select">
+                                    <option value="">-- Ninguno / Sin especificar --</option>
+                                </select>
+                                <small class="text-muted">Opcional. Seleccione el procedimiento odontológico realizado.</small>
+                            </div>
                         </div>
 
                         <!-- Fila 2: Signos vitales -->
@@ -884,6 +891,22 @@
                 });
             } catch (e) {
                 console.error('Error cargando médicos:', e);
+            }
+            // Cargar catálogo de procedimientos
+            try {
+                if (window.catalogoController) {
+                    const jsonP = window.catalogoController.obtenerProcedimientos();
+                    const procs = JSON.parse(jsonP || '[]');
+                    const selP = document.getElementById('ev_id_catalogo_procedimientos');
+                    procs.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.id_catalogo_procedimientos;
+                        opt.text = `${p.nombre_procedimiento} (Lps. ${parseFloat(p.precio_sugerido || 0).toFixed(2)})`;
+                        selP.appendChild(opt);
+                    });
+                }
+            } catch (e) {
+                console.error('Error cargando procedimientos:', e);
             }
         }
 
@@ -1264,6 +1287,9 @@
             const data = {
                 identidad_paciente: identidad,
                 id_medico: parseInt(idMedico),
+                id_catalogo_procedimientos: document.getElementById('ev_id_catalogo_procedimientos').value
+                    ? parseInt(document.getElementById('ev_id_catalogo_procedimientos').value)
+                    : null,
                 fecha_consulta: fecha.replace('T', ' ') + ':00',
                 motivo_consulta: motivo,
                 sintoma_principal: document.getElementById('ev_sintoma').value,

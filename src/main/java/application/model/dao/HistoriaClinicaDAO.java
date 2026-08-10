@@ -254,6 +254,7 @@ public class HistoriaClinicaDAO {
     // ==============================================================
 
     public String registrarEvolucion(int idPacientes, int idExpediente, int idMedico,
+            Integer idCitas, Integer idCatalogoProcedimientos,
             String fechaConsulta, String motivoConsulta, String sintomaPrincipal,
             String presionArterial, String pulsoCardiaco, String temperatura,
             String tejidosBlandos, String diagnostico, String estadoOdontograma,
@@ -273,27 +274,32 @@ public class HistoriaClinicaDAO {
             }
 
             String query = "INSERT INTO Evolucion_Clinica " +
-                    "(id_pacientes, id_expediente_base, id_personal_medico, numero_cita, fecha_consulta, " +
+                    "(id_pacientes, id_expediente_base, id_personal_medico, id_citas, id_catalogo_procedimientos, " +
+                    "numero_cita, fecha_consulta, " +
                     "motivo_consulta, sintoma_principal, presion_arterial, pulso_cardiaco, temperatura, " +
                     "tejidos_blandos_observacion, diagnostico, estado_odontograma, pago_abono, observaciones) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setInt(1, idPacientes);
                 stmt.setInt(2, idExpediente);
                 stmt.setInt(3, idMedico);
-                stmt.setInt(4, numeroCita);
-                stmt.setString(5, fechaConsulta);
-                stmt.setString(6, nullIfEmpty(motivoConsulta));
-                stmt.setString(7, nullIfEmpty(sintomaPrincipal));
-                stmt.setString(8, nullIfEmpty(presionArterial));
-                stmt.setString(9, nullIfEmpty(pulsoCardiaco));
-                stmt.setString(10, nullIfEmpty(temperatura));
-                stmt.setString(11, nullIfEmpty(tejidosBlandos));
-                stmt.setString(12, nullIfEmpty(diagnostico));
-                stmt.setString(13, nullIfEmpty(estadoOdontograma));
-                stmt.setDouble(14, pagoAbono);
-                stmt.setString(15, nullIfEmpty(observaciones));
+                if (idCitas != null && idCitas > 0) stmt.setInt(4, idCitas);
+                else stmt.setNull(4, java.sql.Types.INTEGER);
+                if (idCatalogoProcedimientos != null && idCatalogoProcedimientos > 0) stmt.setInt(5, idCatalogoProcedimientos);
+                else stmt.setNull(5, java.sql.Types.INTEGER);
+                stmt.setInt(6, numeroCita);
+                stmt.setString(7, fechaConsulta);
+                stmt.setString(8, nullIfEmpty(motivoConsulta));
+                stmt.setString(9, nullIfEmpty(sintomaPrincipal));
+                stmt.setString(10, nullIfEmpty(presionArterial));
+                stmt.setString(11, nullIfEmpty(pulsoCardiaco));
+                stmt.setString(12, nullIfEmpty(temperatura));
+                stmt.setString(13, nullIfEmpty(tejidosBlandos));
+                stmt.setString(14, nullIfEmpty(diagnostico));
+                stmt.setString(15, nullIfEmpty(estadoOdontograma));
+                stmt.setDouble(16, pagoAbono);
+                stmt.setString(17, nullIfEmpty(observaciones));
 
                 int rows = stmt.executeUpdate();
                 return rows > 0 ? "OK|Evolución clínica registrada (Cita #" + numeroCita + ")." :
@@ -428,13 +434,14 @@ public class HistoriaClinicaDAO {
     // ==============================================================
 
     public String actualizarEvolucion(int idEvolucion, int idMedico,
+            Integer idCatalogoProcedimientos,
             String fechaConsulta, String motivoConsulta, String sintomaPrincipal,
             String presionArterial, String pulsoCardiaco, String temperatura,
             String tejidosBlandos, String diagnostico, String estadoOdontograma,
             double pagoAbono, String observaciones) {
-        
+
         String query = "UPDATE Evolucion_Clinica SET " +
-                "id_personal_medico = ?, fecha_consulta = ?, motivo_consulta = ?, " +
+                "id_personal_medico = ?, id_catalogo_procedimientos = ?, fecha_consulta = ?, motivo_consulta = ?, " +
                 "sintoma_principal = ?, presion_arterial = ?, pulso_cardiaco = ?, " +
                 "temperatura = ?, tejidos_blandos_observacion = ?, diagnostico = ?, " +
                 "estado_odontograma = ?, pago_abono = ?, observaciones = ? " +
@@ -444,18 +451,22 @@ public class HistoriaClinicaDAO {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setInt(1, idMedico);
-                stmt.setString(2, fechaConsulta);
-                stmt.setString(3, nullIfEmpty(motivoConsulta));
-                stmt.setString(4, nullIfEmpty(sintomaPrincipal));
-                stmt.setString(5, nullIfEmpty(presionArterial));
-                stmt.setString(6, nullIfEmpty(pulsoCardiaco));
-                stmt.setString(7, nullIfEmpty(temperatura));
-                stmt.setString(8, nullIfEmpty(tejidosBlandos));
-                stmt.setString(9, nullIfEmpty(diagnostico));
-                stmt.setString(10, nullIfEmpty(estadoOdontograma));
-                stmt.setDouble(11, pagoAbono);
-                stmt.setString(12, nullIfEmpty(observaciones));
-                stmt.setInt(13, idEvolucion);
+                if (idCatalogoProcedimientos != null && idCatalogoProcedimientos > 0)
+                    stmt.setInt(2, idCatalogoProcedimientos);
+                else
+                    stmt.setNull(2, java.sql.Types.INTEGER);
+                stmt.setString(3, fechaConsulta);
+                stmt.setString(4, nullIfEmpty(motivoConsulta));
+                stmt.setString(5, nullIfEmpty(sintomaPrincipal));
+                stmt.setString(6, nullIfEmpty(presionArterial));
+                stmt.setString(7, nullIfEmpty(pulsoCardiaco));
+                stmt.setString(8, nullIfEmpty(temperatura));
+                stmt.setString(9, nullIfEmpty(tejidosBlandos));
+                stmt.setString(10, nullIfEmpty(diagnostico));
+                stmt.setString(11, nullIfEmpty(estadoOdontograma));
+                stmt.setDouble(12, pagoAbono);
+                stmt.setString(13, nullIfEmpty(observaciones));
+                stmt.setInt(14, idEvolucion);
 
                 int rows = stmt.executeUpdate();
                 return rows > 0 ? "OK|Evolución clínica actualizada exitosamente." :
