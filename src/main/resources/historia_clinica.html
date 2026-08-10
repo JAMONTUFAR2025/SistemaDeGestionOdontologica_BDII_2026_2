@@ -60,30 +60,40 @@
             background-color: rgba(0, 0, 0, 0.4) !important;
         }
 
-        .main-container {
-            background-color: rgba(255, 255, 255, 0.96);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        .card-container {
+            max-width: 1050px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.98);
             padding: 30px;
-            margin-top: 20px;
-            margin-bottom: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        /* ---- PESTAÑAS PRINCIPALES ---- */
-        .btn-tab-main {
-            font-weight: 600;
-            padding: 12px 24px;
-            border-radius: 30px;
+        /* === TABS === */
+        .nav-tabs-custom {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 25px;
+        }
+        .nav-tabs-custom .btn-tab-main {
+            padding: 12px 30px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
             border: none;
-            background: #e9ecef;
-            color: #495057;
-            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            background: transparent;
+            color: #666;
+            transition: all 0.2s;
+            border-radius: 0;
         }
-
-        .btn-tab-main.active {
-            background-color: #0d6efd;
-            color: white;
-            box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
+        .nav-tabs-custom .btn-tab-main:hover { color: #007bf0; }
+        .nav-tabs-custom .btn-tab-main.active { 
+            color: #007bf0; 
+            border-bottom-color: #007bf0; 
+            background: transparent; 
+            box-shadow: none;
         }
 
         /* ---- SUB-PESTAÑAS (formulario paso a paso) ---- */
@@ -269,27 +279,26 @@
 
 <body>
     <div id="bg-fixed"></div>
-    <div class="container my-4">
-        <div class="main-container">
+    <div class="container card-container">
 
-            <!-- Enlace Volver -->
-            <div class="mb-3">
-                <a href="menu.html" class="text-decoration-none fw-bold text-primary">
-                    <i class="fa-solid fa-arrow-left me-2"></i>Volver al Menú Principal
-                </a>
-            </div>
+        <!-- CABECERA DE LA PÁGINA -->
+        <a href="menu.html" class="text-decoration-none mb-3 d-inline-block fw-bold" style="color: #007bf0;">
+            ← Volver al Menú Principal
+        </a>
+        <h3 class="fw-bold mb-4" style="color: #007bf0;">
+            <i class="fas fa-notes-medical"></i> Historia Clínica y Expedientes
+        </h3>
 
-            <!-- PESTAÑAS PRINCIPALES -->
-            <div class="d-flex justify-content-center mb-4 bg-light p-2 rounded-pill shadow-sm mx-auto"
-                style="max-width: 680px;">
-                <button class="btn-tab-main active me-2" id="btnTab1"
-                    onclick="cambiarPestana('panel-expedientes', this)">
-                    <i class="fa-solid fa-folder-open me-2"></i>1. Buscar Expediente
-                </button>
-                <button class="btn-tab-main" id="btnTab2" onclick="cambiarPestana('panel-nuevo-registro', this)">
-                    <i class="fa-solid fa-clipboard-user me-2"></i>2. Registrar Historia Clínica
-                </button>
-            </div>
+        <!-- PESTAÑAS PRINCIPALES -->
+        <div class="nav-tabs-custom">
+            <button class="btn-tab-main active" id="btnTab1"
+                onclick="cambiarPestana('panel-expedientes', this)">
+                <i class="fa-solid fa-folder-open"></i> Buscar Expediente
+            </button>
+            <button class="btn-tab-main" id="btnTab2" onclick="cambiarPestana('panel-nuevo-registro', this)">
+                <i class="fa-solid fa-clipboard-user"></i> Registrar Historia Clínica
+            </button>
+        </div>
 
             <!-- =====================================================
          PANEL 1: BUSCADOR + VISOR

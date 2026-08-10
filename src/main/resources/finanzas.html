@@ -26,59 +26,38 @@
             margin: 0;
         }
 
-        /* ── Barra superior ── */
-        .topbar {
-            background: rgba(255,255,255,0.97);
-            border-bottom: 3px solid var(--verde);
-            padding: 10px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .topbar-brand { font-size: 1.15rem; font-weight: 700; color: var(--verde); }
-        .topbar-back  { color: var(--azul); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
-        .topbar-back:hover { text-decoration: underline; }
-
         /* ── Card contenedor ── */
-        .page-card {
+        .card-container {
             max-width: 1150px;
-            margin: 28px auto;
-            background: rgba(255,255,255,0.98);
-            border-radius: 14px;
-            box-shadow: 0 6px 22px rgba(0,0,0,0.12);
-            overflow: hidden;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        /* ── Tabs ── */
+        /* === TABS === */
         .nav-tabs-custom {
-            background: #f8f9fa;
-            border-bottom: 2px solid #dee2e6;
-            padding: 0 24px;
             display: flex;
-            gap: 6px;
+            gap: 0;
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 25px;
         }
         .nav-tabs-custom .tab-btn {
-            padding: 14px 20px 12px;
+            padding: 12px 30px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
             border: none;
+            border-bottom: 3px solid transparent;
             background: transparent;
             color: #666;
-            font-weight: 600;
-            font-size: 0.92rem;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all .2s;
-            white-space: nowrap;
+            transition: all 0.2s;
         }
-        .nav-tabs-custom .tab-btn:hover { color: var(--verde); }
-        .nav-tabs-custom .tab-btn.active {
-            color: var(--verde);
-            border-bottom-color: var(--verde);
-        }
-        .tab-panel { display: none; padding: 26px 28px; }
+        .nav-tabs-custom .tab-btn:hover { color: #007bf0; }
+        .nav-tabs-custom .tab-btn.active { color: #007bf0; border-bottom-color: #007bf0; }
+        
+        .tab-panel { display: none; }
         .tab-panel.active { display: block; }
 
         /* ── KPI Cards ── */
@@ -197,14 +176,14 @@
 </head>
 <body>
 
-<!-- ══════════ BARRA SUPERIOR ══════════ -->
-<div class="topbar">
-    <span class="topbar-brand"><i class="fas fa-cash-register me-2"></i>Módulo Financiero</span>
-    <a href="menu.html" class="topbar-back"><i class="fas fa-arrow-left me-1"></i>Volver al Menú</a>
-</div>
-
 <!-- ══════════ CONTENEDOR PRINCIPAL ══════════ -->
-<div class="page-card">
+<div class="container card-container">
+    <a href="menu.html" class="text-decoration-none mb-3 d-inline-block fw-bold" style="color: #007bf0;">
+        ← Volver al Menú Principal
+    </a>
+    <h3 class="fw-bold mb-4" style="color: #007bf0;">
+        <i class="fas fa-cash-register"></i> Módulo Financiero
+    </h3>
 
     <!-- TABS NAV -->
     <div class="nav-tabs-custom">
