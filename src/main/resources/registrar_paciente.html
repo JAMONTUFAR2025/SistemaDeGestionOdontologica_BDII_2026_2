@@ -147,6 +147,7 @@
                     <tbody id="cuerpoTabla">
                     </tbody>
                 </table>
+                <div id="paginacionPacientes" style="margin-top: 15px; text-align: center;"></div>
             </div>
         </div>
     </div>
@@ -294,6 +295,23 @@
 
     <script>
         let listaPacientes = [];
+        let pacientesFiltrados = [];
+        let paginaPacientesActual = 1;
+        const REGISTROS_POR_PAGINA = 10;
+
+        function searchPatient() {
+            const input = document.getElementById('search-bar').value.toLowerCase();
+            if (input.trim() === '') {
+                pacientesFiltrados = [...listaPacientes];
+            } else {
+                pacientesFiltrados = listaPacientes.filter(p =>
+                    (p.identidad && p.identidad.toLowerCase().includes(input)) ||
+                    (p.nombreCompleto && p.nombreCompleto.toLowerCase().includes(input))
+                );
+            }
+            paginaPacientesActual = 1;
+            renderizarTabla();
+        }
 
         // === 1. CARGAR PACIENTES DESDE LA BASE DE DATOS ===
         function cargarPacientes() {
@@ -304,22 +322,30 @@
             try {
                 const jsonStr = window.pacienteController.obtenerPacientes();
                 listaPacientes = JSON.parse(jsonStr || '[]');
-                renderizarTabla(listaPacientes);
+                pacientesFiltrados = [...listaPacientes];
+                paginaPacientesActual = 1;
+                renderizarTabla();
             } catch (e) {
                 console.error("Error al cargar pacientes:", e);
             }
         }
 
-        function renderizarTabla(pacientes) {
+        function renderizarTabla() {
             const tbody = document.getElementById('cuerpoTabla');
+            const paginacion = document.getElementById('paginacionPacientes');
             tbody.innerHTML = '';
 
-            if (pacientes.length === 0) {
+            if (pacientesFiltrados.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="text-muted py-3">No hay pacientes registrados.</td></tr>`;
+                paginacion.innerHTML = '';
                 return;
             }
 
-            pacientes.forEach(p => {
+            let inicio = (paginaPacientesActual - 1) * REGISTROS_POR_PAGINA;
+            let fin = inicio + REGISTROS_POR_PAGINA;
+            let paginaDatos = pacientesFiltrados.slice(inicio, fin);
+
+            paginaDatos.forEach(p => {
                 const tr = document.createElement('tr');
                 tr.setAttribute('data-id', p.identidad || '');
                 tr.innerHTML = `
@@ -333,6 +359,36 @@
                 `;
                 tbody.appendChild(tr);
             });
+
+            // Renderizar botones de paginación
+            let totalPaginas = Math.ceil(pacientesFiltrados.length / REGISTROS_POR_PAGINA);
+            let btnHtml = '';
+            
+            if (totalPaginas > 1) {
+                let btnBaseStyle = "margin: 0 5px; padding: 6px 14px; border: none; border-radius: 4px; font-weight: 500; transition: background 0.2s; color: white;";
+                let btnActiveStyle = btnBaseStyle + " background: #007bf0; cursor: pointer;";
+                let btnDisabledStyle = btnBaseStyle + " background: #99c9f8; cursor: not-allowed;";
+
+                btnHtml += `<button onclick="cambiarPaginaPacientes(-1)" ${paginaPacientesActual === 1 ? 'disabled' : ''} 
+                            style="${paginaPacientesActual === 1 ? btnDisabledStyle : btnActiveStyle}"
+                            onmouseover="this.style.background='${paginaPacientesActual === 1 ? '#99c9f8' : '#0056b3'}'"
+                            onmouseout="this.style.background='${paginaPacientesActual === 1 ? '#99c9f8' : '#007bf0'}'">
+                            Anterior</button>`;
+                
+                btnHtml += `<span style="margin: 0 15px; font-weight: bold; color: #333;">Página ${paginaPacientesActual} de ${totalPaginas}</span>`;
+                
+                btnHtml += `<button onclick="cambiarPaginaPacientes(1)" ${paginaPacientesActual === totalPaginas ? 'disabled' : ''} 
+                            style="${paginaPacientesActual === totalPaginas ? btnDisabledStyle : btnActiveStyle}"
+                            onmouseover="this.style.background='${paginaPacientesActual === totalPaginas ? '#99c9f8' : '#0056b3'}'"
+                            onmouseout="this.style.background='${paginaPacientesActual === totalPaginas ? '#99c9f8' : '#007bf0'}'">
+                            Siguiente</button>`;
+            }
+            paginacion.innerHTML = btnHtml;
+        }
+
+        function cambiarPaginaPacientes(direccion) {
+            paginaPacientesActual += direccion;
+            renderizarTabla();
         }
 
         // === 2. MODALES AGREGAR / EDITAR ===

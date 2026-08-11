@@ -180,10 +180,11 @@
                         </tr>
                     </thead>
                     <tbody id="cuerpoTablaUsuarios">
-                        <tr><td colspan="5" class="text-muted py-4">Cargando usuarios...</td></tr>
+                        <!-- Llenado dinámicamente -->
                     </tbody>
                 </table>
             </div>
+            <div id="paginacionUsuarios" style="margin-top: 15px; text-align: center;"></div>
         </div>
 
         <!-- ======================== -->
@@ -216,10 +217,11 @@
                         </tr>
                     </thead>
                     <tbody id="cuerpoTablaMedicos">
-                        <tr><td colspan="6" class="text-muted py-4">Cargando médicos...</td></tr>
+                        <!-- Llenado dinámicamente -->
                     </tbody>
                 </table>
             </div>
+            <div id="paginacionMedicos" style="margin-top: 15px; text-align: center;"></div>
         </div>
 
         <!-- ======================== -->
@@ -249,10 +251,11 @@
                         </tr>
                     </thead>
                     <tbody id="cuerpoTablaEspecialidades">
-                        <tr><td colspan="3" class="text-muted py-4">Cargando especialidades...</td></tr>
+                        <!-- Llenado dinámicamente -->
                     </tbody>
                 </table>
             </div>
+            <div id="paginacionEspecialidades" style="margin-top: 15px; text-align: center;"></div>
         </div>
     </div>
 
@@ -482,8 +485,48 @@
         // ESTADO GLOBAL
         // ==========================================
         let listaUsuarios = [];
+        let usuariosFiltrados = [];
+        let paginaUsuarios = 1;
+
         let listaMedicos = [];
+        let medicosFiltrados = [];
+        let paginaMedicos = 1;
+
         let listaEspecialidades = [];
+        let especialidadesFiltradas = [];
+        let paginaEspecialidades = 1;
+
+        const REGISTROS_POR_PAGINA = 10;
+
+        function generarBotonesPaginacionJS(paginaActual, totalRegistros, idContenedor, funcionJS) {
+            let contenedor = document.getElementById(idContenedor);
+            let totalPaginas = Math.ceil(totalRegistros / REGISTROS_POR_PAGINA);
+            if (totalPaginas <= 1) {
+                contenedor.innerHTML = '';
+                return;
+            }
+            let btnBaseStyle = "margin: 0 5px; padding: 6px 14px; border: none; border-radius: 4px; font-weight: 500; transition: background 0.2s; color: white;";
+            let btnActiveStyle = btnBaseStyle + " background: #007bf0; cursor: pointer;";
+            let btnDisabledStyle = btnBaseStyle + " background: #99c9f8; cursor: not-allowed;";
+
+            let html = '';
+            html += `<button onclick="${funcionJS}(-1)" ${paginaActual === 1 ? 'disabled' : ''} 
+                        style="${paginaActual === 1 ? btnDisabledStyle : btnActiveStyle}"
+                        onmouseover="this.style.background='${paginaActual === 1 ? '#99c9f8' : '#0056b3'}'"
+                        onmouseout="this.style.background='${paginaActual === 1 ? '#99c9f8' : '#007bf0'}'">Anterior</button>`;
+            html += `<span style="margin: 0 15px; font-weight: bold; color: #333;">Página ${paginaActual} de ${totalPaginas}</span>`;
+            html += `<button onclick="${funcionJS}(1)" ${paginaActual === totalPaginas ? 'disabled' : ''} 
+                        style="${paginaActual === totalPaginas ? btnDisabledStyle : btnActiveStyle}"
+                        onmouseover="this.style.background='${paginaActual === totalPaginas ? '#99c9f8' : '#0056b3'}'"
+                        onmouseout="this.style.background='${paginaActual === totalPaginas ? '#99c9f8' : '#007bf0'}'">Siguiente</button>`;
+            
+            contenedor.innerHTML = html;
+        }
+
+        function cambiarPaginaUsuarios(dir) { paginaUsuarios += dir; renderTablaUsuarios(); }
+        function cambiarPaginaMedicos(dir) { paginaMedicos += dir; renderTablaMedicos(); }
+        function cambiarPaginaEspecialidades(dir) { paginaEspecialidades += dir; renderTablaEspecialidades(); }
+
         let idUsuarioAEliminar = null;
         let identidadMedicoAEliminar = null;
         let idEspecialidadAEliminar = null;
@@ -518,17 +561,25 @@
             try {
                 const json = window.personalController.obtenerUsuarios();
                 listaUsuarios = JSON.parse(json || '[]');
-                renderizarUsuarios(listaUsuarios);
+                usuariosFiltrados = [...listaUsuarios];
+                paginaUsuarios = 1;
+                renderTablaUsuarios();
             } catch (e) { console.error('Error al cargar usuarios:', e); }
         }
 
-        function renderizarUsuarios(lista) {
+        function renderTablaUsuarios() {
             const tbody = document.getElementById('cuerpoTablaUsuarios');
-            if (!lista || lista.length === 0) {
+            if (!usuariosFiltrados || usuariosFiltrados.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" class="text-muted py-4">No hay usuarios registrados.</td></tr>';
+                document.getElementById('paginacionUsuarios').innerHTML = '';
                 return;
             }
-            tbody.innerHTML = lista.map(u => `
+
+            let inicio = (paginaUsuarios - 1) * REGISTROS_POR_PAGINA;
+            let fin = inicio + REGISTROS_POR_PAGINA;
+            let paginaDatos = usuariosFiltrados.slice(inicio, fin);
+
+            tbody.innerHTML = paginaDatos.map(u => `
                 <tr data-correo="${(u.correo||'').toLowerCase()}" data-rol="${(u.rol_sistema||'').toLowerCase()}">
                     <td>${u.id_usuario}</td>
                     <td>${u.correo}</td>
@@ -540,6 +591,8 @@
                     </td>
                 </tr>
             `).join('');
+
+            generarBotonesPaginacionJS(paginaUsuarios, usuariosFiltrados.length, 'paginacionUsuarios', 'cambiarPaginaUsuarios');
         }
 
         function badgeClaseRol(rol) {
@@ -556,17 +609,25 @@
             try {
                 const json = window.personalController.obtenerPersonalMedico();
                 listaMedicos = JSON.parse(json || '[]');
-                renderizarMedicos(listaMedicos);
+                medicosFiltrados = [...listaMedicos];
+                paginaMedicos = 1;
+                renderTablaMedicos();
             } catch (e) { console.error('Error al cargar médicos:', e); }
         }
 
-        function renderizarMedicos(lista) {
+        function renderTablaMedicos() {
             const tbody = document.getElementById('cuerpoTablaMedicos');
-            if (!lista || lista.length === 0) {
+            if (!medicosFiltrados || medicosFiltrados.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="text-muted py-4">No hay personal médico registrado.</td></tr>';
+                document.getElementById('paginacionMedicos').innerHTML = '';
                 return;
             }
-            tbody.innerHTML = lista.map(m => `
+
+            let inicio = (paginaMedicos - 1) * REGISTROS_POR_PAGINA;
+            let fin = inicio + REGISTROS_POR_PAGINA;
+            let paginaDatos = medicosFiltrados.slice(inicio, fin);
+
+            tbody.innerHTML = paginaDatos.map(m => `
                 <tr>
                     <td>${m.identidad || '-'}</td>
                     <td>${m.nombreCompleto || '-'}</td>
@@ -579,20 +640,41 @@
                     </td>
                 </tr>
             `).join('');
+
+            generarBotonesPaginacionJS(paginaMedicos, medicosFiltrados.length, 'paginacionMedicos', 'cambiarPaginaMedicos');
         }
 
         // ==========================================
         // BÚSQUEDA INCREMENTAL UNIVERSAL
         // ==========================================
-        function buscarEnTabla(inputId, tbodyId, columnasBuscar) {
+        function buscarEnTabla(inputId, tbodyId, columnasBuscar, esUsuario, esMedico, esEspecialidad) {
             const filtro = document.getElementById(inputId).value.toLowerCase().trim();
             const filas = document.querySelectorAll(`#${tbodyId} tr`);
-            filas.forEach(tr => {
-                const celdas = tr.querySelectorAll('td');
-                // Busca en las columnas especificadas (índices)
-                let texto = columnasBuscar.map(i => celdas[i] ? celdas[i].textContent.toLowerCase() : '').join(' ');
-                tr.style.display = texto.includes(filtro) ? '' : 'none';
-            });
+            
+            if (esUsuario) {
+                usuariosFiltrados = listaUsuarios.filter(u => 
+                    (u.correo && u.correo.toLowerCase().includes(filtro)) ||
+                    (u.rol_sistema && u.rol_sistema.toLowerCase().includes(filtro))
+                );
+                paginaUsuarios = 1;
+                renderTablaUsuarios();
+            } else if (esMedico) {
+                medicosFiltrados = listaMedicos.filter(m => 
+                    (m.identidad && m.identidad.toLowerCase().includes(filtro)) ||
+                    (m.nombreCompleto && m.nombreCompleto.toLowerCase().includes(filtro)) ||
+                    (m.especialidadNombre && m.especialidadNombre.toLowerCase().includes(filtro)) ||
+                    (m.telefono && m.telefono.toLowerCase().includes(filtro)) ||
+                    (m.correo && m.correo.toLowerCase().includes(filtro))
+                );
+                paginaMedicos = 1;
+                renderTablaMedicos();
+            } else if (esEspecialidad) {
+                especialidadesFiltradas = listaEspecialidades.filter(e => 
+                    (e.nombreEspecialidad && e.nombreEspecialidad.toLowerCase().includes(filtro))
+                );
+                paginaEspecialidades = 1;
+                renderTablaEspecialidades();
+            }
         }
 
         // ==========================================
@@ -941,17 +1023,25 @@
             try {
                 const json = window.personalController.obtenerEspecialidades();
                 listaEspecialidades = JSON.parse(json || '[]');
-                renderizarEspecialidades(listaEspecialidades);
+                especialidadesFiltradas = [...listaEspecialidades];
+                paginaEspecialidades = 1;
+                renderTablaEspecialidades();
             } catch(e) { console.error('Error al cargar especialidades:', e); }
         }
 
-        function renderizarEspecialidades(lista) {
+        function renderTablaEspecialidades() {
             const tbody = document.getElementById('cuerpoTablaEspecialidades');
-            if (!lista || lista.length === 0) {
+            if (!especialidadesFiltradas || especialidadesFiltradas.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="3" class="text-muted py-4">No hay especialidades registradas.</td></tr>';
+                document.getElementById('paginacionEspecialidades').innerHTML = '';
                 return;
             }
-            tbody.innerHTML = lista.map(e => `
+
+            let inicio = (paginaEspecialidades - 1) * REGISTROS_POR_PAGINA;
+            let fin = inicio + REGISTROS_POR_PAGINA;
+            let paginaDatos = especialidadesFiltradas.slice(inicio, fin);
+
+            tbody.innerHTML = paginaDatos.map(e => `
                 <tr>
                     <td>${e.idEspecialidades}</td>
                     <td>${e.nombreEspecialidad}</td>
@@ -961,6 +1051,8 @@
                     </td>
                 </tr>
             `).join('');
+
+            generarBotonesPaginacionJS(paginaEspecialidades, especialidadesFiltradas.length, 'paginacionEspecialidades', 'cambiarPaginaEspecialidades');
         }
 
         // MODAL ESPECIALIDAD - ABRIR
@@ -1079,19 +1171,16 @@
             cargarUsuarios();
             intentarCargarEspecialidades();
 
-            // Búsqueda usuarios: columnas 1=correo, 2=rol  (excluir 0=ID, 3=fecha)
             document.getElementById('buscadorUsuarios').addEventListener('keyup', function() {
-                buscarEnTabla('buscadorUsuarios', 'cuerpoTablaUsuarios', [1, 2]);
+                buscarEnTabla('buscadorUsuarios', 'cuerpoTablaUsuarios', [], true, false, false);
             });
 
-            // Búsqueda médicos: columnas 0=identidad, 1=nombre, 2=especialidad, 3=telefono, 4=correo
             document.getElementById('buscadorMedicos').addEventListener('keyup', function() {
-                buscarEnTabla('buscadorMedicos', 'cuerpoTablaMedicos', [0, 1, 2, 3, 4]);
+                buscarEnTabla('buscadorMedicos', 'cuerpoTablaMedicos', [], false, true, false);
             });
 
-            // Búsqueda especialidades: columna 1=nombre (excluir 0=ID)
             document.getElementById('buscadorEspecialidades').addEventListener('keyup', function() {
-                buscarEnTabla('buscadorEspecialidades', 'cuerpoTablaEspecialidades', [1]);
+                buscarEnTabla('buscadorEspecialidades', 'cuerpoTablaEspecialidades', [], false, false, true);
             });
 
             // Máscara identidad médico
