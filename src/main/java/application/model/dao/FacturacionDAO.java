@@ -120,8 +120,10 @@ public class FacturacionDAO {
     }
 
     public boolean anularRecibo(int id) {
-        String query = "UPDATE Facturacion SET anulado = 'Si', fecha_anulado = NOW() " +
-                       "WHERE id_facturacion_recibos = ?";
+        String query = "UPDATE Facturacion f " +
+                       "LEFT JOIN Caja_Sesiones c ON f.id_caja_sesion = c.id_caja_sesion " +
+                       "SET f.anulado = 'Si', f.fecha_anulado = NOW() " +
+                       "WHERE f.id_facturacion_recibos = ? AND (c.id_caja_sesion IS NULL OR LOWER(c.estado) = 'abierta')";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {

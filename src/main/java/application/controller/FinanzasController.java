@@ -187,7 +187,7 @@ public class FinanzasController extends BaseController {
             int id = Integer.parseInt(idStr.trim());
             application.model.dao.EgresoGastoDAO dao = new application.model.dao.EgresoGastoDAO();
             boolean exito = dao.inactivarEgreso(id);
-            return exito ? "OK|Egreso eliminado correctamente." : "ERR|No se pudo eliminar el egreso.";
+            return exito ? "OK|Egreso eliminado correctamente." : "ERR|No se puede eliminar el egreso. Asegúrate de que pertenezca a una sesión de caja abierta.";
         } catch (Throwable t) {
             return "ERR|Error: " + t.getMessage();
         }
@@ -251,7 +251,7 @@ public class FinanzasController extends BaseController {
             int id = Integer.parseInt(idStr.trim());
             application.model.dao.FacturacionDAO dao = new application.model.dao.FacturacionDAO();
             boolean exito = dao.anularRecibo(id);
-            return exito ? "OK|Recibo anulado correctamente." : "ERR|No se pudo anular el recibo.";
+            return exito ? "OK|Recibo anulado correctamente." : "ERR|No se puede anular la factura. Asegúrate de que pertenezca a una sesión de caja abierta.";
         } catch (Throwable t) {
             return "ERR|Error: " + t.getMessage();
         }

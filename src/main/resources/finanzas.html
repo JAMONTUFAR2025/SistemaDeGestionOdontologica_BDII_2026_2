@@ -723,13 +723,9 @@
                         </div>
                     </div>
 
-                    <div class="row mt-4">
-                        <div class="col-md-6 mb-2">
-                            <button type="button" class="btn btn-secondary w-100 py-2" data-bs-dismiss="modal">Cancelar</button>
-                        </div>
-                        <div class="col-md-6">
-                            <button type="button" class="btn-guardar-verde rounded" onclick="guardarEgreso()">Guardar Egreso</button>
-                        </div>
+                    <div class="modal-footer justify-content-center border-0 pb-2 mt-4">
+                        <button type="button" class="btn btn-secondary px-5 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn fw-bold px-5 text-white shadow-sm" style="background:var(--verde); border-radius: 8px;" onclick="guardarEgreso()">Guardar Egreso</button>
                     </div>
                 </form>
             </div>
@@ -751,8 +747,8 @@
                 <p class="text-muted small">El egreso pasará a estado <strong>Inactivo</strong>.</p>
             </div>
             <div class="modal-footer justify-content-center border-0 pb-4">
-                <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">No</button>
-                <button type="button" class="btn btn-danger px-4 fw-bold" onclick="confirmarEliminarEgreso()">Sí, anular</button>
+                <button type="button" class="btn btn-secondary px-5 fw-bold" data-bs-dismiss="modal">No, cancelar</button>
+                <button type="button" class="btn btn-danger px-5 fw-bold" onclick="confirmarEliminarEgreso()">Sí, anular</button>
             </div>
         </div>
     </div>
@@ -1487,9 +1483,9 @@ function guardarEgreso() {
     const comprobante = document.getElementById('eg_comprobante').value.trim();
     const afectaCaja  = document.getElementById('eg_afecta_caja').checked;
 
-    if (!fecha || !descripcion || !monto) {
-        swal('Atención','Complete los campos obligatorios (*)','warning'); return;
-    }
+    if (!fecha)       { swal('Atención','La fecha del gasto es obligatoria.','warning'); return; }
+    if (!descripcion) { swal('Atención','El concepto es obligatorio.','warning'); return; }
+    if (!monto)       { swal('Atención','El monto es obligatorio.','warning'); return; }
 
     const data = {
         id_egreso:          id ? parseInt(id) : null,
@@ -1520,22 +1516,43 @@ function guardarEgreso() {
     }
 }
 
-function borrarEgreso(id) {
-    idEgresoEliminar = id;
-    mostrarModal('modalEliminarEgreso');
+function borrarEgreso(idEgreso) {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: "¿Anular Egreso?",
+            text: "¡Esta acción no se puede deshacer! El egreso quedará anulado y no contará como gasto.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, Anular",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: "#dc3545"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                ejecutarAnulacionEgreso(idEgreso);
+            }
+        });
+    } else {
+        if (confirm("¿Anular Egreso? ¡Esta acción no se puede deshacer!")) {
+            ejecutarAnulacionEgreso(idEgreso);
+        }
+    }
 }
 
-function confirmarEliminarEgreso() {
-    if (!idEgresoEliminar) return;
-    const r = window.finanzasController.inactivarEgreso(String(idEgresoEliminar));
-    const [ok, msg] = r.split('|');
-    if (ok === 'OK') {
-        cerrarModal('modalEliminarEgreso');
-        swal('¡Éxito!', msg, 'success');
-        cargarEgresos();
-        cargarEstadoCaja();
-    } else {
-        swal('Error', msg, 'error');
+function ejecutarAnulacionEgreso(idEgreso) {
+    try {
+        const res = window.finanzasController.inactivarEgreso(String(idEgreso));
+        if (res && res.startsWith('OK')) {
+            swal("Egreso Anulado", "El egreso ha sido anulado con éxito.", "success");
+            cargarEgresos();
+            if (typeof cajaActiva !== 'undefined' && cajaActiva) {
+                cargarEstadoCaja();
+            }
+        } else {
+            swal("Error", res ? res.split('|')[1] : "No se pudo anular.", "error");
+        }
+    } catch(e) {
+        console.error(e);
+        swal("Error", "Ocurrió un error al intentar anular.", "error");
     }
 }
 

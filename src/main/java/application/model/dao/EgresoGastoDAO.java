@@ -89,8 +89,10 @@ public class EgresoGastoDAO {
     }
 
     public boolean inactivarEgreso(int id) {
-        String query = "UPDATE Egresos_Gastos SET anulado = 'Si', fecha_anulado = NOW() " +
-                       "WHERE id_egresos_gastos = ?";
+        String query = "UPDATE Egresos_Gastos e " +
+                       "LEFT JOIN Caja_Sesiones c ON e.id_caja_sesion = c.id_caja_sesion " +
+                       "SET e.anulado = 'Si', e.fecha_anulado = NOW() " +
+                       "WHERE e.id_egresos_gastos = ? AND (c.id_caja_sesion IS NULL OR LOWER(c.estado) = 'abierta')";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
