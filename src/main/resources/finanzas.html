@@ -953,8 +953,10 @@ function renderTablaMovimientos() {
     let paginaDatos = movimientosLista.slice(inicio, fin);
 
     tbody.innerHTML = paginaDatos.map(m => {
-        const cls = m.tipo === 'Ingreso' ? 'mov-ingreso' : 'mov-egreso';
-        const txt = m.tipo === 'Ingreso' ? 'text-success' : 'text-danger';
+        const tipoStr = String(m.tipo || '').toLowerCase();
+        const esIngreso = tipoStr === 'ingreso' || tipoStr === 'ingresos';
+        const cls = esIngreso ? 'mov-ingreso' : 'mov-egreso';
+        const txt = esIngreso ? 'text-success' : 'text-danger';
         const isFactura = m.id_factura ? true : false;
         const infoExtra = isFactura 
             ? `<div class="mt-1" style="font-size:0.85em;color:#777;"><i class="fas fa-file-invoice"></i> Fac #${m.id_factura}</div>` 
@@ -965,22 +967,27 @@ function renderTablaMovimientos() {
             badgeRef = `<div class="mt-1"><span class="badge bg-secondary" style="font-size:0.75em;"><i class="fas fa-hashtag"></i> ${escHtml(m.referencia_transferencia)}</span></div>`;
         }
 
+        let fechaMostrar = m.fecha;
+        if (!fechaMostrar && typeof cajaActiva !== 'undefined' && cajaActiva && cajaActiva.fecha_apertura) {
+            fechaMostrar = cajaActiva.fecha_apertura.split(' ')[0];
+        }
+
         return `
         <tr class="${cls}">
-            <td class="text-secondary fw-bold" style="font-size:0.9em;">
-                <div><i class="far fa-clock"></i> ${m.hora || '--:--'}</div>
-                <div class="mt-1"><i class="far fa-calendar"></i> ${m.fecha || '--/--/----'}</div>
+            <td>
+                <span class="badge ${esIngreso ? 'bg-success' : 'bg-danger'}">${m.tipo}</span>
             </td>
             <td>
-                <span class="badge ${m.tipo === 'Ingreso' ? 'bg-success' : 'bg-danger'}">${m.tipo}</span>
+                <div class="fw-bold" style="color:#444;">${escHtml(m.concepto || m.descripcion || '')}</div>
                 ${infoExtra}
-            </td>
-            <td>
-                <div class="fw-bold" style="color:#444;">${escHtml(m.concepto)}</div>
                 ${badgeRef}
             </td>
+            <td class="text-secondary fw-bold" style="font-size:0.9em;">
+                <div><i class="far fa-clock"></i> ${m.hora || '--:--'}</div>
+                <div class="mt-1"><i class="far fa-calendar"></i> ${fechaMostrar || '--/--/----'}</div>
+            </td>
             <td>${badgePago(m.metodo_pago)}</td>
-            <td class="${txt} fw-bold text-end" style="font-size:1.1em;">${m.tipo === 'Ingreso' ? '+' : '-'}${fmtLps(m.monto)}</td>
+            <td class="${txt} fw-bold text-end" style="font-size:1.1em;">${esIngreso ? '+' : '-'}${fmtLps(m.monto)}</td>
         </tr>`;
     }).join('');
     
@@ -1109,21 +1116,21 @@ function renderTablaFacturas(lista) {
         let badgeE = (f.estado === 'Emitida' || f.estado === 'Activo') ? 'badge-estado badge-efectivo' : 'badge-estado badge-inactivo';
         return `
         <tr>
-            <td class="fw-bold text-primary">#${f.id_factura}</td>
-            <td><small class="text-muted"><i class="far fa-calendar"></i> ${f.fecha_emision}</small></td>
-            <td>${escHtml(f.paciente)}</td>
+            <td class="fw-bold text-primary">${f.numero_recibo || '#' + f.id_factura}</td>
+            <td><small class="text-secondary"><i class="far fa-calendar"></i> ${f.fecha_emision}</small></td>
+            <td>${escHtml(f.nombre_paciente || '—')}</td>
             <td>${escHtml(f.concepto) || '—'}</td>
             <td>${badgePago(f.metodo_pago)}</td>
             <td class="fw-bold text-success text-end">${fmtLps(f.total_neto_recibido !== undefined ? f.total_neto_recibido : f.total)}</td>
             <td><span class="${badgeE}">${f.estado}</span></td>
-            <td class="text-center">
+            <td class="text-center text-nowrap">
                 <button class="btn btn-sm btn-outline-primary" title="Ver Detalles" onclick="verDetalleFactura(${f.id_factura})">
                     <i class="fas fa-eye"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-danger" title="Generar PDF" onclick="window.finanzasController.generarPdfFactura(${f.id_factura})">
+                <button class="btn btn-sm btn-outline-danger ms-1" title="Generar PDF" onclick="window.finanzasController.generarPdfFactura(${f.id_factura})">
                     <i class="fas fa-file-pdf"></i>
                 </button>
-                ${f.estado === 'Emitida' ? `<button class="btn btn-sm btn-outline-danger" title="Anular Factura" onclick="anularFactura(${f.id_factura})"><i class="fas fa-ban"></i></button>` : ''}
+                ${f.estado === 'Activo' ? `<button class="btn btn-sm btn-outline-danger ms-1" title="Anular Factura" onclick="anularFactura(${f.id_factura})"><i class="fas fa-ban"></i></button>` : ''}
             </td>
         </tr>`;
     }).join('');
@@ -1172,12 +1179,66 @@ function abrirModalFactura() {
         document.getElementById(id).value = '0.00';
     });
     document.getElementById('fac_id').value = '';
+    
+    // Auto-generar número de factura
+    let maxNum = 0;
+    if (facturasLista) {
+        for (let f of facturasLista) {
+            if (f.numero_recibo && f.numero_recibo.startsWith('REC-')) {
+                let num = parseInt(f.numero_recibo.replace('REC-', ''), 10);
+                if (!isNaN(num) && num > maxNum) maxNum = num;
+            }
+        }
+    }
+    document.getElementById('fac_numero_recibo').value = "REC-" + String(maxNum + 1).padStart(3, '0');
+
     document.getElementById('fac_fecha_emision').value = new Date().toISOString().split('T')[0];
     document.getElementById('tituloModalFactura').innerHTML = '<i class="fas fa-cash-register me-2"></i> Nueva Factura';
     document.getElementById('btnGuardarRecibo').style.display = 'block';
     document.getElementById('btnCancelarRecibo').textContent = 'Cancelar';
     document.getElementById('formFactura').querySelectorAll('input,select,textarea').forEach(el => el.disabled = false);
     mostrarModal('modalFactura');
+}
+
+function anularFactura(idFactura) {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: "¿Anular Factura?",
+            text: "¡Esta acción no se puede deshacer! La factura quedará anulada y no contará como ingreso.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, Anular",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: "#dc3545"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                ejecutarAnulacion(idFactura);
+            }
+        });
+    } else {
+        if (confirm("¿Anular Factura? ¡Esta acción no se puede deshacer!")) {
+            ejecutarAnulacion(idFactura);
+        }
+    }
+}
+
+function ejecutarAnulacion(idFactura) {
+    try {
+        const res = window.finanzasController.anularRecibo(String(idFactura));
+        if (res && res.startsWith('OK')) {
+            swal("Factura Anulada", "La factura ha sido anulada con éxito.", "success");
+            cargarFacturas();
+            if (typeof cajaActiva !== 'undefined' && cajaActiva) {
+                cargarKPIs(cajaActiva.id_caja_sesion);
+                cargarMovimientos(cajaActiva.id_caja_sesion);
+            }
+        } else {
+            swal("Error", res || "No se pudo anular la factura.", "error");
+        }
+    } catch(e) {
+        console.error(e);
+        swal("Error", "Ocurrió un error al intentar anular.", "error");
+    }
 }
 
 function verDetalleFactura(jsonStr) {

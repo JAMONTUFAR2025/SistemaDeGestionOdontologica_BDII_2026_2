@@ -229,6 +229,7 @@ public class FacturacionDAO {
         return lista;
     }
 
+
     /** Helper: mapea una fila del ResultSet a Map, con "estado" como Activo/Inactivo */
     private Map<String, Object> mapRow(ResultSet rs) throws SQLException {
         Map<String, Object> map = new LinkedHashMap<>();
