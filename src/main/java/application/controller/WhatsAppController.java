@@ -54,6 +54,29 @@ public class WhatsAppController {
                 return;
             }
 
+            // 1. Intentar apagar un servidor Node.js huérfano antes de iniciar uno nuevo
+            try {
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL("http://localhost:3001/api/shutdown").openConnection();
+                conn.setRequestMethod("POST");
+                conn.setConnectTimeout(1500);
+                conn.setReadTimeout(1500);
+                conn.getResponseCode(); // Ejecutar
+                System.out.println("-> Se detectó un servidor antiguo. Se ha enviado la señal de apagado...");
+                Thread.sleep(1500); // Esperar a que Puppeteer y Node se cierren
+            } catch (Exception ignored) {
+                // Puerto libre o inaccesible (esperado)
+            }
+
+            // 1.5. Fuerza bruta: matar cualquier proceso que siga ocupando el puerto 3001 (Windows)
+            try {
+                if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                    ProcessBuilder killPb = new ProcessBuilder("powershell", "-Command", 
+                        "try { $p = (Get-NetTCPConnection -LocalPort 3001 -ErrorAction Stop).OwningProcess; Stop-Process -Id $p -Force } catch {}");
+                    killPb.start().waitFor();
+                }
+            } catch (Exception ignored) {}
+
+            // 2. Iniciar el nuevo servidor
             ProcessBuilder pb = new ProcessBuilder(comandoNode, "index.js");
             pb.directory(workingDir);
             pb.redirectErrorStream(true);
@@ -113,8 +136,39 @@ public class WhatsAppController {
                 return "ERR|Falló el envío. Código: " + responseCode + " - " + responseBody;
             }
 
+        } catch (java.net.ConnectException ce) {
+            return "{\"status\":\"loading\", \"qr\":\"El servidor de WhatsApp se está iniciando. Por favor, espera unos 10 segundos y vuelve a intentar.\"}";
         } catch (Exception e) {
             return "ERR|Error de conexión con el microservicio de WhatsApp: " + e.getMessage();
+        }
+    }
+
+    public String obtenerQR() {
+        if (!nodeInstalado) {
+            return "{\"status\":\"error\", \"qr\":\"Node.js no está instalado\"}";
+        }
+        if (!servidorIniciado) {
+            return "{\"status\":\"error\", \"qr\":\"El servidor de WhatsApp no está iniciado\"}";
+        }
+        try {
+            URL url = new URL("http://localhost:3001/api/qr");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                Scanner s = new Scanner(conn.getInputStream());
+                s.useDelimiter("\\A");
+                String responseBody = s.hasNext() ? s.next() : "";
+                s.close();
+                return responseBody;
+            } else {
+                return "{\"status\":\"error\", \"qr\":\"Error del servidor Node\"}";
+            }
+        } catch (java.net.ConnectException ce) {
+            return "{\"status\":\"loading\", \"qr\":\"El servidor de WhatsApp está arrancando, espera un momento y vuelve a intentar.\"}";
+        } catch (Exception e) {
+            return "{\"status\":\"error\", \"qr\":\"Error de conexión: " + e.getMessage() + "\"}";
         }
     }
 }

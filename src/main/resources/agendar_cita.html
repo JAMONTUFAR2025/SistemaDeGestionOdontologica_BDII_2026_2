@@ -217,9 +217,9 @@
             border-radius: 4px;
             margin-bottom: 20px;
         }
-        .modal-section-title.green {
-            background: #d4edda;
-            color: #155724;
+        .modal-section-title.blue {
+            background: #e8f0ff;
+            color: #007bf0;
         }
 
         /* === TABS === */
@@ -276,6 +276,11 @@
                 Volver al Menú Principal</a>
         </div>
 
+        <!-- TÍTULO DE LA PÁGINA -->
+        <h3 class="fw-bold mb-4" style="color: #007bf0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 25px; margin-top: 10px; font-size: 24px;">
+            <i class="fas fa-calendar-alt"></i> Agenda y Citas
+        </h3>
+
         <!-- REQ 3: Banner de advertencia en modo edición -->
         <div id="bannerEdicion">
             ✏️ Modo Edición — Cita #<span id="numeroCitaEdicion"></span>. Modifica los datos y pulsa "Actualizar Cita".
@@ -293,6 +298,9 @@
                 <h3>📢 Comunicación</h3>
                 <a href="#" onclick="enviarWhatsApp()" class="btn-canal btn-ws" id="btnWsDirecto">
                     <span>💬</span> WhatsApp Individual
+                </a>
+                <a href="#" onclick="vincularWhatsApp()" class="btn-canal" style="background-color:#128C7E; color:white; font-weight:bold; margin-top:15px;" id="btnWsVincular">
+                    <span>🔗</span> Vincular Sesión
                 </a>
             </div>
 
@@ -321,7 +329,7 @@
                                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                                 <label style="margin-bottom: 0;">Identidad del Paciente:*</label>
                                 <button type="button" onclick="abrirModalPaciente();"
-                                    style="color: #28a745; background: #e8f5e9; border: 1px solid #28a745; font-size: 12px; font-weight: bold; padding: 3px 10px; border-radius: 4px; cursor: pointer;">
+                                    style="color: #007bf0; background: #e8f0ff; border: 1px solid #007bf0; font-size: 12px; font-weight: bold; padding: 3px 10px; border-radius: 4px; cursor: pointer;">
                                     + Nuevo Paciente
                                 </button>
                             </div>
@@ -408,6 +416,9 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Controles de paginación -->
+            <div id="paginacionHistorial" style="margin-top: 15px; text-align: center;"></div>
         </div>
     </div>
 
@@ -492,7 +503,7 @@
                 </div>
 
                 <button type="submit" id="btnGuardarModal"
-                    style="background-color: #28a745; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; transition: background 0.3s;">
+                    style="background-color: #007bf0; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; transition: background 0.3s;">
                     Guardar Paciente
                 </button>
             </form>
@@ -559,7 +570,7 @@
             <!-- Tab 2: Datos del Médico -->
             <div id="tabModalMedico" class="modal-tab-content">
                 <form id="formModalMedico">
-                    <div class="modal-section-title green">Vincular con usuario existente</div>
+                    <div class="modal-section-title blue">Vincular con usuario existente</div>
                     <div style="margin-bottom: 15px;">
                         <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Usuario (sin médico asignado):*</label>
                         <select id="mu_id_usuario"
@@ -568,7 +579,7 @@
                         </select>
                     </div>
 
-                    <div class="modal-section-title green">Datos del Personal</div>
+                    <div class="modal-section-title blue">Datos del Personal</div>
 
                     <div style="margin-bottom: 15px;">
                         <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Nombre Completo:*</label>
@@ -596,7 +607,7 @@
                     </div>
 
                     <button type="button" onclick="guardarMedicoModal()"
-                        style="background-color: #28a745; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; transition: background 0.3s;">
+                        style="background-color: #007bf0; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; transition: background 0.3s;">
                         Registrar Médico y Vincular Usuario
                     </button>
                 </form>
@@ -698,6 +709,46 @@
             } else {
                 window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`, '_blank');
             }
+        }
+
+        function vincularWhatsApp() {
+            if (!window.whatsAppController) {
+                Swal.fire('Error', 'Controlador de WhatsApp no disponible', 'error');
+                return;
+            }
+            
+            $('#btnWsVincular').html('<span>⏳</span> Cargando...').css('pointer-events', 'none');
+            setTimeout(() => {
+                try {
+                    let resStr = window.whatsAppController.obtenerQR();
+                    let res = JSON.parse(resStr);
+                    
+                    $('#btnWsVincular').html('<span>🔗</span> Vincular Sesión').css('pointer-events', 'auto');
+
+                    if (res.status === 'connected') {
+                        Swal.fire('¡Sesión Activa!', 'El bot de WhatsApp ya está conectado y listo para usarse.', 'success');
+                    } else if (res.status === 'pending' && res.qr) {
+                        let qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(res.qr);
+                        Swal.fire({
+                            title: 'Vincular WhatsApp',
+                            text: 'Abre WhatsApp en tu teléfono, ve a "Dispositivos vinculados" y escanea este código:',
+                            imageUrl: qrUrl,
+                            imageWidth: 250,
+                            imageHeight: 250,
+                            imageAlt: 'Código QR de WhatsApp',
+                            confirmButtonText: 'Cerrar',
+                            confirmButtonColor: '#25D366'
+                        });
+                    } else if (res.status === 'loading') {
+                        Swal.fire('Generando código...', 'Por favor espera unos segundos a que inicie el servidor y vuelve a presionar el botón.', 'info');
+                    } else {
+                        Swal.fire('Error de vinculación', res.qr || 'No se pudo obtener el QR.', 'error');
+                    }
+                } catch (e) {
+                    $('#btnWsVincular').html('<span>🔗</span> Vincular Sesión').css('pointer-events', 'auto');
+                    Swal.fire('Error interno', 'Falló la comunicación con el bot de WhatsApp.', 'error');
+                }
+            }, 100);
         }
 
         // ============================================================
@@ -1135,49 +1186,109 @@
             }
         }
 
+        let historialData = [];
+        let historialFiltrado = [];
+        let paginaHistorialActual = 1;
+        const REGISTROS_POR_PAGINA_HISTORIAL = 10;
+
         function cargarHistorialCitas() {
             if (!window.citaController) return;
             
             try {
                 let json = window.citaController.obtenerHistorialCitasDelUsuario();
-                let citas = JSON.parse(json);
-                let tbody = document.getElementById('tbodyHistorial');
+                historialData = JSON.parse(json);
+                historialFiltrado = [...historialData];
+                paginaHistorialActual = 1;
                 
-                if (citas.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="padding: 10px; text-align: center; color: #666;">No hay citas registradas en el historial.</td></tr>';
-                    return;
-                }
-
-                let html = '';
-                citas.forEach(c => {
-                    let colorEstado = '#555';
-                    if (c.estado === 'Confirmada') colorEstado = '#28a745';
-                    else if (c.estado === 'Cancelada' || c.estado === 'Ausente') colorEstado = '#dc3545';
-                    else if (c.estado === 'Completada') colorEstado = '#17a2b8';
-
-                    html += `<tr class="fila-historial" style="border-bottom: 1px solid #ddd; transition: background 0.2s;" onmouseover="this.style.background='#f1f8ff'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 10px;">${c.id_citas}</td>
-                        <td style="padding: 10px; font-weight: bold; color: #007bf0;">${c.fecha}</td>
-                        <td style="padding: 10px;">${c.hora}</td>
-                        <td style="padding: 10px;">${c.paciente}</td>
-                        <td style="padding: 10px;">${c.motivo_cita}</td>
-                        <td style="padding: 10px; font-weight: bold; color: ${colorEstado};">${c.estado}</td>
-                    </tr>`;
-                });
-                tbody.innerHTML = html;
+                renderizarHistorial();
             } catch (e) {
                 console.error("Error al cargar historial:", e);
                 document.getElementById('tbodyHistorial').innerHTML = '<tr><td colspan="6" style="padding: 10px; text-align: center; color: red;">Error al cargar datos.</td></tr>';
             }
         }
 
+        function renderizarHistorial() {
+            let tbody = document.getElementById('tbodyHistorial');
+            let contenedorPaginacion = document.getElementById('paginacionHistorial');
+            
+            if (historialFiltrado.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="padding: 10px; text-align: center; color: #666;">No hay citas registradas.</td></tr>';
+                contenedorPaginacion.innerHTML = '';
+                return;
+            }
+
+            let inicio = (paginaHistorialActual - 1) * REGISTROS_POR_PAGINA_HISTORIAL;
+            let fin = inicio + REGISTROS_POR_PAGINA_HISTORIAL;
+            let paginaDatos = historialFiltrado.slice(inicio, fin);
+
+            let html = '';
+            paginaDatos.forEach(c => {
+                let badgeStyle = '';
+                if (c.estado === 'Confirmada') badgeStyle = 'background: #e6f4ea; color: #1e8e3e; border: 1px solid #1e8e3e;';
+                else if (c.estado === 'Cancelada' || c.estado === 'Ausente') badgeStyle = 'background: #fce8e6; color: #d93025; border: 1px solid #d93025;';
+                else if (c.estado === 'Completada') badgeStyle = 'background: #e4f7fb; color: #129eaf; border: 1px solid #129eaf;';
+                else badgeStyle = 'background: #eef6ff; color: #007bf0; border: 1px solid #007bf0;'; // Programada u otros
+
+                html += `<tr class="fila-historial" style="border-bottom: 1px solid #ddd; transition: background 0.2s;" onmouseover="this.style.background='#f1f8ff'" onmouseout="this.style.background='transparent'">
+                    <td style="padding: 10px; color: #555;">${c.id_citas}</td>
+                    <td style="padding: 10px; font-weight: bold; color: #007bf0;">${c.fecha}</td>
+                    <td style="padding: 10px; color: #555;">${c.hora}</td>
+                    <td style="padding: 10px;">${c.paciente}</td>
+                    <td style="padding: 10px; color: #444;">${c.motivo_cita}</td>
+                    <td style="padding: 10px;">
+                        <span style="padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; ${badgeStyle}">${c.estado}</span>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+
+            // Renderizar paginación
+            let totalPaginas = Math.ceil(historialFiltrado.length / REGISTROS_POR_PAGINA_HISTORIAL);
+            let btnHtml = '';
+            
+            if (totalPaginas > 1) {
+                let btnBaseStyle = "margin: 0 5px; padding: 6px 14px; border: none; border-radius: 4px; font-weight: 500; transition: background 0.2s; color: white;";
+                let btnActiveStyle = btnBaseStyle + " background: #007bf0; cursor: pointer;";
+                let btnDisabledStyle = btnBaseStyle + " background: #99c9f8; cursor: not-allowed;";
+
+                btnHtml += `<button onclick="cambiarPaginaHistorial(-1)" ${paginaHistorialActual === 1 ? 'disabled' : ''} 
+                            style="${paginaHistorialActual === 1 ? btnDisabledStyle : btnActiveStyle}"
+                            onmouseover="this.style.background='${paginaHistorialActual === 1 ? '#99c9f8' : '#0056b3'}'"
+                            onmouseout="this.style.background='${paginaHistorialActual === 1 ? '#99c9f8' : '#007bf0'}'">
+                            Anterior</button>`;
+                
+                btnHtml += `<span style="margin: 0 15px; font-weight: bold; color: #333;">Página ${paginaHistorialActual} de ${totalPaginas}</span>`;
+                
+                btnHtml += `<button onclick="cambiarPaginaHistorial(1)" ${paginaHistorialActual === totalPaginas ? 'disabled' : ''} 
+                            style="${paginaHistorialActual === totalPaginas ? btnDisabledStyle : btnActiveStyle}"
+                            onmouseover="this.style.background='${paginaHistorialActual === totalPaginas ? '#99c9f8' : '#0056b3'}'"
+                            onmouseout="this.style.background='${paginaHistorialActual === totalPaginas ? '#99c9f8' : '#007bf0'}'">
+                            Siguiente</button>`;
+            }
+            contenedorPaginacion.innerHTML = btnHtml;
+        }
+
+        function cambiarPaginaHistorial(direccion) {
+            paginaHistorialActual += direccion;
+            renderizarHistorial();
+        }
+
         function filtrarHistorial() {
             let input = document.getElementById('busquedaHistorial').value.toLowerCase();
-            let filas = document.querySelectorAll('#tbodyHistorial tr.fila-historial');
-            filas.forEach(fila => {
-                let texto = fila.innerText.toLowerCase();
-                fila.style.display = texto.includes(input) ? '' : 'none';
-            });
+            if (input.trim() === '') {
+                historialFiltrado = [...historialData];
+            } else {
+                historialFiltrado = historialData.filter(c => 
+                    (c.id_citas && c.id_citas.toString().includes(input)) ||
+                    (c.fecha && c.fecha.toLowerCase().includes(input)) ||
+                    (c.hora && c.hora.toLowerCase().includes(input)) ||
+                    (c.paciente && c.paciente.toLowerCase().includes(input)) ||
+                    (c.motivo_cita && c.motivo_cita.toLowerCase().includes(input)) ||
+                    (c.estado && c.estado.toLowerCase().includes(input))
+                );
+            }
+            paginaHistorialActual = 1;
+            renderizarHistorial();
         }
     </script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

@@ -22,26 +22,44 @@ function getBrowserExecutablePath() {
     return undefined; 
 }
 
+// Evitar que el servidor Node se caiga por errores internos de Puppeteer
+process.on('uncaughtException', function (err) {
+    console.error('Excepción no capturada:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Rechazo no manejado en:', promise, 'razón:', reason);
+});
+
 const client = new Client({
     authStrategy: new LocalAuth({ dataPath: 'sessions' }),
+    webVersionCache: {
+        type: 'none' // Desactivar la caché estricta para evitar crasheos de versión antigua
+    },
     puppeteer: {
         executablePath: getBrowserExecutablePath(),
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox',
+            '--disable-features=IsolateOrigins,site-per-process'
+        ]
     }
 });
 
 let clientReady = false;
+let currentQR = "";
 
 client.on('qr', (qr) => {
+    currentQR = qr;
     console.log('\n======================================================');
-    console.log('✅ ESCANEA ESTE CÓDIGO QR CON EL WHATSAPP DE LA CLÍNICA');
+    console.log('✅ CÓDIGO QR GENERADO. ABRIR EN EL SISTEMA PARA ESCANEAR');
     console.log('======================================================\n');
-    qrcode.generate(qr, { small: true });
+    // Ya no lo mostramos en terminal, solo lo guardamos
 });
 
 client.on('ready', () => {
     clientReady = true;
+    currentQR = ""; // Limpiar QR cuando ya está conectado
     console.log('WhatsApp Bot está LISTO y CONECTADO!');
 });
 
@@ -92,6 +110,25 @@ app.post('/api/send', async (req, res) => {
 
 app.get('/api/status', (req, res) => {
     res.json({ ready: clientReady });
+});
+
+app.get('/api/qr', (req, res) => {
+    if (clientReady) {
+        return res.json({ qr: "", status: "connected" });
+    }
+    if (currentQR) {
+        return res.json({ qr: currentQR, status: "pending" });
+    }
+    return res.json({ qr: "", status: "loading" });
+});
+
+app.post('/api/shutdown', async (req, res) => {
+    console.log("Señal de apagado recibida. Cerrando sesión de Puppeteer y el servidor Node...");
+    res.json({ status: "shutting_down" });
+    try {
+        await client.destroy();
+    } catch(e) {}
+    process.exit(0);
 });
 
 const PORT = 3001;

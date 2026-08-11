@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         :root {
-            --verde: #28a745;
+            --verde: #007bf0;
             --verde-dark: #1e7e34;
             --azul: #007bf0;
             --rojo: #dc3545;
@@ -81,7 +81,7 @@
         .kpi-card .kpi-label { font-size: 0.78rem; opacity: .85; letter-spacing: .5px; }
         .kpi-card .kpi-value { font-size: 1.4rem; font-weight: 700; }
         .kpi-apertura   { background: linear-gradient(135deg, #007bf0, #0056c7); }
-        .kpi-ingresos   { background: linear-gradient(135deg, #28a745, #1e7e34); }
+        .kpi-ingresos   { background: linear-gradient(135deg, #007bf0, #0056b3); }
         .kpi-egresos    { background: linear-gradient(135deg, #dc3545, #b02a37); }
         .kpi-saldo      { background: linear-gradient(135deg, #6f42c1, #4e2d89); }
 
@@ -135,7 +135,7 @@
         .badge-estado {
             padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
         }
-        .badge-activo   { background: #d4edda; color: #155724; }
+        .badge-activo   { background: #e8f0ff; color: #007bf0; }
         .badge-inactivo { background: #f8d7da; color: #721c24; }
 
         /* ── Método pago badges ── */
@@ -150,7 +150,7 @@
 
         /* ── Modals ── */
         .modal-content { border-radius: 14px; border: none; box-shadow: 0 12px 35px rgba(0,0,0,0.2); }
-        .modal-header-verde { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; border-radius: 14px 14px 0 0; border-bottom: none; }
+        .modal-header-verde { background: linear-gradient(135deg, #007bf0, #0056b3); color: white; border-radius: 14px 14px 0 0; border-bottom: none; }
         .modal-header-azul  { background: linear-gradient(135deg, #007bf0, #0056c7); color: white; border-radius: 14px 14px 0 0; border-bottom: none; }
         .modal-header-rojo  { background: linear-gradient(135deg, #dc3545, #b02a37); color: white; border-radius: 14px 14px 0 0; border-bottom: none; }
         .modal-backdrop.show { opacity: 0.35 !important; }
@@ -218,7 +218,7 @@
                 <div class="small text-muted mt-1" id="cajaSubInfo"></div>
             </div>
             <div class="d-flex gap-2">
-                <button class="btn btn-success fw-bold" id="btnAbrirCaja" onclick="mostrarModalAbrirCaja()" style="display:none!important;">
+                <button class="btn btn-primary fw-bold" id="btnAbrirCaja" onclick="mostrarModalAbrirCaja()" style="display:none!important;">
                     <i class="fas fa-lock-open me-1"></i> Abrir Caja
                 </button>
                 <button class="btn btn-warning fw-bold" id="btnCerrarCaja" onclick="mostrarModalArqueo()" style="display:none!important;">
@@ -277,6 +277,7 @@
                 </tbody>
             </table>
         </div>
+        <div id="paginacionMovimientos" style="margin-top: 15px; text-align: center;"></div>
     </div><!-- /panel-dashboard -->
 
     <!-- ════════════ TAB 2: FACTURACIÓN ════════════ -->
@@ -334,6 +335,7 @@
                 </tbody>
             </table>
         </div>
+        <div id="paginacionFacturas" style="margin-top: 15px; text-align: center;"></div>
     </div><!-- /panel-facturacion -->
 
     <!-- ════════════ TAB 3: EGRESOS ════════════ -->
@@ -387,6 +389,7 @@
                 </tbody>
             </table>
         </div>
+        <div id="paginacionEgresos" style="margin-top: 15px; text-align: center;"></div>
     </div><!-- /panel-egresos -->
 
     <!-- ════════════ TAB 4: HISTORIAL DE CIERRES ════════════ -->
@@ -433,6 +436,7 @@
                 </tbody>
             </table>
         </div>
+        <div id="paginacionHistorial" style="margin-top: 15px; text-align: center;"></div>
     </div><!-- /panel-historial -->
 
 </div><!-- /page-card -->
@@ -729,8 +733,15 @@
 let cajaActiva = null;        // Objeto de caja o null
 let idFacturaAnular = null;
 let idEgresoEliminar = null;
+const REGISTROS_POR_PAGINA = 10;
 let facturasLista = [];
+let paginaFacturas = 1;
 let egresosLista  = [];
+let paginaEgresos = 1;
+let movimientosLista = [];
+let paginaMovimientos = 1;
+let cierresLista = [];
+let paginaCierres = 1;
 
 /**
  * Convierte el valor de un input date a formato ISO 'yyyy-MM-dd'.
@@ -755,6 +766,35 @@ function parseDateToISO(rawValue) {
     return '';
 }
 
+function generarBotonesPaginacionJS(paginaActual, totalRegistros, idContenedor, funcionJS) {
+    let contenedor = document.getElementById(idContenedor);
+    let totalPaginas = Math.ceil(totalRegistros / REGISTROS_POR_PAGINA);
+    if (totalPaginas <= 1) {
+        contenedor.innerHTML = '';
+        return;
+    }
+    let btnBaseStyle = "margin: 0 5px; padding: 6px 14px; border: none; border-radius: 4px; font-weight: 500; transition: background 0.2s; color: white;";
+    let btnActiveStyle = btnBaseStyle + " background: #007bf0; cursor: pointer;";
+    let btnDisabledStyle = btnBaseStyle + " background: #99c9f8; cursor: not-allowed;";
+
+    let html = '';
+    html += `<button onclick="${funcionJS}(-1)" ${paginaActual === 1 ? 'disabled' : ''} 
+                style="${paginaActual === 1 ? btnDisabledStyle : btnActiveStyle}"
+                onmouseover="this.style.background='${paginaActual === 1 ? '#99c9f8' : '#0056b3'}'"
+                onmouseout="this.style.background='${paginaActual === 1 ? '#99c9f8' : '#007bf0'}'">Anterior</button>`;
+    html += `<span style="margin: 0 15px; font-weight: bold; color: #333;">Página ${paginaActual} de ${totalPaginas}</span>`;
+    html += `<button onclick="${funcionJS}(1)" ${paginaActual === totalPaginas ? 'disabled' : ''} 
+                style="${paginaActual === totalPaginas ? btnDisabledStyle : btnActiveStyle}"
+                onmouseover="this.style.background='${paginaActual === totalPaginas ? '#99c9f8' : '#0056b3'}'"
+                onmouseout="this.style.background='${paginaActual === totalPaginas ? '#99c9f8' : '#007bf0'}'">Siguiente</button>`;
+    
+    contenedor.innerHTML = html;
+}
+
+function cambiarPaginaMovimientos(dir) { paginaMovimientos += dir; renderTablaMovimientos(); }
+function cambiarPaginaFacturas(dir) { paginaFacturas += dir; renderTablaFacturas(facturasLista); }
+function cambiarPaginaEgresos(dir) { paginaEgresos += dir; renderTablaEgresos(egresosLista); }
+function cambiarPaginaCierres(dir) { paginaCierres += dir; renderTablaCierres(); }
 // ═══════════════════════════════════════════════════════════
 // INICIALIZACIÓN
 // ═══════════════════════════════════════════════════════════
@@ -844,7 +884,7 @@ function renderCajaBanner() {
 
     if (cajaActiva) {
         banner.classList.add('abierta');
-        status.innerHTML = '<i class="fas fa-circle me-1" style="color:#28a745;"></i> Caja ABIERTA';
+        status.innerHTML = '<i class="fas fa-circle me-1" style="color:#007bf0;"></i> Caja ABIERTA';
         subInfo.textContent = `Sesión #${cajaActiva.id_caja_sesion} · Apertura: ${fmtLps(cajaActiva.monto_apertura)} · Desde: ${cajaActiva.fecha_apertura}`;
         btnAbrir.style.setProperty('display','none','important');
         btnCerrar.style.removeProperty('display');
@@ -894,26 +934,57 @@ function cargarKPIs(idCajaSesion) {
 function cargarMovimientos(idCajaSesion) {
     try {
         const json = window.finanzasController.obtenerMovimientosDeSesion(String(idCajaSesion));
-        const lista = JSON.parse(json || '[]');
-        const tbody = document.getElementById('tablaMovimientos');
-        if (!lista.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-muted py-4">Sin movimientos registrados en esta sesión.</td></tr>';
-            return;
-        }
-        tbody.innerHTML = lista.map(m => {
-            const cls = m.tipo === 'Ingreso' ? 'mov-ingreso' : 'mov-egreso';
-            const icn = m.tipo === 'Ingreso' ? 'fa-arrow-up' : 'fa-arrow-down';
-            return `<tr>
-                <td><span class="${cls}"><i class="fas ${icn} me-1"></i>${m.tipo}</span></td>
-                <td class="text-start">${escHtml(m.descripcion)}</td>
-                <td>${m.fecha || '—'}</td>
-                <td>${badgePago(m.metodo_pago)}</td>
-                <td class="${cls}">${fmtLps(m.monto)}</td>
-            </tr>`;
-        }).join('');
-    } catch(e) {
-        console.error('Error al cargar movimientos:', e);
+        movimientosLista = JSON.parse(json || '[]');
+        paginaMovimientos = 1;
+        renderTablaMovimientos();
+    } catch(e) { console.error('Error:', e); }
+}
+
+function renderTablaMovimientos() {
+    const tbody = document.getElementById('tablaMovimientos');
+    if (!movimientosLista.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-muted py-4">Sin movimientos registrados en esta sesión.</td></tr>';
+        document.getElementById('paginacionMovimientos').innerHTML = '';
+        return;
     }
+    
+    let inicio = (paginaMovimientos - 1) * REGISTROS_POR_PAGINA;
+    let fin = inicio + REGISTROS_POR_PAGINA;
+    let paginaDatos = movimientosLista.slice(inicio, fin);
+
+    tbody.innerHTML = paginaDatos.map(m => {
+        const cls = m.tipo === 'Ingreso' ? 'mov-ingreso' : 'mov-egreso';
+        const txt = m.tipo === 'Ingreso' ? 'text-success' : 'text-danger';
+        const isFactura = m.id_factura ? true : false;
+        const infoExtra = isFactura 
+            ? `<div class="mt-1" style="font-size:0.85em;color:#777;"><i class="fas fa-file-invoice"></i> Fac #${m.id_factura}</div>` 
+            : '';
+
+        let badgeRef = '';
+        if (m.referencia_transferencia) {
+            badgeRef = `<div class="mt-1"><span class="badge bg-secondary" style="font-size:0.75em;"><i class="fas fa-hashtag"></i> ${escHtml(m.referencia_transferencia)}</span></div>`;
+        }
+
+        return `
+        <tr class="${cls}">
+            <td class="text-secondary fw-bold" style="font-size:0.9em;">
+                <div><i class="far fa-clock"></i> ${m.hora || '--:--'}</div>
+                <div class="mt-1"><i class="far fa-calendar"></i> ${m.fecha || '--/--/----'}</div>
+            </td>
+            <td>
+                <span class="badge ${m.tipo === 'Ingreso' ? 'bg-success' : 'bg-danger'}">${m.tipo}</span>
+                ${infoExtra}
+            </td>
+            <td>
+                <div class="fw-bold" style="color:#444;">${escHtml(m.concepto)}</div>
+                ${badgeRef}
+            </td>
+            <td>${badgePago(m.metodo_pago)}</td>
+            <td class="${txt} fw-bold text-end" style="font-size:1.1em;">${m.tipo === 'Ingreso' ? '+' : '-'}${fmtLps(m.monto)}</td>
+        </tr>`;
+    }).join('');
+    
+    generarBotonesPaginacionJS(paginaMovimientos, movimientosLista.length, 'paginacionMovimientos', 'cambiarPaginaMovimientos');
 }
 
 // ── Modal Abrir Caja ──
@@ -962,7 +1033,7 @@ function calcularDiferencia() {
     const diferencia = cierre - esperado;
     const el = document.getElementById('arq_diferencia');
     el.textContent = fmtLps(diferencia);
-    el.style.color = diferencia < 0 ? '#dc3545' : diferencia > 0 ? '#28a745' : '#333';
+    el.style.color = diferencia < 0 ? '#dc3545' : diferencia > 0 ? '#007bf0' : '#333';
 }
 
 function confirmarCerrarCaja() {
@@ -1022,11 +1093,50 @@ function cargarPacientesSelector() {
     }
 }
 
+function renderTablaFacturas(lista) {
+    const tbody = document.getElementById('tablaFacturasBody');
+    if (!lista || !lista.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-muted py-4">No se encontraron registros.</td></tr>'; 
+        document.getElementById('paginacionFacturas').innerHTML = '';
+        return;
+    }
+    
+    let inicio = (paginaFacturas - 1) * REGISTROS_POR_PAGINA;
+    let fin = inicio + REGISTROS_POR_PAGINA;
+    let paginaDatos = lista.slice(inicio, fin);
+
+    tbody.innerHTML = paginaDatos.map(f => {
+        let badgeE = f.estado === 'Emitida' ? 'bg-success' : 'bg-danger';
+        return `
+        <tr>
+            <td class="fw-bold text-primary">#${f.id_factura}</td>
+            <td><small class="text-muted"><i class="far fa-calendar"></i> ${f.fecha_emision}</small></td>
+            <td>${escHtml(f.paciente)}</td>
+            <td>${escHtml(f.rtn_paciente) || '—'}</td>
+            <td>${badgePago(f.metodo_pago)}</td>
+            <td><span class="badge ${badgeE}">${f.estado}</span></td>
+            <td class="fw-bold text-success text-end">${fmtLps(f.total)}</td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-outline-primary" title="Ver Detalles" onclick="verDetalleFactura(${f.id_factura})">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" title="Generar PDF" onclick="window.finanzasController.generarPdfFactura(${f.id_factura})">
+                    <i class="fas fa-file-pdf"></i>
+                </button>
+                ${f.estado === 'Emitida' ? `<button class="btn btn-sm btn-outline-danger" title="Anular Factura" onclick="anularFactura(${f.id_factura})"><i class="fas fa-ban"></i></button>` : ''}
+            </td>
+        </tr>`;
+    }).join('');
+    
+    generarBotonesPaginacionJS(paginaFacturas, lista.length, 'paginacionFacturas', 'cambiarPaginaFacturas');
+}
+
 function cargarFacturas() {
     if (!window.finanzasController) { setTimeout(cargarFacturas, 150); return; }
     try {
         const json = window.finanzasController.obtenerRecibos();
         facturasLista = JSON.parse(json || '[]');
+        paginaFacturas = 1;
         renderTablaFacturas(facturasLista);
     } catch(e) {
         console.error('Error al cargar facturas:', e);
@@ -1051,30 +1161,6 @@ function limpiarFiltrosFacturas() {
     document.getElementById('fechaDesdeFacturas').value = '';
     document.getElementById('fechaHastaFacturas').value = '';
     cargarFacturas();
-}
-
-function renderTablaFacturas(lista) {
-    const tbody = document.getElementById('tablaFacturasBody');
-    if (!lista || !lista.length) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-muted py-4">No se encontraron registros.</td></tr>'; return;
-    }
-    tbody.innerHTML = lista.map(f => {
-        const activo = f.estado === 'Activo';
-        return `<tr style="${!activo ? 'opacity:.6;' : ''}">
-            <td class="fw-bold text-secondary">${f.numero_recibo || '—'}</td>
-            <td>${f.fecha_emision || '—'}</td>
-            <td class="fw-semibold">${f.nombre_paciente || '—'}</td>
-            <td class="text-start" style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escHtml(f.concepto)}">${escHtml(f.concepto)}</td>
-            <td>${badgePago(f.metodo_pago)}</td>
-            <td class="neto-col">${fmtLps(f.total_neto_recibido)}</td>
-            <td><span class="badge-estado ${activo ? 'badge-activo' : 'badge-inactivo'}">${f.estado}</span></td>
-            <td class="action-icons">
-                <i class="fas fa-file-pdf" title="Exportar PDF" style="color: #dc3545; cursor:pointer; margin-right: 8px;" onclick="window.finanzasController.generarPdfFactura(${f.id_factura})"></i>
-                <i class="fas fa-eye" title="Ver detalle" onclick="verDetalleFactura('${encodeURIComponent(JSON.stringify(f))}')"></i>
-                ${activo ? `<i class="fas fa-ban" title="Anular" onclick="pedirAnularFactura(${f.id_factura})"></i>` : ''}
-            </td>
-        </tr>`;
-    }).join('');
 }
 
 function abrirModalFactura() {
@@ -1184,6 +1270,7 @@ function cargarEgresos() {
     try {
         const json = window.finanzasController.obtenerEgresos();
         egresosLista = JSON.parse(json || '[]');
+        paginaEgresos = 1;
         renderTablaEgresos(egresosLista);
     } catch(e) {
         console.error('Error al cargar egresos:', e);
@@ -1219,7 +1306,7 @@ function renderTablaEgresos(lista) {
         const activo     = e.estado === 'Activo';
         const tieneCaja  = e.id_caja_sesion != null && e.id_caja_sesion > 0;
         const cajaBadge  = tieneCaja
-            ? `<span class="badge bg-success text-white">Sí (Sesión #${e.id_caja_sesion})</span>`
+            ? `<span class="badge bg-primary text-white">Sí (Sesión #${e.id_caja_sesion})</span>`
             : `<span class="badge bg-secondary text-white">No</span>`;
         return `<tr style="${!activo ? 'opacity:.6;' : ''}">
             <td class="fw-bold">##${e.id_egreso}</td>
@@ -1349,15 +1436,24 @@ function cargarHistorial() {
     
     const filtros = JSON.stringify({ fechaInicio: fechaDesde, fechaFin: fechaHasta, idUsuario: null });
     const json = window.finanzasController.obtenerHistorialCierres(filtros);
-    const lista = JSON.parse(json || '[]');
-    
+    cierresLista = JSON.parse(json || '[]');
+    paginaCierres = 1;
+    renderTablaCierres();
+}
+
+function renderTablaCierres() {
     const tbody = document.getElementById('tablaHistorialBody');
-    if (!lista || lista.length === 0) {
+    if (!cierresLista || cierresLista.length === 0) {
         tbody.innerHTML = '<tr><td colspan="10" class="text-muted py-4">No se encontraron cierres en el rango seleccionado.</td></tr>';
+        document.getElementById('paginacionHistorial').innerHTML = '';
         return;
     }
     
-    tbody.innerHTML = lista.map(c => `
+    let inicio = (paginaCierres - 1) * REGISTROS_POR_PAGINA;
+    let fin = inicio + REGISTROS_POR_PAGINA;
+    let paginaDatos = cierresLista.slice(inicio, fin);
+    
+    tbody.innerHTML = paginaDatos.map(c => `
         <tr>
             <td class="fw-bold">#${c.id_caja_sesion}</td>
             <td>${c.fecha_cierre || '—'}</td>
@@ -1372,7 +1468,10 @@ function cargarHistorial() {
                 <i class="fas fa-file-pdf text-danger" style="cursor:pointer; font-size:1.15rem;" title="Ver PDF de Cierre" onclick="window.finanzasController.generarPdfCierreCaja(${c.id_caja_sesion})"></i>
             </td>
         </tr>
+        </tr>
     `).join('');
+    
+    generarBotonesPaginacionJS(paginaCierres, cierresLista.length, 'paginacionHistorial', 'cambiarPaginaCierres');
 }
 
 function limpiarFiltrosHistorial() {
