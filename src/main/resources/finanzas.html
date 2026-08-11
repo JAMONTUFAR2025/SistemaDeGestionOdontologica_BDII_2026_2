@@ -82,8 +82,8 @@
         .kpi-card .kpi-value { font-size: 1.4rem; font-weight: 700; }
         .kpi-apertura   { background: linear-gradient(135deg, #007bf0, #0056c7); }
         .kpi-ingresos   { background: linear-gradient(135deg, #007bf0, #0056b3); }
-        .kpi-egresos    { background: linear-gradient(135deg, #dc3545, #b02a37); }
-        .kpi-saldo      { background: linear-gradient(135deg, #6f42c1, #4e2d89); }
+        .kpi-egresos    { background: linear-gradient(135deg, #007bf0, #0056c7); }
+        .kpi-saldo      { background: linear-gradient(135deg, #007bf0, #0056b3); }
 
         /* ── Caja banner ── */
         .caja-banner {
@@ -1106,16 +1106,16 @@ function renderTablaFacturas(lista) {
     let paginaDatos = lista.slice(inicio, fin);
 
     tbody.innerHTML = paginaDatos.map(f => {
-        let badgeE = f.estado === 'Emitida' ? 'bg-success' : 'bg-danger';
+        let badgeE = (f.estado === 'Emitida' || f.estado === 'Activo') ? 'badge-estado badge-efectivo' : 'badge-estado badge-inactivo';
         return `
         <tr>
             <td class="fw-bold text-primary">#${f.id_factura}</td>
             <td><small class="text-muted"><i class="far fa-calendar"></i> ${f.fecha_emision}</small></td>
             <td>${escHtml(f.paciente)}</td>
-            <td>${escHtml(f.rtn_paciente) || '—'}</td>
+            <td>${escHtml(f.concepto) || '—'}</td>
             <td>${badgePago(f.metodo_pago)}</td>
-            <td><span class="badge ${badgeE}">${f.estado}</span></td>
-            <td class="fw-bold text-success text-end">${fmtLps(f.total)}</td>
+            <td class="fw-bold text-success text-end">${fmtLps(f.total_neto_recibido !== undefined ? f.total_neto_recibido : f.total)}</td>
+            <td><span class="${badgeE}">${f.estado}</span></td>
             <td class="text-center">
                 <button class="btn btn-sm btn-outline-primary" title="Ver Detalles" onclick="verDetalleFactura(${f.id_factura})">
                     <i class="fas fa-eye"></i>
