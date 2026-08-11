@@ -280,14 +280,11 @@ public class CajaSesionDAO {
         );
 
         java.util.List<Object> params = new java.util.ArrayList<>();
-        if (fechaInicio != null && !fechaInicio.trim().isEmpty() && fechaFin != null && !fechaFin.trim().isEmpty()) {
-            query.append(" AND DATE(c.fecha_cierre) BETWEEN ? AND ?");
-            params.add(fechaInicio.trim());
-            params.add(fechaFin.trim());
-        } else if (fechaInicio != null && !fechaInicio.trim().isEmpty()) {
+        if (fechaInicio != null && !fechaInicio.trim().isEmpty()) {
             query.append(" AND DATE(c.fecha_cierre) >= ?");
             params.add(fechaInicio.trim());
-        } else if (fechaFin != null && !fechaFin.trim().isEmpty()) {
+        }
+        if (fechaFin != null && !fechaFin.trim().isEmpty()) {
             query.append(" AND DATE(c.fecha_cierre) <= ?");
             params.add(fechaFin.trim());
         }

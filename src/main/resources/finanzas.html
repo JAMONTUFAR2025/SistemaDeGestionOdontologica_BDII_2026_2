@@ -732,6 +732,29 @@ let idEgresoEliminar = null;
 let facturasLista = [];
 let egresosLista  = [];
 
+/**
+ * Convierte el valor de un input date a formato ISO 'yyyy-MM-dd'.
+ * JavaFX WebView no soporta <input type="date"> correctamente y
+ * puede devolver formatos como '04-Aug-2026' o 'dd/MM/yyyy'.
+ * Esta función normaliza cualquiera de esos formatos al ISO esperado por MySQL.
+ */
+function parseDateToISO(rawValue) {
+    if (!rawValue || rawValue.trim() === '') return '';
+    // Si ya está en formato yyyy-MM-dd, devolverlo tal cual
+    if (/^\d{4}-\d{2}-\d{2}$/.test(rawValue.trim())) return rawValue.trim();
+    // Intentar parsear con Date
+    const d = new Date(rawValue);
+    if (!isNaN(d.getTime())) {
+        const yyyy = d.getFullYear();
+        const mm   = String(d.getMonth() + 1).padStart(2, '0');
+        const dd   = String(d.getDate()).padStart(2, '0');
+        return yyyy + '-' + mm + '-' + dd;
+    }
+    // Fallback: devolver vacío para no romper la consulta
+    console.warn('No se pudo parsear la fecha:', rawValue);
+    return '';
+}
+
 // ═══════════════════════════════════════════════════════════
 // INICIALIZACIÓN
 // ═══════════════════════════════════════════════════════════
@@ -1012,9 +1035,9 @@ function cargarFacturas() {
 
 function buscarFacturas() {
     const termino    = document.getElementById('buscadorFacturas').value.trim();
-    const fechaDesde = document.getElementById('fechaDesdeFacturas').value;
-    const fechaHasta = document.getElementById('fechaHastaFacturas').value;
-    if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
+    const fechaDesde = parseDateToISO(document.getElementById('fechaDesdeFacturas').value);
+    const fechaHasta = parseDateToISO(document.getElementById('fechaHastaFacturas').value);
+    if (fechaDesde && fechaHasta && fechaDesde > fechaHasta) {
         swal('Atención','Rango de fechas inválido.','warning'); return;
     }
     try {
@@ -1169,9 +1192,9 @@ function cargarEgresos() {
 
 function buscarEgresos() {
     const termino    = document.getElementById('buscadorEgresos').value.trim();
-    const fechaDesde = document.getElementById('fechaDesdeEgresos').value;
-    const fechaHasta = document.getElementById('fechaHastaEgresos').value;
-    if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
+    const fechaDesde = parseDateToISO(document.getElementById('fechaDesdeEgresos').value);
+    const fechaHasta = parseDateToISO(document.getElementById('fechaHastaEgresos').value);
+    if (fechaDesde && fechaHasta && fechaDesde > fechaHasta) {
         swal('Atención','Rango de fechas inválido.','warning'); return;
     }
     try {
@@ -1316,10 +1339,10 @@ function confirmarEliminarEgreso() {
 // ██ HISTORIAL DE CIERRES
 // ═══════════════════════════════════════════════════════════
 function cargarHistorial() {
-    const fechaDesde = document.getElementById('fechaDesdeHistorial').value;
-    const fechaHasta = document.getElementById('fechaHastaHistorial').value;
+    const fechaDesde = parseDateToISO(document.getElementById('fechaDesdeHistorial').value);
+    const fechaHasta = parseDateToISO(document.getElementById('fechaHastaHistorial').value);
     
-    if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
+    if (fechaDesde && fechaHasta && fechaDesde > fechaHasta) {
         swal('Atención', 'Rango de fechas inválido.', 'warning');
         return;
     }

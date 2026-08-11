@@ -188,7 +188,7 @@ public class FacturacionDAO {
             "fr.total_neto_recibido, fr.metodo_pago, fr.anulado " +
             "FROM Facturacion fr " +
             "INNER JOIN Pacientes p ON fr.id_pacientes = p.id_pacientes " +
-            "WHERE 1=1"
+            "WHERE fr.anulado = 'No'"
         );
 
         List<Object> params = new ArrayList<>();
@@ -200,12 +200,12 @@ public class FacturacionDAO {
             params.add(like);
             params.add(like);
         }
-        if (hayDesde) {
-            sb.append(" AND fr.fecha_emision >= ?");
+        if (fechaDesde != null && !fechaDesde.trim().isEmpty()) {
+            sb.append(" AND DATE(fr.fecha_emision) >= ?");
             params.add(fechaDesde.trim());
         }
-        if (hayHasta) {
-            sb.append(" AND fr.fecha_emision <= ?");
+        if (fechaHasta != null && !fechaHasta.trim().isEmpty()) {
+            sb.append(" AND DATE(fr.fecha_emision) <= ?");
             params.add(fechaHasta.trim());
         }
 

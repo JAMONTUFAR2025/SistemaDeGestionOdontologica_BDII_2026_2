@@ -276,8 +276,8 @@ public class FinanzasController extends BaseController {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(
                     jsonFiltros == null ? "{}" : jsonFiltros).getAsJsonObject();
             String termino    = obj.has("termino")    ? obj.get("termino").getAsString().trim()    : "";
-            String fechaDesde = obj.has("fechaDesde") ? obj.get("fechaDesde").getAsString().trim() : "";
-            String fechaHasta = obj.has("fechaHasta") ? obj.get("fechaHasta").getAsString().trim() : "";
+            String fechaDesde = obj.has("fechaDesde") ? obj.get("fechaDesde").getAsString().trim() : (obj.has("fechaInicio") ? obj.get("fechaInicio").getAsString().trim() : "");
+            String fechaHasta = obj.has("fechaHasta") ? obj.get("fechaHasta").getAsString().trim() : (obj.has("fechaFin") ? obj.get("fechaFin").getAsString().trim() : "");
 
             application.model.dao.FacturacionDAO dao = new application.model.dao.FacturacionDAO();
             java.util.List<java.util.Map<String, Object>> lista = dao.buscarRecibos(
@@ -299,8 +299,8 @@ public class FinanzasController extends BaseController {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(
                     jsonFiltros == null ? "{}" : jsonFiltros).getAsJsonObject();
             String termino    = obj.has("termino")    ? obj.get("termino").getAsString().trim()    : "";
-            String fechaDesde = obj.has("fechaDesde") ? obj.get("fechaDesde").getAsString().trim() : "";
-            String fechaHasta = obj.has("fechaHasta") ? obj.get("fechaHasta").getAsString().trim() : "";
+            String fechaDesde = obj.has("fechaDesde") ? obj.get("fechaDesde").getAsString().trim() : (obj.has("fechaInicio") ? obj.get("fechaInicio").getAsString().trim() : "");
+            String fechaHasta = obj.has("fechaHasta") ? obj.get("fechaHasta").getAsString().trim() : (obj.has("fechaFin") ? obj.get("fechaFin").getAsString().trim() : "");
 
             application.model.dao.EgresoGastoDAO dao = new application.model.dao.EgresoGastoDAO();
             java.util.List<java.util.Map<String, Object>> lista = dao.buscarEgresos(

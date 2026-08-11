@@ -114,7 +114,7 @@ public class EgresoGastoDAO {
         StringBuilder sb = new StringBuilder(
             "SELECT id_egresos_gastos, id_caja_sesion, id_usuario, fecha, " +
             "descripcion, monto, metodo_pago, numero_comprobante, anulado " +
-            "FROM Egresos_Gastos WHERE 1=1"
+            "FROM Egresos_Gastos WHERE anulado = 'No'"
         );
 
         List<Object> params = new ArrayList<>();
@@ -125,12 +125,12 @@ public class EgresoGastoDAO {
             params.add(like);
             params.add(like);
         }
-        if (hayDesde) {
-            sb.append(" AND fecha >= ?");
+        if (fechaDesde != null && !fechaDesde.trim().isEmpty()) {
+            sb.append(" AND DATE(fecha) >= ?");
             params.add(fechaDesde.trim());
         }
-        if (hayHasta) {
-            sb.append(" AND fecha <= ?");
+        if (fechaHasta != null && !fechaHasta.trim().isEmpty()) {
+            sb.append(" AND DATE(fecha) <= ?");
             params.add(fechaHasta.trim());
         }
         sb.append(" ORDER BY id_egresos_gastos DESC");
