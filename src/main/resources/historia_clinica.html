@@ -605,7 +605,7 @@
     <div class="modal fade" id="modalNuevaConsulta" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header bg-success text-white">
+                <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title fw-bold">
                         <i class="fa-solid fa-notes-medical me-2"></i>Registrar Evolución Clínica
                     </h5>
@@ -698,7 +698,7 @@
                     </div>
                     <div class="modal-footer bg-light border-0">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-success fw-bold" onclick="guardarEvolucion()">
+                        <button type="button" class="btn btn-primary fw-bold" onclick="guardarEvolucion()">
                             <i class="fa-solid fa-save me-2"></i>Guardar Evolución
                         </button>
                     </div>
@@ -1084,13 +1084,13 @@
 
         <!-- Bloque 5: Historial de Evoluciones -->
         <div class="col-12 mt-2">
-            <div class="seccion-bloque shadow-sm border-success">
+            <div class="seccion-bloque shadow-sm border-primary">
                 <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                    <h5 class="fw-bold text-success m-0">
+                    <h5 class="fw-bold text-primary m-0">
                         <i class="fa-solid fa-timeline me-2"></i>5. Historial de Evolución Clínica
-                        <span class="badge bg-success ms-2">${evoluciones.length} consulta(s)</span>
+                        <span class="badge bg-primary ms-2">${evoluciones.length} consulta(s)</span>
                     </h5>
-                    <button class="btn btn-sm btn-success fw-bold"
+                    <button class="btn btn-sm btn-primary fw-bold"
                         onclick="abrirModalEvolucion('${escHtml(p.identidad || ultimoBusquedaIdentidad)}')">
                         <i class="fa-solid fa-plus me-1"></i> Añadir Evolución
                     </button>

@@ -93,23 +93,7 @@
             background-color: #0056b3;
         }
 
-        .btn-success {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            font-weight: bold;
-            margin-top: 20px;
-            transition: background 0.3s;
-        }
 
-        .btn-success:hover {
-            background-color: #1e7e34;
-        }
 
         .back-link {
             text-decoration: none;
@@ -130,16 +114,16 @@
             border-left: 4px solid #007bf0;
         }
 
-        .section-title-green {
+        .section-title-blue {
             grid-column: span 2;
-            background: #d4edda;
+            background: #e8f0ff;
             padding: 10px;
             border-radius: 4px;
             font-weight: bold;
             margin-top: 15px;
             margin-bottom: 5px;
-            color: #155724;
-            border-left: 4px solid #28a745;
+            color: #007bf0;
+            border-left: 4px solid #007bf0;
         }
 
         /* Tabs */
@@ -176,11 +160,7 @@
             border-color: #007bf0;
         }
 
-        .tab-btn.active-green {
-            background: #28a745;
-            color: white;
-            border-color: #28a745;
-        }
+
 
         .tab-content {
             display: none;
@@ -211,7 +191,7 @@
         <div class="tabs">
             <div class="tab-btn active-blue" onclick="mostrarTab('tabUsuario', this, 'blue')">👤 Paso 1: Crear Usuario
             </div>
-            <div class="tab-btn" onclick="mostrarTab('tabMedico', this, 'green')">🩺 Paso 2: Registrar Médico</div>
+            <div class="tab-btn" onclick="mostrarTab('tabMedico', this, 'blue')">🩺 Paso 2: Registrar Médico</div>
         </div>
 
         <!-- ============================== -->
@@ -265,7 +245,7 @@
             <form id="formMedico">
                 <div class="form-grid">
 
-                    <div class="section-title-green">Vincular con un Usuario Existente</div>
+                    <div class="section-title-blue">Vincular con un Usuario Existente</div>
 
                     <div class="form-group full-width">
                         <label for="med_id_usuario">Seleccionar Usuario (sin médico asignado):*</label>
@@ -274,7 +254,7 @@
                         </select>
                     </div>
 
-                    <div class="section-title-green">Datos del Personal de la Clínica</div>
+                    <div class="section-title-blue">Datos del Personal de la Clínica</div>
 
                     <div class="form-group full-width">
                         <label for="med_nombre">Nombre Completo:*</label>
@@ -299,7 +279,7 @@
                     </div>
                 </div>
 
-                <button type="button" class="btn-success" onclick="guardarMedico()">Registrar Médico y Vincular
+                <button type="button" class="btn-primary" onclick="guardarMedico()">Registrar Médico y Vincular
                     Usuario</button>
             </form>
         </div>

@@ -58,7 +58,7 @@
         }
         .nav-tab-btn:hover { color: #007bf0; }
         .nav-tab-btn.active { color: #007bf0; border-bottom-color: #007bf0; }
-        .nav-tab-btn.active-green { color: #28a745; border-bottom-color: #28a745; }
+        .nav-tab-btn.active-blue { color: #007bf0; border-bottom-color: #007bf0; }
 
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
@@ -96,25 +96,25 @@
             margin-bottom: 15px;
             color: #495057;
         }
-        .section-title-green {
-            background: #d4edda;
+        .section-title-blue {
+            background: #e8f0ff;
             padding: 8px 15px;
             border-radius: 4px;
             font-weight: bold;
             margin-top: 20px;
             margin-bottom: 15px;
-            color: #155724;
+            color: #007bf0;
         }
         .modal-body label { font-weight: bold; color: #333; }
 
         .btn-guardar {
-            background-color: #28a745;
+            background-color: #007bf0;
             color: white;
             font-weight: bold;
             padding: 10px;
             width: 100%;
         }
-        .btn-guardar:hover { background-color: #218838; color: white; }
+        .btn-guardar:hover { background-color: #0056c7; color: white; }
 
         .badge-rol {
             padding: 4px 10px;
@@ -198,7 +198,7 @@
                         placeholder="Escribe para buscar...">
                 </div>
                 <div>
-                    <button class="btn btn-success" onclick="abrirModalMedico(null)">
+                    <button class="btn btn-primary" onclick="abrirModalMedico(null)">
                         <i class="fas fa-plus"></i> Agregar Médico
                     </button>
                 </div>
@@ -323,7 +323,7 @@
     <div class="modal fade" id="modalAgregarMedico" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content shadow-lg">
-                <div class="modal-header text-white" style="background:#28a745;">
+                <div class="modal-header text-white" style="background:#007bf0;">
                     <h5 class="modal-title fw-bold" id="tituloModalMedico">
                         <i class="fas fa-user-md"></i> Registrar Personal Médico
                     </h5>
@@ -334,7 +334,7 @@
 
                     <!-- Sección vinculación usuario (solo al crear, no al editar) -->
                     <div id="seccionVincularUsuario">
-                        <div class="section-title-green">Vincular con Usuario Existente</div>
+                        <div class="section-title-blue">Vincular con Usuario Existente</div>
                         <div class="mb-3">
                             <label for="med_id_usuario">Usuario (sin médico asignado):*</label>
                             <select id="med_id_usuario" class="form-select">
@@ -343,7 +343,7 @@
                         </div>
                     </div>
 
-                    <div class="section-title-green">Datos del Personal de la Clínica</div>
+                    <div class="section-title-blue">Datos del Personal de la Clínica</div>
                     <div class="mb-3">
                         <label for="med_nombre">Nombre Completo:*</label>
                         <input type="text" id="med_nombre" class="form-control" placeholder="Ej: Dr. Carlos Mendoza">
@@ -377,7 +377,7 @@
                             <button type="button" class="btn btn-secondary w-100 py-2" data-bs-dismiss="modal">Cancelar</button>
                         </div>
                         <div class="col-md-6">
-                            <button type="button" class="btn btn-guardar rounded" style="background:#28a745;" onclick="guardarMedico()">Guardar Médico</button>
+                            <button type="button" class="btn btn-guardar rounded" style="background:#007bf0;" onclick="guardarMedico()">Guardar Médico</button>
                         </div>
                     </div>
                 </div>
@@ -451,7 +451,7 @@
     <div class="modal fade" id="modalAgregarEspecialidad" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow-lg">
-                <div class="modal-header text-white" style="background:#6f42c1;">
+                <div class="modal-header text-white" style="background:#007bf0;">
                     <h5 class="modal-title fw-bold" id="tituloModalEspecialidad">
                         <i class="fas fa-star"></i> Nueva Especialidad
                     </h5>
@@ -470,7 +470,7 @@
                         </div>
                         <div class="col-md-6">
                             <button type="button" class="btn w-100 py-2 fw-bold text-white"
-                                style="background:#6f42c1;" onclick="guardarEspecialidad()">Guardar</button>
+                                style="background:#007bf0;" onclick="guardarEspecialidad()">Guardar</button>
                         </div>
                     </div>
                 </div>
@@ -540,10 +540,10 @@
         function mostrarTab(tabId, btn, esVerde) {
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-tab-btn').forEach(b => {
-                b.classList.remove('active', 'active-green');
+                b.classList.remove('active', 'active-blue');
             });
             document.getElementById(tabId).classList.add('active');
-            btn.classList.add(esVerde ? 'active-green' : 'active');
+            btn.classList.add(esVerde ? 'active-blue' : 'active');
 
             if (tabId === 'tabUsuarios') cargarUsuarios();
             if (tabId === 'tabMedicos') {

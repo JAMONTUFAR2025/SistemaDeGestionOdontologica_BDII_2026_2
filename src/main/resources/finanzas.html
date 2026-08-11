@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         :root {
-            --verde: #28a745;
+            --verde: #007bf0;
             --verde-dark: #1e7e34;
             --azul: #007bf0;
             --rojo: #dc3545;
@@ -81,7 +81,7 @@
         .kpi-card .kpi-label { font-size: 0.78rem; opacity: .85; letter-spacing: .5px; }
         .kpi-card .kpi-value { font-size: 1.4rem; font-weight: 700; }
         .kpi-apertura   { background: linear-gradient(135deg, #007bf0, #0056c7); }
-        .kpi-ingresos   { background: linear-gradient(135deg, #28a745, #1e7e34); }
+        .kpi-ingresos   { background: linear-gradient(135deg, #007bf0, #0056b3); }
         .kpi-egresos    { background: linear-gradient(135deg, #dc3545, #b02a37); }
         .kpi-saldo      { background: linear-gradient(135deg, #6f42c1, #4e2d89); }
 
@@ -135,7 +135,7 @@
         .badge-estado {
             padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
         }
-        .badge-activo   { background: #d4edda; color: #155724; }
+        .badge-activo   { background: #e8f0ff; color: #007bf0; }
         .badge-inactivo { background: #f8d7da; color: #721c24; }
 
         /* ── Método pago badges ── */
@@ -150,7 +150,7 @@
 
         /* ── Modals ── */
         .modal-content { border-radius: 14px; border: none; box-shadow: 0 12px 35px rgba(0,0,0,0.2); }
-        .modal-header-verde { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; border-radius: 14px 14px 0 0; border-bottom: none; }
+        .modal-header-verde { background: linear-gradient(135deg, #007bf0, #0056b3); color: white; border-radius: 14px 14px 0 0; border-bottom: none; }
         .modal-header-azul  { background: linear-gradient(135deg, #007bf0, #0056c7); color: white; border-radius: 14px 14px 0 0; border-bottom: none; }
         .modal-header-rojo  { background: linear-gradient(135deg, #dc3545, #b02a37); color: white; border-radius: 14px 14px 0 0; border-bottom: none; }
         .modal-backdrop.show { opacity: 0.35 !important; }
@@ -218,7 +218,7 @@
                 <div class="small text-muted mt-1" id="cajaSubInfo"></div>
             </div>
             <div class="d-flex gap-2">
-                <button class="btn btn-success fw-bold" id="btnAbrirCaja" onclick="mostrarModalAbrirCaja()" style="display:none!important;">
+                <button class="btn btn-primary fw-bold" id="btnAbrirCaja" onclick="mostrarModalAbrirCaja()" style="display:none!important;">
                     <i class="fas fa-lock-open me-1"></i> Abrir Caja
                 </button>
                 <button class="btn btn-warning fw-bold" id="btnCerrarCaja" onclick="mostrarModalArqueo()" style="display:none!important;">
@@ -861,7 +861,7 @@ function renderCajaBanner() {
 
     if (cajaActiva) {
         banner.classList.add('abierta');
-        status.innerHTML = '<i class="fas fa-circle me-1" style="color:#28a745;"></i> Caja ABIERTA';
+        status.innerHTML = '<i class="fas fa-circle me-1" style="color:#007bf0;"></i> Caja ABIERTA';
         subInfo.textContent = `Sesión #${cajaActiva.id_caja_sesion} · Apertura: ${fmtLps(cajaActiva.monto_apertura)} · Desde: ${cajaActiva.fecha_apertura}`;
         btnAbrir.style.setProperty('display','none','important');
         btnCerrar.style.removeProperty('display');
@@ -1010,7 +1010,7 @@ function calcularDiferencia() {
     const diferencia = cierre - esperado;
     const el = document.getElementById('arq_diferencia');
     el.textContent = fmtLps(diferencia);
-    el.style.color = diferencia < 0 ? '#dc3545' : diferencia > 0 ? '#28a745' : '#333';
+    el.style.color = diferencia < 0 ? '#dc3545' : diferencia > 0 ? '#007bf0' : '#333';
 }
 
 function confirmarCerrarCaja() {
@@ -1283,7 +1283,7 @@ function renderTablaEgresos(lista) {
         const activo     = e.estado === 'Activo';
         const tieneCaja  = e.id_caja_sesion != null && e.id_caja_sesion > 0;
         const cajaBadge  = tieneCaja
-            ? `<span class="badge bg-success text-white">Sí (Sesión #${e.id_caja_sesion})</span>`
+            ? `<span class="badge bg-primary text-white">Sí (Sesión #${e.id_caja_sesion})</span>`
             : `<span class="badge bg-secondary text-white">No</span>`;
         return `<tr style="${!activo ? 'opacity:.6;' : ''}">
             <td class="fw-bold">##${e.id_egreso}</td>
