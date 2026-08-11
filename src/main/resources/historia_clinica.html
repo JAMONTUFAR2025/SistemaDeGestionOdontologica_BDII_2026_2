@@ -1250,6 +1250,7 @@
             const p = data.paciente;
             const exp = data.expediente;
             const evoluciones = data.evoluciones || [];
+            const alergias = data.alergias || [];
 
             window.currentExpedienteData = exp;
             window.currentEvoluciones = evoluciones;
@@ -1285,12 +1286,22 @@
                 return;
             }
 
-            // Sección 1: Anamnesis
-            // Sección 2: Antecedentes
-            // Sección 3: Examen Oral
-            // Sección 4: Signos y Diagnóstico
-            // Sección 5: Evoluciones
-            contenedor.innerHTML = `
+            let htmlAlergias = '';
+            if (alergias.length > 0) {
+                const listaNombres = alergias.map(a => a.nombre_alergia).join(', ');
+                htmlAlergias = `
+                <div class="col-12 mb-2">
+                    <div class="alert alert-danger d-flex align-items-center shadow-sm m-0 border-danger" role="alert">
+                        <i class="fa-solid fa-triangle-exclamation fa-2x me-3"></i>
+                        <div>
+                            <h6 class="alert-heading fw-bold mb-1 text-danger">¡ATENCIÓN! PACIENTE CON ALERGIAS REGISTRADAS</h6>
+                            <p class="mb-0 fw-semibold text-danger">${listaNombres}</p>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            contenedor.innerHTML = htmlAlergias + `
         <!-- Bloque 1: Datos Básicos -->
         <div class="col-12">
             <div class="seccion-bloque shadow-sm position-relative">

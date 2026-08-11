@@ -55,6 +55,10 @@ public class HistoriaClinicaDAO {
             resultado.put("evoluciones", new ArrayList<>());
         }
 
+        // 4. Cargar alergias
+        List<Map<String, Object>> alergias = new PacienteAlergiaDAO().obtenerPorPaciente(idPacientes);
+        resultado.put("alergias", alergias);
+
         return resultado;
     }
 
