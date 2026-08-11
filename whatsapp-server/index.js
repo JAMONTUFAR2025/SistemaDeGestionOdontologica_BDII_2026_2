@@ -118,8 +118,16 @@ app.get('/api/qr', (req, res) => {
     }
     if (currentQR) {
         return res.json({ qr: currentQR, status: "pending" });
-    }
     return res.json({ qr: "", status: "loading" });
+});
+
+app.post('/api/shutdown', async (req, res) => {
+    console.log("Señal de apagado recibida. Cerrando sesión de Puppeteer y el servidor Node...");
+    res.json({ status: "shutting_down" });
+    try {
+        await client.destroy();
+    } catch(e) {}
+    process.exit(0);
 });
 
 const PORT = 3001;

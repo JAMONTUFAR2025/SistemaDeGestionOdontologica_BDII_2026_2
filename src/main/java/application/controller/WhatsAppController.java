@@ -54,6 +54,20 @@ public class WhatsAppController {
                 return;
             }
 
+            // 1. Intentar apagar un servidor Node.js huérfano antes de iniciar uno nuevo
+            try {
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL("http://localhost:3001/api/shutdown").openConnection();
+                conn.setRequestMethod("POST");
+                conn.setConnectTimeout(1500);
+                conn.setReadTimeout(1500);
+                conn.getResponseCode(); // Ejecutar
+                System.out.println("-> Se detectó un servidor antiguo. Se ha enviado la señal de apagado...");
+                Thread.sleep(2500); // Esperar a que Puppeteer y Node se cierren completamente
+            } catch (Exception ignored) {
+                // Puerto libre o inaccesible (esperado)
+            }
+
+            // 2. Iniciar el nuevo servidor
             ProcessBuilder pb = new ProcessBuilder(comandoNode, "index.js");
             pb.directory(workingDir);
             pb.redirectErrorStream(true);
