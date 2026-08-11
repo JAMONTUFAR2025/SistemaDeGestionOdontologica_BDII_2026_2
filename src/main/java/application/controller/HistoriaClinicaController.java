@@ -338,4 +338,30 @@ public class HistoriaClinicaController extends BaseController {
         if (!obj.has(key) || obj.get(key).isJsonNull()) return "";
         return obj.get(key).getAsString();
     }
+
+    // ------------------------------------------------------------------
+    // GENERAR PDF DE DOCUMENTO MÉDICO (Constancia / Consentimientos)
+    // ------------------------------------------------------------------
+    /**
+     * Recibe el contenido HTML del documento visible en el modal,
+     * el tipo de plantilla y los datos del paciente.
+     * Genera un PDF tamaño Letter, márgenes 15mm y lo abre en el visor del sistema.
+     */
+    public String generarPdfDocumentoMedico(String htmlContenido, String tipoPlantilla,
+                                             String nombrePaciente, String identidadPaciente) {
+        javafx.application.Platform.runLater(() -> {
+            try {
+                java.io.File file = application.util.DocumentoPDFGenerator.generarDocumentoPdf(
+                        htmlContenido, tipoPlantilla, nombrePaciente, identidadPaciente);
+                if (file != null && file.exists()) {
+                    java.awt.Desktop.getDesktop().open(file);
+                    System.out.println("-> PDF de documento médico generado: " + file.getAbsolutePath());
+                }
+            } catch (Exception e) {
+                System.err.println("Error al generar PDF de documento médico: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+        return "{\"status\":\"ok\"}";
+    }
 }

@@ -44,6 +44,8 @@ public class Main extends Application {
                 window.setMember("whatsAppController", whatsAppController);
                 window.setMember("documentosController", documentosController);
                 window.setMember("catalogoController", catalogoController);
+                // Helper de impresión con referencia al WebView
+                window.setMember("printHelper", new application.controller.PrintHelper(webView));
             }
         });
 
