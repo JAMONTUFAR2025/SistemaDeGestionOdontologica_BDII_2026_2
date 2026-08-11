@@ -276,6 +276,11 @@
                 Volver al Menú Principal</a>
         </div>
 
+        <!-- TÍTULO DE LA PÁGINA -->
+        <h3 class="fw-bold mb-4" style="color: #007bf0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 25px; margin-top: 10px; font-size: 24px;">
+            <i class="fas fa-calendar-alt"></i> Agenda y Citas
+        </h3>
+
         <!-- REQ 3: Banner de advertencia en modo edición -->
         <div id="bannerEdicion">
             ✏️ Modo Edición — Cita #<span id="numeroCitaEdicion"></span>. Modifica los datos y pulsa "Actualizar Cita".
@@ -397,7 +402,7 @@
             <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; font-size: 14px; background: white;">
                     <thead>
-                        <tr style="background: #007bf0; color: white; text-align: left;">
+                        <tr style="background: #28a745; color: white; text-align: left;">
                             <th style="padding: 10px;">ID</th>
                             <th style="padding: 10px;">Fecha</th>
                             <th style="padding: 10px;">Hora</th>
@@ -411,6 +416,9 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Controles de paginación -->
+            <div id="paginacionHistorial" style="margin-top: 15px; text-align: center;"></div>
         </div>
     </div>
 
@@ -1178,49 +1186,109 @@
             }
         }
 
+        let historialData = [];
+        let historialFiltrado = [];
+        let paginaHistorialActual = 1;
+        const REGISTROS_POR_PAGINA_HISTORIAL = 20;
+
         function cargarHistorialCitas() {
             if (!window.citaController) return;
             
             try {
                 let json = window.citaController.obtenerHistorialCitasDelUsuario();
-                let citas = JSON.parse(json);
-                let tbody = document.getElementById('tbodyHistorial');
+                historialData = JSON.parse(json);
+                historialFiltrado = [...historialData];
+                paginaHistorialActual = 1;
                 
-                if (citas.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="padding: 10px; text-align: center; color: #666;">No hay citas registradas en el historial.</td></tr>';
-                    return;
-                }
-
-                let html = '';
-                citas.forEach(c => {
-                    let colorEstado = '#555';
-                    if (c.estado === 'Confirmada') colorEstado = '#28a745';
-                    else if (c.estado === 'Cancelada' || c.estado === 'Ausente') colorEstado = '#dc3545';
-                    else if (c.estado === 'Completada') colorEstado = '#17a2b8';
-
-                    html += `<tr class="fila-historial" style="border-bottom: 1px solid #ddd; transition: background 0.2s;" onmouseover="this.style.background='#f1f8ff'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 10px;">${c.id_citas}</td>
-                        <td style="padding: 10px; font-weight: bold; color: #007bf0;">${c.fecha}</td>
-                        <td style="padding: 10px;">${c.hora}</td>
-                        <td style="padding: 10px;">${c.paciente}</td>
-                        <td style="padding: 10px;">${c.motivo_cita}</td>
-                        <td style="padding: 10px; font-weight: bold; color: ${colorEstado};">${c.estado}</td>
-                    </tr>`;
-                });
-                tbody.innerHTML = html;
+                renderizarHistorial();
             } catch (e) {
                 console.error("Error al cargar historial:", e);
                 document.getElementById('tbodyHistorial').innerHTML = '<tr><td colspan="6" style="padding: 10px; text-align: center; color: red;">Error al cargar datos.</td></tr>';
             }
         }
 
+        function renderizarHistorial() {
+            let tbody = document.getElementById('tbodyHistorial');
+            let contenedorPaginacion = document.getElementById('paginacionHistorial');
+            
+            if (historialFiltrado.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="padding: 10px; text-align: center; color: #666;">No hay citas registradas.</td></tr>';
+                contenedorPaginacion.innerHTML = '';
+                return;
+            }
+
+            let inicio = (paginaHistorialActual - 1) * REGISTROS_POR_PAGINA_HISTORIAL;
+            let fin = inicio + REGISTROS_POR_PAGINA_HISTORIAL;
+            let paginaDatos = historialFiltrado.slice(inicio, fin);
+
+            let html = '';
+            paginaDatos.forEach(c => {
+                let badgeStyle = '';
+                if (c.estado === 'Confirmada') badgeStyle = 'background: #e6f4ea; color: #1e8e3e; border: 1px solid #1e8e3e;';
+                else if (c.estado === 'Cancelada' || c.estado === 'Ausente') badgeStyle = 'background: #fce8e6; color: #d93025; border: 1px solid #d93025;';
+                else if (c.estado === 'Completada') badgeStyle = 'background: #e4f7fb; color: #129eaf; border: 1px solid #129eaf;';
+                else badgeStyle = 'background: #eef6ff; color: #007bf0; border: 1px solid #007bf0;'; // Programada u otros
+
+                html += `<tr class="fila-historial" style="border-bottom: 1px solid #ddd; transition: background 0.2s;" onmouseover="this.style.background='#f1f8ff'" onmouseout="this.style.background='transparent'">
+                    <td style="padding: 10px; color: #555;">${c.id_citas}</td>
+                    <td style="padding: 10px; font-weight: bold; color: #28a745;">${c.fecha}</td>
+                    <td style="padding: 10px; color: #555;">${c.hora}</td>
+                    <td style="padding: 10px;">${c.paciente}</td>
+                    <td style="padding: 10px; color: #444;">${c.motivo_cita}</td>
+                    <td style="padding: 10px;">
+                        <span style="padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; ${badgeStyle}">${c.estado}</span>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+
+            // Renderizar paginación
+            let totalPaginas = Math.ceil(historialFiltrado.length / REGISTROS_POR_PAGINA_HISTORIAL);
+            let btnHtml = '';
+            
+            if (totalPaginas > 1) {
+                let btnBaseStyle = "margin: 0 5px; padding: 6px 14px; border: none; border-radius: 4px; font-weight: 500; transition: background 0.2s; color: white;";
+                let btnActiveStyle = btnBaseStyle + " background: #007bf0; cursor: pointer;";
+                let btnDisabledStyle = btnBaseStyle + " background: #99c9f8; cursor: not-allowed;";
+
+                btnHtml += `<button onclick="cambiarPaginaHistorial(-1)" ${paginaHistorialActual === 1 ? 'disabled' : ''} 
+                            style="${paginaHistorialActual === 1 ? btnDisabledStyle : btnActiveStyle}"
+                            onmouseover="this.style.background='${paginaHistorialActual === 1 ? '#99c9f8' : '#0056b3'}'"
+                            onmouseout="this.style.background='${paginaHistorialActual === 1 ? '#99c9f8' : '#007bf0'}'">
+                            Anterior</button>`;
+                
+                btnHtml += `<span style="margin: 0 15px; font-weight: bold; color: #333;">Página ${paginaHistorialActual} de ${totalPaginas}</span>`;
+                
+                btnHtml += `<button onclick="cambiarPaginaHistorial(1)" ${paginaHistorialActual === totalPaginas ? 'disabled' : ''} 
+                            style="${paginaHistorialActual === totalPaginas ? btnDisabledStyle : btnActiveStyle}"
+                            onmouseover="this.style.background='${paginaHistorialActual === totalPaginas ? '#99c9f8' : '#0056b3'}'"
+                            onmouseout="this.style.background='${paginaHistorialActual === totalPaginas ? '#99c9f8' : '#007bf0'}'">
+                            Siguiente</button>`;
+            }
+            contenedorPaginacion.innerHTML = btnHtml;
+        }
+
+        function cambiarPaginaHistorial(direccion) {
+            paginaHistorialActual += direccion;
+            renderizarHistorial();
+        }
+
         function filtrarHistorial() {
             let input = document.getElementById('busquedaHistorial').value.toLowerCase();
-            let filas = document.querySelectorAll('#tbodyHistorial tr.fila-historial');
-            filas.forEach(fila => {
-                let texto = fila.innerText.toLowerCase();
-                fila.style.display = texto.includes(input) ? '' : 'none';
-            });
+            if (input.trim() === '') {
+                historialFiltrado = [...historialData];
+            } else {
+                historialFiltrado = historialData.filter(c => 
+                    (c.id_citas && c.id_citas.toString().includes(input)) ||
+                    (c.fecha && c.fecha.toLowerCase().includes(input)) ||
+                    (c.hora && c.hora.toLowerCase().includes(input)) ||
+                    (c.paciente && c.paciente.toLowerCase().includes(input)) ||
+                    (c.motivo_cita && c.motivo_cita.toLowerCase().includes(input)) ||
+                    (c.estado && c.estado.toLowerCase().includes(input))
+                );
+            }
+            paginaHistorialActual = 1;
+            renderizarHistorial();
         }
     </script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
