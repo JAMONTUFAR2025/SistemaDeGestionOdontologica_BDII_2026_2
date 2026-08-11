@@ -242,15 +242,9 @@
         <a href="historia_clinica.html" class="card" id="card-historia">
             <div class="icon"><i class="fas fa-notes-medical"></i></div>
             <h3>Historia Clínica</h3>
-            <p>Odontograma y diagnósticos</p>
+            <p>Odontograma, expedientes y documentos clínicos</p>
         </a>
 
-        <!-- Módulo: Documentos Clínicos -->
-        <a href="documentos.html" class="card" id="card-documentos">
-            <div class="icon"><i class="fas fa-folder-open"></i></div>
-            <h3>Documentos Clínicos</h3>
-            <p>Archivos, alergias, consentimientos y constancias</p>
-        </a>
 
         <!-- Módulo: Finanzas (Facturación + Egresos + Caja) -->
         <a href="finanzas.html" class="card" id="card-facturacion">
@@ -314,14 +308,12 @@
             const cardFacturacion = document.getElementById('card-facturacion');
             const cardPersonal    = document.getElementById('card-personal');
             const cardCitas       = document.getElementById('card-citas');
-            const cardDocumentos  = document.getElementById('card-documentos');
 
             let rolNormalizado = rol ? rol.trim().toLowerCase() : "";
 
             if (rolNormalizado === 'recepcionista') {
                 if (cardHistoria)   cardHistoria.style.display   = 'none';
                 if (cardPersonal)   cardPersonal.style.display   = 'none';
-                if (cardDocumentos) cardDocumentos.style.display = 'none';
 
             } else if (rolNormalizado === 'médico' || rolNormalizado === 'medico') {
                 if (cardCitas)       cardCitas.style.display       = 'none';

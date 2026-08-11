@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
+<!-- SIN USAR -->
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,8 +16,9 @@
             --danger: #dc3545;
             --warning: #ffc107;
             --bg-card: rgba(255, 255, 255, 0.97);
-            --shadow: 0 4px 18px rgba(0,0,0,0.13);
+            --shadow: 0 4px 18px rgba(0, 0, 0, 0.13);
         }
+
         html {
             height: 100%;
         }
@@ -43,8 +46,18 @@
         }
 
         /* --- BUSCADOR DE PACIENTE --- */
-        .search-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .search-bar input { flex: 1; min-width: 200px; }
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-bar input {
+            flex: 1;
+            min-width: 200px;
+        }
+
         .patient-badge {
             display: none;
             background: #eef6ff;
@@ -55,7 +68,12 @@
             font-size: 14px;
             margin-top: 14px;
         }
-        .patient-badge .nombre { font-weight: bold; color: var(--primary); font-size: 16px; }
+
+        .patient-badge .nombre {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 16px;
+        }
 
         /* === TABS === */
         .nav-tabs-custom {
@@ -65,6 +83,7 @@
             margin-bottom: 25px;
             margin-top: 20px;
         }
+
         .nav-tabs-custom .btn-tab-main {
             padding: 12px 30px;
             font-weight: bold;
@@ -77,15 +96,25 @@
             transition: all 0.2s;
             border-radius: 0;
         }
-        .nav-tabs-custom .btn-tab-main:hover { color: var(--primary); }
-        .nav-tabs-custom .btn-tab-main.active { 
-            color: var(--primary); 
-            border-bottom-color: var(--primary); 
-            background: transparent; 
+
+        .nav-tabs-custom .btn-tab-main:hover {
+            color: var(--primary);
+        }
+
+        .nav-tabs-custom .btn-tab-main.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: transparent;
             box-shadow: none;
         }
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
 
         /* --- TABLAS --- */
         .tabla-docs {
@@ -93,11 +122,33 @@
             border-collapse: collapse;
             font-size: 14px;
         }
-        .tabla-docs thead tr { background: var(--primary); color: white; }
-        .tabla-docs th, .tabla-docs td { padding: 10px 12px; text-align: left; }
-        .tabla-docs tbody tr { border-bottom: 1px solid #e9ecef; transition: background 0.15s; }
-        .tabla-docs tbody tr:hover { background: #f0f8ff; }
-        .tabla-docs .vacia td { text-align: center; color: #888; padding: 20px; font-style: italic; }
+
+        .tabla-docs thead tr {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tabla-docs th,
+        .tabla-docs td {
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        .tabla-docs tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: background 0.15s;
+        }
+
+        .tabla-docs tbody tr:hover {
+            background: #f0f8ff;
+        }
+
+        .tabla-docs .vacia td {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+            font-style: italic;
+        }
 
         /* --- FORMULARIOS --- */
         .form-seccion {
@@ -107,14 +158,26 @@
             padding: 20px;
             margin-bottom: 20px;
         }
+
         .form-seccion h5 {
             color: var(--primary);
             font-size: 15px;
             font-weight: 700;
             margin-bottom: 14px;
         }
-        label { font-size: 13px; font-weight: 600; color: #444; }
-        .form-control, .form-select { font-size: 14px; border-radius: 7px; }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        .form-control,
+        .form-select {
+            font-size: 14px;
+            border-radius: 7px;
+        }
+
         .btn-primary-soe {
             background: var(--primary);
             color: white;
@@ -126,7 +189,11 @@
             font-weight: 600;
             transition: background 0.2s;
         }
-        .btn-primary-soe:hover { background: var(--primary-dark); }
+
+        .btn-primary-soe:hover {
+            background: var(--primary-dark);
+        }
+
         .btn-danger-soe {
             background: var(--danger);
             color: white;
@@ -138,22 +205,60 @@
             font-weight: 600;
             transition: background 0.2s;
         }
-        .btn-danger-soe:hover { background: #b02a37; }
+
+        .btn-danger-soe:hover {
+            background: #b02a37;
+        }
+
         .badge-tipo {
             padding: 3px 10px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: 700;
         }
-        .badge-radio { background: #fff3cd; color: #856404; }
-        .badge-foto  { background: #d1e7dd; color: #0f5132; }
-        .badge-lab   { background: #cff4fc; color: #055160; }
-        .badge-otro  { background: #e2e3e5; color: #383d41; }
-        .alerta { display:none; border-radius: 8px; padding: 10px 16px; font-size: 13px; margin-top: 10px; }
-        .alerta-ok  { background: #d1e7dd; color: #0f5132; border: 1px solid #a3cfbb; }
-        .alerta-err { background: #f8d7da; color: #842029; border: 1px solid #f1aeb5; }
+
+        .badge-radio {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-foto {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .badge-lab {
+            background: #cff4fc;
+            color: #055160;
+        }
+
+        .badge-otro {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .alerta {
+            display: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .alerta-ok {
+            background: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #a3cfbb;
+        }
+
+        .alerta-err {
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f1aeb5;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="container card-container">
@@ -165,15 +270,18 @@
         <h3 class="fw-bold mb-1" style="color: var(--primary);">
             <i class="fas fa-folder-open"></i> Documentos Clínicos
         </h3>
-        <p style="color:#666; font-size:14px; margin-bottom: 25px;">Archivos, alergias, consentimientos y constancias por paciente</p>
+        <p style="color:#666; font-size:14px; margin-bottom: 25px;">Archivos, alergias, consentimientos y constancias
+            por paciente</p>
 
         <!-- BUSCADOR DE PACIENTE -->
         <h5 style="color:var(--primary); margin-bottom:14px;"><i class="fas fa-search"></i> Buscar Paciente</h5>
         <div class="search-bar">
-            <input type="text" id="inputIdentidad" class="form-control" placeholder="Número de identidad del paciente..."
-                   maxlength="20" onkeydown="if(event.key==='Enter') buscarPaciente()">
+            <input type="text" id="inputIdentidad" class="form-control"
+                placeholder="Número de identidad del paciente..." maxlength="20"
+                onkeydown="if(event.key==='Enter') buscarPaciente()">
             <button class="btn-primary-soe" onclick="buscarPaciente()"><i class="fas fa-search"></i> Buscar</button>
-            <button class="btn-primary-soe" style="background:#6c757d;" onclick="limpiarBusqueda()"><i class="fas fa-times"></i> Limpiar</button>
+            <button class="btn-primary-soe" style="background:#6c757d;" onclick="limpiarBusqueda()"><i
+                    class="fas fa-times"></i> Limpiar</button>
         </div>
         <div id="pacienteBadge" class="patient-badge">
             <div class="nombre" id="nombrePaciente">—</div>
@@ -227,20 +335,30 @@
                     </div>
                     <div class="col-md-12">
                         <label>Observaciones</label>
-                        <input type="text" id="arObservaciones" class="form-control" placeholder="Descripción breve del archivo...">
+                        <input type="text" id="arObservaciones" class="form-control"
+                            placeholder="Descripción breve del archivo...">
                     </div>
                     <div class="col-md-12">
-                        <button class="btn-primary-soe" onclick="guardarArchivo()"><i class="fas fa-save"></i> Guardar Archivo</button>
+                        <button class="btn-primary-soe" onclick="guardarArchivo()"><i class="fas fa-save"></i> Guardar
+                            Archivo</button>
                     </div>
                 </div>
                 <div id="alertaArchivos" class="alerta mt-2"></div>
             </div>
 
-            <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Archivos Registrados</h6>
+            <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Archivos
+                Registrados</h6>
             <table class="tabla-docs">
-                <thead><tr>
-                    <th>Tipo</th><th>Nombre</th><th>Ruta/Referencia</th><th>Observaciones</th><th>Fecha</th><th>Acción</th>
-                </tr></thead>
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Nombre</th>
+                        <th>Ruta/Referencia</th>
+                        <th>Observaciones</th>
+                        <th>Fecha</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
                 <tbody id="tablaArchivos"></tbody>
             </table>
         </div>
@@ -257,15 +375,22 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <button class="btn-primary-soe" onclick="agregarAlergiaAlPaciente()"><i class="fas fa-plus"></i> Agregar</button>
+                        <button class="btn-primary-soe" onclick="agregarAlergiaAlPaciente()"><i class="fas fa-plus"></i>
+                            Agregar</button>
                     </div>
                 </div>
                 <div id="alertaAlergias" class="alerta mt-2"></div>
             </div>
 
-            <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Alergias del Paciente</h6>
+            <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Alergias del
+                Paciente</h6>
             <table class="tabla-docs">
-                <thead><tr><th>Alergia</th><th>Acción</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Alergia</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
                 <tbody id="tablaAlergias"></tbody>
             </table>
         </div>
@@ -296,22 +421,34 @@
                     </div>
                     <div class="col-md-6">
                         <label>Representante Legal (si aplica)</label>
-                        <input type="text" id="coRepresentante" class="form-control" placeholder="Nombre del tutor/representante...">
+                        <input type="text" id="coRepresentante" class="form-control"
+                            placeholder="Nombre del tutor/representante...">
                     </div>
                     <div class="col-md-6">
                         <label>Identidad del Representante</label>
-                        <input type="text" id="coIdentidadRep" class="form-control" placeholder="Número de identidad...">
+                        <input type="text" id="coIdentidadRep" class="form-control"
+                            placeholder="Número de identidad...">
                     </div>
                     <div class="col-12">
-                        <button class="btn-primary-soe" onclick="guardarConsentimiento()"><i class="fas fa-save"></i> Guardar Consentimiento</button>
+                        <button class="btn-primary-soe" onclick="guardarConsentimiento()"><i class="fas fa-save"></i>
+                            Guardar Consentimiento</button>
                     </div>
                 </div>
                 <div id="alertaConsentimientos" class="alerta mt-2"></div>
             </div>
 
-            <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Consentimientos Registrados</h6>
+            <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Consentimientos
+                Registrados</h6>
             <table class="tabla-docs">
-                <thead><tr><th>Tipo Procedimiento</th><th>Representante</th><th>Identidad Rep.</th><th>Fecha Firma</th><th>Acción</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Tipo Procedimiento</th>
+                        <th>Representante</th>
+                        <th>Identidad Rep.</th>
+                        <th>Fecha Firma</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
                 <tbody id="tablaConsentimientos"></tbody>
             </table>
             <p id="msgConsentimientos" style="color:#888; font-style:italic; font-size:13px; display:none;">
@@ -341,18 +478,28 @@
                     <div class="col-md-12">
                         <label>Tratamiento Realizado *</label>
                         <textarea id="cnTratamiento" class="form-control" rows="3"
-                                  placeholder="Describa el tratamiento realizado..."></textarea>
+                            placeholder="Describa el tratamiento realizado..."></textarea>
                     </div>
                     <div class="col-12">
-                        <button class="btn-primary-soe" onclick="guardarConstancia()"><i class="fas fa-save"></i> Emitir Constancia</button>
+                        <button class="btn-primary-soe" onclick="guardarConstancia()"><i class="fas fa-save"></i> Emitir
+                            Constancia</button>
                     </div>
                 </div>
                 <div id="alertaConstancias" class="alerta mt-2"></div>
             </div>
 
-            <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Historial de Constancias</h6>
+            <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Historial de
+                Constancias</h6>
             <table class="tabla-docs">
-                <thead><tr><th>Fecha Emisión</th><th>Hora</th><th>Médico</th><th>Tratamiento</th><th>Acción</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Fecha Emisión</th>
+                        <th>Hora</th>
+                        <th>Médico</th>
+                        <th>Tratamiento</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
                 <tbody id="tablaConstancias"></tbody>
             </table>
         </div>
@@ -405,10 +552,10 @@
             }
 
             pacienteActual = JSON.parse(resp);
-            document.getElementById('nombrePaciente').textContent    = pacienteActual.nombre_completo;
+            document.getElementById('nombrePaciente').textContent = pacienteActual.nombre_completo;
             document.getElementById('identidadPaciente').textContent = pacienteActual.identidad;
-            document.getElementById('telefonoPaciente').textContent  = pacienteActual.telefono || 'N/A';
-            document.getElementById('pacienteBadge').style.display   = 'block';
+            document.getElementById('telefonoPaciente').textContent = pacienteActual.telefono || 'N/A';
+            document.getElementById('pacienteBadge').style.display = 'block';
             ocultarAlerta('alertaBusqueda');
 
             mostrarTabs();
@@ -427,8 +574,8 @@
             ocultarAlerta('alertaBusqueda');
         }
 
-        function mostrarTabs()  { document.getElementById('contenedorTabs').style.display = 'block'; }
-        function ocultarTabs()  { document.getElementById('contenedorTabs').style.display = 'none'; }
+        function mostrarTabs() { document.getElementById('contenedorTabs').style.display = 'block'; }
+        function ocultarTabs() { document.getElementById('contenedorTabs').style.display = 'none'; }
 
         // =====================================================
         // CAMBIO DE TAB
@@ -465,17 +612,17 @@
 
         function getBadgeTipo(tipo) {
             if (tipo === 'Radiografia') return 'badge-radio';
-            if (tipo === 'Fotografia')  return 'badge-foto';
+            if (tipo === 'Fotografia') return 'badge-foto';
             if (tipo === 'Laboratorio') return 'badge-lab';
             return 'badge-otro';
         }
 
         function guardarArchivo() {
             if (!pacienteActual) return;
-            const tipo   = document.getElementById('arTipo').value;
+            const tipo = document.getElementById('arTipo').value;
             const nombre = document.getElementById('arNombre').value.trim();
-            const ruta   = document.getElementById('arRuta').value.trim();
-            const obs    = document.getElementById('arObservaciones').value.trim();
+            const ruta = document.getElementById('arRuta').value.trim();
+            const obs = document.getElementById('arObservaciones').value.trim();
 
             if (!tipo || !nombre || !ruta) {
                 mostrarAlerta('alertaArchivos', 'err', 'Tipo, nombre y ruta son obligatorios.');
@@ -565,7 +712,7 @@
             const evoluciones = JSON.parse(resp);
             const opts = '<option value="">-- Seleccione Consulta --</option>' +
                 evoluciones.map(e => `<option value="${e.id_evolucion_clinica}">
-                    Cita #${e.numero_cita} — ${e.fecha_consulta ? e.fecha_consulta.substring(0,10) : '?'} — ${e.nombre_medico || 'Sin médico'}
+                    Cita #${e.numero_cita} — ${e.fecha_consulta ? e.fecha_consulta.substring(0, 10) : '?'} — ${e.nombre_medico || 'Sin médico'}
                 </option>`).join('');
             document.getElementById('coSelectEvolucion').innerHTML = opts;
             document.getElementById('cnSelectEvolucion').innerHTML = opts;
@@ -574,7 +721,7 @@
         // =====================================================
         // CONSENTIMIENTOS
         // =====================================================
-        document.getElementById && (function(){
+        document.getElementById && (function () {
             const sel = document.getElementById('coSelectEvolucion');
             if (sel) sel.addEventListener('change', () => {
                 const id = parseInt(sel.value);
@@ -605,9 +752,9 @@
             const idEvolucion = parseInt(document.getElementById('coSelectEvolucion').value);
             if (!idEvolucion) { mostrarAlerta('alertaConsentimientos', 'err', 'Seleccione la evolución clínica correspondiente.'); return; }
 
-            const tipo  = document.getElementById('coTipo').value;
+            const tipo = document.getElementById('coTipo').value;
             const fecha = document.getElementById('coFechaFirma').value;
-            if (!tipo)  { mostrarAlerta('alertaConsentimientos', 'err', 'Seleccione el tipo de procedimiento.'); return; }
+            if (!tipo) { mostrarAlerta('alertaConsentimientos', 'err', 'Seleccione el tipo de procedimiento.'); return; }
             if (!fecha) { mostrarAlerta('alertaConsentimientos', 'err', 'Ingrese la fecha de firma.'); return; }
 
             const data = JSON.stringify({
@@ -665,12 +812,12 @@
             if (!idEvolucion) { mostrarAlerta('alertaConstancias', 'err', 'Seleccione la evolución clínica correspondiente.'); return; }
 
             const fecha = document.getElementById('cnFecha').value;
-            const hora  = document.getElementById('cnHora').value;
-            const trat  = document.getElementById('cnTratamiento').value.trim();
+            const hora = document.getElementById('cnHora').value;
+            const trat = document.getElementById('cnTratamiento').value.trim();
 
             if (!fecha) { mostrarAlerta('alertaConstancias', 'err', 'Ingrese la fecha de emisión.'); return; }
-            if (!hora)  { mostrarAlerta('alertaConstancias', 'err', 'Ingrese la hora de emisión.'); return; }
-            if (!trat)  { mostrarAlerta('alertaConstancias', 'err', 'Describa el tratamiento realizado.'); return; }
+            if (!hora) { mostrarAlerta('alertaConstancias', 'err', 'Ingrese la hora de emisión.'); return; }
+            if (!trat) { mostrarAlerta('alertaConstancias', 'err', 'Describa el tratamiento realizado.'); return; }
 
             const data = JSON.stringify({
                 id_evolucion_clinica: idEvolucion,
@@ -726,4 +873,5 @@
         });
     </script>
 </body>
+
 </html>
