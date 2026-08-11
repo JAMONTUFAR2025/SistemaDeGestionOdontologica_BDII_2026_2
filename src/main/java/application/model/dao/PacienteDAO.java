@@ -79,7 +79,7 @@ public class PacienteDAO {
 
     public String actualizar(Paciente p) {
         // SchemaActual: no toca borrado al actualizar datos personales
-        String query = "UPDATE Pacientes SET nombre_completo=?, fecha_nacimiento=?, genero=?, estado_civil=?, " +
+        String query = "UPDATE Pacientes SET identidad=?, nombre_completo=?, fecha_nacimiento=?, genero=?, estado_civil=?, " +
                 "ocupacion=?, domicilio=?, telefono=?, persona_responsable=?, telefono_responsable=? " +
                 "WHERE identidad=?";
         try {
@@ -88,20 +88,24 @@ public class PacienteDAO {
                 return "ERR|No se pudo establecer conexión con la base de datos.";
             }
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, p.getNombreCompleto());
+                stmt.setString(1, p.getIdentidad());
+                stmt.setString(2, p.getNombreCompleto());
                 if (p.getFechaNacimiento() != null) {
-                    stmt.setDate(2, Date.valueOf(p.getFechaNacimiento()));
+                    stmt.setDate(3, Date.valueOf(p.getFechaNacimiento()));
                 } else {
-                    stmt.setNull(2, java.sql.Types.DATE);
+                    stmt.setNull(3, java.sql.Types.DATE);
                 }
-                stmt.setString(3, p.getGenero());
-                stmt.setString(4, p.getEstadoCivil());
-                stmt.setString(5, p.getOcupacion());
-                stmt.setString(6, p.getDomicilio());
-                stmt.setString(7, p.getTelefono());
-                stmt.setString(8, p.getPersonaResponsable());
-                stmt.setString(9, p.getTelefonoResponsable());
-                stmt.setString(10, p.getIdentidad());
+                stmt.setString(4, p.getGenero());
+                stmt.setString(5, p.getEstadoCivil());
+                stmt.setString(6, p.getOcupacion());
+                stmt.setString(7, p.getDomicilio());
+                stmt.setString(8, p.getTelefono());
+                stmt.setString(9, p.getPersonaResponsable());
+                stmt.setString(10, p.getTelefonoResponsable());
+                
+                String idOriginal = (p.getIdentidadOriginal() != null && !p.getIdentidadOriginal().isEmpty()) 
+                                    ? p.getIdentidadOriginal() : p.getIdentidad();
+                stmt.setString(11, idOriginal);
 
                 int filasAfectadas = stmt.executeUpdate();
                 if (filasAfectadas > 0) {

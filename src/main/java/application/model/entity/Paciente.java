@@ -7,6 +7,7 @@ public class Paciente {
     // SchemaActual: PK = id_pacientes (INT AUTO_INCREMENT), borrado ENUM('Si','No')
     private int idPaciente;
     private String identidad;
+    private String identidadOriginal;
     private String nombreCompleto;
     private LocalDate fechaNacimiento;
     private String genero;
@@ -53,6 +54,14 @@ public class Paciente {
 
     public void setIdentidad(String identidad) {
         this.identidad = identidad;
+    }
+
+    public String getIdentidadOriginal() {
+        return identidadOriginal;
+    }
+
+    public void setIdentidadOriginal(String identidadOriginal) {
+        this.identidadOriginal = identidadOriginal;
     }
 
     public String getNombreCompleto() {
