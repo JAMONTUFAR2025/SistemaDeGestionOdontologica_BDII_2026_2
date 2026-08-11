@@ -294,6 +294,9 @@
                 <a href="#" onclick="enviarWhatsApp()" class="btn-canal btn-ws" id="btnWsDirecto">
                     <span>💬</span> WhatsApp Individual
                 </a>
+                <a href="#" onclick="vincularWhatsApp()" class="btn-canal" style="background-color:#128C7E; color:white; font-weight:bold; margin-top:15px;" id="btnWsVincular">
+                    <span>🔗</span> Vincular Sesión
+                </a>
             </div>
 
             <!-- Panel Derecho: Formulario de Cita -->
@@ -698,6 +701,46 @@
             } else {
                 window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`, '_blank');
             }
+        }
+
+        function vincularWhatsApp() {
+            if (!window.whatsAppController) {
+                Swal.fire('Error', 'Controlador de WhatsApp no disponible', 'error');
+                return;
+            }
+            
+            $('#btnWsVincular').html('<span>⏳</span> Cargando...').css('pointer-events', 'none');
+            setTimeout(() => {
+                try {
+                    let resStr = window.whatsAppController.obtenerQR();
+                    let res = JSON.parse(resStr);
+                    
+                    $('#btnWsVincular').html('<span>🔗</span> Vincular Sesión').css('pointer-events', 'auto');
+
+                    if (res.status === 'connected') {
+                        Swal.fire('¡Sesión Activa!', 'El bot de WhatsApp ya está conectado y listo para usarse.', 'success');
+                    } else if (res.status === 'pending' && res.qr) {
+                        let qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(res.qr);
+                        Swal.fire({
+                            title: 'Vincular WhatsApp',
+                            text: 'Abre WhatsApp en tu teléfono, ve a "Dispositivos vinculados" y escanea este código:',
+                            imageUrl: qrUrl,
+                            imageWidth: 250,
+                            imageHeight: 250,
+                            imageAlt: 'Código QR de WhatsApp',
+                            confirmButtonText: 'Cerrar',
+                            confirmButtonColor: '#25D366'
+                        });
+                    } else if (res.status === 'loading') {
+                        Swal.fire('Generando código...', 'Por favor espera unos segundos a que inicie el servidor y vuelve a presionar el botón.', 'info');
+                    } else {
+                        Swal.fire('Error de vinculación', res.qr || 'No se pudo obtener el QR.', 'error');
+                    }
+                } catch (e) {
+                    $('#btnWsVincular').html('<span>🔗</span> Vincular Sesión').css('pointer-events', 'auto');
+                    Swal.fire('Error interno', 'Falló la comunicación con el bot de WhatsApp.', 'error');
+                }
+            }, 100);
         }
 
         // ============================================================

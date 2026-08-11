@@ -113,8 +113,39 @@ public class WhatsAppController {
                 return "ERR|Falló el envío. Código: " + responseCode + " - " + responseBody;
             }
 
+        } catch (java.net.ConnectException ce) {
+            return "{\"status\":\"loading\", \"qr\":\"El servidor de WhatsApp se está iniciando. Por favor, espera unos 10 segundos y vuelve a intentar.\"}";
         } catch (Exception e) {
             return "ERR|Error de conexión con el microservicio de WhatsApp: " + e.getMessage();
+        }
+    }
+
+    public String obtenerQR() {
+        if (!nodeInstalado) {
+            return "{\"status\":\"error\", \"qr\":\"Node.js no está instalado\"}";
+        }
+        if (!servidorIniciado) {
+            return "{\"status\":\"error\", \"qr\":\"El servidor de WhatsApp no está iniciado\"}";
+        }
+        try {
+            URL url = new URL("http://localhost:3001/api/qr");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                Scanner s = new Scanner(conn.getInputStream());
+                s.useDelimiter("\\A");
+                String responseBody = s.hasNext() ? s.next() : "";
+                s.close();
+                return responseBody;
+            } else {
+                return "{\"status\":\"error\", \"qr\":\"Error del servidor Node\"}";
+            }
+        } catch (java.net.ConnectException ce) {
+            return "{\"status\":\"loading\", \"qr\":\"El servidor de WhatsApp está arrancando, espera un momento y vuelve a intentar.\"}";
+        } catch (Exception e) {
+            return "{\"status\":\"error\", \"qr\":\"Error de conexión: " + e.getMessage() + "\"}";
         }
     }
 }
