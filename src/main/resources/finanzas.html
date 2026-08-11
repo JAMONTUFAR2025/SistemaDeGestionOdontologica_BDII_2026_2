@@ -1468,7 +1468,6 @@ function renderTablaCierres() {
                 <i class="fas fa-file-pdf text-danger" style="cursor:pointer; font-size:1.15rem;" title="Ver PDF de Cierre" onclick="window.finanzasController.generarPdfCierreCaja(${c.id_caja_sesion})"></i>
             </td>
         </tr>
-        </tr>
     `).join('');
     
     generarBotonesPaginacionJS(paginaCierres, cierresLista.length, 'paginacionHistorial', 'cambiarPaginaCierres');
@@ -1529,7 +1528,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if(typeof flatpickr !== 'undefined') {
         flatpickr('.datepicker', {
-            dateFormat: "d-M-Y"
+            dateFormat: "Y-m-d"
         });
     }
 });

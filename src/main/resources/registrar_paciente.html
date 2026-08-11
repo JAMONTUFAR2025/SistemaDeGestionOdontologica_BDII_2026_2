@@ -168,6 +168,7 @@
                     <form id="registroPacienteForm" onsubmit="registrarPaciente(event)">
 
                         <div class="section-title mt-0">1. Datos Generales del Paciente</div>
+                        <input type="hidden" id="identidad_original" name="identidadOriginal">
 
                         <!-- Fila 1 -->
                         <div class="row mb-3">
@@ -397,6 +398,7 @@
             if (form) form.reset();
             const inputIdentidad = document.getElementById('identidad');
             if (inputIdentidad) inputIdentidad.readOnly = false;
+            document.getElementById('identidad_original').value = '';
             const titulo = document.querySelector('.modal-title');
             if (titulo) titulo.innerHTML = '<i class="fas fa-user-plus"></i> Registro de Nuevo Paciente';
         }
@@ -408,8 +410,9 @@
             const inputIdentidad = document.getElementById('identidad');
             if (inputIdentidad) {
                 inputIdentidad.value = p.identidad || '';
-                inputIdentidad.readOnly = true;
+                inputIdentidad.readOnly = false;
             }
+            document.getElementById('identidad_original').value = p.identidad || '';
             document.getElementById('nombre_completo').value = p.nombreCompleto || '';
 
             let fechaStr = '';
@@ -709,7 +712,7 @@
 
     if(typeof flatpickr !== 'undefined') {
       flatpickr('.datepicker', {
-          dateFormat: "d-M-Y"
+          dateFormat: "Y-m-d"
       });
     }
   });
