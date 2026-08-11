@@ -340,6 +340,11 @@
         }
 
         @media print {
+            @page {
+                size: letter portrait;
+                margin: 15mm;
+            }
+
             body * {
                 visibility: hidden;
             }
@@ -354,7 +359,10 @@
                 left: 0;
                 top: 0;
                 width: 100%;
-                padding: 20px;
+                margin: 0;
+                padding: 0;
+                -webkit-print-color-adjust: exact; /* Fuerza la impresión de fondos y colores */
+                print-color-adjust: exact;
             }
         }
     </style>
@@ -2030,11 +2038,29 @@
         }
 
         function imprimirDocumento() {
-            if (!document.getElementById('selectTipoPlantilla').value) {
+            const select = document.getElementById('selectTipoPlantilla');
+            if (!select.value) {
                 if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor seleccione un documento primero.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor seleccione un documento primero.');
                 return;
             }
-            window.print();
+
+            // Obtener datos para el PDF
+            const tipoPlantilla = select.value;
+            const htmlContenido = document.getElementById('seccion-imprimir').innerHTML;
+            const nombrePaciente = tempPacienteNombre || '';
+            const identidadPaciente = tempPacienteIdentidad || '';
+
+            // Llamar al backend Java para generar el PDF y abrirlo
+            if (window.historiaClinicaController && typeof window.historiaClinicaController.generarPdfDocumentoMedico === 'function') {
+                window.historiaClinicaController.generarPdfDocumentoMedico(
+                    htmlContenido, tipoPlantilla, nombrePaciente, identidadPaciente
+                );
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ title: '¡PDF Generado!', text: 'El documento se abrirá en su visor de PDF.', icon: 'success', timer: 2000, showConfirmButton: false });
+                }
+            } else {
+                alert('El controlador de historia clínica no está disponible. Reinicie la aplicación.');
+            }
         }
 
         // ============================================================
