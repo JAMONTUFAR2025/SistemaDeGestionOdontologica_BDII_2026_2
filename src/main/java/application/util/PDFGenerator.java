@@ -174,7 +174,7 @@ public class PDFGenerator {
             
             for (Map<String, Object> mov : movimientos) {
                 table.addCell(new PdfPCell(new Phrase(mov.get("tipo") != null ? mov.get("tipo").toString().toUpperCase() : "", fontNormal)));
-                table.addCell(new PdfPCell(new Phrase(mov.get("descripcion") != null ? mov.get("descripcion").toString() : "", fontNormal)));
+                table.addCell(new PdfPCell(new Phrase(mov.get("concepto") != null ? mov.get("concepto").toString() : "", fontNormal)));
                 table.addCell(new PdfPCell(new Phrase(mov.get("metodo_pago") != null ? mov.get("metodo_pago").toString() : "", fontNormal)));
                 table.addCell(new PdfPCell(new Phrase("L " + formatNumber(mov.get("monto")), fontNormal)));
             }

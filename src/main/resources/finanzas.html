@@ -164,8 +164,9 @@
         .arqueo-negativo { color: var(--rojo); }
 
         .btn-guardar-verde { background: var(--verde); color: white; border: none; width: 100%; padding: 10px; border-radius: 6px; font-weight: 700; transition: background .2s; }
-        .btn-guardar-verde:hover { background: var(--verde-dark); color: white; }
-        .btn-guardar-azul  { background: var(--azul);  color: white; border: none; width: 100%; padding: 10px; border-radius: 6px; font-weight: 700; }
+        .btn-guardar-verde:hover { background: #0056b3; color: white; }
+        .btn-guardar-azul  { background: var(--azul);  color: white; border: none; width: 100%; padding: 10px; border-radius: 6px; font-weight: 700; transition: background .2s; }
+        .btn-guardar-azul:hover { background: #0056b3; color: white; }
 
         .action-icons i { font-size: 1.1rem; cursor: pointer; margin-right: 10px; }
         .fa-eye  { color: var(--azul); }
@@ -303,12 +304,20 @@
                     <label class="form-label fw-bold text-dark mb-1" style="font-size:.85rem;">Hasta:</label>
                     <input type="date" id="fechaHastaFacturas" class="form-control" style="width:145px;">
                 </div>
-                <button class="btn text-white" onclick="buscarFacturas()" style="height:38px;background:var(--verde);border-color:var(--verde);">
-                    <i class="fas fa-search me-1"></i>Buscar
-                </button>
-                <button class="btn btn-outline-secondary" onclick="limpiarFiltrosFacturas()" style="height:38px;">
-                    <i class="fas fa-times me-1"></i>Limpiar
-                </button>
+                <div>
+                    <div class="form-check form-switch mb-1" style="padding-left: 2.5em;">
+                        <input class="form-check-input" type="checkbox" role="switch" id="chkMostrarAnuladas" onchange="renderTablaFacturas(facturasLista)">
+                        <label class="form-check-label fw-bold text-dark" style="font-size:.85rem; padding-top:2px; cursor:pointer;" for="chkMostrarAnuladas">Mostrar anulados</label>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn text-white" onclick="buscarFacturas()" style="height:38px;background:var(--verde);border-color:var(--verde);">
+                            <i class="fas fa-search me-1"></i>Buscar
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="limpiarFiltrosFacturas()" style="height:38px;">
+                            <i class="fas fa-times me-1"></i>Limpiar
+                        </button>
+                    </div>
+                </div>
             </div>
             <button class="btn fw-bold text-white" onclick="abrirModalFactura()" style="background:var(--verde);border-color:var(--verde);">
                 <i class="fas fa-plus me-1"></i> Nueva Factura
@@ -341,6 +350,11 @@
     <!-- ════════════ TAB 3: EGRESOS ════════════ -->
     <div class="tab-panel" id="panel-egresos">
 
+        <!-- Banner caja en egresos -->
+        <div class="caja-banner" id="egCajaBanner" style="display:none;">
+            <span id="egCajaBannerText"></span>
+        </div>
+
         <!-- Barra de herramientas -->
         <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
             <div class="d-flex flex-wrap align-items-end gap-2">
@@ -356,12 +370,20 @@
                     <label class="form-label fw-bold text-dark mb-1" style="font-size:.85rem;">Hasta:</label>
                     <input type="date" id="fechaHastaEgresos" class="form-control" style="width:145px;">
                 </div>
-                <button class="btn btn-primary" onclick="buscarEgresos()" style="height:38px;">
-                    <i class="fas fa-search me-1"></i>Buscar
-                </button>
-                <button class="btn btn-outline-secondary" onclick="limpiarFiltrosEgresos()" style="height:38px;">
-                    <i class="fas fa-times me-1"></i>Limpiar
-                </button>
+                <div>
+                    <div class="form-check form-switch mb-1" style="padding-left: 2.5em;">
+                        <input class="form-check-input" type="checkbox" role="switch" id="chkMostrarEgresosAnulados" onchange="renderTablaEgresos(egresosLista)">
+                        <label class="form-check-label fw-bold text-dark" style="font-size:.85rem; padding-top:2px; cursor:pointer;" for="chkMostrarEgresosAnulados">Mostrar anulados</label>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" onclick="buscarEgresos()" style="height:38px;">
+                            <i class="fas fa-search me-1"></i>Buscar
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="limpiarFiltrosEgresos()" style="height:38px;">
+                            <i class="fas fa-times me-1"></i>Limpiar
+                        </button>
+                    </div>
+                </div>
             </div>
             <button class="btn btn-primary" onclick="abrirModalEgreso(null)">
                 <i class="fas fa-plus"></i> Nuevo Egreso
@@ -397,6 +419,10 @@
         <!-- Barra de herramientas -->
         <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
             <div class="d-flex flex-wrap align-items-end gap-2">
+                <div>
+                    <label class="form-label fw-bold text-dark mb-1" style="font-size:.85rem;">Buscar:</label>
+                    <input type="text" id="buscadorHistorial" class="form-control" style="width:220px;" placeholder="Cajero, ID..." onkeyup="if(event.key==='Enter') cargarHistorial()">
+                </div>
                 <div>
                     <label class="form-label fw-bold text-dark mb-1" style="font-size:.85rem;">Desde:</label>
                     <input type="date" id="fechaDesdeHistorial" class="form-control" style="width:145px;">
@@ -537,8 +563,8 @@
                     <div class="section-title"><i class="fa-solid fa-receipt me-1"></i> Datos de la Factura</div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">N° Factura:</label>
-                            <input type="text" id="fac_numero_recibo" class="form-control" placeholder="Ej: REC-001">
+                            <label class="form-label fw-bold">N° Factura: <span class="text-danger">*</span></label>
+                            <input type="text" id="fac_numero_recibo" class="form-control fw-bold text-primary" readonly required>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label fw-bold">Fecha Emisión: <span class="text-danger">*</span></label>
@@ -637,7 +663,7 @@
 
 <!-- ══════════ MODAL: EGRESO ══════════ -->
 <div class="modal fade" id="modalEgreso" tabindex="-1" data-bs-backdrop="false">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header modal-header-azul">
                 <h5 class="modal-title fw-bold" id="tituloModalEgreso">
@@ -648,20 +674,15 @@
             <div class="modal-body p-4">
                 <form id="formEgreso">
                     <input type="hidden" id="eg_id">
-                    <div class="section-title mt-0">Detalles de la Compra / Gasto</div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Fecha del Gasto: <span class="text-danger">*</span></label>
-                        <input type="date" id="eg_fecha" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Descripción / Concepto: <span class="text-danger">*</span></label>
-                        <textarea id="eg_descripcion" class="form-control" rows="2" placeholder="Ej: Compra de insumos médicos" required></textarea>
-                    </div>
+                    <div class="section-title mt-0"><i class="fa-solid fa-file-lines me-1"></i> Datos del Gasto</div>
                     <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Monto (Lps.): <span class="text-danger">*</span></label>
-                            <input type="number" id="eg_monto" step="0.01" min="0.01" class="form-control" placeholder="0.00" required>
+                        <div class="col-md-4 mb-2 mb-md-0">
+                            <label class="form-label fw-bold">N° de Comprobante:</label>
+                            <input type="text" id="eg_comprobante" class="form-control" placeholder="Opcional">
+                        </div>
+                        <div class="col-md-4 mb-2 mb-md-0">
+                            <label class="form-label fw-bold">Fecha del Gasto: <span class="text-danger">*</span></label>
+                            <input type="date" id="eg_fecha" class="form-control" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Método de Pago: <span class="text-danger">*</span></label>
@@ -671,20 +692,34 @@
                                 <option value="POS">POS</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">N° Factura:</label>
-                            <input type="text" id="eg_comprobante" class="form-control" placeholder="Opcional">
-                        </div>
                     </div>
 
-                    <!-- Toggle Afecta Caja Chica -->
-                    <div class="mb-3 p-3 rounded" style="background:#f8f9fa;border:1px solid #dee2e6;">
-                        <label class="toggle-switch mb-0">
-                            <input type="checkbox" id="eg_afecta_caja" checked role="switch" class="form-check-input">
-                            <span class="fw-bold ms-2">¿Afecta Caja Chica?</span>
-                        </label>
-                        <div class="small text-muted mt-1" id="eg_caja_info">
-                            El egreso se asociará a la sesión de caja activa.
+                    <div class="section-title"><i class="fa-solid fa-receipt me-1"></i> Detalle del Gasto</div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Concepto: <span class="text-danger">*</span></label>
+                        <textarea id="eg_descripcion" class="form-control" rows="2" placeholder="Ej: Compra de insumos médicos" required></textarea>
+                    </div>
+
+                    <div class="section-title"><i class="fa-solid fa-calculator me-1"></i> Detalle de Montos (Lps.)</div>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="form-label fw-bold text-danger">Monto (Lps.): <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text fw-bold text-danger">Lps.</span>
+                                <input type="number" id="eg_monto" step="0.01" min="0.01" class="form-control fw-bold text-danger" placeholder="0.00" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Toggle Afecta Caja Chica -->
+                            <div class="p-3 rounded" style="background:#f8f9fa;border:1px solid #dee2e6;">
+                                <label class="toggle-switch mb-0">
+                                    <input type="checkbox" id="eg_afecta_caja" checked role="switch" class="form-check-input">
+                                    <span class="fw-bold ms-2">¿Afecta Caja Chica?</span>
+                                </label>
+                                <div class="small text-muted mt-1" id="eg_caja_info">
+                                    El egreso se asociará a la sesión de caja activa.
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -706,17 +741,18 @@
 <div class="modal fade" id="modalEliminarEgreso" data-bs-backdrop="false" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header text-white bg-danger" style="border-radius:14px 14px 0 0;">
-                <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación</h5>
+            <div class="modal-header modal-header-rojo">
+                <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Confirmar Anulación</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body text-center py-4">
-                <h5 class="mb-2">¿Desea eliminar este egreso?</h5>
+                <i class="fas fa-ban fa-3x text-danger mb-3"></i>
+                <h5 class="mb-2">¿Desea anular este egreso?</h5>
                 <p class="text-muted small">El egreso pasará a estado <strong>Inactivo</strong>.</p>
             </div>
             <div class="modal-footer justify-content-center border-0 pb-4">
                 <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">No</button>
-                <button type="button" class="btn btn-danger px-4 fw-bold" onclick="confirmarEliminarEgreso()">Sí, eliminar</button>
+                <button type="button" class="btn btn-danger px-4 fw-bold" onclick="confirmarEliminarEgreso()">Sí, anular</button>
             </div>
         </div>
     </div>
@@ -907,6 +943,21 @@ function renderCajaBanner() {
         facBanner.className = 'caja-banner sin-caja';
         facText.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i><strong>Sin caja activa.</strong> Debes abrir la caja antes de registrar cobros.';
     }
+
+    // Banner en pestaña egresos
+    const egBanner = document.getElementById('egCajaBanner');
+    const egText   = document.getElementById('egCajaBannerText');
+    if (egBanner && egText) {
+        egBanner.style.display = 'flex';
+        if (cajaActiva) {
+            egBanner.className = 'caja-banner sin-caja';
+            egText.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i><strong>Caja Abierta</strong> — Sesión #${cajaActiva.id_caja_sesion}. Los gastos se asociarán a esta sesión si así lo indica.`;
+        } else {
+            egBanner.className = 'caja-banner sin-caja';
+            egText.innerHTML = '<i class="fas fa-info-circle me-2"></i><strong>Sin caja activa.</strong> Los egresos se registrarán independientemente de la caja.';
+        }
+    }
+
     actualizarInfoCajaEgreso();
 }
 
@@ -983,8 +1034,7 @@ function renderTablaMovimientos() {
                 ${badgeRef}
             </td>
             <td class="text-secondary fw-bold" style="font-size:0.9em;">
-                <div><i class="far fa-clock"></i> ${m.hora || '--:--'}</div>
-                <div class="mt-1"><i class="far fa-calendar"></i> ${fechaMostrar || '--/--/----'}</div>
+                <div><i class="far fa-calendar"></i> ${fechaMostrar || '--/--/----'}</div>
             </td>
             <td>${badgePago(m.metodo_pago)}</td>
             <td class="${txt} fw-bold text-end" style="font-size:1.1em;">${esIngreso ? '+' : '-'}${fmtLps(m.monto)}</td>
@@ -1102,7 +1152,11 @@ function cargarPacientesSelector() {
 
 function renderTablaFacturas(lista) {
     const tbody = document.getElementById('tablaFacturasBody');
-    if (!lista || !lista.length) {
+    const chk = document.getElementById('chkMostrarAnuladas');
+    const mostrarAnuladas = chk ? chk.checked : false;
+    let listaFiltrada = mostrarAnuladas ? lista : lista.filter(f => f.estado !== 'Inactivo' && f.estado !== 'Anulada' && f.estado !== 'Anulado');
+
+    if (!listaFiltrada || !listaFiltrada.length) {
         tbody.innerHTML = '<tr><td colspan="8" class="text-muted py-4">No se encontraron registros.</td></tr>'; 
         document.getElementById('paginacionFacturas').innerHTML = '';
         return;
@@ -1110,27 +1164,23 @@ function renderTablaFacturas(lista) {
     
     let inicio = (paginaFacturas - 1) * REGISTROS_POR_PAGINA;
     let fin = inicio + REGISTROS_POR_PAGINA;
-    let paginaDatos = lista.slice(inicio, fin);
+    let paginaDatos = listaFiltrada.slice(inicio, fin);
 
     tbody.innerHTML = paginaDatos.map(f => {
         let badgeE = (f.estado === 'Emitida' || f.estado === 'Activo') ? 'badge-estado badge-efectivo' : 'badge-estado badge-inactivo';
         return `
         <tr>
-            <td class="fw-bold text-primary">${f.numero_recibo || '#' + f.id_factura}</td>
-            <td><small class="text-secondary"><i class="far fa-calendar"></i> ${f.fecha_emision}</small></td>
+            <td class="fw-bold text-primary text-nowrap">${f.numero_recibo || '#' + f.id_factura}</td>
+            <td class="text-nowrap"><small class="text-secondary"><i class="far fa-calendar"></i> ${f.fecha_emision}</small></td>
             <td>${escHtml(f.nombre_paciente || '—')}</td>
             <td>${escHtml(f.concepto) || '—'}</td>
             <td>${badgePago(f.metodo_pago)}</td>
             <td class="fw-bold text-success text-end">${fmtLps(f.total_neto_recibido !== undefined ? f.total_neto_recibido : f.total)}</td>
             <td><span class="${badgeE}">${f.estado}</span></td>
-            <td class="text-center text-nowrap">
-                <button class="btn btn-sm btn-outline-primary" title="Ver Detalles" onclick="verDetalleFactura(${f.id_factura})">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger ms-1" title="Generar PDF" onclick="window.finanzasController.generarPdfFactura(${f.id_factura})">
-                    <i class="fas fa-file-pdf"></i>
-                </button>
-                ${f.estado === 'Activo' ? `<button class="btn btn-sm btn-outline-danger ms-1" title="Anular Factura" onclick="anularFactura(${f.id_factura})"><i class="fas fa-ban"></i></button>` : ''}
+            <td class="action-icons text-center text-nowrap">
+                <i class="fas fa-eye" title="Ver Detalles" onclick="verDetalleFactura(${f.id_factura})"></i>
+                <i class="fas fa-file-pdf text-danger" title="Generar PDF" onclick="window.finanzasController.generarPdfFactura(${f.id_factura})"></i>
+                ${f.estado === 'Activo' ? `<i class="fas fa-ban" title="Anular Factura" onclick="anularFactura(${f.id_factura})"></i>` : ''}
             </td>
         </tr>`;
     }).join('');
@@ -1180,17 +1230,20 @@ function abrirModalFactura() {
     });
     document.getElementById('fac_id').value = '';
     
-    // Auto-generar número de factura
+    // Auto-generar número de factura como FAC-000-XXX
     let maxNum = 0;
     if (facturasLista) {
         for (let f of facturasLista) {
-            if (f.numero_recibo && f.numero_recibo.startsWith('REC-')) {
+            if (f.numero_recibo && f.numero_recibo.startsWith('FAC-000-')) {
+                let num = parseInt(f.numero_recibo.replace('FAC-000-', ''), 10);
+                if (!isNaN(num) && num > maxNum) maxNum = num;
+            } else if (f.numero_recibo && f.numero_recibo.startsWith('REC-')) {
                 let num = parseInt(f.numero_recibo.replace('REC-', ''), 10);
                 if (!isNaN(num) && num > maxNum) maxNum = num;
             }
         }
     }
-    document.getElementById('fac_numero_recibo').value = "REC-" + String(maxNum + 1).padStart(3, '0');
+    document.getElementById('fac_numero_recibo').value = "FAC-000-" + String(maxNum + 1).padStart(3, '0');
 
     document.getElementById('fac_fecha_emision').value = new Date().toISOString().split('T')[0];
     document.getElementById('tituloModalFactura').innerHTML = '<i class="fas fa-cash-register me-2"></i> Nueva Factura';
@@ -1360,10 +1413,14 @@ function limpiarFiltrosEgresos() {
 
 function renderTablaEgresos(lista) {
     const tbody = document.getElementById('tablaEgresosBody');
-    if (!lista || !lista.length) {
+    const chk = document.getElementById('chkMostrarEgresosAnulados');
+    const mostrarAnulados = chk ? chk.checked : false;
+    let listaFiltrada = mostrarAnulados ? lista : lista.filter(e => e.estado !== 'Inactivo' && e.estado !== 'Anulada' && e.estado !== 'Anulado');
+
+    if (!listaFiltrada || !listaFiltrada.length) {
         tbody.innerHTML = '<tr><td colspan="9" class="text-muted py-4">No se encontraron registros.</td></tr>'; return;
     }
-    tbody.innerHTML = lista.map(e => {
+    tbody.innerHTML = listaFiltrada.map(e => {
         const activo     = e.estado === 'Activo';
         const tieneCaja  = e.id_caja_sesion != null && e.id_caja_sesion > 0;
         const cajaBadge  = tieneCaja
@@ -1371,16 +1428,15 @@ function renderTablaEgresos(lista) {
             : `<span class="badge bg-secondary text-white">No</span>`;
         return `<tr style="${!activo ? 'opacity:.6;' : ''}">
             <td class="fw-bold">##${e.id_egreso}</td>
-            <td>${e.fecha || '—'}</td>
+            <td class="text-nowrap"><small class="text-secondary"><i class="far fa-calendar"></i> ${e.fecha || '—'}</small></td>
             <td class="text-start">${escHtml(e.descripcion)}</td>
-            <td>${e.numero_comprobante || '—'}</td>
+            <td class="text-nowrap">${e.numero_comprobante || '—'}</td>
             <td class="egreso-col">${fmtLps(e.monto)}</td>
             <td>${badgePago(e.metodo_pago)}</td>
             <td>${cajaBadge}</td>
             <td><span class="badge-estado ${activo ? 'badge-activo' : 'badge-inactivo'}">${e.estado}</span></td>
-            <td class="action-icons">
-                ${activo ? `<i class="fas fa-edit" title="Editar" onclick="abrirModalEgreso('${encodeURIComponent(JSON.stringify(e))}')"></i>` : ''}
-                ${activo ? `<i class="fas fa-trash" title="Eliminar" onclick="borrarEgreso(${e.id_egreso})"></i>` : ''}
+            <td class="action-icons text-center text-nowrap">
+                ${activo ? `<i class="fas fa-ban text-danger" title="Anular Egreso" onclick="borrarEgreso(${e.id_egreso})"></i>` : ''}
             </td>
         </tr>`;
     }).join('');
@@ -1504,7 +1560,17 @@ function cargarHistorial() {
 
 function renderTablaCierres() {
     const tbody = document.getElementById('tablaHistorialBody');
-    if (!cierresLista || cierresLista.length === 0) {
+    const termino = document.getElementById('buscadorHistorial') ? document.getElementById('buscadorHistorial').value.toLowerCase().trim() : '';
+
+    let listaFiltrada = cierresLista || [];
+    if (termino) {
+        listaFiltrada = listaFiltrada.filter(c => 
+            (c.id_caja_sesion && c.id_caja_sesion.toString().includes(termino)) ||
+            (c.usuario_apertura && c.usuario_apertura.toLowerCase().includes(termino))
+        );
+    }
+
+    if (!listaFiltrada || listaFiltrada.length === 0) {
         tbody.innerHTML = '<tr><td colspan="10" class="text-muted py-4">No se encontraron cierres en el rango seleccionado.</td></tr>';
         document.getElementById('paginacionHistorial').innerHTML = '';
         return;
@@ -1512,12 +1578,23 @@ function renderTablaCierres() {
     
     let inicio = (paginaCierres - 1) * REGISTROS_POR_PAGINA;
     let fin = inicio + REGISTROS_POR_PAGINA;
-    let paginaDatos = cierresLista.slice(inicio, fin);
+    let paginaDatos = listaFiltrada.slice(inicio, fin);
     
-    tbody.innerHTML = paginaDatos.map(c => `
+    tbody.innerHTML = paginaDatos.map(c => {
+        let fechaStr = '—';
+        let horaStr = '';
+        if (c.fecha_cierre) {
+            const parts = c.fecha_cierre.split(' ');
+            fechaStr = parts[0];
+            if (parts.length > 1) horaStr = parts[1];
+        }
+        return `
         <tr>
             <td class="fw-bold">#${c.id_caja_sesion}</td>
-            <td>${c.fecha_cierre || '—'}</td>
+            <td class="text-nowrap">
+                <div><i class="far fa-calendar"></i> ${fechaStr}</div>
+                ${horaStr ? `<div class="mt-1 text-secondary" style="font-size:0.85em;"><i class="far fa-clock"></i> ${horaStr}</div>` : ''}
+            </td>
             <td><small>${c.usuario_apertura || '—'}</small></td>
             <td class="text-primary fw-bold">${fmtLps(c.monto_apertura)}</td>
             <td class="text-success fw-bold">${fmtLps(c.ingresos_efectivo)}</td>
@@ -1528,13 +1605,14 @@ function renderTablaCierres() {
             <td>
                 <i class="fas fa-file-pdf text-danger" style="cursor:pointer; font-size:1.15rem;" title="Ver PDF de Cierre" onclick="window.finanzasController.generarPdfCierreCaja(${c.id_caja_sesion})"></i>
             </td>
-        </tr>
-    `).join('');
+        </tr>`;
+    }).join('');
     
-    generarBotonesPaginacionJS(paginaCierres, cierresLista.length, 'paginacionHistorial', 'cambiarPaginaCierres');
+    generarBotonesPaginacionJS(paginaCierres, listaFiltrada.length, 'paginacionHistorial', 'cambiarPaginaCierres');
 }
 
 function limpiarFiltrosHistorial() {
+    if (document.getElementById('buscadorHistorial')) document.getElementById('buscadorHistorial').value = '';
     document.getElementById('fechaDesdeHistorial').value = '';
     document.getElementById('fechaHastaHistorial').value = '';
     cargarHistorial();

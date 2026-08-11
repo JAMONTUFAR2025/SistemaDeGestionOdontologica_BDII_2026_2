@@ -230,15 +230,15 @@ public class CajaSesionDAO {
     public java.util.List<Map<String, Object>> obtenerMovimientosDeSesion(int idCajaSesion) {
         java.util.List<Map<String, Object>> lista = new java.util.ArrayList<>();
 
-        String query = "SELECT 'INGRESO' AS tipo, DATE_FORMAT(f.fecha_emision, '%Y-%m-%d') AS fecha, DATE_FORMAT(f.fecha_emision, '%H:%i') AS hora, " +
-                       "CONCAT('Cobro: ', p.nombre_completo) AS concepto, f.metodo_pago, f.total_neto_recibido AS monto " +
+        String query = "SELECT 'INGRESO' AS tipo, DATE_FORMAT(f.fecha_emision, '%Y-%m-%d') AS fecha, " +
+                       "f.concepto, f.metodo_pago, f.total_neto_recibido AS monto " +
                        "FROM Facturacion f INNER JOIN Pacientes p ON f.id_pacientes = p.id_pacientes " +
                        "WHERE f.id_caja_sesion = ? AND LOWER(f.anulado) = 'no' " +
                        "UNION ALL " +
-                       "SELECT 'EGRESO' AS tipo, DATE_FORMAT(fecha, '%Y-%m-%d') AS fecha, DATE_FORMAT(fecha, '%H:%i') AS hora, " +
+                       "SELECT 'EGRESO' AS tipo, DATE_FORMAT(fecha, '%Y-%m-%d') AS fecha, " +
                        "descripcion AS concepto, metodo_pago, monto " +
                        "FROM Egresos_Gastos WHERE id_caja_sesion = ? AND LOWER(anulado) = 'no' " +
-                       "ORDER BY hora ASC";
+                       "ORDER BY fecha ASC";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -250,7 +250,6 @@ public class CajaSesionDAO {
                         Map<String, Object> m = new LinkedHashMap<>();
                         m.put("tipo",        rs.getString("tipo"));
                         m.put("fecha",       rs.getString("fecha") != null ? rs.getString("fecha") : "");
-                        m.put("hora",        rs.getString("hora") != null ? rs.getString("hora") : "");
                         m.put("concepto",    rs.getString("concepto"));
                         m.put("monto",       rs.getDouble("monto"));
                         m.put("metodo_pago", rs.getString("metodo_pago"));
