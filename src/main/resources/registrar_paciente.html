@@ -612,21 +612,55 @@
                 document.getElementById('edad').value = '';
                 return;
             }
+            
+            let cumpleanos;
             const partes = fechaStr.split('-');
+            
             if (partes.length === 3) {
-                const ano = parseInt(partes[0], 10);
-                const mes = parseInt(partes[1], 10) - 1;
-                const dia = parseInt(partes[2], 10);
-                if (!isNaN(dia) && !isNaN(mes) && !isNaN(ano)) {
-                    const cumpleanos = new Date(ano, mes, dia);
-                    const hoy = new Date();
-                    let edad = hoy.getFullYear() - cumpleanos.getFullYear();
-                    let m = hoy.getMonth() - cumpleanos.getMonth();
-                    if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) {
-                        edad--;
+                if (partes[0].length === 4) {
+                    // Formato: YYYY-MM-DD
+                    const ano = parseInt(partes[0], 10);
+                    const mes = parseInt(partes[1], 10) - 1;
+                    const dia = parseInt(partes[2], 10);
+                    if (!isNaN(dia) && !isNaN(mes) && !isNaN(ano)) {
+                        cumpleanos = new Date(ano, mes, dia);
                     }
-                    document.getElementById('edad').value = (edad >= 0 && cumpleanos <= hoy) ? edad : '';
+                } else if (partes[2].length === 4) {
+                    // Formato: DD-MM-YYYY o DD-MMM-YYYY
+                    const dia = parseInt(partes[0], 10);
+                    const ano = parseInt(partes[2], 10);
+                    let mes = parseInt(partes[1], 10);
+                    
+                    if (isNaN(mes)) {
+                        // Puede ser un mes en texto como 'Aug'
+                        const d = new Date(fechaStr);
+                        if (!isNaN(d.getTime())) {
+                            cumpleanos = d;
+                        }
+                    } else {
+                        // Es numérico
+                        if (!isNaN(dia) && !isNaN(ano)) {
+                            cumpleanos = new Date(ano, mes - 1, dia);
+                        }
+                    }
                 }
+            }
+
+            // Fallback si no se pudo parsear
+            if (!cumpleanos || isNaN(cumpleanos.getTime())) {
+                cumpleanos = new Date(fechaStr);
+            }
+
+            if (cumpleanos && !isNaN(cumpleanos.getTime())) {
+                const hoy = new Date();
+                let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+                let m = hoy.getMonth() - cumpleanos.getMonth();
+                if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) {
+                    edad--;
+                }
+                document.getElementById('edad').value = (edad >= 0 && cumpleanos <= hoy) ? edad : '';
+            } else {
+                document.getElementById('edad').value = '';
             }
         }
 
@@ -652,6 +686,7 @@
                 inputTelefonoResp.maxLength = 9;
             }
             if (inputFechaNacimiento) {
+                inputFechaNacimiento.addEventListener('input', (e) => calcularEdad(e.target.value));
                 inputFechaNacimiento.addEventListener('change', (e) => calcularEdad(e.target.value));
             }
         });
