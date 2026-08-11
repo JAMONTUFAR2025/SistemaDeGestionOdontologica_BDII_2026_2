@@ -293,7 +293,7 @@
             <div class="d-flex flex-wrap align-items-end gap-2">
                 <div>
                     <label class="form-label fw-bold text-dark mb-1" style="font-size:.85rem;">Buscar:</label>
-                    <input type="text" id="buscadorFacturas" class="form-control" style="width:220px;" placeholder="Nombre, recibo, concepto...">
+                    <input type="text" id="buscadorFacturas" class="form-control" style="width:220px;" placeholder="Nombre, factura, concepto...">
                 </div>
                 <div>
                     <label class="form-label fw-bold text-dark mb-1" style="font-size:.85rem;">Desde:</label>
@@ -311,7 +311,7 @@
                 </button>
             </div>
             <button class="btn fw-bold text-white" onclick="abrirModalFactura()" style="background:var(--verde);border-color:var(--verde);">
-                <i class="fas fa-plus me-1"></i> Nuevo Recibo
+                <i class="fas fa-plus me-1"></i> Nueva Factura
             </button>
         </div>
 
@@ -320,7 +320,7 @@
             <table class="table-custom text-center">
                 <thead>
                     <tr>
-                        <th># Recibo</th>
+                        <th># Factura</th>
                         <th>Fecha</th>
                         <th>Paciente</th>
                         <th>Concepto</th>
@@ -520,13 +520,13 @@
     </div>
 </div>
 
-<!-- ══════════ MODAL: NUEVO RECIBO ══════════ -->
+<!-- ══════════ MODAL: NUEVA FACTURA ══════════ -->
 <div class="modal fade" id="modalFactura" tabindex="-1" data-bs-backdrop="false">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header modal-header-verde">
                 <h5 class="modal-title fw-bold" id="tituloModalFactura">
-                    <i class="fas fa-cash-register me-2"></i> Nuevo Recibo / Factura
+                    <i class="fas fa-cash-register me-2"></i> Nueva Factura
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -534,10 +534,10 @@
                 <form id="formFactura" autocomplete="off">
                     <input type="hidden" id="fac_id">
 
-                    <div class="section-title"><i class="fa-solid fa-receipt me-1"></i> Datos del Recibo</div>
+                    <div class="section-title"><i class="fa-solid fa-receipt me-1"></i> Datos de la Factura</div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">N° Recibo:</label>
+                            <label class="form-label fw-bold">N° Factura:</label>
                             <input type="text" id="fac_numero_recibo" class="form-control" placeholder="Ej: REC-001">
                         </div>
                         <div class="col-md-4 mb-3">
@@ -604,7 +604,7 @@
                         </div>
                         <div class="col-md-7">
                             <button type="button" id="btnGuardarRecibo" class="btn-guardar-verde rounded" onclick="guardarFactura()">
-                                <i class="fas fa-save me-2"></i>Guardar Recibo
+                                <i class="fas fa-save me-2"></i>Guardar Factura
                             </button>
                         </div>
                     </div>
@@ -614,7 +614,7 @@
     </div>
 </div>
 
-<!-- ══════════ MODAL: ANULAR RECIBO ══════════ -->
+<!-- ══════════ MODAL: ANULAR FACTURA ══════════ -->
 <div class="modal fade" id="modalAnularFactura" data-bs-backdrop="false" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -624,8 +624,8 @@
             </div>
             <div class="modal-body text-center py-4">
                 <i class="fas fa-ban fa-3x text-danger mb-3"></i>
-                <h5 class="mb-2">¿Desea anular este recibo?</h5>
-                <p class="text-muted small">El recibo pasará a estado <strong>Inactivo</strong>.</p>
+                <h5 class="mb-2">¿Desea anular esta factura?</h5>
+                <p class="text-muted small">La factura pasará a estado <strong>Inactivo</strong>.</p>
             </div>
             <div class="modal-footer justify-content-center border-0 pb-4">
                 <button type="button" class="btn btn-secondary px-5 fw-bold" data-bs-dismiss="modal">No, cancelar</button>
@@ -1173,7 +1173,7 @@ function abrirModalFactura() {
     });
     document.getElementById('fac_id').value = '';
     document.getElementById('fac_fecha_emision').value = new Date().toISOString().split('T')[0];
-    document.getElementById('tituloModalFactura').innerHTML = '<i class="fas fa-cash-register me-2"></i> Nuevo Recibo / Factura';
+    document.getElementById('tituloModalFactura').innerHTML = '<i class="fas fa-cash-register me-2"></i> Nueva Factura';
     document.getElementById('btnGuardarRecibo').style.display = 'block';
     document.getElementById('btnCancelarRecibo').textContent = 'Cancelar';
     document.getElementById('formFactura').querySelectorAll('input,select,textarea').forEach(el => el.disabled = false);
@@ -1193,7 +1193,7 @@ function verDetalleFactura(jsonStr) {
     document.getElementById('fac_total_retenido').value    = f.total_retenido    || 0;
     document.getElementById('fac_total_neto_recibido').value = f.total_neto_recibido || 0;
     document.getElementById('fac_metodo_pago').value   = f.metodo_pago   || 'Efectivo';
-    document.getElementById('tituloModalFactura').innerHTML = '<i class="fas fa-eye me-2"></i> Detalle del Recibo';
+    document.getElementById('tituloModalFactura').innerHTML = '<i class="fas fa-eye me-2"></i> Detalle de la Factura';
     document.getElementById('btnGuardarRecibo').style.display = 'none';
     document.getElementById('btnCancelarRecibo').textContent = 'Cerrar';
     document.getElementById('formFactura').querySelectorAll('input,select,textarea').forEach(el => el.disabled = true);
