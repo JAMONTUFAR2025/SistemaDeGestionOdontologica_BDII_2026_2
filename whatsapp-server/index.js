@@ -118,6 +118,7 @@ app.get('/api/qr', (req, res) => {
     }
     if (currentQR) {
         return res.json({ qr: currentQR, status: "pending" });
+    }
     return res.json({ qr: "", status: "loading" });
 });
 

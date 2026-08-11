@@ -62,10 +62,19 @@ public class WhatsAppController {
                 conn.setReadTimeout(1500);
                 conn.getResponseCode(); // Ejecutar
                 System.out.println("-> Se detectó un servidor antiguo. Se ha enviado la señal de apagado...");
-                Thread.sleep(2500); // Esperar a que Puppeteer y Node se cierren completamente
+                Thread.sleep(1500); // Esperar a que Puppeteer y Node se cierren
             } catch (Exception ignored) {
                 // Puerto libre o inaccesible (esperado)
             }
+
+            // 1.5. Fuerza bruta: matar cualquier proceso que siga ocupando el puerto 3001 (Windows)
+            try {
+                if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                    ProcessBuilder killPb = new ProcessBuilder("powershell", "-Command", 
+                        "try { $p = (Get-NetTCPConnection -LocalPort 3001 -ErrorAction Stop).OwningProcess; Stop-Process -Id $p -Force } catch {}");
+                    killPb.start().waitFor();
+                }
+            } catch (Exception ignored) {}
 
             // 2. Iniciar el nuevo servidor
             ProcessBuilder pb = new ProcessBuilder(comandoNode, "index.js");
