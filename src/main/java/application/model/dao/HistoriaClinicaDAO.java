@@ -147,7 +147,7 @@ public class HistoriaClinicaDAO {
                        "ec.diagnostico, ec.estado_odontograma, ec.pago_abono, ec.observaciones, " +
                        "ec.fecha_registro, " +
                        "pm.nombre_completo AS nombre_medico, ec.id_personal_medico, " +
-                       "cp.nombre_procedimiento " +
+                       "cp.nombre_procedimiento, ec.id_catalogo_procedimientos " +
                        "FROM Evolucion_Clinica ec " +
                        "LEFT JOIN Personal_Medico pm ON ec.id_personal_medico = pm.id_personal_medico " +
                        "LEFT JOIN Catalogo_Procedimientos cp ON ec.id_catalogo_procedimientos = cp.id_catalogo_procedimientos " +
@@ -178,6 +178,7 @@ public class HistoriaClinicaDAO {
                         map.put("nombre_medico",        rs.getString("nombre_medico"));
                         map.put("id_medico",            rs.getInt("id_personal_medico"));
                         map.put("nombre_procedimiento", rs.getString("nombre_procedimiento"));
+                        map.put("id_catalogo_procedimientos", rs.getObject("id_catalogo_procedimientos"));
                         lista.add(map);
                     }
                 }
