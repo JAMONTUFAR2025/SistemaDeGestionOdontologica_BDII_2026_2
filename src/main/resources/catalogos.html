@@ -488,7 +488,7 @@
 
     function filtrarAlergias() {
         let txt = document.getElementById('buscadorAlergias').value.toLowerCase();
-        filtradasAlergias = listaAlergias.filter(x => x.nombreAlergia.toLowerCase().includes(txt));
+        filtradasAlergias = listaAlergias.filter(x => x.nombre_alergia.toLowerCase().includes(txt));
         paginaAlergia = 1;
         renderAlergias();
     }
@@ -512,10 +512,10 @@
         let html = '';
         paginaDatos.forEach(item => {
             html += `<tr>
-                <td>${item.nombreAlergia}</td>
+                <td>${item.nombre_alergia}</td>
                 <td class="action-icons">
-                    <i class="fas fa-edit" onclick="editarAlergia(${item.idAlergia}, '${item.nombreAlergia.replace(/'/g, "\\'")}')" title="Editar"></i>
-                    <i class="fas fa-trash" onclick="eliminarAlergia(${item.idAlergia})" title="Eliminar"></i>
+                    <i class="fas fa-edit" onclick="editarAlergia(${item.id_catalogo_alergias}, '${item.nombre_alergia.replace(/'/g, "\\'")}')" title="Editar"></i>
+                    <i class="fas fa-trash" onclick="eliminarAlergia(${item.id_catalogo_alergias})" title="Eliminar"></i>
                 </td>
             </tr>`;
         });
@@ -569,7 +569,7 @@
 
     function filtrarProcedimientos() {
         let txt = document.getElementById('buscadorProcedimientos').value.toLowerCase();
-        filtradosProcedimientos = listaProcedimientos.filter(x => x.nombreProcedimiento.toLowerCase().includes(txt));
+        filtradosProcedimientos = listaProcedimientos.filter(x => x.nombre_procedimiento.toLowerCase().includes(txt));
         paginaProcedimiento = 1;
         renderProcedimientos();
     }
@@ -593,11 +593,11 @@
         let html = '';
         paginaDatos.forEach(item => {
             html += `<tr>
-                <td>${item.nombreProcedimiento}</td>
-                <td>${item.precioSugerido.toFixed(2)}</td>
+                <td>${item.nombre_procedimiento}</td>
+                <td>${item.precio_sugerido.toFixed(2)}</td>
                 <td class="action-icons">
-                    <i class="fas fa-edit" onclick="editarProcedimiento(${item.idCatProcedimiento}, '${item.nombreProcedimiento.replace(/'/g, "\\'")}', ${item.precioSugerido})" title="Editar"></i>
-                    <i class="fas fa-trash" onclick="eliminarProcedimiento(${item.idCatProcedimiento})" title="Eliminar"></i>
+                    <i class="fas fa-edit" onclick="editarProcedimiento(${item.id_catalogo_procedimientos}, '${item.nombre_procedimiento.replace(/'/g, "\\'")}', ${item.precio_sugerido})" title="Editar"></i>
+                    <i class="fas fa-trash" onclick="eliminarProcedimiento(${item.id_catalogo_procedimientos})" title="Eliminar"></i>
                 </td>
             </tr>`;
         });
