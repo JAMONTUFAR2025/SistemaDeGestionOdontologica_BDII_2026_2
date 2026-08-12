@@ -261,6 +261,7 @@ CREATE TABLE Evolucion_Clinica (
     CONSTRAINT CHK_EvoClinica_Abono CHECK (pago_abono >= 0)
 );
 
+/*
 CREATE TABLE Consentimientos_Informados (
     id_consentimientos_informados INT AUTO_INCREMENT,
     id_evolucion_clinica INT NOT NULL,
@@ -285,6 +286,7 @@ CREATE TABLE Constancias_Medicas (
     CONSTRAINT PK_Constancias_Medicas PRIMARY KEY (id_constancias_medicas),
     CONSTRAINT FK_Constancias_Evolucion FOREIGN KEY (id_evolucion_clinica) REFERENCES Evolucion_Clinica(id_evolucion_clinica)
 );
+*/
 
 -- ========================================== 
 -- 4. DATOS INICIALES (INSERTS)

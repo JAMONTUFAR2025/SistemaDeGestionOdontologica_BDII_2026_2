@@ -744,10 +744,10 @@
                     <button class="btn-subtab-doc" onclick="cambiarTabDoc('doc-alergias', this)">
                         <i class="fas fa-allergies"></i> Alergias
                     </button>
-                    <button class="btn-subtab-doc" onclick="cambiarTabDoc('doc-consentimientos', this)">
-                        <i class="fas fa-file-signature"></i> Consentimientos
+                    <button class="btn-subtab-doc" onclick="cambiarTabDoc('doc-medicos', this)">
+                        <i class="fas fa-file-signature"></i> Documentos Médicos
                     </button>
-                    <button class="btn-subtab-doc" onclick="cambiarTabDoc('doc-constancias', this)">
+                    <button class="btn-subtab-doc" onclick="cambiarTabDoc('doc-constancias', this)" style="display:none;">
                         <i class="fas fa-file-medical"></i> Constancias Médicas
                     </button>
                 </div>
@@ -791,7 +791,7 @@
                     <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Archivos Registrados</h6>
                     <table class="tabla-docs">
                         <thead><tr>
-                            <th>Tipo</th><th>Nombre</th><th>Ruta/Referencia</th><th>Observaciones</th><th>Fecha</th><th>Acción</th>
+                            <th>Tipo</th><th>Nombre</th><th>Observaciones</th><th>Fecha</th><th>Acción</th>
                         </tr></thead>
                         <tbody id="tablaArchivosDoc"></tbody>
                     </table>
@@ -821,49 +821,17 @@
                     </table>
                 </div>
 
-                <!-- TAB: CONSENTIMIENTOS -->
-                <div id="tab-doc-consentimientos" class="tab-panel-doc">
-                    <div class="form-seccion-doc">
-                        <h5><i class="fas fa-plus-circle"></i> Registrar Consentimiento Informado</h5>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold" style="font-size:13px;">Evolución Clínica *</label>
-                                <select id="coSelectEvolucionDoc" class="form-select">
-                                    <option value="">-- Seleccione Consulta --</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold" style="font-size:13px;">Tipo de Procedimiento *</label>
-                                <select id="coTipoDoc" class="form-select">
-                                    <option value="">-- Seleccione --</option>
-                                    <option value="Cirugia Bucal">Cirugía Bucal</option>
-                                    <option value="Endodoncia">Endodoncia</option>
-                                    <option value="Otro">Otro</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold" style="font-size:13px;">Fecha de Firma *</label>
-                                <input type="date" id="coFechaFirmaDoc" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold" style="font-size:13px;">Representante Legal (si aplica)</label>
-                                <input type="text" id="coRepresentanteDoc" class="form-control" placeholder="Nombre del tutor/representante...">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold" style="font-size:13px;">Identidad del Representante</label>
-                                <input type="text" id="coIdentidadRepDoc" class="form-control" placeholder="Número de identidad...">
-                            </div>
-                            <div class="col-12">
-                                <button class="btn-primary-doc" onclick="guardarConsentimientoDoc()"><i class="fas fa-save"></i> Guardar Consentimiento</button>
-                            </div>
-                        </div>
-                        <div id="alertaConsentimientosDoc" class="alerta-doc mt-2"></div>
+                <!-- TAB: DOCUMENTOS MÉDICOS -->
+                <div id="tab-doc-medicos" class="tab-panel-doc">
+                    <div class="form-seccion-doc border p-4 rounded d-flex justify-content-between align-items-center" style="background-color: #f8f9fa;">
+                        <h5 class="fw-bold m-0 text-dark d-flex align-items-center">
+                            <i class="fa-solid fa-file-signature me-2" style="font-size: 1.2rem;"></i> Documentos Médicos
+                        </h5>
+                        <button class="btn btn-dark fw-bold px-4 py-2"
+                            onclick="if(pacienteActualDoc) prepararGenerarDoc(pacienteActualDoc.identidad, pacienteActualDoc.nombre_completo); else alert('Seleccione un paciente primero.')">
+                            <i class="fa-solid fa-print me-2"></i> Generar / Imprimir Documento
+                        </button>
                     </div>
-                    <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Consentimientos Registrados</h6>
-                    <table class="tabla-docs">
-                        <thead><tr><th>Tipo Procedimiento</th><th>Representante</th><th>Identidad Rep.</th><th>Fecha Firma</th><th>Acción</th></tr></thead>
-                        <tbody id="tablaConsentimientosDoc"></tbody>
-                    </table>
                 </div>
 
                 <!-- TAB: CONSTANCIAS -->
@@ -1630,20 +1598,7 @@
             </div>
         </div>
 
-        <!-- Bloque 6: Acciones del expediente -->
-        <div class="col-12 mt-2">
-            <div class="seccion-bloque shadow-sm border-dark">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold m-0 text-dark">
-                        <i class="fa-solid fa-file-signature me-2"></i>Documentos Médicos
-                    </h6>
-                    <button class="btn btn-sm btn-dark fw-bold"
-                        onclick="prepararGenerarDoc('${escHtml(p.identidad || ultimoBusquedaIdentidad)}','${escHtml(p.nombre_completo || '')}')">
-                        <i class="fa-solid fa-print me-1"></i> Generar / Imprimir Documento
-                    </button>
-                </div>
-            </div>
-        </div>`;
+        `;
         }
 
         // ============================================================
@@ -2445,12 +2400,11 @@
                 <tr>
                     <td><span class="badge-tipo-doc ${getBadgeTipoDoc(a.tipo_archivo)}">${a.tipo_archivo}</span></td>
                     <td>${a.nombre_archivo}</td>
-                    <td style="font-size:12px; color:#555; word-break:break-all;">${a.ruta_archivo}</td>
                     <td style="font-size:12px;">${a.observaciones || '—'}</td>
                     <td style="font-size:12px;">${a.fecha_subida || '—'}</td>
-                    <td style="white-space: nowrap;">
-                        <button class="btn btn-info btn-sm text-white border-0 shadow-sm me-1" onclick="abrirArchivoDoc('${a.ruta_archivo.replace(/\\/g, '\\\\')}')" title="Visualizar Archivo"><i class="fas fa-eye"></i></button>
-                        <button class="btn-danger-doc" style="padding:4px 8px;" onclick="eliminarArchivoDoc(${a.id_expediente_archivos})" title="Eliminar Archivo"><i class="fas fa-trash"></i></button>
+                    <td style="white-space: nowrap; font-size: 1.2rem;">
+                        <i class="fas fa-eye text-primary" style="cursor:pointer; margin-right: 12px;" onclick="abrirArchivoDoc('${a.ruta_archivo.replace(/\\/g, '\\\\')}')" title="Visualizar Archivo"></i>
+                        <i class="fas fa-trash text-danger" style="cursor:pointer;" onclick="eliminarArchivoDoc(${a.id_expediente_archivos})" title="Eliminar Archivo"></i>
                     </td>
                 </tr>`).join('');
         }
@@ -2543,7 +2497,7 @@
             tbody.innerHTML = alergias.map(a => `
                 <tr>
                     <td><span class="badge-tipo-doc badge-otro"><i class="fas fa-exclamation-triangle" style="color:#dc3545;"></i> ${a.nombre_alergia}</span></td>
-                    <td><button class="btn-danger-doc" onclick="eliminarAlergiaDoc(${a.id_paciente_alergias})"><i class="fas fa-trash"></i></button></td>
+                    <td style="font-size: 1.2rem;"><i class="fas fa-trash text-danger" style="cursor:pointer;" onclick="eliminarAlergiaDoc(${a.id_paciente_alergias})" title="Eliminar Alergia"></i></td>
                 </tr>`).join('');
         }
 
@@ -2598,7 +2552,7 @@
                     <td>${c.representante_legal || '—'}</td>
                     <td>${c.identidad_representante || '—'}</td>
                     <td>${c.fecha_firma}</td>
-                    <td><button class="btn-danger-doc" onclick="eliminarConsentimientoDoc(${c.id_consentimientos_informados})"><i class="fas fa-trash"></i></button></td>
+                    <td style="font-size: 1.2rem;"><i class="fas fa-trash text-danger" style="cursor:pointer;" onclick="eliminarConsentimientoDoc(${c.id_consentimientos_informados})" title="Eliminar Consentimiento"></i></td>
                 </tr>`).join('');
         }
 
@@ -2659,7 +2613,7 @@
                     <td>${c.hora_emision}</td>
                     <td style="font-size:12px;">${c.nombre_medico || '—'}</td>
                     <td style="font-size:12px;">${c.tratamiento_realizado}</td>
-                    <td><button class="btn-danger-doc" onclick="eliminarConstanciaDoc(${c.id_constancias_medicas})"><i class="fas fa-trash"></i></button></td>
+                    <td style="font-size: 1.2rem;"><i class="fas fa-trash text-danger" style="cursor:pointer;" onclick="eliminarConstanciaDoc(${c.id_constancias_medicas})" title="Eliminar Constancia"></i></td>
                 </tr>`).join('');
         }
 
