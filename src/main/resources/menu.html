@@ -260,6 +260,13 @@
             <p>Gestión de doctores, usuarios y roles</p>
         </a>
 
+        <!-- Módulo: Catálogos -->
+        <a href="catalogos.html" class="card" id="card-catalogos">
+            <div class="icon"><i class="fas fa-list-alt"></i></div>
+            <h3>Catálogos del Sistema</h3>
+            <p>Especialidades, alergias y procedimientos</p>
+        </a>
+
     </div>
 
     <!-- Script original de Bootstrap -->
@@ -308,17 +315,20 @@
             const cardFacturacion = document.getElementById('card-facturacion');
             const cardPersonal    = document.getElementById('card-personal');
             const cardCitas       = document.getElementById('card-citas');
+            const cardCatalogos   = document.getElementById('card-catalogos');
 
             let rolNormalizado = rol ? rol.trim().toLowerCase() : "";
 
             if (rolNormalizado === 'recepcionista') {
                 if (cardHistoria)   cardHistoria.style.display   = 'none';
                 if (cardPersonal)   cardPersonal.style.display   = 'none';
+                if (cardCatalogos)  cardCatalogos.style.display  = 'none';
 
             } else if (rolNormalizado === 'médico' || rolNormalizado === 'medico') {
                 if (cardCitas)       cardCitas.style.display       = 'none';
                 if (cardFacturacion) cardFacturacion.style.display = 'none';
                 if (cardPersonal)   cardPersonal.style.display    = 'none';
+                if (cardCatalogos)  cardCatalogos.style.display  = 'none';
             }
         }
 

@@ -121,4 +121,55 @@ public class CatalogoController extends BaseController {
             return "ERR|Error: " + t.getMessage();
         }
     }
+
+    // =====================================================
+    // CATÁLOGO DE ESPECIALIDADES
+    // =====================================================
+
+    public String obtenerEspecialidades() {
+        try {
+            application.model.dao.EspecialidadDAO dao = new application.model.dao.EspecialidadDAO();
+            return gson.toJson(dao.obtenerEspecialidades());
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en obtenerEspecialidades: " + t.getMessage());
+            return "[]";
+        }
+    }
+
+    public String agregarEspecialidad(String nombre) {
+        try {
+            if (nombre == null || nombre.trim().isEmpty())
+                return "ERR|El nombre de la especialidad es obligatorio.";
+            application.model.dao.EspecialidadDAO dao = new application.model.dao.EspecialidadDAO();
+            boolean ok = dao.agregarEspecialidad(nombre.trim());
+            return ok ? "OK|Especialidad agregada exitosamente." : "ERR|No se pudo agregar la especialidad.";
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en agregarEspecialidad: " + t.getMessage());
+            return "ERR|Error: " + t.getMessage();
+        }
+    }
+
+    public String actualizarEspecialidad(int id, String nombre) {
+        try {
+            if (nombre == null || nombre.trim().isEmpty())
+                return "ERR|El nombre de la especialidad es obligatorio.";
+            application.model.dao.EspecialidadDAO dao = new application.model.dao.EspecialidadDAO();
+            boolean ok = dao.actualizarEspecialidad(id, nombre.trim());
+            return ok ? "OK|Especialidad actualizada exitosamente." : "ERR|No se pudo actualizar la especialidad.";
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en actualizarEspecialidad: " + t.getMessage());
+            return "ERR|Error: " + t.getMessage();
+        }
+    }
+
+    public String eliminarEspecialidad(int id) {
+        try {
+            application.model.dao.EspecialidadDAO dao = new application.model.dao.EspecialidadDAO();
+            boolean ok = dao.eliminarEspecialidad(id);
+            return ok ? "OK|Especialidad eliminada exitosamente." : "ERR|No se pudo eliminar. Puede estar asignada a personal médico.";
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en eliminarEspecialidad: " + t.getMessage());
+            return "ERR|Error: " + t.getMessage();
+        }
+    }
 }
