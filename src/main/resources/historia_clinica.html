@@ -772,8 +772,11 @@
                                 <input type="text" id="arNombreDoc" class="form-control" placeholder="Rx_Panoramica_Paciente.png">
                             </div>
                             <div class="col-md-5">
-                                <label class="form-label fw-semibold" style="font-size:13px;">Ruta / Referencia *</label>
-                                <input type="text" id="arRutaDoc" class="form-control" placeholder="/uploads/pacientes/1/rx.png">
+                                <label class="form-label fw-semibold" style="font-size:13px;">Archivo Clínico *</label>
+                                <div class="input-group">
+                                    <input type="text" id="arRutaDoc" class="form-control" readonly placeholder="Seleccione un archivo...">
+                                    <button class="btn btn-secondary" type="button" onclick="seleccionarArchivoFisico()"><i class="fas fa-folder-open"></i> Examinar...</button>
+                                </div>
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-semibold" style="font-size:13px;">Observaciones</label>
@@ -2445,8 +2448,35 @@
                     <td style="font-size:12px; color:#555; word-break:break-all;">${a.ruta_archivo}</td>
                     <td style="font-size:12px;">${a.observaciones || '—'}</td>
                     <td style="font-size:12px;">${a.fecha_subida || '—'}</td>
-                    <td><button class="btn-danger-doc" onclick="eliminarArchivoDoc(${a.id_expediente_archivos})"><i class="fas fa-trash"></i></button></td>
+                    <td style="white-space: nowrap;">
+                        <button class="btn btn-info btn-sm text-white border-0 shadow-sm me-1" onclick="abrirArchivoDoc('${a.ruta_archivo.replace(/\\/g, '\\\\')}')" title="Visualizar Archivo"><i class="fas fa-eye"></i></button>
+                        <button class="btn-danger-doc" style="padding:4px 8px;" onclick="eliminarArchivoDoc(${a.id_expediente_archivos})" title="Eliminar Archivo"><i class="fas fa-trash"></i></button>
+                    </td>
                 </tr>`).join('');
+        }
+
+        function seleccionarArchivoFisico() {
+            if (!window.documentosController) { alert('Conector Java no disponible.'); return; }
+            const ruta = window.documentosController.seleccionarArchivoPath();
+            if (ruta && ruta !== '') {
+                document.getElementById('arRutaDoc').value = ruta;
+                // Auto-rellenar el nombre del archivo si está vacío
+                const nombreActual = document.getElementById('arNombreDoc').value;
+                if (!nombreActual.trim()) {
+                    const partes = ruta.split(/[\/\\]/);
+                    let nombreExt = partes[partes.length - 1];
+                    let nombreSinExt = nombreExt.split('.').slice(0, -1).join('.') || nombreExt;
+                    document.getElementById('arNombreDoc').value = nombreSinExt;
+                }
+            }
+        }
+
+        function abrirArchivoDoc(ruta) {
+            if (!window.documentosController) return;
+            const resp = window.documentosController.abrirArchivo(ruta);
+            if (resp.startsWith('ERR|')) {
+                alert(resp.substring(4));
+            }
         }
 
         function getBadgeTipoDoc(tipo) {
@@ -2476,10 +2506,22 @@
         }
 
         function eliminarArchivoDoc(id) {
-            if (!confirm('¿Desea eliminar este archivo del expediente?')) return;
-            const resp = window.documentosController.eliminarArchivo(id);
-            if (resp.startsWith('OK|')) cargarArchivosDoc();
-            else alert(resp.substring(4));
+            Swal.fire({
+                title: '¿Confirmar Eliminación?',
+                text: '¿Desea eliminar este archivo del expediente?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, borrar',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const resp = window.documentosController.eliminarArchivo(id);
+                    if (resp.startsWith('OK|')) { cargarArchivosDoc(); Swal.fire('Eliminado', resp.substring(3), 'success'); }
+                    else Swal.fire('Error', resp.substring(4), 'error');
+                }
+            });
         }
 
         // --- ALERGIAS ---
@@ -2515,10 +2557,22 @@
         }
 
         function eliminarAlergiaDoc(id) {
-            if (!confirm('¿Desea eliminar esta alergia del paciente?')) return;
-            const resp = window.documentosController.eliminarAlergiaPaciente(id);
-            if (resp.startsWith('OK|')) cargarAlergiasPacienteDoc();
-            else alert(resp.substring(4));
+            Swal.fire({
+                title: '¿Confirmar Eliminación?',
+                text: '¿Desea eliminar esta alergia del paciente?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, borrar',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const resp = window.documentosController.eliminarAlergiaPaciente(id);
+                    if (resp.startsWith('OK|')) { cargarAlergiasPacienteDoc(); Swal.fire('Eliminada', resp.substring(3), 'success'); }
+                    else Swal.fire('Error', resp.substring(4), 'error');
+                }
+            });
         }
 
         // --- EVOLUCIONES (selector compartido) ---
@@ -2573,11 +2627,23 @@
         }
 
         function eliminarConsentimientoDoc(id) {
-            if (!confirm('¿Desea eliminar este consentimiento?')) return;
-            const idEv = parseInt(document.getElementById('coSelectEvolucionDoc').value);
-            const resp = window.documentosController.eliminarConsentimiento(id);
-            if (resp.startsWith('OK|')) cargarConsentimientosPorEvolucionDoc(idEv);
-            else alert(resp.substring(4));
+            Swal.fire({
+                title: '¿Confirmar Eliminación?',
+                text: '¿Desea eliminar este consentimiento?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, borrar',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const idEv = parseInt(document.getElementById('coSelectEvolucionDoc').value);
+                    const resp = window.documentosController.eliminarConsentimiento(id);
+                    if (resp.startsWith('OK|')) { cargarConsentimientosPorEvolucionDoc(idEv); Swal.fire('Eliminado', resp.substring(3), 'success'); }
+                    else Swal.fire('Error', resp.substring(4), 'error');
+                }
+            });
         }
 
         // --- CONSTANCIAS ---
@@ -2616,10 +2682,22 @@
         }
 
         function eliminarConstanciaDoc(id) {
-            if (!confirm('¿Desea eliminar esta constancia médica?')) return;
-            const resp = window.documentosController.eliminarConstancia(id);
-            if (resp.startsWith('OK|')) cargarConstanciasDoc();
-            else alert(resp.substring(4));
+            Swal.fire({
+                title: '¿Confirmar Eliminación?',
+                text: '¿Desea eliminar esta constancia médica?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, borrar',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const resp = window.documentosController.eliminarConstancia(id);
+                    if (resp.startsWith('OK|')) { cargarConstanciasDoc(); Swal.fire('Eliminada', resp.substring(3), 'success'); }
+                    else Swal.fire('Error', resp.substring(4), 'error');
+                }
+            });
         }
 
         // --- HELPERS ALERTAS DOCS ---

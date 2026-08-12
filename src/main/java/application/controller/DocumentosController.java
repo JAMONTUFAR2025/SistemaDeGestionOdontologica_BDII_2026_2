@@ -83,6 +83,35 @@ public class DocumentosController extends BaseController {
         }
     }
 
+    public String seleccionarArchivoPath() {
+        try {
+            javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+            fileChooser.setTitle("Seleccionar Archivo Clínico");
+            java.io.File file = fileChooser.showOpenDialog(null);
+            if (file != null) {
+                return file.getAbsolutePath();
+            }
+            return "";
+        } catch (Exception e) {
+            System.err.println("-> ERROR en seleccionarArchivoPath: " + e.getMessage());
+            return "";
+        }
+    }
+
+    public String abrirArchivo(String ruta) {
+        try {
+            java.io.File file = new java.io.File(ruta);
+            if (file.exists()) {
+                java.awt.Desktop.getDesktop().open(file);
+                return "OK";
+            }
+            return "ERR|El archivo no existe en la ruta especificada.";
+        } catch (Exception e) {
+            System.err.println("-> ERROR en abrirArchivo: " + e.getMessage());
+            return "ERR|No se pudo abrir el archivo: " + e.getMessage();
+        }
+    }
+
     public String registrarArchivo(String jsonData) {
         try {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonData).getAsJsonObject();
@@ -90,17 +119,42 @@ public class DocumentosController extends BaseController {
             if (idPacientes <= 0) return "ERR|El ID del paciente es obligatorio.";
 
             String tipoArchivo   = str(obj, "tipo_archivo");
-            String nombreArchivo = str(obj, "nombre_archivo");
-            String rutaArchivo   = str(obj, "ruta_archivo");
+            String nombreArchivoOriginal = str(obj, "nombre_archivo");
+            String rutaArchivoOriginal   = str(obj, "ruta_archivo");
             String observaciones = str(obj, "observaciones");
 
             if (tipoArchivo.isEmpty())   return "ERR|El tipo de archivo es obligatorio.";
-            if (nombreArchivo.isEmpty()) return "ERR|El nombre del archivo es obligatorio.";
-            if (rutaArchivo.isEmpty())   return "ERR|La ruta/referencia del archivo es obligatoria.";
+            if (rutaArchivoOriginal.isEmpty())   return "ERR|La ruta del archivo original es obligatoria.";
+
+            java.io.File sourceFile = new java.io.File(rutaArchivoOriginal);
+            if (!sourceFile.exists()) {
+                return "ERR|El archivo seleccionado ya no existe en la ruta original.";
+            }
+
+            // Crear carpeta del paciente
+            String userHome = System.getProperty("user.home");
+            java.nio.file.Path targetDir = java.nio.file.Paths.get(userHome, "SOE_Archivos", "Pacientes", String.valueOf(idPacientes));
+            if (!java.nio.file.Files.exists(targetDir)) {
+                java.nio.file.Files.createDirectories(targetDir);
+            }
+
+            // Generar nombre de archivo: Tipo_YYYYMMDD_HHMMSS.ext
+            String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+            String fileName = sourceFile.getName();
+            String ext = fileName.contains(".") ? fileName.substring(fileName.lastIndexOf('.')) : "";
+            String newFileName = tipoArchivo + "_" + timestamp + ext;
+            
+            java.nio.file.Path targetPath = targetDir.resolve(newFileName);
+            
+            // Copiar el archivo fisicamente
+            java.nio.file.Files.copy(sourceFile.toPath(), targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            
+            String rutaFinal = targetPath.toAbsolutePath().toString();
+            String nombreFinal = nombreArchivoOriginal.isEmpty() ? newFileName : nombreArchivoOriginal;
 
             application.model.dao.ExpedienteArchivoDAO dao = new application.model.dao.ExpedienteArchivoDAO();
-            boolean ok = dao.registrar(idPacientes, tipoArchivo, nombreArchivo, rutaArchivo, observaciones);
-            return ok ? "OK|Archivo registrado exitosamente." : "ERR|No se pudo registrar el archivo.";
+            boolean ok = dao.registrar(idPacientes, tipoArchivo, nombreFinal, rutaFinal, observaciones);
+            return ok ? "OK|Archivo registrado exitosamente." : "ERR|No se pudo registrar el archivo en la base de datos.";
         } catch (Throwable t) {
             System.err.println("-> ERROR en registrarArchivo: " + t.getMessage());
             return "ERR|Error: " + t.getMessage();
