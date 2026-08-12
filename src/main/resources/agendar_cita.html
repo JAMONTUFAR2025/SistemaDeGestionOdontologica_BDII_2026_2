@@ -663,7 +663,23 @@
             let fecha = document.getElementById('fecha_cita').value;
             let hora = document.getElementById('hora_cita').value;
             if (fecha && hora) {
-                document.getElementById('fecha_hora').value = fecha + ' ' + hora + ':00';
+                let formattedHora = hora;
+                if (hora.toUpperCase().includes('AM') || hora.toUpperCase().includes('PM')) {
+                    let isPM = hora.toUpperCase().includes('PM');
+                    let timeParts = hora.replace(/AM|PM/gi, '').trim().split(':');
+                    if (timeParts.length >= 2) {
+                        let h = parseInt(timeParts[0], 10);
+                        let m = parseInt(timeParts[1], 10);
+                        if (isPM && h < 12) h += 12;
+                        if (!isPM && h === 12) h = 0;
+                        formattedHora = h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0');
+                    }
+                }
+                
+                if (formattedHora.split(':').length === 2) {
+                    formattedHora += ':00';
+                }
+                document.getElementById('fecha_hora').value = fecha + ' ' + formattedHora;
             }
         }
 
@@ -700,6 +716,12 @@
         // WhatsApp
         // ============================================================
         function enviarWhatsApp() {
+            let idCitaEdicion = document.getElementById('id_cita_edicion').value;
+            if (!idCitaEdicion) {
+                Swal.fire({ title: 'Atención', text: 'Primero debes Guardar la cita en el sistema para poder enviar un recordatorio.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                return;
+            }
+            
             let selectPaciente = document.getElementById('identidad_paciente');
             if (!selectPaciente.value) {
                 Swal.fire({ title: 'Atención', text: 'Por favor selecciona un paciente primero.', icon: 'warning', confirmButtonText: 'Entendido', confirmButtonColor: '#ffc107' });
