@@ -994,7 +994,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text">Lps.</span>
                                     <input type="number" step="0.01" min="0" id="ev_pago_abono" class="form-control"
-                                        value="0.00">
+                                        placeholder="0.00">
                                 </div>
                             </div>
                         </div>
@@ -1574,7 +1574,7 @@
             window.id_evolucion_editando = null;
             document.getElementById('formNuevaConsulta').reset();
             document.getElementById('ev_identidad').value = identidad;
-            document.getElementById('ev_pago_abono').value = '0.00';
+            document.getElementById('ev_pago_abono').value = '';
 
             // Fecha actual
             const now = new Date();
