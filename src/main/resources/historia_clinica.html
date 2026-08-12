@@ -828,7 +828,7 @@
                             <i class="fa-solid fa-file-signature me-2" style="font-size: 1.2rem;"></i> Documentos Médicos
                         </h5>
                         <button class="btn btn-dark fw-bold px-4 py-2"
-                            onclick="if(pacienteActualDoc) prepararGenerarDoc(pacienteActualDoc.identidad, pacienteActualDoc.nombre_completo); else alert('Seleccione un paciente primero.')">
+                            onclick="if(pacienteActualDoc) prepararGenerarDoc(pacienteActualDoc.identidad, pacienteActualDoc.nombre_completo); else Swal.fire('Atención', 'Seleccione un paciente primero.', 'warning')">
                             <i class="fa-solid fa-print me-2"></i> Generar / Imprimir Documento
                         </button>
                     </div>
@@ -2244,7 +2244,7 @@
                     Swal.fire({ title: '¡PDF Generado!', text: 'El documento se abrirá en su visor de PDF.', icon: 'success', timer: 2000, showConfirmButton: false });
                 }
             } else {
-                alert('El controlador de historia clínica no está disponible. Reinicie la aplicación.');
+                Swal.fire('Error', 'El controlador de historia clínica no está disponible. Reinicie la aplicación.', 'error');
             }
         }
 
@@ -2410,7 +2410,7 @@
         }
 
         function seleccionarArchivoFisico() {
-            if (!window.documentosController) { alert('Conector Java no disponible.'); return; }
+            if (!window.documentosController) { Swal.fire('Error', 'Conector Java no disponible.', 'error'); return; }
             const ruta = window.documentosController.seleccionarArchivoPath();
             if (ruta && ruta !== '') {
                 document.getElementById('arRutaDoc').value = ruta;
@@ -2429,7 +2429,7 @@
             if (!window.documentosController) return;
             const resp = window.documentosController.abrirArchivo(ruta);
             if (resp.startsWith('ERR|')) {
-                alert(resp.substring(4));
+                Swal.fire('Error', resp.substring(4), 'error');
             }
         }
 
