@@ -426,87 +426,124 @@
          MODAL: REGISTRAR NUEVO PACIENTE (con BD)
     ================================================ -->
     <div id="modalPaciente" class="modal-overlay">
-        <div class="modal-box">
-            <span onclick="cerrarModalPaciente();" class="modal-close">&times;</span>
-            <h2 style="color: #007bf0; text-align: center; margin-top: 0; margin-bottom: 25px;">Registro de Nuevo Paciente</h2>
-
-            <div id="msgModalPaciente" style="display: none; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 13px;"></div>
+        <div class="modal-box" style="padding: 0; overflow-y: auto; overflow-x: hidden;">
+            <div style="background-color: #007bf0; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+                <h5 style="margin: 0; font-size: 1.25rem; font-weight: bold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><i class="fas fa-user-plus"></i> Registro de Nuevo Paciente</h5>
+                <button type="button" onclick="cerrarModalPaciente();" style="background: transparent; border: none; font-size: 24px; color: white; cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+            
+            <div style="padding: 20px 30px;">
+                <div id="msgModalPaciente" style="display: none; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 13px;"></div>
 
             <form id="formNuevoPacienteModal">
-                <div class="modal-section-title">Datos Personales</div>
+                <input type="hidden" id="identidad_original" name="identidadOriginal">
+                
+                <div class="modal-section-title">1. Datos Generales del Paciente</div>
 
-                <!-- Fila 1: DNI y Nombre Completo -->
+                <!-- Fila 1: Nombre y Edad -->
                 <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">DNI:</label>
-                        <input type="text" id="modal_identidad" name="identidad" required
-                            placeholder="Ej: 0801-1990-12345"
+                    <div style="flex: 3;">
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Nombre:</label>
+                        <input type="text" id="nombre_completo" name="nombreCompleto" required
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                     </div>
                     <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Nombre Completo:</label>
-                        <input type="text" id="modal_nombre_pac" name="nombre_completo" required
-                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Edad:</label>
+                        <input type="text" id="edad" readonly
+                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; background-color: #e9ecef;">
                     </div>
                 </div>
 
-                <!-- Fila 2: Fecha de Nacimiento, Género y Ocupación -->
+                <!-- Fila 2: Genero y Domicilio -->
                 <div style="display: flex; gap: 15px; margin-bottom: 15px;">
                     <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Fecha de Nacimiento:</label>
-                        <input type="date" id="modal_fecha_nac" name="fecha_nacimiento"
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Genero:</label>
+                        <select id="genero" name="genero"
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Género:</label>
-                        <select name="genero"
-                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                            <option value="M">Masculino</option>
-                            <option value="F">Femenino</option>
+                            <option value="M">M</option>
+                            <option value="F">F</option>
                         </select>
                     </div>
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Ocupación:</label>
-                        <input type="text" name="ocupacion"
+                    <div style="flex: 2;">
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Domicilio:</label>
+                        <input type="text" id="domicilio" name="domicilio"
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                     </div>
                 </div>
 
-                <!-- Fila 3: Teléfono -->
-                <div style="margin-bottom: 15px;">
-                    <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Teléfono:</label>
-                    <input type="text" id="modal_tel_pac" name="telefono" required
-                        style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
+                <!-- Fila 3: Estado Civil y Ocupación -->
+                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Estado Civil:</label>
+                        <select id="estado_civil" name="estadoCivil"
+                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
+                            <option value="Soltero(a)">Soltero(a)</option>
+                            <option value="Casado(a)">Casado(a)</option>
+                            <option value="Divorciado(a)">Divorciado(a)</option>
+                            <option value="Viudo(a)">Viudo(a)</option>
+                            <option value="Union Libre">Unión Libre</option>
+                        </select>
+                    </div>
+                    <div style="flex: 2;">
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Ocupación:</label>
+                        <input type="text" id="ocupacion" name="ocupacion"
+                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
+                    </div>
                 </div>
 
-                <!-- Fila 4: Domicilio -->
-                <div style="margin-bottom: 25px;">
-                    <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Domicilio / Dirección:</label>
-                    <textarea name="direccion" rows="2"
-                        style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; box-sizing: border-box; font-size: 14px;"></textarea>
+                <!-- Fila 4: Fecha de Nacimiento -->
+                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Fecha de nacimiento:</label>
+                        <input type="date" id="fecha_nacimiento" name="fechaNacimiento" required
+                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
+                    </div>
+                    <div style="flex: 2;">
+                    </div>
                 </div>
 
-                <div class="modal-section-title">Persona Responsable (emergencia o menor de edad)</div>
-
-                <!-- Fila 5: Responsable -->
+                <!-- Fila 5: Teléfono y Identidad -->
                 <div style="display: flex; gap: 15px; margin-bottom: 25px;">
                     <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Nombre del Responsable:</label>
-                        <input type="text" name="nombre_responsable"
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Teléfono:</label>
+                        <input type="text" id="telefono" name="telefono" required placeholder="####-####"
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                     </div>
                     <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Teléfono del Responsable:</label>
-                        <input type="text" name="telefono_responsable"
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Identidad:</label>
+                        <input type="text" id="identidad" name="identidad" required placeholder="####-####-#####"
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                     </div>
                 </div>
 
-                <button type="submit" id="btnGuardarModal"
-                    style="background-color: #007bf0; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; transition: background 0.3s;">
-                    Guardar Paciente
-                </button>
+                <div class="modal-section-title">- En caso de emergencia o menor de edad</div>
+
+                <!-- Fila 6: Responsable -->
+                <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+                    <div style="flex: 1;">
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Personas Responsable:</label>
+                        <input type="text" id="persona_responsable" name="personaResponsable"
+                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Teléfono:</label>
+                        <input type="text" id="telefono_responsable" name="telefonoResponsable" placeholder="####-####"
+                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px;">
+                    <button type="button" onclick="cerrarModalPaciente()"
+                        style="flex: 1; background-color: #6c757d; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold;">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="btnGuardarModal"
+                        style="flex: 1; background-color: #007bf0; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: background 0.3s;">
+                        Guardar Paciente
+                    </button>
+                </div>
             </form>
+            </div>
         </div>
     </div>
 
@@ -882,33 +919,14 @@
                 e.preventDefault();
                 $('#btnGuardarModal').prop('disabled', true).text('Guardando...');
 
-                let identidad = $('#modal_identidad').val().trim();
-                let nombre = $('#modal_nombre_pac').val().trim();
-                let telefono = $('#modal_tel_pac').val().trim();
-                let fechaNac = $('input[name="fecha_nacimiento"]').val();
-                let genero = $('select[name="genero"]').val();
-                let ocupacion = $('input[name="ocupacion"]').val().trim();
-                let direccion = $('textarea[name="direccion"]').val().trim();
-                let nomResp = $('input[name="nombre_responsable"]').val().trim();
-                let telResp = $('input[name="telefono_responsable"]').val().trim();
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
 
-                if (!identidad || !nombre || !telefono) {
+                if (!data.identidad || !data.nombreCompleto || !data.telefono) {
                     Swal.fire({ title: 'Faltan Datos', text: 'DNI, Nombre y Teléfono son requeridos.', icon: 'warning', confirmButtonText: 'Aceptar', confirmButtonColor: '#ffc107' });
                     $('#btnGuardarModal').prop('disabled', false).text('Guardar Paciente');
                     return;
                 }
-
-                let data = {
-                    identidad: identidad,
-                    nombre_completo: nombre,
-                    fecha_nacimiento: fechaNac || null,
-                    genero: genero,
-                    ocupacion: ocupacion,
-                    domicilio: direccion,
-                    telefono: telefono,
-                    persona_responsable: nomResp,
-                    telefono_responsable: telResp
-                };
 
                 let respuesta = window.pacienteController.registrarPaciente(JSON.stringify(data));
                 let partes = respuesta.split("|");
@@ -925,7 +943,7 @@
                         let opt = new Option(p.nombreCompleto + " (" + p.identidad + ")", p.idPaciente);
                         opt.setAttribute("data-telefono", p.telefono || "");
                         selPaciente.appendChild(opt);
-                        if (p.identidad === identidad) idNuevo = p.idPaciente;
+                        if (p.identidad === data.identidad) idNuevo = p.idPaciente;
                     });
                     if (idNuevo) $('#identidad_paciente').val(idNuevo).trigger('change');
 
@@ -937,6 +955,60 @@
                 }
 
                 $('#btnGuardarModal').prop('disabled', false).text('Guardar Paciente');
+            });
+
+            // Formato de Teléfono
+            $('#telefono, #telefono_responsable').on('input', function(e) {
+                let val = e.target.value.replace(/\D/g, '');
+                let newVal = '';
+                if (val.length > 0) {
+                    newVal += val.substring(0, 4);
+                }
+                if (val.length >= 5) {
+                    newVal += '-' + val.substring(4, 8);
+                }
+                e.target.value = newVal;
+            });
+
+            // Formato de Identidad
+            $('#identidad').on('input', function(e) {
+                let val = e.target.value.replace(/\D/g, '');
+                let newVal = '';
+                if (val.length > 0) {
+                    newVal += val.substring(0, 4);
+                }
+                if (val.length >= 5) {
+                    newVal += '-' + val.substring(4, 8);
+                }
+                if (val.length >= 9) {
+                    newVal += '-' + val.substring(8, 13);
+                }
+                e.target.value = newVal;
+            });
+
+            // Calcular Edad
+            $('#fecha_nacimiento').on('change', function(e) {
+                const fechaStr = e.target.value;
+                if (!fechaStr) {
+                    $('#edad').val('');
+                    return;
+                }
+                const partes = fechaStr.split('-');
+                if (partes.length === 3 && partes[0].length === 4) {
+                    const ano = parseInt(partes[0], 10);
+                    const mes = parseInt(partes[1], 10) - 1;
+                    const dia = parseInt(partes[2], 10);
+                    if (!isNaN(dia) && !isNaN(mes) && !isNaN(ano)) {
+                        const cumpleanos = new Date(ano, mes, dia);
+                        const hoy = new Date();
+                        let edadCalc = hoy.getFullYear() - cumpleanos.getFullYear();
+                        const m = hoy.getMonth() - cumpleanos.getMonth();
+                        if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) {
+                            edadCalc--;
+                        }
+                        $('#edad').val(edadCalc);
+                    }
+                }
             });
         });
 
