@@ -640,6 +640,29 @@
     </div>
 </div>
 
+<!-- ══════════ MODAL: VISTA PREVIA FACTURA ══════════ -->
+<div id="modalVistaPreviaFactura" class="modal fade" tabindex="-1" data-bs-backdrop="false">
+  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-content" style="max-width: 420px;">
+    <div class="modal-header d-flex justify-content-between align-items-center modal-header-azul">
+      <h5 class="modal-title"><i class="fas fa-eye me-2"></i> Detalle de Factura</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    </div>
+    
+    <!-- Cuerpo donde se dibujará la factura dinámicamente -->
+    <div class="modal-body" id="contenedorTicketFactura" style="background-color: #fff; padding: 20px; font-family: monospace;">
+      <!-- Se llena dinámicamente con JS -->
+    </div>
+    
+    <div class="modal-footer p-2 justify-content-center border-0">
+      <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">
+        Cerrar
+      </button>
+    </div>
+  </div>
+  </div>
+</div>
+
 <!-- ══════════ MODAL: ANULAR FACTURA ══════════ -->
 <div class="modal fade" id="modalAnularFactura" data-bs-backdrop="false" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -1290,24 +1313,61 @@ function ejecutarAnulacion(idFactura) {
     }
 }
 
-function verDetalleFactura(jsonStr) {
-    const f = JSON.parse(decodeURIComponent(jsonStr));
-    document.getElementById('fac_id').value = f.id_factura;
-    document.getElementById('fac_numero_recibo').value = f.numero_recibo || '';
-    document.getElementById('fac_fecha_emision').value = f.fecha_emision || '';
-    document.getElementById('fac_id_paciente').value   = f.id_paciente   || '';
-    document.getElementById('fac_rtn_cliente').value   = f.rtn_cliente   || '';
-    document.getElementById('fac_concepto').value      = f.concepto      || '';
-    document.getElementById('fac_suma_neta').value     = f.suma_neta     || 0;
-    document.getElementById('fac_total_honorarios').value  = f.total_honorarios  || 0;
-    document.getElementById('fac_total_retenido').value    = f.total_retenido    || 0;
-    document.getElementById('fac_total_neto_recibido').value = f.total_neto_recibido || 0;
-    document.getElementById('fac_metodo_pago').value   = f.metodo_pago   || 'Efectivo';
-    document.getElementById('tituloModalFactura').innerHTML = '<i class="fas fa-eye me-2"></i> Detalle de la Factura';
-    document.getElementById('btnGuardarRecibo').style.display = 'none';
-    document.getElementById('btnCancelarRecibo').textContent = 'Cerrar';
-    document.getElementById('formFactura').querySelectorAll('input,select,textarea').forEach(el => el.disabled = true);
-    mostrarModal('modalFactura');
+function verDetalleFactura(idFactura) {
+    try {
+        const jsonStr = window.finanzasController.obtenerDetalleFacturaJson(idFactura);
+        const factura = JSON.parse(jsonStr || '{}');
+        
+        if (factura.numeroRecibo) {
+            const contenedor = document.getElementById('contenedorTicketFactura');
+            
+            // Dibujar la plantilla del ticket con los datos del JSON
+            contenedor.innerHTML = `
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <h4 style="margin:0; font-weight: bold;">CLÍNICA ODONTOLÓGICA SOE</h4>
+                    <p style="margin:0; font-size: 12px;">Comprobante de Pago</p>
+                    <hr style="border-top: 1px dashed #000; margin: 10px 0;">
+                </div>
+                
+                <div style="font-size: 13px; line-height: 1.6;">
+                    <p style="margin:0;"><strong>Recibo N°:</strong> ${factura.numeroRecibo}</p>
+                    <p style="margin:0;"><strong>Fecha:</strong> ${factura.fechaEmision}</p>
+                    <p style="margin:0;"><strong>Paciente:</strong> ${factura.nombrePaciente}</p>
+                    <p style="margin:0;"><strong>Médico:</strong> ${factura.nombreMedico || 'N/A'}</p>
+                    <hr style="border-top: 1px dashed #000; margin: 10px 0;">
+                    
+                    <p style="margin:0;"><strong>CONCEPTO:</strong></p>
+                    <p style="margin: 0 0 10px 0; font-size: 14px;">${factura.concepto}</p>
+                    
+                    <hr style="border-top: 1px dashed #000; margin: 10px 0;">
+                    
+                    <div style="display: flex; justify-content: space-between; font-size: 14px;">
+                        <span>Suma Neta:</span>
+                        <span>L. ${parseFloat(factura.sumaNeta).toFixed(2)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 15px; font-weight: bold; margin-top: 5px;">
+                        <span>TOTAL PAGADO:</span>
+                        <span>L. ${parseFloat(factura.netoRecibido).toFixed(2)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; margin-top: 5px;">
+                        <span>Método de Pago:</span>
+                        <span>${factura.metodoPago}</span>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px; font-size: 11px;">
+                    <p>¡Gracias por su preferencia!</p>
+                </div>
+            `;
+            
+            mostrarModal('modalVistaPreviaFactura');
+        } else {
+            if (typeof Swal !== 'undefined') Swal.fire('Error', 'No se encontraron detalles de la factura.', 'error');
+        }
+    } catch (err) {
+        console.error('Error al cargar la factura:', err);
+        if (typeof Swal !== 'undefined') Swal.fire('Error', 'No se pudieron obtener los detalles de la factura.', 'error');
+    }
 }
 
 function calcularNetoFactura() {

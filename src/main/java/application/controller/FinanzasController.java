@@ -343,6 +343,32 @@ public class FinanzasController extends BaseController {
         return "{\"status\":\"ok\"}";
     }
 
+    public String obtenerDetalleFacturaJson(int facturaId) {
+        try {
+            application.model.dao.FacturacionDAO dao = new application.model.dao.FacturacionDAO();
+            java.util.Map<String, Object> f = dao.obtenerReciboPorId(facturaId);
+            if (f != null) {
+                int idPaciente = (int) f.get("id_paciente");
+                String medico = dao.obtenerMedicoDeCitaReciente(idPaciente);
+
+                com.google.gson.JsonObject json = new com.google.gson.JsonObject();
+                json.addProperty("numeroRecibo", (String) f.get("numero_recibo"));
+                json.addProperty("fechaEmision", f.get("fecha_emision") != null ? f.get("fecha_emision").toString() : "");
+                json.addProperty("nombrePaciente", (String) f.get("nombre_paciente"));
+                json.addProperty("nombreMedico", medico);
+                json.addProperty("concepto", (String) f.get("concepto"));
+                json.addProperty("sumaNeta", f.get("suma_neta") != null ? ((Number) f.get("suma_neta")).doubleValue() : 0.0);
+                json.addProperty("netoRecibido", f.get("total_neto_recibido") != null ? ((Number) f.get("total_neto_recibido")).doubleValue() : 0.0);
+                json.addProperty("metodoPago", (String) f.get("metodo_pago"));
+
+                return json.toString();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "{}";
+    }
+
     public String generarPdfCierreCaja(int sessionId) {
         javafx.application.Platform.runLater(() -> {
             try {
