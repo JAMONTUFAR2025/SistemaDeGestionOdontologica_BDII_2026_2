@@ -60,6 +60,17 @@ public class Main extends Application {
             alerta.showAndWait();
         });
 
+        // Habilitar confirm() de JavaScript
+        webView.getEngine().setConfirmHandler(mensaje -> {
+            javafx.scene.control.Alert alerta = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.CONFIRMATION);
+            alerta.setTitle("Confirmación - SOE Odontología");
+            alerta.setHeaderText(null);
+            alerta.setContentText(mensaje);
+            java.util.Optional<javafx.scene.control.ButtonType> resultado = alerta.showAndWait();
+            return resultado.isPresent() && resultado.get() == javafx.scene.control.ButtonType.OK;
+        });
+
         webView.getEngine().load(urlHtml);
 
         // 3. Configurar la ventana

@@ -355,7 +355,7 @@
                     <td>${p.telefono || ''}</td>
                     <td class="action-icons">
                         <i class="fas fa-edit" title="Editar" onclick="openEditModal('${p.identidad}')"></i>
-                        <i class="fas fa-trash" title="Eliminar" onclick="deletePatient('${p.identidad}')"></i>
+                        <i class="fas fa-trash text-danger" title="Eliminar" onclick="deletePatient('${p.identidad}')"></i>
                     </td>
                 `;
                 tbody.appendChild(tr);
