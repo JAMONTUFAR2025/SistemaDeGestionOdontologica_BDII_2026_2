@@ -1056,6 +1056,9 @@
         let tempPacienteNombre = '';
         let tempPacienteIdentidad = '';
         let tempPacienteEdad = '______';
+        let tempPacienteDomicilio = '';
+        let tempResponsableNombre = '';
+        let tempResponsableIdentidad = '';
         let ultimoBusquedaIdentidad = '';
 
         const estadosDiente = [null, 'sano', 'caries', 'resina', 'corona', 'ausente'];
@@ -1318,6 +1321,10 @@
             } else {
                 tempPacienteEdad = '______';
             }
+            tempPacienteDomicilio = p.domicilio || '';
+            tempResponsableNombre = p.persona_responsable || '';
+            // La identidad del responsable no está en el objeto p, dejarla vacía
+            tempResponsableIdentidad = '';
 
             // Cabecera
             document.getElementById('lblNombrePaciente').innerText = tempPacienteNombre;
@@ -1905,9 +1912,8 @@
 
                 <div style="font-size: 15px; line-height: 2.1; text-align: justify;" class="my-4">
                     Servicios odontológicos Enamorado por medio de la presente, hace constar que el
-                    paciente <strong style="text-decoration: underline; padding: 0 5px;">${tempPacienteNombre || '________________________________________'}</strong> de <strong style="text-decoration: underline; padding: 0 5px;">${tempPacienteEdad}</strong> años, con #
-                    de ID <strong style="text-decoration: underline; padding: 0 5px;">${tempPacienteIdentidad || '____________________'}</strong>, se presentó a consulta odontológica por
-                    ______________________________________________________________________________________.
+                    paciente <strong style="text-decoration: underline; padding: 0 5px;">${tempPacienteNombre || '________________________________________'}</strong>${tempPacienteIdentidad ? ', con # de ID <strong style="text-decoration: underline; padding: 0 5px;">' + tempPacienteIdentidad + '</strong>' : ''}, se presentó a consulta odontológica por
+                    ____________________________________________________________________________________.
                     <br><br>
                     Se le realizo el tratamiento de ___________________________________________________
                     <br>
@@ -1944,12 +1950,12 @@
                     <img src="../../Logo.png" alt="Logo SOE" style="max-height: 75px;" class="mb-2">
                     <h4 class="fw-bold mb-2" style="letter-spacing: 0.5px;">SERVICIOS ODONTOLOGICOS ENAMORADO</h4>
                     <h5 class="fw-bold text-center mt-3 mb-4" style="font-size: 16px; letter-spacing: 0.5px;">
-                        CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE CIRUG�?A BUCAL
+                        CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE CIRUGÍA BUCAL
                     </h5>
                 </div>
 
                 <div style="font-size: 14px; text-align: justify; line-height: 1.8;" class="mb-3">
-                    Yo, <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteNombre || '________________________________________'}</strong> de <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteEdad}</strong> (representante legal o tutor/a de ________________________________ que me identifico con el documento de identidad <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteIdentidad || '____________________'}</strong> y que resido en el domicilio de ________________________________________________ por medio del presente documento hago constar lo siguiente.
+                    Yo, <strong style="text-decoration: underline; padding: 0 4px;">${tempResponsableNombre || '________________________________________'}</strong> (representante legal o tutor/a de <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteNombre || '________________________________________'}</strong>${tempResponsableIdentidad ? ') que me identifico con el documento de identidad <strong style="text-decoration: underline; padding: 0 4px;">' + tempResponsableIdentidad + '</strong>' : ')'}${tempPacienteDomicilio ? ' y que resido en el domicilio de <strong style="text-decoration: underline; padding: 0 4px;">' + tempPacienteDomicilio + '</strong>' : ' y que resido en el domicilio de ________________________________________________'} por medio del presente documento hago constar lo siguiente.
                 </div>
 
                 <ul style="list-style-type: disc; padding-left: 20px; font-size: 13.5px; line-height: 1.8;" class="mb-3">
@@ -2018,7 +2024,7 @@
                 </div>
 
                 <div style="font-size: 14px; text-align: justify; line-height: 1.8;" class="mb-3">
-                    Yo, <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteNombre || '________________________________________'}</strong> de <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteEdad}</strong> años que me identifico con el documento de identidad <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteIdentidad || '____________________'}</strong> y que resido en el domicilio de ________________________________________________ por medio del presente documento hago constar lo siguiente.
+                    Yo, <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteNombre || '________________________________________'}</strong> que me identifico con el documento de identidad${tempPacienteIdentidad ? ' <strong style="text-decoration: underline; padding: 0 4px;">' + tempPacienteIdentidad + '</strong>' : ' ____________________'}${tempPacienteDomicilio ? ' y que resido en el domicilio de <strong style="text-decoration: underline; padding: 0 4px;">' + tempPacienteDomicilio + '</strong>' : ' y que resido en el domicilio de ________________________________________________'} por medio del presente documento hago constar lo siguiente.
                 </div>
 
                 <ul style="list-style-type: disc; padding-left: 20px; font-size: 13.5px; line-height: 1.8;" class="mb-3">
@@ -2099,8 +2105,13 @@
 
             // Llamar al backend Java para generar el PDF y abrirlo
             if (window.historiaClinicaController && typeof window.historiaClinicaController.generarPdfDocumentoMedico === 'function') {
+                const extraData = JSON.stringify({
+                    domicilio: tempPacienteDomicilio || '',
+                    responsableNombre: tempResponsableNombre || '',
+                    responsableIdentidad: tempResponsableIdentidad || ''
+                });
                 window.historiaClinicaController.generarPdfDocumentoMedico(
-                    htmlContenido, tipoPlantilla, nombrePaciente, identidadPaciente, edadPaciente
+                    htmlContenido, tipoPlantilla, nombrePaciente, identidadPaciente, edadPaciente, extraData
                 );
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({ title: '¡PDF Generado!', text: 'El documento se abrirá en su visor de PDF.', icon: 'success', timer: 2000, showConfirmButton: false });

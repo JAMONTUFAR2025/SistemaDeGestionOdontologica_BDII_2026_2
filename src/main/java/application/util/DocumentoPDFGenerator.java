@@ -28,7 +28,19 @@ public class DocumentoPDFGenerator {
     private static final float MARGIN_BOTTOM = 60f;
 
     public static File generarDocumentoPdf(String htmlContenido, String tipoPlantilla,
-                                            String nombrePaciente, String identidadPaciente, String edadPaciente) throws Exception {
+                                            String nombrePaciente, String identidadPaciente, String edadPaciente, String extraDataJson) throws Exception {
+
+        String domicilio = "";
+        String responsableNombre = "";
+        String responsableIdentidad = "";
+        if (extraDataJson != null && !extraDataJson.trim().isEmpty()) {
+            try {
+                com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(extraDataJson).getAsJsonObject();
+                if (obj.has("domicilio") && !obj.get("domicilio").isJsonNull()) domicilio = obj.get("domicilio").getAsString();
+                if (obj.has("responsableNombre") && !obj.get("responsableNombre").isJsonNull()) responsableNombre = obj.get("responsableNombre").getAsString();
+                if (obj.has("responsableIdentidad") && !obj.get("responsableIdentidad").isJsonNull()) responsableIdentidad = obj.get("responsableIdentidad").getAsString();
+            } catch(Exception e){}
+        }
 
         String prefijo = "DocMedico_";
         if ("constancia".equals(tipoPlantilla)) prefijo = "Constancia_";
@@ -58,9 +70,9 @@ public class DocumentoPDFGenerator {
         if ("constancia".equals(tipoPlantilla)) {
             generarConstancia(document, fontNormal, fontBold, fontSectionTitle, nombrePaciente, identidadPaciente, edadPaciente);
         } else if ("consentimiento_cirugia".equals(tipoPlantilla)) {
-            generarConsentimientoCirugia(document, fontNormal, fontBold, fontSectionTitle, nombrePaciente, identidadPaciente, edadPaciente);
+            generarConsentimientoCirugia(document, fontNormal, fontBold, fontSectionTitle, nombrePaciente, identidadPaciente, edadPaciente, domicilio, responsableNombre, responsableIdentidad);
         } else if ("consentimiento_endodoncia".equals(tipoPlantilla)) {
-            generarConsentimientoEndodoncia(document, fontNormal, fontBold, fontSectionTitle, nombrePaciente, identidadPaciente, edadPaciente);
+            generarConsentimientoEndodoncia(document, fontNormal, fontBold, fontSectionTitle, nombrePaciente, identidadPaciente, edadPaciente, domicilio);
         }
 
         document.close();
@@ -179,10 +191,10 @@ public class DocumentoPDFGenerator {
 
         String cuerpo = "Servicios odontológicos Enamorado por medio de la presente, hace constar que el paciente "
                 + (nombre != null && !nombre.isEmpty() ? nombre : "________________________________________")
-                + " de " + (edad != null && !edad.isEmpty() ? edad : "______") + " años, con # de ID "
-                + (identidad != null && !identidad.isEmpty() ? identidad : "____________________")
+                + " de " + (edad != null && !edad.isEmpty() ? edad : "______") + " años"
+                + (identidad != null && !identidad.isEmpty() ? ", con # de ID " + identidad : "")
                 + ", se presentó a consulta odontológica por "
-                + "______________________________________________________________________________________.";
+                + "____________________________________________________________________________________.";
         Paragraph pCuerpo = new Paragraph(cuerpo, fontNormal);
         pCuerpo.setAlignment(Element.ALIGN_JUSTIFIED);
         pCuerpo.setLeading(18f);
@@ -221,7 +233,7 @@ public class DocumentoPDFGenerator {
     // CONSENTIMIENTO INFORMADO - CIRUGÍA BUCAL (2 PÁGINAS)
     // ═══════════════════════════════════════════════════
     private static void generarConsentimientoCirugia(Document document, Font fontNormal, Font fontBold,
-                                                      Font fontSectionTitle, String nombre, String identidad, String edad) throws Exception {
+                                                      Font fontSectionTitle, String nombre, String identidad, String edad, String domicilio, String responsableNombre, String responsableIdentidad) throws Exception {
 
         Paragraph tituloDoc = new Paragraph("CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE CIRUGÍA BUCAL", fontSectionTitle);
         tituloDoc.setAlignment(Element.ALIGN_CENTER);
@@ -229,12 +241,11 @@ public class DocumentoPDFGenerator {
         tituloDoc.setSpacingAfter(15f);
         document.add(tituloDoc);
 
-        String intro = "Yo, " + (nombre != null && !nombre.isEmpty() ? nombre : "________________________________________")
-                + " de " + (edad != null && !edad.isEmpty() ? edad : "______") + " (representante legal o tutor/a de ________________________________ "
-                + "que me identifico con el documento de identidad "
-                + (identidad != null && !identidad.isEmpty() ? identidad : "____________________")
-                + " y que resido en el domicilio de ________________________________________________ "
-                + "por medio del presente documento hago constar lo siguiente.";
+        String intro = "Yo, " + (responsableNombre != null && !responsableNombre.isEmpty() ? responsableNombre : "________________________________________")
+                + " (representante legal o tutor/a de " + (nombre != null && !nombre.isEmpty() ? nombre : "________________________________________")
+                + (responsableIdentidad != null && !responsableIdentidad.isEmpty() ? ") que me identifico con el documento de identidad " + responsableIdentidad : ")")
+                + (domicilio != null && !domicilio.isEmpty() ? " y que resido en el domicilio de " + domicilio : " y que resido en el domicilio de ________________________________________________")
+                + " por medio del presente documento hago constar lo siguiente.";
         Paragraph pIntro = new Paragraph(intro, fontNormal);
         pIntro.setAlignment(Element.ALIGN_JUSTIFIED);
         pIntro.setLeading(22f);
@@ -305,7 +316,7 @@ public class DocumentoPDFGenerator {
     // CONSENTIMIENTO INFORMADO - ENDODONCIA (2 PÁGINAS)
     // ═══════════════════════════════════════════════════
     private static void generarConsentimientoEndodoncia(Document document, Font fontNormal, Font fontBold,
-                                                         Font fontSectionTitle, String nombre, String identidad, String edad) throws Exception {
+                                                         Font fontSectionTitle, String nombre, String identidad, String edad, String domicilio) throws Exception {
 
         Paragraph tituloDoc = new Paragraph("CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE ENDODONCIA", fontSectionTitle);
         tituloDoc.setAlignment(Element.ALIGN_CENTER);
@@ -314,10 +325,10 @@ public class DocumentoPDFGenerator {
         document.add(tituloDoc);
 
         String intro = "Yo, " + (nombre != null && !nombre.isEmpty() ? nombre : "________________________________________")
-                + " de " + (edad != null && !edad.isEmpty() ? edad : "______") + " años que me identifico con el documento de identidad "
+                + " que me identifico con el documento de identidad "
                 + (identidad != null && !identidad.isEmpty() ? identidad : "____________________")
-                + " y que resido en el domicilio de ________________________________________________ "
-                + "por medio del presente documento hago constar lo siguiente.";
+                + (domicilio != null && !domicilio.isEmpty() ? " y que resido en el domicilio de " + domicilio : " y que resido en el domicilio de ________________________________________________")
+                + " por medio del presente documento hago constar lo siguiente.";
         Paragraph pIntro = new Paragraph(intro, fontNormal);
         pIntro.setAlignment(Element.ALIGN_JUSTIFIED);
         pIntro.setLeading(22f);
