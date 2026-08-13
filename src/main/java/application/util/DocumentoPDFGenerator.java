@@ -10,6 +10,9 @@ import com.lowagie.text.pdf.PdfWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Genera PDFs para documentos médicos: Constancias y Consentimientos Informados.
@@ -25,7 +28,7 @@ public class DocumentoPDFGenerator {
     private static final float MARGIN_BOTTOM = 60f;
 
     public static File generarDocumentoPdf(String htmlContenido, String tipoPlantilla,
-                                            String nombrePaciente, String identidadPaciente) throws Exception {
+                                            String nombrePaciente, String identidadPaciente, String edadPaciente) throws Exception {
 
         String prefijo = "DocMedico_";
         if ("constancia".equals(tipoPlantilla)) prefijo = "Constancia_";
@@ -53,11 +56,11 @@ public class DocumentoPDFGenerator {
         agregarEncabezado(document, fontTitle, fontSubtitle);
 
         if ("constancia".equals(tipoPlantilla)) {
-            generarConstancia(document, fontNormal, fontBold, fontSectionTitle, nombrePaciente, identidadPaciente);
+            generarConstancia(document, fontNormal, fontBold, fontSectionTitle, nombrePaciente, identidadPaciente, edadPaciente);
         } else if ("consentimiento_cirugia".equals(tipoPlantilla)) {
-            generarConsentimientoCirugia(document, fontNormal, fontBold, fontSectionTitle, nombrePaciente, identidadPaciente);
+            generarConsentimientoCirugia(document, fontNormal, fontBold, fontSectionTitle, nombrePaciente, identidadPaciente, edadPaciente);
         } else if ("consentimiento_endodoncia".equals(tipoPlantilla)) {
-            generarConsentimientoEndodoncia(document, fontNormal, fontBold, fontSectionTitle, nombrePaciente, identidadPaciente);
+            generarConsentimientoEndodoncia(document, fontNormal, fontBold, fontSectionTitle, nombrePaciente, identidadPaciente, edadPaciente);
         }
 
         document.close();
@@ -151,12 +154,15 @@ public class DocumentoPDFGenerator {
     // CONSTANCIA MÉDICA (1 PÁGINA)
     // ═══════════════════════════════════════════════════
     private static void generarConstancia(Document document, Font fontNormal, Font fontBold,
-                                           Font fontSectionTitle, String nombre, String identidad) throws Exception {
+                                           Font fontSectionTitle, String nombre, String identidad, String edad) throws Exception {
+
+        String fechaActual = LocalDate.now().format(DateTimeFormatter.ofPattern("dd / MM / yyyy"));
+        String horaActual = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
 
         PdfPTable fechaTable = new PdfPTable(2);
         fechaTable.setWidthPercentage(100);
         fechaTable.setSpacingBefore(10f);
-        PdfPCell fechaCell = new PdfPCell(new Phrase("Fecha: _____ / _____ / ________", fontBold));
+        PdfPCell fechaCell = new PdfPCell(new Phrase("Fecha: " + fechaActual, fontBold));
         fechaCell.setBorder(Rectangle.NO_BORDER);
         PdfPCell lugarCell = new PdfPCell(new Phrase("Santa Barbara, S.B.", fontBold));
         lugarCell.setBorder(Rectangle.NO_BORDER);
@@ -172,9 +178,9 @@ public class DocumentoPDFGenerator {
         document.add(tituloDoc);
 
         String cuerpo = "Servicios odontológicos Enamorado por medio de la presente, hace constar que el paciente "
-                + (nombre != null ? nombre : "________________________________________")
-                + " de ______ años, con # de ID "
-                + (identidad != null ? identidad : "____________________")
+                + (nombre != null && !nombre.isEmpty() ? nombre : "________________________________________")
+                + " de " + (edad != null && !edad.isEmpty() ? edad : "______") + " años, con # de ID "
+                + (identidad != null && !identidad.isEmpty() ? identidad : "____________________")
                 + ", se presentó a consulta odontológica por "
                 + "______________________________________________________________________________________.";
         Paragraph pCuerpo = new Paragraph(cuerpo, fontNormal);
@@ -192,8 +198,8 @@ public class DocumentoPDFGenerator {
         document.add(pTratamiento);
 
         Paragraph pFirma = new Paragraph(
-                "Para constancia se firma en la ciudad de Santa Barbara a las _________ horas "
-                + "el día ___ / ___ / _______.", fontNormal);
+                "Para constancia se firma en la ciudad de Santa Barbara a las " + horaActual + " horas "
+                + "el día " + fechaActual + ".", fontNormal);
         pFirma.setLeading(18f);
         pFirma.setSpacingAfter(20f);
         document.add(pFirma);
@@ -215,7 +221,7 @@ public class DocumentoPDFGenerator {
     // CONSENTIMIENTO INFORMADO - CIRUGÍA BUCAL (2 PÁGINAS)
     // ═══════════════════════════════════════════════════
     private static void generarConsentimientoCirugia(Document document, Font fontNormal, Font fontBold,
-                                                      Font fontSectionTitle, String nombre, String identidad) throws Exception {
+                                                      Font fontSectionTitle, String nombre, String identidad, String edad) throws Exception {
 
         Paragraph tituloDoc = new Paragraph("CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE CIRUGÍA BUCAL", fontSectionTitle);
         tituloDoc.setAlignment(Element.ALIGN_CENTER);
@@ -223,10 +229,10 @@ public class DocumentoPDFGenerator {
         tituloDoc.setSpacingAfter(15f);
         document.add(tituloDoc);
 
-        String intro = "Yo, " + (nombre != null ? nombre : "________________________________________")
-                + " de ______ (representante legal o tutor/a de ________________________________ "
+        String intro = "Yo, " + (nombre != null && !nombre.isEmpty() ? nombre : "________________________________________")
+                + " de " + (edad != null && !edad.isEmpty() ? edad : "______") + " (representante legal o tutor/a de ________________________________ "
                 + "que me identifico con el documento de identidad "
-                + (identidad != null ? identidad : "____________________")
+                + (identidad != null && !identidad.isEmpty() ? identidad : "____________________")
                 + " y que resido en el domicilio de ________________________________________________ "
                 + "por medio del presente documento hago constar lo siguiente.";
         Paragraph pIntro = new Paragraph(intro, fontNormal);
@@ -299,7 +305,7 @@ public class DocumentoPDFGenerator {
     // CONSENTIMIENTO INFORMADO - ENDODONCIA (2 PÁGINAS)
     // ═══════════════════════════════════════════════════
     private static void generarConsentimientoEndodoncia(Document document, Font fontNormal, Font fontBold,
-                                                         Font fontSectionTitle, String nombre, String identidad) throws Exception {
+                                                         Font fontSectionTitle, String nombre, String identidad, String edad) throws Exception {
 
         Paragraph tituloDoc = new Paragraph("CONSENTIMIENTO INFORMADO PARA TRATAMIENTO DE ENDODONCIA", fontSectionTitle);
         tituloDoc.setAlignment(Element.ALIGN_CENTER);
@@ -307,9 +313,9 @@ public class DocumentoPDFGenerator {
         tituloDoc.setSpacingAfter(15f);
         document.add(tituloDoc);
 
-        String intro = "Yo, " + (nombre != null ? nombre : "________________________________________")
-                + " de ______ años que me identifico con el documento de identidad "
-                + (identidad != null ? identidad : "____________________")
+        String intro = "Yo, " + (nombre != null && !nombre.isEmpty() ? nombre : "________________________________________")
+                + " de " + (edad != null && !edad.isEmpty() ? edad : "______") + " años que me identifico con el documento de identidad "
+                + (identidad != null && !identidad.isEmpty() ? identidad : "____________________")
                 + " y que resido en el domicilio de ________________________________________________ "
                 + "por medio del presente documento hago constar lo siguiente.";
         Paragraph pIntro = new Paragraph(intro, fontNormal);
@@ -417,7 +423,8 @@ public class DocumentoPDFGenerator {
         firmasTable.addCell(doctorCell);
         document.add(firmasTable);
 
-        Paragraph fechaFirma = new Paragraph("______________________________\nFecha", fontBold);
+        String fechaActual = LocalDate.now().format(DateTimeFormatter.ofPattern("dd / MM / yyyy"));
+        Paragraph fechaFirma = new Paragraph("______________________________\nFecha: " + fechaActual, fontBold);
         fechaFirma.setAlignment(Element.ALIGN_CENTER);
         fechaFirma.setSpacingBefore(40f);
         document.add(fechaFirma);

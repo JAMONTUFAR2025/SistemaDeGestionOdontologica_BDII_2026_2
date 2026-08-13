@@ -2274,11 +2274,12 @@
             const htmlContenido = document.getElementById('seccion-imprimir').innerHTML;
             const nombrePaciente = tempPacienteNombre || '';
             const identidadPaciente = tempPacienteIdentidad || '';
+            const edadPaciente = String(tempPacienteEdad || '');
 
             // Llamar al backend Java para generar el PDF y abrirlo
             if (window.historiaClinicaController && typeof window.historiaClinicaController.generarPdfDocumentoMedico === 'function') {
                 window.historiaClinicaController.generarPdfDocumentoMedico(
-                    htmlContenido, tipoPlantilla, nombrePaciente, identidadPaciente
+                    htmlContenido, tipoPlantilla, nombrePaciente, identidadPaciente, edadPaciente
                 );
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({ title: '¡PDF Generado!', text: 'El documento se abrirá en su visor de PDF.', icon: 'success', timer: 2000, showConfirmButton: false });

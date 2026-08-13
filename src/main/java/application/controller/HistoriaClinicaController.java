@@ -348,11 +348,11 @@ public class HistoriaClinicaController extends BaseController {
      * Genera un PDF tamaño Letter, márgenes 15mm y lo abre en el visor del sistema.
      */
     public String generarPdfDocumentoMedico(String htmlContenido, String tipoPlantilla,
-                                             String nombrePaciente, String identidadPaciente) {
+                                             String nombrePaciente, String identidadPaciente, String edadPaciente) {
         javafx.application.Platform.runLater(() -> {
             try {
                 java.io.File file = application.util.DocumentoPDFGenerator.generarDocumentoPdf(
-                        htmlContenido, tipoPlantilla, nombrePaciente, identidadPaciente);
+                        htmlContenido, tipoPlantilla, nombrePaciente, identidadPaciente, edadPaciente);
                 if (file != null && file.exists()) {
                     java.awt.Desktop.getDesktop().open(file);
                     System.out.println("-> PDF de documento médico generado: " + file.getAbsolutePath());
