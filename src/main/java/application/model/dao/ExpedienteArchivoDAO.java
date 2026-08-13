@@ -17,9 +17,9 @@ public class ExpedienteArchivoDAO {
     public List<Map<String, Object>> obtenerPorPaciente(int idPacientes) {
         List<Map<String, Object>> lista = new ArrayList<>();
         String query = "SELECT id_expediente_archivos, tipo_archivo, nombre_archivo, " +
-                       "ruta_archivo, observaciones, fecha_subida " +
+                       "ruta_archivo, observaciones, fecha_subida, borrado " +
                        "FROM Expediente_Archivos " +
-                       "WHERE id_pacientes = ? AND borrado = 'No' " +
+                       "WHERE id_pacientes = ? " +
                        "ORDER BY fecha_subida DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -34,6 +34,7 @@ public class ExpedienteArchivoDAO {
                         map.put("ruta_archivo",  rs.getString("ruta_archivo"));
                         map.put("observaciones", rs.getString("observaciones"));
                         map.put("fecha_subida",  rs.getString("fecha_subida"));
+                        map.put("estado", rs.getString("borrado").equals("No") ? "Activo" : "Inactivo");
                         lista.add(map);
                     }
                 }
@@ -81,6 +82,22 @@ public class ExpedienteArchivoDAO {
             }
         } catch (SQLException e) {
             System.err.println("Error al eliminar archivo del expediente: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /** Reactivar un archivo del expediente. */
+    public boolean reactivarArchivo(int idExpedienteArchivo) {
+        String query = "UPDATE Expediente_Archivos SET borrado = 'No', fecha_borrado = NULL " +
+                       "WHERE id_expediente_archivos = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, idExpedienteArchivo);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al reactivar archivo del expediente: " + e.getMessage());
             return false;
         }
     }

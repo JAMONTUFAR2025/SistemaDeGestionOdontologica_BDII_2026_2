@@ -64,4 +64,27 @@ public class PacienteController extends BaseController {
             return "ERR|Error al eliminar paciente: " + t.getMessage();
         }
     }
+
+
+    public String reactivarPaciente(String correoAdmin, String passAdmin, String identidad) {
+        try {
+            application.model.dao.UserDAO userDAO = new application.model.dao.UserDAO();
+            if (!userDAO.autenticarUsuario(correoAdmin, passAdmin)) {
+                return "ERR|Contraseña incorrecta.";
+            }
+            if (!"Administrador".equals(userDAO.obtenerRolPorCorreo(correoAdmin))) {
+                return "ERR|Solo un Administrador puede reactivar registros.";
+            }
+
+            boolean exito = pacienteDAO.reactivarPaciente(identidad);
+            if (exito) {
+                return "OK|Paciente reactivado exitosamente.";
+            } else {
+                return "ERR|No se pudo reactivar el paciente.";
+            }
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en reactivarPaciente: " + t.getMessage());
+            return "ERR|Error al reactivar paciente: " + t.getMessage();
+        }
+    }
 }

@@ -342,16 +342,9 @@
                             </select>
                         </div>
 
-                        <!-- REQ 1: Botón "Nuevo Médico" -->
+                        <!-- Select Doctor -->
                         <div class="form-group">
-                            <div
-                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                                <label style="margin-bottom: 0;">Doctor / Especialista:*</label>
-                                <button type="button" onclick="abrirModalMedico();"
-                                    style="color: #007bf0; background: #e8f0ff; border: 1px solid #007bf0; font-size: 12px; font-weight: bold; padding: 3px 10px; border-radius: 4px; cursor: pointer;">
-                                    + Nuevo Médico
-                                </button>
-                            </div>
+                            <label style="margin-bottom: 5px;">Doctor / Especialista:*</label>
                             <select id="id_medico" name="id_medico" required style="width: 100%;">
                                 <option value="">-- Seleccionar Doctor --</option>
                             </select>
@@ -399,9 +392,14 @@
         <div id="panel-historial" class="tab-panel" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 style="color: #007bf0; margin: 0;">Historial Completo de Citas</h3>
-                <input type="text" id="busquedaHistorial" placeholder="Buscar paciente, estado..." 
-                       style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 250px;"
-                       onkeyup="filtrarHistorial()">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="font-size: 13px; color: #555; display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="checkbox" id="chkMostrarCanceladas" onchange="filtrarHistorial()" checked> Mostrar canceladas
+                    </label>
+                    <input type="text" id="busquedaHistorial" placeholder="Buscar paciente, estado..." 
+                           style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 250px;"
+                           onkeyup="filtrarHistorial()">
+                </div>
             </div>
             <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; font-size: 14px; background: white;">
@@ -860,6 +858,9 @@
                         });
                         $('#id_medico').trigger('change');
 
+                        // REQ 3: Configurar opciones iniciales de estado
+                        configurarOpcionesEstado();
+
                         // REQ 3: Si hay id_cita en URL → modo edición
                         if (idCitaParam) {
                             activarModoEdicion(idCitaParam);
@@ -1056,6 +1057,24 @@
             });
         });
 
+        function configurarOpcionesEstado() {
+            let sel = document.getElementById('estado');
+            for (let i = 0; i < sel.options.length; i++) {
+                if (sel.options[i].value !== 'Programada') {
+                    if (!modoEdicion) {
+                        sel.options[i].style.display = 'none';
+                        sel.options[i].disabled = true;
+                    } else {
+                        sel.options[i].style.display = '';
+                        sel.options[i].disabled = false;
+                    }
+                }
+            }
+            if (!modoEdicion) {
+                sel.value = 'Programada';
+            }
+        }
+
         // ============================================================
         // REQ 3: Activar modo edición y pre-cargar datos de la cita
         // ============================================================
@@ -1095,6 +1114,7 @@
                 actualizarFechaHoraOculta();
 
                 // Estado
+                configurarOpcionesEstado();
                 let selEstado = document.getElementById('estado');
                 for (let i = 0; i < selEstado.options.length; i++) {
                     if (selEstado.options[i].value === cita.estado) {
@@ -1401,18 +1421,19 @@
 
         function filtrarHistorial() {
             let input = document.getElementById('busquedaHistorial').value.toLowerCase();
-            if (input.trim() === '') {
-                historialFiltrado = [...historialData];
-            } else {
-                historialFiltrado = historialData.filter(c => 
-                    (c.id_citas && c.id_citas.toString().includes(input)) ||
+            let mostrarCanceladas = document.getElementById('chkMostrarCanceladas').checked;
+            
+            historialFiltrado = historialData.filter(c => {
+                if (!mostrarCanceladas && c.estado === 'Cancelada') return false;
+                if (input.trim() === '') return true;
+                
+                return (c.id_citas && c.id_citas.toString().includes(input)) ||
                     (c.fecha && c.fecha.toLowerCase().includes(input)) ||
                     (c.hora && c.hora.toLowerCase().includes(input)) ||
                     (c.paciente && c.paciente.toLowerCase().includes(input)) ||
                     (c.motivo_cita && c.motivo_cita.toLowerCase().includes(input)) ||
-                    (c.estado && c.estado.toLowerCase().includes(input))
-                );
-            }
+                    (c.estado && c.estado.toLowerCase().includes(input));
+            });
             paginaHistorialActual = 1;
             renderizarHistorial();
         }

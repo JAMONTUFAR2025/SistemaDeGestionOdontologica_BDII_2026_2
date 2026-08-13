@@ -18,6 +18,7 @@ public class Paciente {
     private String personaResponsable;
     private String telefonoResponsable;
     private LocalDateTime fechaRegistro;
+    private String estado;
 
     public Paciente() {
     }
@@ -142,6 +143,14 @@ public class Paciente {
 
     public void setFechaRegistro(LocalDateTime fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 
     @Override

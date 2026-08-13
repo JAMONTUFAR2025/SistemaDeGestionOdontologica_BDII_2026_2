@@ -124,7 +124,7 @@ public class PacienteDAO {
     public List<Paciente> obtenerPacientes() {
         List<Paciente> lista = new ArrayList<>();
         // SchemaActual: PK = id_pacientes, borrado ENUM('Si','No') DEFAULT 'No'
-        String query = "SELECT * FROM Pacientes WHERE borrado = 'No' ORDER BY nombre_completo ASC";
+        String query = "SELECT * FROM Pacientes ORDER BY nombre_completo ASC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return lista;
@@ -148,6 +148,7 @@ public class PacienteDAO {
                     p.setTelefono(rs.getString("telefono"));
                     p.setPersonaResponsable(rs.getString("persona_responsable"));
                     p.setTelefonoResponsable(rs.getString("telefono_responsable"));
+                    p.setEstado(rs.getString("borrado").equals("No") ? "Activo" : "Inactivo");
 
                     lista.add(p);
                 }
@@ -171,6 +172,23 @@ public class PacienteDAO {
             }
         } catch (SQLException e) {
             System.err.println("Error al realizar borrado lógico de paciente: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Reactivar un paciente inactivo
+    public boolean reactivarPaciente(String identidad) {
+        String query = "UPDATE Pacientes SET borrado = 'No', fecha_borrado = NULL WHERE identidad = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) return false;
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, identidad);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al reactivar paciente: " + e.getMessage());
             e.printStackTrace();
             return false;
         }

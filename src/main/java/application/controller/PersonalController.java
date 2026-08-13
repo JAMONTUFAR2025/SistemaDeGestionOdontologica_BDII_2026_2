@@ -217,4 +217,41 @@ public class PersonalController extends BaseController {
             return "ERR|Error: " + t.getMessage();
         }
     }
+
+    public String reactivarUsuario(String correoAdmin, String passAdmin, String idUsuarioStr) {
+        try {
+            application.model.dao.UserDAO userDAO = new application.model.dao.UserDAO();
+            if (!userDAO.autenticarUsuario(correoAdmin, passAdmin)) {
+                return "ERR|Contraseña incorrecta.";
+            }
+            if (!"Administrador".equals(userDAO.obtenerRolPorCorreo(correoAdmin))) {
+                return "ERR|Solo un Administrador puede reactivar registros.";
+            }
+            
+            int idUsuario = Integer.parseInt(idUsuarioStr.trim());
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            boolean exito = pmDAO.reactivarUsuario(idUsuario);
+            return exito ? "OK|Usuario reactivado correctamente." : "ERR|No se pudo reactivar el usuario.";
+        } catch (Throwable t) {
+            return "ERR|Error: " + t.getMessage();
+        }
+    }
+
+    public String reactivarPersonalMedico(String correoAdmin, String passAdmin, String identidad) {
+        try {
+            application.model.dao.UserDAO userDAO = new application.model.dao.UserDAO();
+            if (!userDAO.autenticarUsuario(correoAdmin, passAdmin)) {
+                return "ERR|Contraseña incorrecta.";
+            }
+            if (!"Administrador".equals(userDAO.obtenerRolPorCorreo(correoAdmin))) {
+                return "ERR|Solo un Administrador puede reactivar registros.";
+            }
+
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            boolean exito = pmDAO.reactivarPersonalMedico(identidad);
+            return exito ? "OK|Médico reactivado correctamente." : "ERR|No se pudo reactivar el médico.";
+        } catch (Throwable t) {
+            return "ERR|Error: " + t.getMessage();
+        }
+    }
 }

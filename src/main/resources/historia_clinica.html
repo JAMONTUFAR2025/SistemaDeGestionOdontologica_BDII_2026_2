@@ -121,6 +121,17 @@
             line-height: 46px !important;
             margin-right: 15px;
         }
+        .input-group button i { margin-right: 5px; }
+
+        /* === INACTIVOS === */
+        .registro-inactivo {
+            background-color: #f8f9fa !important;
+            color: #6c757d !important;
+            font-style: italic;
+        }
+        .registro-inactivo td {
+            color: #6c757d !important;
+        }
         html {
             height: 100%;
         }
@@ -788,7 +799,13 @@
                         </div>
                         <div id="alertaArchivosDoc" class="alerta-doc mt-2"></div>
                     </div>
-                    <h6 style="color:#444; font-weight:700; margin-bottom:10px;"><i class="fas fa-list"></i> Archivos Registrados</h6>
+                    <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
+                        <h6 style="color:#444; font-weight:700; margin-bottom:0;"><i class="fas fa-list"></i> Archivos Registrados</h6>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="chkMostrarArchivosInactivos" onchange="cargarArchivosDoc()">
+                            <label class="form-check-label fw-bold text-secondary" for="chkMostrarArchivosInactivos" style="font-size: 13px;">Mostrar Inactivos</label>
+                        </div>
+                    </div>
                     <table class="tabla-docs">
                         <thead><tr>
                             <th>Tipo</th><th>Nombre</th><th>Observaciones</th><th>Fecha</th><th>Acción</th>
@@ -2392,21 +2409,30 @@
             const resp = window.documentosController.obtenerArchivos(pacienteActualDoc.id_pacientes);
             const archivos = JSON.parse(resp);
             const tbody = document.getElementById('tablaArchivosDoc');
-            if (archivos.length === 0) {
-                tbody.innerHTML = '<tr class="vacia"><td colspan="6">No hay archivos registrados para este paciente.</td></tr>';
+            const mostrarInactivos = document.getElementById('chkMostrarArchivosInactivos').checked;
+            const archivosFiltrados = archivos.filter(a => mostrarInactivos || a.estado !== 'Inactivo');
+
+            if (archivosFiltrados.length === 0) {
+                tbody.innerHTML = '<tr class="vacia"><td colspan="5">No hay archivos registrados para este paciente.</td></tr>';
                 return;
             }
-            tbody.innerHTML = archivos.map(a => `
-                <tr>
+            tbody.innerHTML = archivosFiltrados.map(a => {
+                const inactivo = a.estado === 'Inactivo';
+                const rowClass = inactivo ? 'registro-inactivo' : '';
+                const acciones = inactivo
+                    ? `<button class="btn btn-sm btn-outline-secondary py-0" onclick="pedirPasswordReactivarArchivo(${a.id_expediente_archivos})"><i class="fas fa-recycle"></i> Reactivar</button>`
+                    : `<i class="fas fa-eye text-primary" style="cursor:pointer; margin-right: 12px;" onclick="abrirArchivoDoc('${a.ruta_archivo.replace(/\\/g, '\\\\')}')" title="Visualizar Archivo"></i>
+                       <i class="fas fa-trash text-danger" style="cursor:pointer;" onclick="eliminarArchivoDoc(${a.id_expediente_archivos})" title="Eliminar Archivo"></i>`;
+
+                return `
+                <tr class="${rowClass}">
                     <td><span class="badge-tipo-doc ${getBadgeTipoDoc(a.tipo_archivo)}">${a.tipo_archivo}</span></td>
                     <td>${a.nombre_archivo}</td>
                     <td style="font-size:12px;">${a.observaciones || '—'}</td>
                     <td style="font-size:12px;">${a.fecha_subida || '—'}</td>
-                    <td style="white-space: nowrap; font-size: 1.2rem;">
-                        <i class="fas fa-eye text-primary" style="cursor:pointer; margin-right: 12px;" onclick="abrirArchivoDoc('${a.ruta_archivo.replace(/\\/g, '\\\\')}')" title="Visualizar Archivo"></i>
-                        <i class="fas fa-trash text-danger" style="cursor:pointer;" onclick="eliminarArchivoDoc(${a.id_expediente_archivos})" title="Eliminar Archivo"></i>
-                    </td>
-                </tr>`).join('');
+                    <td style="white-space: nowrap; font-size: 1.2rem;">${acciones}</td>
+                </tr>`;
+            }).join('');
         }
 
         function seleccionarArchivoFisico() {
@@ -2479,6 +2505,46 @@
         }
 
         // --- ALERGIAS ---
+        function pedirPasswordReactivarArchivo(idArchivo) {
+            Swal.fire({
+                title: 'Reactivar Archivo',
+                html: `
+                    <p class="mb-3 text-muted text-sm">Ingrese credenciales de Administrador para confirmar</p>
+                    <input type="email" id="adminEmail" class="swal2-input" placeholder="Correo de Administrador">
+                    <input type="password" id="adminPass" class="swal2-input" placeholder="Contraseña">
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Reactivar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#28a745',
+                preConfirm: () => {
+                    const email = document.getElementById('adminEmail').value;
+                    const pass = document.getElementById('adminPass').value;
+                    if (!email || !pass) {
+                        Swal.showValidationMessage('Debe ingresar correo y contraseña');
+                        return false;
+                    }
+                    return { email: email, pass: pass };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (window.historiaClinicaController) {
+                        const respuesta = window.historiaClinicaController.reactivarArchivo(result.value.email, result.value.pass, idArchivo.toString());
+                        const partes = respuesta.split('|');
+                        if (partes[0] === 'OK') {
+                            Swal.fire('Reactivado', partes[1], 'success');
+                            cargarArchivosDoc();
+                        } else {
+                            Swal.fire('Error', partes[1], 'error');
+                        }
+                    } else {
+                        Swal.fire('Error', 'Controlador de historia clínica no disponible', 'error');
+                    }
+                }
+            });
+        }
+
         function cargarCatalogoAlergiasDoc() {
             if (!window.catalogoController) return;
             const resp = window.catalogoController.obtenerAlergias();

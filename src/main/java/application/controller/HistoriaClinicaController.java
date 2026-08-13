@@ -364,4 +364,32 @@ public class HistoriaClinicaController extends BaseController {
         });
         return "{\"status\":\"ok\"}";
     }
+
+    // ------------------------------------------------------------------
+    // REACTIVAR ARCHIVO DEL EXPEDIENTE
+    // ------------------------------------------------------------------
+    public String reactivarArchivo(String correoAdmin, String passAdmin, String idArchivoStr) {
+        try {
+            application.model.dao.UserDAO userDAO = new application.model.dao.UserDAO();
+            if (!userDAO.autenticarUsuario(correoAdmin, passAdmin)) {
+                return "ERR|Contraseña incorrecta.";
+            }
+            if (!"Administrador".equals(userDAO.obtenerRolPorCorreo(correoAdmin))) {
+                return "ERR|Solo un Administrador puede reactivar registros.";
+            }
+
+            int idArchivo = Integer.parseInt(idArchivoStr.trim());
+            application.model.dao.ExpedienteArchivoDAO archivoDAO = new application.model.dao.ExpedienteArchivoDAO();
+            boolean exito = archivoDAO.reactivarArchivo(idArchivo);
+            
+            if (exito) {
+                return "OK|Archivo reactivado exitosamente.";
+            } else {
+                return "ERR|No se pudo reactivar el archivo.";
+            }
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en reactivarArchivo: " + t.getMessage());
+            return "ERR|Error al reactivar archivo: " + t.getMessage();
+        }
+    }
 }

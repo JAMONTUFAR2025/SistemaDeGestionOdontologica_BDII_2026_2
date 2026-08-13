@@ -215,12 +215,12 @@ public class PersonalMedicoDAO {
     // CONSULTAS DE PERSONAL Y USUARIOS
     // ==========================================
 
-    // Obtener todos los usuarios activos para la tabla de personal
+    // Obtener todos los usuarios (activos e inactivos) para la tabla de personal
     public java.util.List<java.util.Map<String, Object>> obtenerUsuarios() {
         java.util.List<java.util.Map<String, Object>> lista = new java.util.ArrayList<>();
-        // SchemaActual: PK = id_usuarios_login, borrado='No'
+        // SchemaActual: PK = id_usuarios_login, borrado='No' (o 'Si')
         String query = "SELECT id_usuarios_login, correo, rol_sistema, borrado, fecha_creacion " +
-                "FROM Usuarios_Login WHERE borrado = 'No' ORDER BY fecha_creacion DESC";
+                "FROM Usuarios_Login ORDER BY fecha_creacion DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
@@ -242,15 +242,15 @@ public class PersonalMedicoDAO {
         return lista;
     }
 
-    // Obtener todo el personal médico activo para la tabla
+    // Obtener todo el personal médico (activo e inactivo) para la tabla
     public java.util.List<java.util.Map<String, Object>> obtenerPersonalMedico() {
         java.util.List<java.util.Map<String, Object>> lista = new java.util.ArrayList<>();
-        // SchemaActual: FK id_especialidades, borrado='No'
+        // SchemaActual: FK id_especialidades, borrado='No' (o 'Si')
         String query = "SELECT pm.id_personal_medico, pm.identidad, pm.nombre_completo, pm.telefono, pm.correo, pm.borrado, "
                 +
                 "e.nombre_especialidad FROM Personal_Medico pm " +
                 "LEFT JOIN Especialidades e ON pm.id_especialidades = e.id_especialidades " +
-                "WHERE pm.borrado = 'No' ORDER BY pm.id_personal_medico DESC";
+                "ORDER BY pm.id_personal_medico DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
@@ -320,6 +320,37 @@ public class PersonalMedicoDAO {
         }
     }
 
+    // Eliminar lógicamente un médico
+    public boolean eliminarMedico(int idMedico) {
+        String query = "UPDATE Personal_Medico SET borrado = 'Si', fecha_borrado = NOW() WHERE id_personal_medico = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, idMedico);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar médico: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Reactivar un usuario inactivo
+    public boolean reactivarUsuario(int idUsuario) {
+        String query = "UPDATE Usuarios_Login SET borrado = 'No', fecha_borrado = NULL WHERE id_usuarios_login = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, idUsuario);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al reactivar usuario: " + e.getMessage());
+            return false;
+        }
+    }
+
+
     // Actualizar datos de personal médico
     public boolean actualizarPersonalMedico(String identidad, String nombreCompleto, String telefono,
             int idEspecialidades) {
@@ -351,6 +382,21 @@ public class PersonalMedicoDAO {
             }
         } catch (SQLException e) {
             System.err.println("Error al inactivar personal médico: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Reactivar personal médico
+    public boolean reactivarPersonalMedico(String identidad) {
+        String q = "UPDATE Personal_Medico SET borrado = 'No', fecha_borrado = NULL WHERE identidad = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(q)) {
+                stmt.setString(1, identidad);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al reactivar personal médico: " + e.getMessage());
             return false;
         }
     }

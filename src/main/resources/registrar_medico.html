@@ -374,6 +374,12 @@
                 if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el correo electrónico.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert("Por favor, ingresa el correo electrónico."); 
                 return; 
             }
+            
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(correo)) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa un correo electrónico válido (ej. usuario@dominio.com).', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert("Por favor, ingresa un correo electrónico válido.");
+                return;
+            }
             if (!contrasenia) { 
                 if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa la contraseña.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert("Por favor, ingresa la contraseña."); 
                 return; 
@@ -451,8 +457,16 @@
                 if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa la identidad (DNI).', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert("Por favor, ingresa la identidad (DNI).");
                 return;
             }
+            if (identidad.length < 15) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'La identidad (DNI) debe tener 15 caracteres (incluyendo guiones).', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('La identidad (DNI) debe tener 15 caracteres (incluyendo guiones).');
+                return;
+            }
             if (!telefono) {
                 if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el teléfono.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert("Por favor, ingresa el teléfono.");
+                return;
+            }
+            if (telefono.length < 9) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'El teléfono debe tener 9 caracteres (incluyendo el guion).', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('El teléfono debe tener 9 caracteres (incluyendo el guion).');
                 return;
             }
             if (!especialidad) {

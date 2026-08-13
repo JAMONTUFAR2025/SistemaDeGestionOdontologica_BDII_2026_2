@@ -125,6 +125,16 @@
         .badge-admin { background: #e3f2fd; color: #1565c0; }
         .badge-medico { background: #e8f5e9; color: #2e7d32; }
         .badge-recep { background: #fff8e1; color: #f57f17; }
+
+        /* === INACTIVOS === */
+        .registro-inactivo {
+            background-color: #f8f9fa !important;
+            color: #6c757d !important;
+            font-style: italic;
+        }
+        .registro-inactivo td {
+            color: #6c757d !important;
+        }
     </style>
 </head>
 
@@ -156,8 +166,12 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="d-flex align-items-center">
                     <label class="me-2 fw-bold text-dark mb-0">Buscar:</label>
-                    <input type="text" id="buscadorUsuarios" class="form-control" style="width: 260px;"
+                    <input type="text" id="buscadorUsuarios" class="form-control me-3" style="width: 260px;"
                         placeholder="Escribe para buscar...">
+                    <div class="form-check form-switch ms-2">
+                        <input class="form-check-input" type="checkbox" id="chkMostrarUsuariosInactivos" onchange="cargarUsuarios()">
+                        <label class="form-check-label fw-bold text-secondary" for="chkMostrarUsuariosInactivos">Mostrar Inactivos</label>
+                    </div>
                 </div>
                 <div>
                     <button class="btn btn-primary" onclick="abrirModalUsuario(false)">
@@ -192,8 +206,12 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="d-flex align-items-center">
                     <label class="me-2 fw-bold text-dark mb-0">Buscar:</label>
-                    <input type="text" id="buscadorMedicos" class="form-control" style="width: 260px;"
+                    <input type="text" id="buscadorMedicos" class="form-control me-3" style="width: 260px;"
                         placeholder="Escribe para buscar...">
+                    <div class="form-check form-switch ms-2">
+                        <input class="form-check-input" type="checkbox" id="chkMostrarMedicosInactivos" onchange="cargarMedicos()">
+                        <label class="form-check-label fw-bold text-secondary" for="chkMostrarMedicosInactivos">Mostrar Inactivos</label>
+                    </div>
                 </div>
                 <div>
                     <button class="btn btn-primary" onclick="abrirModalMedico(null)">
@@ -474,7 +492,8 @@
             try {
                 const json = window.personalController.obtenerUsuarios();
                 listaUsuarios = JSON.parse(json || '[]');
-                usuariosFiltrados = [...listaUsuarios];
+                const mostrarInactivos = document.getElementById('chkMostrarUsuariosInactivos').checked;
+                usuariosFiltrados = listaUsuarios.filter(u => mostrarInactivos || u.estado !== 'Inactivo');
                 paginaUsuarios = 1;
                 renderTablaUsuarios();
             } catch (e) { console.error('Error al cargar usuarios:', e); }
@@ -492,18 +511,24 @@
             let fin = inicio + REGISTROS_POR_PAGINA;
             let paginaDatos = usuariosFiltrados.slice(inicio, fin);
 
-            tbody.innerHTML = paginaDatos.map(u => `
-                <tr data-correo="${(u.correo||'').toLowerCase()}" data-rol="${(u.rol_sistema||'').toLowerCase()}">
+            tbody.innerHTML = paginaDatos.map(u => {
+                const inactivo = u.estado === 'Inactivo';
+                const rowClass = inactivo ? 'registro-inactivo' : '';
+                const acciones = inactivo 
+                    ? `<button class="btn btn-sm btn-outline-secondary py-0" onclick="pedirPasswordReactivarUsuario(${u.id_usuario})"><i class="fas fa-recycle"></i> Reactivar</button>`
+                    : `<i class="fas fa-edit" title="Editar" onclick="abrirModalUsuario(true, ${u.id_usuario}, '${u.correo}', '${u.rol_sistema}')"></i>
+                       <i class="fas fa-trash" title="Inactivar" onclick="deleteUsuario(${u.id_usuario})"></i>`;
+                
+                return `
+                <tr class="${rowClass}" data-correo="${(u.correo||'').toLowerCase()}" data-rol="${(u.rol_sistema||'').toLowerCase()}">
                     <td>${u.id_usuario}</td>
                     <td>${u.correo}</td>
                     <td><span class="badge-rol ${badgeClaseRol(u.rol_sistema)}">${u.rol_sistema}</span></td>
                     <td>${u.fecha_creacion ? u.fecha_creacion.substring(0,10) : '-'}</td>
-                    <td class="action-icons">
-                        <i class="fas fa-edit" title="Editar" onclick="abrirModalUsuario(true, ${u.id_usuario}, '${u.correo}', '${u.rol_sistema}')"></i>
-                        <i class="fas fa-trash" title="Inactivar" onclick="deleteUsuario(${u.id_usuario})"></i>
-                    </td>
+                    <td class="action-icons">${acciones}</td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
 
             generarBotonesPaginacionJS(paginaUsuarios, usuariosFiltrados.length, 'paginacionUsuarios', 'cambiarPaginaUsuarios');
         }
@@ -522,7 +547,8 @@
             try {
                 const json = window.personalController.obtenerPersonalMedico();
                 listaMedicos = JSON.parse(json || '[]');
-                medicosFiltrados = [...listaMedicos];
+                const mostrarInactivos = document.getElementById('chkMostrarMedicosInactivos').checked;
+                medicosFiltrados = listaMedicos.filter(m => mostrarInactivos || m.estado !== 'Inactivo');
                 paginaMedicos = 1;
                 renderTablaMedicos();
             } catch (e) { console.error('Error al cargar médicos:', e); }
@@ -540,19 +566,25 @@
             let fin = inicio + REGISTROS_POR_PAGINA;
             let paginaDatos = medicosFiltrados.slice(inicio, fin);
 
-            tbody.innerHTML = paginaDatos.map(m => `
-                <tr>
+            tbody.innerHTML = paginaDatos.map(m => {
+                const inactivo = m.estado === 'Inactivo';
+                const rowClass = inactivo ? 'registro-inactivo' : '';
+                const acciones = inactivo
+                    ? `<button class="btn btn-sm btn-outline-secondary py-0" onclick="pedirPasswordReactivarMedico('${m.identidad}')"><i class="fas fa-recycle"></i> Reactivar</button>`
+                    : `<i class="fas fa-edit" title="Editar" onclick="abrirModalMedico(${JSON.stringify(m).replace(/"/g,'&quot;')})"></i>
+                       <i class="fas fa-trash" title="Inactivar" onclick="deleteMedico('${m.identidad}')"></i>`;
+                
+                return `
+                <tr class="${rowClass}">
                     <td>${m.identidad || '-'}</td>
                     <td>${m.nombreCompleto || '-'}</td>
                     <td>${m.especialidadNombre || '-'}</td>
                     <td>${m.telefono || '-'}</td>
                     <td>${m.correo || '-'}</td>
-                    <td class="action-icons">
-                        <i class="fas fa-edit" title="Editar" onclick="abrirModalMedico(${JSON.stringify(m).replace(/"/g,'&quot;')})"></i>
-                        <i class="fas fa-trash" title="Inactivar" onclick="deleteMedico('${m.identidad}')"></i>
-                    </td>
+                    <td class="action-icons">${acciones}</td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
 
             generarBotonesPaginacionJS(paginaMedicos, medicosFiltrados.length, 'paginacionMedicos', 'cambiarPaginaMedicos');
         }
@@ -565,14 +597,18 @@
             const filas = document.querySelectorAll(`#${tbodyId} tr`);
             
             if (esUsuario) {
-                usuariosFiltrados = listaUsuarios.filter(u => 
+                const mostrarInactivos = document.getElementById('chkMostrarUsuariosInactivos').checked;
+                let baseUsuarios = listaUsuarios.filter(u => mostrarInactivos || u.estado !== 'Inactivo');
+                usuariosFiltrados = baseUsuarios.filter(u => 
                     (u.correo && u.correo.toLowerCase().includes(filtro)) ||
                     (u.rol_sistema && u.rol_sistema.toLowerCase().includes(filtro))
                 );
                 paginaUsuarios = 1;
                 renderTablaUsuarios();
             } else if (esMedico) {
-                medicosFiltrados = listaMedicos.filter(m => 
+                const mostrarInactivos = document.getElementById('chkMostrarMedicosInactivos').checked;
+                let baseMedicos = listaMedicos.filter(m => mostrarInactivos || m.estado !== 'Inactivo');
+                medicosFiltrados = baseMedicos.filter(m => 
                     (m.identidad && m.identidad.toLowerCase().includes(filtro)) ||
                     (m.nombreCompleto && m.nombreCompleto.toLowerCase().includes(filtro)) ||
                     (m.especialidadNombre && m.especialidadNombre.toLowerCase().includes(filtro)) ||
@@ -721,6 +757,13 @@
             const idUsuario = document.getElementById('usu_id_editar').value;
 
             if (!correo) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el correo electrónico.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa el correo electrónico.'); return; }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(correo)) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa un correo electrónico válido (ej. usuario@dominio.com).', icon: 'warning', confirmButtonColor: '#ffc107' });
+                else alert('Por favor, ingresa un correo electrónico válido.');
+                return;
+            }
             if (!modoEdicionUsuario && !contrasenia) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa la contraseña.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa la contraseña.'); return; }
             if (contrasenia && contrasenia !== confirmar) {
                 if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Las contraseñas no coinciden. Por favor verifica.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Las contraseñas no coinciden. Por favor verifica.');
@@ -782,7 +825,9 @@
 
             if (!nombre) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el nombre completo.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa el nombre completo.'); return; }
             if (!identidad) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa la identidad (DNI).', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa la identidad (DNI).'); return; }
+            if (identidad.length < 15) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'La identidad (DNI) debe tener 15 caracteres (incluyendo guiones).', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('La identidad (DNI) debe tener 15 caracteres (incluyendo guiones).'); return; }
             if (!telefono) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el teléfono.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa el teléfono.'); return; }
+            if (telefono.length < 9) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'El teléfono debe tener 9 caracteres (incluyendo el guion).', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('El teléfono debe tener 9 caracteres (incluyendo el guion).'); return; }
             if (!especialidad) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, selecciona la especialidad.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, selecciona la especialidad.'); return; }
 
             let respuesta;
@@ -929,6 +974,85 @@
         }
 
 
+
+        // ==========================================
+        // REACTIVAR REGISTROS (Requiere Admin)
+        // ==========================================
+        function pedirPasswordReactivarUsuario(idUsuario) {
+            Swal.fire({
+                title: 'Reactivar Usuario',
+                html: `
+                    <p class="mb-3 text-muted text-sm">Ingrese credenciales de Administrador para confirmar</p>
+                    <input type="email" id="adminEmail" class="swal2-input" placeholder="Correo de Administrador">
+                    <input type="password" id="adminPass" class="swal2-input" placeholder="Contraseña">
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Reactivar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#28a745',
+                preConfirm: () => {
+                    const email = document.getElementById('adminEmail').value;
+                    const pass = document.getElementById('adminPass').value;
+                    if (!email || !pass) {
+                        Swal.showValidationMessage('Debe ingresar correo y contraseña');
+                        return false;
+                    }
+                    return { email: email, pass: pass };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (window.personalController) {
+                        const respuesta = window.personalController.reactivarUsuario(result.value.email, result.value.pass, idUsuario.toString());
+                        const partes = respuesta.split('|');
+                        if (partes[0] === 'OK') {
+                            Swal.fire('Reactivado', partes[1], 'success');
+                            cargarUsuarios();
+                        } else {
+                            Swal.fire('Error', partes[1], 'error');
+                        }
+                    }
+                }
+            });
+        }
+
+        function pedirPasswordReactivarMedico(identidad) {
+            Swal.fire({
+                title: 'Reactivar Médico',
+                html: `
+                    <p class="mb-3 text-muted text-sm">Ingrese credenciales de Administrador para confirmar</p>
+                    <input type="email" id="adminEmail" class="swal2-input" placeholder="Correo de Administrador">
+                    <input type="password" id="adminPass" class="swal2-input" placeholder="Contraseña">
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Reactivar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#28a745',
+                preConfirm: () => {
+                    const email = document.getElementById('adminEmail').value;
+                    const pass = document.getElementById('adminPass').value;
+                    if (!email || !pass) {
+                        Swal.showValidationMessage('Debe ingresar correo y contraseña');
+                        return false;
+                    }
+                    return { email: email, pass: pass };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (window.personalController) {
+                        const respuesta = window.personalController.reactivarPersonalMedico(result.value.email, result.value.pass, identidad);
+                        const partes = respuesta.split('|');
+                        if (partes[0] === 'OK') {
+                            Swal.fire('Reactivado', partes[1], 'success');
+                            cargarMedicos();
+                        } else {
+                            Swal.fire('Error', partes[1], 'error');
+                        }
+                    }
+                }
+            });
+        }
 
         // ==========================================
         // INICIALIZACIÓN

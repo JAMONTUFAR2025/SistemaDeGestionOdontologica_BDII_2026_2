@@ -99,6 +99,16 @@
             background-color: #0056c7;
             color: white;
         }
+
+        /* === INACTIVOS === */
+        .registro-inactivo {
+            background-color: #f8f9fa !important;
+            color: #6c757d !important;
+            font-style: italic;
+        }
+        .registro-inactivo td {
+            color: #6c757d !important;
+        }
     </style>
 <link rel="stylesheet" href="application/assets/css/flatpickr.min.css">
     </head>
@@ -122,8 +132,12 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="d-flex align-items-center">
                     <label for="buscadorPacientes" class="me-2 fw-bold text-dark mb-0">Buscar:</label>
-                    <input type="text" id="buscadorPacientes" class="form-control" style="width: 250px;"
+                    <input type="text" id="buscadorPacientes" class="form-control me-3" style="width: 250px;"
                         placeholder="Escriba para buscar...">
+                    <div class="form-check form-switch ms-2">
+                        <input class="form-check-input" type="checkbox" id="chkMostrarInactivos" onchange="cargarPacientes()">
+                        <label class="form-check-label fw-bold text-secondary" for="chkMostrarInactivos">Mostrar Inactivos</label>
+                    </div>
                 </div>
                 <div>
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarPaciente"
@@ -323,7 +337,10 @@
             try {
                 const jsonStr = window.pacienteController.obtenerPacientes();
                 listaPacientes = JSON.parse(jsonStr || '[]');
-                pacientesFiltrados = [...listaPacientes];
+                
+                const mostrarInactivos = document.getElementById('chkMostrarInactivos').checked;
+                pacientesFiltrados = listaPacientes.filter(p => mostrarInactivos || p.estado !== 'Inactivo');
+                
                 paginaPacientesActual = 1;
                 renderizarTabla();
             } catch (e) {
@@ -347,16 +364,21 @@
             let paginaDatos = pacientesFiltrados.slice(inicio, fin);
 
             paginaDatos.forEach(p => {
+                const inactivo = p.estado === 'Inactivo';
+                const rowClass = inactivo ? 'registro-inactivo' : '';
+                const acciones = inactivo
+                    ? `<button class="btn btn-sm btn-outline-secondary py-0" onclick="pedirPasswordReactivarPaciente('${p.identidad}')"><i class="fas fa-recycle"></i> Reactivar</button>`
+                    : `<i class="fas fa-edit" title="Editar" onclick="openEditModal('${p.identidad}')"></i>
+                       <i class="fas fa-trash text-danger" title="Eliminar" onclick="deletePatient('${p.identidad}')"></i>`;
+                
                 const tr = document.createElement('tr');
+                tr.className = rowClass;
                 tr.setAttribute('data-id', p.identidad || '');
                 tr.innerHTML = `
                     <td>${p.identidad || ''}</td>
                     <td>${p.nombreCompleto || ''}</td>
                     <td>${p.telefono || ''}</td>
-                    <td class="action-icons">
-                        <i class="fas fa-edit" title="Editar" onclick="openEditModal('${p.identidad}')"></i>
-                        <i class="fas fa-trash text-danger" title="Eliminar" onclick="deletePatient('${p.identidad}')"></i>
-                    </td>
+                    <td class="action-icons">${acciones}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -533,6 +555,18 @@
             const formData = new FormData(form);
             const paciente = Object.fromEntries(formData.entries());
 
+            if (!paciente.identidad || paciente.identidad.trim() === '') {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Faltan Datos', text: 'La identidad del paciente es obligatoria.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                else alert('La identidad del paciente es obligatoria.');
+                return;
+            }
+
+            if (!paciente.telefono || paciente.telefono.trim() === '') {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Faltan Datos', text: 'El número de teléfono es obligatorio.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                else alert('El número de teléfono es obligatorio.');
+                return;
+            }
+
             if (paciente.telefono && paciente.telefono.length < 9) {
                 if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'El teléfono debe tener 8 dígitos mínimos.', icon: 'warning', confirmButtonColor: '#ffc107' });
                 else alert('El teléfono debe tener 8 dígitos mínimos.');
@@ -685,9 +719,68 @@
             }
         }
 
+        // === REACTIVAR PACIENTE ===
+        function pedirPasswordReactivarPaciente(identidad) {
+            Swal.fire({
+                title: 'Reactivar Paciente',
+                html: `
+                    <p class="mb-3 text-muted text-sm">Ingrese credenciales de Administrador para confirmar</p>
+                    <input type="email" id="adminEmail" class="swal2-input" placeholder="Correo de Administrador">
+                    <input type="password" id="adminPass" class="swal2-input" placeholder="Contraseña">
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Reactivar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#28a745',
+                preConfirm: () => {
+                    const email = document.getElementById('adminEmail').value;
+                    const pass = document.getElementById('adminPass').value;
+                    if (!email || !pass) {
+                        Swal.showValidationMessage('Debe ingresar correo y contraseña');
+                        return false;
+                    }
+                    return { email: email, pass: pass };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (window.pacienteController) {
+                        const respuesta = window.pacienteController.reactivarPaciente(result.value.email, result.value.pass, identidad);
+                        const partes = respuesta.split('|');
+                        if (partes[0] === 'OK') {
+                            Swal.fire('Reactivado', partes[1], 'success');
+                            cargarPacientes();
+                        } else {
+                            Swal.fire('Error', partes[1], 'error');
+                        }
+                    }
+                }
+            });
+        }
+
         // Inicializar eventos
         document.addEventListener('DOMContentLoaded', () => {
             cargarPacientes();
+            
+            const buscador = document.getElementById('buscadorPacientes');
+            if (buscador) {
+                buscador.addEventListener('keyup', function() {
+                    const input = this.value.toLowerCase();
+                    const mostrarInactivos = document.getElementById('chkMostrarInactivos').checked;
+                    let baseFiltrada = listaPacientes.filter(p => mostrarInactivos || p.estado !== 'Inactivo');
+                    
+                    if (input.trim() === '') {
+                        pacientesFiltrados = baseFiltrada;
+                    } else {
+                        pacientesFiltrados = baseFiltrada.filter(p =>
+                            (p.identidad && p.identidad.toLowerCase().includes(input)) ||
+                            (p.nombreCompleto && p.nombreCompleto.toLowerCase().includes(input))
+                        );
+                    }
+                    paginaPacientesActual = 1;
+                    renderizarTabla();
+                });
+            }
 
             const inputIdentidad = document.getElementById('identidad');
             const inputTelefono = document.getElementById('telefono');
