@@ -458,8 +458,8 @@
                         <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Genero:</label>
                         <select id="genero" name="genero"
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                            <option value="M">Masculino</option>
-                            <option value="F">Femenino</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Femenino">Femenino</option>
                         </select>
                     </div>
                     <div style="flex: 2;">
@@ -840,7 +840,7 @@
                     try {
                         // Cargar pacientes
                         let pacientesJson = window.pacienteController.obtenerPacientes();
-                        let pacientes = JSON.parse(pacientesJson);
+                        let pacientes = JSON.parse(pacientesJson).filter(p => p.estado !== 'Inactivo');
                         let selPaciente = document.getElementById("identidad_paciente");
                         pacientes.forEach(p => {
                             let opt = new Option(p.nombreCompleto + " (" + p.identidad + ")", p.idPaciente);
@@ -851,7 +851,7 @@
 
                         // Cargar médicos
                         let medicosJson = window.personalController.obtenerPersonalMedico();
-                        let medicos = JSON.parse(medicosJson);
+                        let medicos = JSON.parse(medicosJson).filter(m => m.estado !== 'Inactivo');
                         let selMedico = document.getElementById("id_medico");
                         medicos.forEach(m => {
                             let opt = new Option(m.nombreCompleto + " (" + m.especialidadNombre + ")", m.idPersonalMedico);
@@ -1058,16 +1058,24 @@
             });
         });
 
-        function configurarOpcionesEstado() {
+        function configurarOpcionesEstado(fechaCita) {
             let sel = document.getElementById('estado');
+            let hoy = new Date();
+            let strHoy = hoy.getFullYear() + "-" + String(hoy.getMonth()+1).padStart(2,'0') + "-" + String(hoy.getDate()).padStart(2,'0');
+            
             for (let i = 0; i < sel.options.length; i++) {
                 if (sel.options[i].value !== 'Programada') {
                     if (!modoEdicion) {
                         sel.options[i].style.display = 'none';
                         sel.options[i].disabled = true;
                     } else {
-                        sel.options[i].style.display = '';
-                        sel.options[i].disabled = false;
+                        if (fechaCita && fechaCita > strHoy && sel.options[i].value === 'Completada') {
+                            sel.options[i].style.display = 'none';
+                            sel.options[i].disabled = true;
+                        } else {
+                            sel.options[i].style.display = '';
+                            sel.options[i].disabled = false;
+                        }
                     }
                 }
             }
@@ -1115,7 +1123,7 @@
                 actualizarFechaHoraOculta();
 
                 // Estado
-                configurarOpcionesEstado();
+                configurarOpcionesEstado(cita.fecha);
                 let selEstado = document.getElementById('estado');
                 for (let i = 0; i < selEstado.options.length; i++) {
                     if (selEstado.options[i].value === cita.estado) {

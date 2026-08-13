@@ -249,8 +249,8 @@
                             <div class="col-md-4">
                                 <label for="genero">Genero:</label>
                                 <select id="genero" name="genero" class="form-select">
-                                    <option value="M">Masculino</option>
-                                    <option value="F">Femenino</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Femenino">Femenino</option>
                                 </select>
                             </div>
                             <div class="col-md-8">
@@ -586,7 +586,7 @@
             if (fechaStr) {
                 calcularEdad(fechaStr);
             }
-            document.getElementById('genero').value = p.genero || 'M';
+            document.getElementById('genero').value = p.genero || 'Masculino';
             document.getElementById('estado_civil').value = p.estadoCivil || 'Soltero(a)';
             document.getElementById('ocupacion').value = p.ocupacion || '';
             document.getElementById('telefono').value = p.telefono || '';
@@ -690,9 +690,21 @@
             const formData = new FormData(form);
             const paciente = Object.fromEntries(formData.entries());
 
+            if (!paciente.nombreCompleto || paciente.nombreCompleto.trim() === '') {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Faltan Datos', text: 'El nombre completo es obligatorio.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                else alert('El nombre completo es obligatorio.');
+                return;
+            }
+
             if (!paciente.identidad || paciente.identidad.trim() === '') {
                 if (typeof Swal !== 'undefined') Swal.fire({ title: 'Faltan Datos', text: 'La identidad del paciente es obligatoria.', icon: 'warning', confirmButtonColor: '#ffc107' });
                 else alert('La identidad del paciente es obligatoria.');
+                return;
+            }
+
+            if (!paciente.fechaNacimiento || paciente.fechaNacimiento.trim() === '') {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Faltan Datos', text: 'La fecha de nacimiento es obligatoria.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                else alert('La fecha de nacimiento es obligatoria.');
                 return;
             }
 
@@ -718,6 +730,10 @@
                 if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'El teléfono del responsable debe tener 8 dígitos mínimos.', icon: 'warning', confirmButtonColor: '#ffc107' });
                 else alert('El teléfono del responsable debe tener 8 dígitos mínimos.');
                 return;
+            }
+
+            if (paciente.idResponsable === '') {
+                delete paciente.idResponsable;
             }
 
             const jsonStr = JSON.stringify(paciente);
@@ -954,7 +970,7 @@
                 listaResponsables = JSON.parse(jsonStr || '[]');
                 
                 const mostrarInactivos = document.getElementById('chkMostrarInactivosResp').checked;
-                responsablesFiltrados = listaResponsables.filter(r => mostrarInactivos || r.borrado === false);
+                responsablesFiltrados = listaResponsables.filter(r => mostrarInactivos || r.estado !== 'Inactivo');
                 
                 paginaRespActual = 1;
                 renderizarTablaResp();
@@ -971,10 +987,10 @@
             const currentVal = select.value;
             select.innerHTML = '<option value="">-- Ninguno --</option>';
             
-            listaResponsables.filter(r => r.borrado === false).forEach(r => {
+            listaResponsables.filter(r => r.estado !== 'Inactivo').forEach(r => {
                 const opt = document.createElement('option');
-                opt.value = r.idResponsable;
-                opt.textContent = `${r.nombreCompleto} ${r.telefono ? ' - ' + r.telefono : ''}`;
+                opt.value = r.id_responsable;
+                opt.textContent = `${r.nombre_completo} ${r.telefono ? ' - ' + r.telefono : ''}`;
                 select.appendChild(opt);
             });
             
@@ -997,17 +1013,17 @@
             let paginaDatos = responsablesFiltrados.slice(inicio, fin);
 
             paginaDatos.forEach(r => {
-                const inactivo = r.borrado === true;
+                const inactivo = r.estado === 'Inactivo';
                 const rowClass = inactivo ? 'registro-inactivo' : '';
                 const acciones = inactivo
-                    ? `<button class="btn btn-sm btn-outline-secondary py-0" onclick="pedirPasswordReactivarResp(${r.idResponsable})"><i class="fas fa-recycle"></i> Reactivar</button>`
-                    : `<i class="fas fa-edit" title="Editar" onclick="openEditRespModal(${r.idResponsable})"></i>
-                       <i class="fas fa-trash text-danger" title="Eliminar" onclick="deleteResp(${r.idResponsable})"></i>`;
+                    ? `<button class="btn btn-sm btn-outline-secondary py-0" onclick="pedirPasswordReactivarResp(${r.id_responsable})"><i class="fas fa-recycle"></i> Reactivar</button>`
+                    : `<i class="fas fa-edit" title="Editar" onclick="openEditRespModal(${r.id_responsable})"></i>
+                       <i class="fas fa-trash text-danger" title="Eliminar" onclick="deleteResp(${r.id_responsable})"></i>`;
                 
                 const tr = document.createElement('tr');
                 tr.className = rowClass;
                 tr.innerHTML = `
-                    <td>${r.nombreCompleto || ''}</td>
+                    <td>${r.nombre_completo || ''}</td>
                     <td>${r.telefono || ''}</td>
                     <td>${r.correo || ''}</td>
                     <td class="action-icons">${acciones}</td>
@@ -1043,10 +1059,10 @@
         }
 
         function openEditRespModal(id) {
-            const r = listaResponsables.find(item => item.idResponsable === id);
+            const r = listaResponsables.find(item => item.id_responsable === id);
             if (!r) return;
-            document.getElementById('id_responsable_form').value = r.idResponsable;
-            document.getElementById('nombre_responsable').value = r.nombreCompleto || '';
+            document.getElementById('id_responsable_form').value = r.id_responsable;
+            document.getElementById('nombre_responsable').value = r.nombre_completo || '';
             document.getElementById('telefono_responsable').value = r.telefono || '';
             document.getElementById('correo_responsable').value = r.correo || '';
 
@@ -1064,6 +1080,16 @@
 
             if (!data.nombreCompleto || data.nombreCompleto.trim() === '') {
                 Swal.fire('Atención', 'El nombre es obligatorio.', 'warning');
+                return;
+            }
+
+            if (!data.identidad || data.identidad.trim() === '') {
+                Swal.fire('Atención', 'La identidad es obligatoria.', 'warning');
+                return;
+            }
+
+            if (data.identidad && data.identidad.length < 15) {
+                Swal.fire('Atención', 'La identidad debe tener 13 dígitos.', 'warning');
                 return;
             }
 
@@ -1164,13 +1190,13 @@
                 buscadorResp.addEventListener('keyup', function() {
                     const input = this.value.toLowerCase();
                     const mostrarInactivos = document.getElementById('chkMostrarInactivosResp').checked;
-                    let baseFiltrada = listaResponsables.filter(r => mostrarInactivos || r.borrado === false);
+                    let baseFiltrada = listaResponsables.filter(r => mostrarInactivos || r.estado !== 'Inactivo');
                     
                     if (input.trim() === '') {
                         responsablesFiltrados = baseFiltrada;
                     } else {
                         responsablesFiltrados = baseFiltrada.filter(r =>
-                            (r.nombreCompleto && r.nombreCompleto.toLowerCase().includes(input)) ||
+                            (r.nombre_completo && r.nombre_completo.toLowerCase().includes(input)) ||
                             (r.telefono && r.telefono.toLowerCase().includes(input)) ||
                             (r.correo && r.correo.toLowerCase().includes(input))
                         );

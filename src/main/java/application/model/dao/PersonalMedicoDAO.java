@@ -267,23 +267,27 @@ public class PersonalMedicoDAO {
     // ==========================================
 
     // Actualizar datos de un usuario (rol y opcionalmente contraseña)
-    public boolean actualizarUsuario(int idUsuario, String rolSistema, String nuevaContrasenia) {
+    public boolean actualizarUsuario(int idUsuario, String nombreUsuario, String correo, String rolSistema, String nuevaContrasenia) {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (nuevaContrasenia != null && !nuevaContrasenia.isEmpty()) {
                 String hashed = application.util.SecurityUtils.hashPassword(nuevaContrasenia);
-                String q = "UPDATE Usuarios_Login SET rol_sistema = ?, contrasenia = ? WHERE id_usuario_login = ?";
+                String q = "UPDATE Usuarios_Login SET nombre_usuario = ?, correo = ?, rol_sistema = ?, contrasenia = ? WHERE id_usuario_login = ?";
                 try (PreparedStatement stmt = conn.prepareStatement(q)) {
-                    stmt.setString(1, rolSistema);
-                    stmt.setString(2, hashed);
-                    stmt.setInt(3, idUsuario);
+                    stmt.setString(1, nombreUsuario);
+                    stmt.setString(2, correo);
+                    stmt.setString(3, rolSistema);
+                    stmt.setString(4, hashed);
+                    stmt.setInt(5, idUsuario);
                     return stmt.executeUpdate() > 0;
                 }
             } else {
-                String q = "UPDATE Usuarios_Login SET rol_sistema = ? WHERE id_usuario_login = ?";
+                String q = "UPDATE Usuarios_Login SET nombre_usuario = ?, correo = ?, rol_sistema = ? WHERE id_usuario_login = ?";
                 try (PreparedStatement stmt = conn.prepareStatement(q)) {
-                    stmt.setString(1, rolSistema);
-                    stmt.setInt(2, idUsuario);
+                    stmt.setString(1, nombreUsuario);
+                    stmt.setString(2, correo);
+                    stmt.setString(3, rolSistema);
+                    stmt.setInt(4, idUsuario);
                     return stmt.executeUpdate() > 0;
                 }
             }

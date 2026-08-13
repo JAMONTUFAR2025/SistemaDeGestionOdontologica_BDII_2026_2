@@ -696,7 +696,7 @@
             if (esEdicion) {
                 titulo.innerHTML = '<i class="fas fa-user-edit"></i> Editar Usuario';
                 passHint.style.display = 'block';
-                document.getElementById('usu_correo').readOnly = true;
+                document.getElementById('usu_correo').readOnly = false;
             } else {
                 titulo.innerHTML = '<i class="fas fa-user-plus"></i> Nuevo Usuario del Sistema';
                 passHint.style.display = 'none';
@@ -845,7 +845,7 @@
             let respuesta;
             if (modoEdicionMedico) {
                 const identidadOriginal = document.getElementById('med_identidad_original').value;
-                const data = { identidad: identidadOriginal, nombre_completo: nombre, telefono, id_especialidades: parseInt(especialidad) };
+                const data = { identidad: identidadOriginal, nombre_completo: nombre, telefono, id_especialidad: parseInt(especialidad) };
                 respuesta = window.personalController.actualizarPersonalMedico(JSON.stringify(data));
             } else {
                 const idUsuario = document.getElementById('med_id_usuario').value;
@@ -857,7 +857,7 @@
                     nombre_completo: nombre,
                     identidad,
                     telefono,
-                    id_especialidades: parseInt(especialidad),
+                    id_especialidad: parseInt(especialidad),
                     correo: correoUsuario
                 };
                 respuesta = window.personalController.registrarMedicoConUsuario(JSON.stringify(data));

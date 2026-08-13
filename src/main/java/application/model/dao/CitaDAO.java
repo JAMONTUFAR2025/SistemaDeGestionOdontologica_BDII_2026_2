@@ -47,7 +47,7 @@ public class CitaDAO {
             "SELECT c.id_cita, c.fecha_hora, p.nombre_completo AS paciente, p.telefono, c.motivo_cita " +
             "FROM Citas c " +
             "JOIN Pacientes p ON c.id_paciente = p.id_paciente " +
-            "WHERE DATE(c.fecha_hora) = CURDATE() " +
+            "WHERE DATE(c.fecha_hora) = CURDATE() AND p.borrado = FALSE " +
             "AND c.estado != 'Cancelada' AND c.estado != 'Ausente' AND c.estado != 'Completada'"
         );
 
@@ -93,7 +93,7 @@ public class CitaDAO {
             "SELECT c.id_cita, c.fecha_hora, p.nombre_completo AS paciente, p.telefono, c.motivo_cita, c.estado " +
             "FROM Citas c " +
             "JOIN Pacientes p ON c.id_paciente = p.id_paciente " +
-            "WHERE DATE(c.fecha_hora) > CURDATE() " +
+            "WHERE DATE(c.fecha_hora) > CURDATE() AND p.borrado = FALSE " +
             "AND c.estado != 'Cancelada' AND c.estado != 'Ausente' AND c.estado != 'Completada'"
         );
 

@@ -181,9 +181,11 @@ public class PersonalController extends BaseController {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonUsuario).getAsJsonObject();
             int idUsuario = obj.get("id_usuario").getAsInt();
             String rolSistema = obj.get("rol_sistema").getAsString();
+            String nombreUsuario = obj.has("nombre_usuario") ? obj.get("nombre_usuario").getAsString() : null;
+            String correo = obj.has("correo") ? obj.get("correo").getAsString() : null;
             String contrasenia = obj.has("contrasenia") ? obj.get("contrasenia").getAsString() : "";
             application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
-            boolean exito = pmDAO.actualizarUsuario(idUsuario, rolSistema, contrasenia);
+            boolean exito = pmDAO.actualizarUsuario(idUsuario, nombreUsuario, correo, rolSistema, contrasenia);
             return exito ? "OK|Usuario actualizado exitosamente." : "ERR|No se pudo actualizar el usuario.";
         } catch (Throwable t) {
             return "ERR|Error: " + t.getMessage();
