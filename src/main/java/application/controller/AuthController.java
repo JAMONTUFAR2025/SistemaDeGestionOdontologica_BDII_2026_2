@@ -17,27 +17,28 @@ public class AuthController extends BaseController {
         return rolUsuarioActual;
     }
 
-    public boolean login(String correo, String contrasenia) {
-        System.out.println("Intentando iniciar sesion con: " + correo);
-        boolean exito = userDAO.autenticarUsuario(correo, contrasenia);
+    public boolean login(String identificador, String contrasenia) {
+        System.out.println("Intentando iniciar sesion con: " + identificador);
+        boolean exito = userDAO.autenticarUsuario(identificador, contrasenia);
         if (exito) {
-            System.out.println("-> Inicio de sesion EXITOSO para: " + correo);
-            rolUsuarioActual = userDAO.obtenerRolPorCorreo(correo);
-            idPersonalMedicoActual = userDAO.obtenerIdMedicoPorCorreo(correo);
-            idUsuarioLoginActual = userDAO.obtenerIdLoginPorCorreo(correo);
-            correoUsuarioActual = correo;
-            nombreMedicoActual = userDAO.obtenerNombreMedicoPorCorreo(correo);
+            System.out.println("-> Inicio de sesion EXITOSO para: " + identificador);
+            rolUsuarioActual = userDAO.obtenerRolPorCorreo(identificador);
+            idPersonalMedicoActual = userDAO.obtenerIdMedicoPorCorreo(identificador);
+            idUsuarioLoginActual = userDAO.obtenerIdLoginPorCorreo(identificador);
+            correoUsuarioActual = identificador; // Store username or email (used mostly for UI)
+            nombreUsuarioActual = userDAO.obtenerNombreUsuario(identificador);
+            nombreMedicoActual = userDAO.obtenerNombreMedicoPorCorreo(identificador);
         } else {
-            System.out.println("-> Fila no encontrada o credenciales INCORRECTAS para: " + correo);
+            System.out.println("-> Fila no encontrada o credenciales INCORRECTAS para: " + identificador);
             clearSession();
         }
         return exito;
     }
 
-    /** Retorna el nombre del médico si está asignado, de lo contrario devuelve el correo del usuario */
+    /** Retorna el nombre de usuario de login, de lo contrario devuelve el identificador usado */
     public String obtenerNombreBienvenida() {
-        if (nombreMedicoActual != null && !nombreMedicoActual.trim().isEmpty()) {
-            return "Dr(a). " + nombreMedicoActual;
+        if (nombreUsuarioActual != null && !nombreUsuarioActual.trim().isEmpty()) {
+            return nombreUsuarioActual;
         }
         return correoUsuarioActual;
     }
@@ -47,34 +48,34 @@ public class AuthController extends BaseController {
         clearSession();
     }
 
-    /** Retorna el id_usuarios_login del usuario actualmente en sesión. */
+    /** Retorna el id_usuario_login del usuario actualmente en sesión. */
     public String obtenerIdUsuarioActual() {
         return idUsuarioLoginActual != null ? String.valueOf(idUsuarioLoginActual) : "0";
     }
 
-    public String enviarCodigoRecuperacion(String correo) {
-        System.out.println("Solicitud de codigo para: " + correo);
+    public String enviarCodigoRecuperacion(String identificador) {
+        System.out.println("Solicitud de codigo para: " + identificador);
 
-        boolean existe = userDAO.verificarCorreoExistente(correo);
-        if (existe) {
+        String correoReal = userDAO.obtenerCorreoReal(identificador);
+        if (correoReal != null && !correoReal.isEmpty()) {
             String codigoSeguridad = String.format("%06d", (int) (Math.random() * 1000000));
-            codigosRecuperacion.put(correo, codigoSeguridad);
+            codigosRecuperacion.put(identificador, codigoSeguridad);
 
-            System.out.println("-> Enviando correo a " + correo + "...");
-            boolean enviado = application.model.connection.EmailService.enviarCorreoNuevaContrasenia(correo,
+            System.out.println("-> Enviando correo a " + correoReal + "...");
+            boolean enviado = application.model.connection.EmailService.enviarCorreoNuevaContrasenia(correoReal,
                     codigoSeguridad);
             if (enviado) {
-                return "OK|Código enviado con éxito. Revisa tu bandeja de entrada.";
+                return "OK|Código enviado con éxito al correo registrado. Revisa tu bandeja de entrada.";
             } else {
                 return "ERR|El código se generó, pero hubo un error al enviar el correo.";
             }
         } else {
-            return "ERR|No se encontro ningun usuario activo con ese correo.";
+            return "ERR|No se encontro ningun usuario activo con ese nombre de usuario o correo.";
         }
     }
 
-    public String verificarCodigo(String correo, String codigoIngresado) {
-        String codigoReal = codigosRecuperacion.get(correo);
+    public String verificarCodigo(String identificador, String codigoIngresado) {
+        String codigoReal = codigosRecuperacion.get(identificador);
         if (codigoReal != null && codigoReal.equals(codigoIngresado)) {
             return "OK|Código verificado correctamente.";
         } else {
@@ -82,16 +83,16 @@ public class AuthController extends BaseController {
         }
     }
 
-    public String restablecerContrasenia(String correo, String codigoIngresado, String nuevaContrasenia) {
-        String codigoReal = codigosRecuperacion.get(correo);
+    public String restablecerContrasenia(String identificador, String codigoIngresado, String nuevaContrasenia) {
+        String codigoReal = codigosRecuperacion.get(identificador);
         if (codigoReal == null || !codigoReal.equals(codigoIngresado)) {
             return "ERR|Intento inválido de cambio de contraseña.";
         }
 
-        boolean actualizado = userDAO.actualizarContrasenia(correo, nuevaContrasenia);
+        boolean actualizado = userDAO.actualizarContrasenia(identificador, nuevaContrasenia);
 
         if (actualizado) {
-            codigosRecuperacion.remove(correo);
+            codigosRecuperacion.remove(identificador);
             return "OK|Contraseña actualizada exitosamente. Ya puedes iniciar sesión.";
         } else {
             return "ERR|Ocurrió un error al guardar la nueva contraseña en la base de datos.";

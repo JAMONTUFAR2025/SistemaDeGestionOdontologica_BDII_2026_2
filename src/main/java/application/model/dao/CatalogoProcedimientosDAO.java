@@ -16,7 +16,7 @@ public class CatalogoProcedimientosDAO {
     /** Retorna todos los procedimientos del catálogo. */
     public List<Map<String, Object>> obtenerTodos() {
         List<Map<String, Object>> lista = new ArrayList<>();
-        String query = "SELECT id_catalogo_procedimientos, nombre_procedimiento, precio_sugerido " +
+        String query = "SELECT id_catalogo_procedimiento, nombre_procedimiento, precio_sugerido " +
                        "FROM Catalogo_Procedimientos ORDER BY nombre_procedimiento ASC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -24,7 +24,7 @@ public class CatalogoProcedimientosDAO {
                  ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> map = new LinkedHashMap<>();
-                    map.put("id_catalogo_procedimientos", rs.getInt("id_catalogo_procedimientos"));
+                    map.put("id_catalogo_procedimientos", rs.getInt("id_catalogo_procedimiento")); // Keep map key for frontend compatibility
                     map.put("nombre_procedimiento", rs.getString("nombre_procedimiento"));
                     map.put("precio_sugerido", rs.getDouble("precio_sugerido"));
                     lista.add(map);
@@ -55,7 +55,7 @@ public class CatalogoProcedimientosDAO {
     /** Actualiza un procedimiento existente. */
     public boolean actualizar(int id, String nombreProcedimiento, double precioSugerido) {
         String query = "UPDATE Catalogo_Procedimientos SET nombre_procedimiento = ?, precio_sugerido = ? " +
-                       "WHERE id_catalogo_procedimientos = ?";
+                       "WHERE id_catalogo_procedimiento = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -72,7 +72,7 @@ public class CatalogoProcedimientosDAO {
 
     /** Elimina físicamente un procedimiento del catálogo. */
     public boolean eliminar(int id) {
-        String query = "DELETE FROM Catalogo_Procedimientos WHERE id_catalogo_procedimientos = ?";
+        String query = "DELETE FROM Catalogo_Procedimientos WHERE id_catalogo_procedimiento = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {

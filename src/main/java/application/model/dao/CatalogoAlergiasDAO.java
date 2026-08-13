@@ -16,14 +16,14 @@ public class CatalogoAlergiasDAO {
     /** Retorna todas las alergias del catálogo. */
     public List<Map<String, Object>> obtenerTodas() {
         List<Map<String, Object>> lista = new ArrayList<>();
-        String query = "SELECT id_catalogo_alergias, nombre_alergia FROM Catalogo_Alergias ORDER BY nombre_alergia ASC";
+        String query = "SELECT id_catalogo_alergia, nombre_alergia FROM Catalogo_Alergias ORDER BY nombre_alergia ASC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
                  ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> map = new LinkedHashMap<>();
-                    map.put("id_catalogo_alergias", rs.getInt("id_catalogo_alergias"));
+                    map.put("id_catalogo_alergias", rs.getInt("id_catalogo_alergia")); // Keep map key for frontend compatibility
                     map.put("nombre_alergia", rs.getString("nombre_alergia"));
                     lista.add(map);
                 }
@@ -51,7 +51,7 @@ public class CatalogoAlergiasDAO {
 
     /** Actualiza una alergia existente. */
     public boolean actualizar(int id, String nombreAlergia) {
-        String query = "UPDATE Catalogo_Alergias SET nombre_alergia = ? WHERE id_catalogo_alergias = ?";
+        String query = "UPDATE Catalogo_Alergias SET nombre_alergia = ? WHERE id_catalogo_alergia = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -67,7 +67,7 @@ public class CatalogoAlergiasDAO {
 
     /** Elimina físicamente una alergia del catálogo. */
     public boolean eliminar(int id) {
-        String query = "DELETE FROM Catalogo_Alergias WHERE id_catalogo_alergias = ?";
+        String query = "DELETE FROM Catalogo_Alergias WHERE id_catalogo_alergia = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {

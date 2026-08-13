@@ -62,9 +62,9 @@ public class HistoriaClinicaController extends BaseController {
             String identidad = obj.has("identidad_paciente") ? obj.get("identidad_paciente").getAsString() : "";
             if (identidad.trim().isEmpty()) return "ERR|La identidad del paciente es obligatoria.";
 
-            // Buscar id_pacientes por identidad
-            int idPacientes = resolverIdPaciente(identidad.trim());
-            if (idPacientes <= 0) {
+            // Buscar id_paciente por identidad
+            int idPaciente = resolverIdPaciente(identidad.trim());
+            if (idPaciente <= 0) {
                 return "ERR|No se encontró ningún paciente con identidad: " + identidad +
                        ". Debe registrar al paciente primero.";
             }
@@ -76,7 +76,7 @@ public class HistoriaClinicaController extends BaseController {
             String antGineco         = str(obj, "antecedentes_ginecobstetros");
             String habitosToxicos    = str(obj, "habitos_toxicos");
             String farmacos          = str(obj, "farmacos_uso_habitual");
-            String reaccionAnest     = str(obj, "reaccion_anestesicos");
+            boolean reaccionAnest     = "true".equalsIgnoreCase(str(obj, "reaccion_anestesicos")) || "1".equals(str(obj, "reaccion_anestesicos"));
             String especAnest        = str(obj, "especifique_anestesia");
             String complicaciones    = str(obj, "complicaciones_tratamientos_previos");
             String habitosBucales    = str(obj, "habitos_bucales");
@@ -84,16 +84,12 @@ public class HistoriaClinicaController extends BaseController {
             String tipoCerdas        = str(obj, "tipo_cepillo_cerdas");
             String usoHilo           = str(obj, "uso_hilo_dental");
             String tipoMordida       = str(obj, "tipo_mordida");
-            String tejidosBlandos    = str(obj, "tejidos_blandos_observacion");
-            String diagPresuntivo    = str(obj, "diagnostico_presuntivo");
-            String observaciones     = str(obj, "observaciones_generales");
 
             application.model.dao.HistoriaClinicaDAO dao = new application.model.dao.HistoriaClinicaDAO();
-            return dao.registrarExpedienteBase(idPacientes, remitidoPor,
+            return dao.registrarExpedienteBase(idPaciente, remitidoPor,
                     antPatologicos, antOdontologicos, antQuirurgicos, antGineco,
                     habitosToxicos, farmacos, reaccionAnest, especAnest, complicaciones,
-                    habitosBucales, frecCepillado, tipoCerdas, usoHilo, tipoMordida,
-                    tejidosBlandos, diagPresuntivo, observaciones);
+                    habitosBucales, frecCepillado, tipoCerdas, usoHilo, tipoMordida);
         } catch (Throwable t) {
             System.err.println("-> ERROR en registrarExpediente: " + t.getMessage());
             return "ERR|Error procesando datos: " + t.getMessage();
@@ -118,11 +114,11 @@ public class HistoriaClinicaController extends BaseController {
             String identidad = obj.has("identidad_paciente") ? obj.get("identidad_paciente").getAsString() : "";
             if (identidad.trim().isEmpty()) return "ERR|La identidad del paciente es obligatoria.";
 
-            int idPacientes = resolverIdPaciente(identidad.trim());
-            if (idPacientes <= 0) return "ERR|Paciente no encontrado con identidad: " + identidad;
+            int idPaciente = resolverIdPaciente(identidad.trim());
+            if (idPaciente <= 0) return "ERR|Paciente no encontrado con identidad: " + identidad;
 
             // Obtener el id_expediente_base del paciente
-            int idExpediente = resolverIdExpediente(idPacientes);
+            int idExpediente = resolverIdExpediente(idPaciente);
             if (idExpediente <= 0) {
                 return "ERR|El paciente no tiene Expediente Base. Registre primero la Historia Clínica inicial.";
             }
@@ -131,13 +127,10 @@ public class HistoriaClinicaController extends BaseController {
             if (idMedico <= 0) return "ERR|Debe seleccionar un médico tratante.";
 
             // Nuevos campos opcionales
-            Integer idCitas = (obj.has("id_citas") && !obj.get("id_citas").isJsonNull())
-                    ? obj.get("id_citas").getAsInt() : null;
+            Integer idCitas = (obj.has("id_cita") && !obj.get("id_cita").isJsonNull())
+                    ? obj.get("id_cita").getAsInt() : null;
             Integer idCatalogoProcedimientos = (obj.has("id_catalogo_procedimientos") && !obj.get("id_catalogo_procedimientos").isJsonNull())
                     ? obj.get("id_catalogo_procedimientos").getAsInt() : null;
-
-            String fechaConsulta    = str(obj, "fecha_consulta");
-            if (fechaConsulta.isEmpty()) return "ERR|La fecha de consulta es obligatoria.";
 
             String motivoConsulta   = str(obj, "motivo_consulta");
             String sintomaPrincipal = str(obj, "sintoma_principal");
@@ -147,15 +140,31 @@ public class HistoriaClinicaController extends BaseController {
             String tejidosBlandos   = str(obj, "tejidos_blandos_observacion");
             String diagnostico      = str(obj, "diagnostico");
             String odontograma      = str(obj, "estado_odontograma");
-            double pagoAbono        = obj.has("pago_abono") ? obj.get("pago_abono").getAsDouble() : 0.0;
             String observaciones    = str(obj, "observaciones");
+            
+            Integer ps = null, pd = null;
+            if (presionArterial != null && presionArterial.contains("/")) {
+                try {
+                    String[] parts = presionArterial.split("/");
+                    ps = Integer.parseInt(parts[0].trim());
+                    pd = Integer.parseInt(parts[1].trim());
+                } catch (Exception ignored) {}
+            }
+            Integer pulso = null;
+            if (pulsoCardiaco != null && !pulsoCardiaco.isEmpty()) {
+                try { pulso = Integer.parseInt(pulsoCardiaco.replaceAll("\\D", "")); } catch (Exception ignored) {}
+            }
+            Double temp = null;
+            if (temperatura != null && !temperatura.isEmpty()) {
+                try { temp = Double.parseDouble(temperatura.replaceAll("[^0-9.]", "")); } catch (Exception ignored) {}
+            }
 
             application.model.dao.HistoriaClinicaDAO dao = new application.model.dao.HistoriaClinicaDAO();
-            return dao.registrarEvolucion(idPacientes, idExpediente, idMedico,
+            return dao.registrarEvolucion(idExpediente, idMedico,
                     idCitas, idCatalogoProcedimientos,
-                    fechaConsulta, motivoConsulta, sintomaPrincipal,
-                    presionArterial, pulsoCardiaco, temperatura,
-                    tejidosBlandos, diagnostico, odontograma, pagoAbono, observaciones);
+                    motivoConsulta, sintomaPrincipal, null, // historiaEnfermedadActual
+                    ps, pd, pulso, temp,
+                    tejidosBlandos, diagnostico, odontograma, observaciones);
 
         } catch (Throwable t) {
             System.err.println("-> ERROR en agregarEvolucion: " + t.getMessage());
@@ -174,8 +183,8 @@ public class HistoriaClinicaController extends BaseController {
             String identidad = obj.has("identidad_paciente") ? obj.get("identidad_paciente").getAsString() : "";
             if (identidad.trim().isEmpty()) return "ERR|La identidad del paciente es obligatoria.";
 
-            int idPacientes = resolverIdPaciente(identidad.trim());
-            if (idPacientes <= 0) {
+            int idPaciente = resolverIdPaciente(identidad.trim());
+            if (idPaciente <= 0) {
                 return "ERR|No se encontró ningún paciente con identidad: " + identidad;
             }
 
@@ -186,7 +195,7 @@ public class HistoriaClinicaController extends BaseController {
             String antGineco         = str(obj, "antecedentes_ginecobstetros");
             String habitosToxicos    = str(obj, "habitos_toxicos");
             String farmacos          = str(obj, "farmacos_uso_habitual");
-            String reaccionAnest     = str(obj, "reaccion_anestesicos");
+            boolean reaccionAnest     = "true".equalsIgnoreCase(str(obj, "reaccion_anestesicos")) || "1".equals(str(obj, "reaccion_anestesicos"));
             String especAnest        = str(obj, "especifique_anestesia");
             String complicaciones    = str(obj, "complicaciones_tratamientos_previos");
             String habitosBucales    = str(obj, "habitos_bucales");
@@ -194,16 +203,12 @@ public class HistoriaClinicaController extends BaseController {
             String tipoCerdas        = str(obj, "tipo_cepillo_cerdas");
             String usoHilo           = str(obj, "uso_hilo_dental");
             String tipoMordida       = str(obj, "tipo_mordida");
-            String tejidosBlandos    = str(obj, "tejidos_blandos_observacion");
-            String diagPresuntivo    = str(obj, "diagnostico_presuntivo");
-            String observaciones     = str(obj, "observaciones_generales");
 
             application.model.dao.HistoriaClinicaDAO dao = new application.model.dao.HistoriaClinicaDAO();
-            return dao.actualizarExpedienteBase(idPacientes, remitidoPor,
+            return dao.actualizarExpedienteBase(idPaciente, remitidoPor,
                     antPatologicos, antOdontologicos, antQuirurgicos, antGineco,
                     habitosToxicos, farmacos, reaccionAnest, especAnest, complicaciones,
-                    habitosBucales, frecCepillado, tipoCerdas, usoHilo, tipoMordida,
-                    tejidosBlandos, diagPresuntivo, observaciones);
+                    habitosBucales, frecCepillado, tipoCerdas, usoHilo, tipoMordida);
         } catch (Throwable t) {
             System.err.println("-> ERROR en actualizarExpediente: " + t.getMessage());
             return "ERR|Error procesando datos: " + t.getMessage();
@@ -215,13 +220,13 @@ public class HistoriaClinicaController extends BaseController {
             if (identidad == null || identidad.trim().isEmpty()) {
                 return "ERR|La identidad del paciente es obligatoria.";
             }
-            int idPacientes = resolverIdPaciente(identidad.trim());
-            if (idPacientes <= 0) {
+            int idPaciente = resolverIdPaciente(identidad.trim());
+            if (idPaciente <= 0) {
                 return "ERR|No se encontró ningún paciente con identidad: " + identidad;
             }
 
             application.model.dao.HistoriaClinicaDAO dao = new application.model.dao.HistoriaClinicaDAO();
-            return dao.eliminarExpedienteBase(idPacientes);
+            return dao.eliminarExpedienteBase(idPaciente);
         } catch (Throwable t) {
             System.err.println("-> ERROR en eliminarExpediente: " + t.getMessage());
             return "ERR|Error al eliminar expediente: " + t.getMessage();
@@ -245,9 +250,6 @@ public class HistoriaClinicaController extends BaseController {
             Integer idCatalogoProcedimientos = (obj.has("id_catalogo_procedimientos") && !obj.get("id_catalogo_procedimientos").isJsonNull())
                     ? obj.get("id_catalogo_procedimientos").getAsInt() : null;
 
-            String fechaConsulta    = str(obj, "fecha_consulta");
-            if (fechaConsulta.isEmpty()) return "ERR|La fecha de consulta es obligatoria.";
-
             String motivoConsulta   = str(obj, "motivo_consulta");
             String sintomaPrincipal = str(obj, "sintoma_principal");
             String presionArterial  = str(obj, "presion_arterial");
@@ -256,14 +258,30 @@ public class HistoriaClinicaController extends BaseController {
             String tejidosBlandos   = str(obj, "tejidos_blandos_observacion");
             String diagnostico      = str(obj, "diagnostico");
             String odontograma      = str(obj, "estado_odontograma");
-            double pagoAbono        = obj.has("pago_abono") ? obj.get("pago_abono").getAsDouble() : 0.0;
             String observaciones    = str(obj, "observaciones");
+            
+            Integer ps = null, pd = null;
+            if (presionArterial != null && presionArterial.contains("/")) {
+                try {
+                    String[] parts = presionArterial.split("/");
+                    ps = Integer.parseInt(parts[0].trim());
+                    pd = Integer.parseInt(parts[1].trim());
+                } catch (Exception ignored) {}
+            }
+            Integer pulso = null;
+            if (pulsoCardiaco != null && !pulsoCardiaco.isEmpty()) {
+                try { pulso = Integer.parseInt(pulsoCardiaco.replaceAll("\\D", "")); } catch (Exception ignored) {}
+            }
+            Double temp = null;
+            if (temperatura != null && !temperatura.isEmpty()) {
+                try { temp = Double.parseDouble(temperatura.replaceAll("[^0-9.]", "")); } catch (Exception ignored) {}
+            }
 
             application.model.dao.HistoriaClinicaDAO dao = new application.model.dao.HistoriaClinicaDAO();
             return dao.actualizarEvolucion(idEvolucion, idMedico, idCatalogoProcedimientos,
-                    fechaConsulta, motivoConsulta, 
-                    sintomaPrincipal, presionArterial, pulsoCardiaco, temperatura, tejidosBlandos, 
-                    diagnostico, odontograma, pagoAbono, observaciones);
+                    motivoConsulta, sintomaPrincipal, null, // historiaEnfermedadActual
+                    ps, pd, pulso, temp,
+                    tejidosBlandos, diagnostico, odontograma, observaciones);
 
         } catch (Throwable t) {
             System.err.println("-> ERROR en actualizarEvolucion: " + t.getMessage());
@@ -302,7 +320,7 @@ public class HistoriaClinicaController extends BaseController {
     // ------------------------------------------------------------------
 
     private int resolverIdPaciente(String identidad) {
-        String query = "SELECT id_pacientes FROM Pacientes WHERE identidad = ? AND borrado = 'No'";
+        String query = "SELECT id_paciente FROM Pacientes WHERE identidad = ? AND borrado = FALSE";
         try {
             java.sql.Connection conn = application.model.connection.DBConnection.getInstance().getConnection();
             try (java.sql.PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -317,12 +335,12 @@ public class HistoriaClinicaController extends BaseController {
         return -1;
     }
 
-    private int resolverIdExpediente(int idPacientes) {
-        String query = "SELECT id_expediente_base FROM Expediente_Base WHERE id_pacientes = ?";
+    private int resolverIdExpediente(int idPaciente) {
+        String query = "SELECT id_expediente_base FROM Expediente_Base WHERE id_paciente = ?";
         try {
             java.sql.Connection conn = application.model.connection.DBConnection.getInstance().getConnection();
             try (java.sql.PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setInt(1, idPacientes);
+                stmt.setInt(1, idPaciente);
                 try (java.sql.ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) return rs.getInt(1);
                 }

@@ -46,11 +46,13 @@ public class ConstanciaMedicaDAO {
     public List<Map<String, Object>> obtenerPorPaciente(int idPacientes) {
         List<Map<String, Object>> lista = new ArrayList<>();
         String query = "SELECT cm.id_constancias_medicas, cm.fecha_emision, cm.hora_emision, " +
-                       "cm.tratamiento_realizado, ec.fecha_consulta, pm.nombre_completo AS nombre_medico " +
+                       "cm.tratamiento_realizado, c.fecha_hora AS fecha_consulta, pm.nombre_completo AS nombre_medico " +
                        "FROM Constancias_Medicas cm " +
                        "INNER JOIN Evolucion_Clinica ec ON cm.id_evolucion_clinica = ec.id_evolucion_clinica " +
+                       "LEFT JOIN Citas c ON ec.id_cita = c.id_cita " +
                        "INNER JOIN Personal_Medico pm ON ec.id_personal_medico = pm.id_personal_medico " +
-                       "WHERE ec.id_pacientes = ? ORDER BY cm.fecha_emision DESC, cm.hora_emision DESC";
+                       "INNER JOIN Expediente_Base eb ON ec.id_expediente_base = eb.id_expediente_base " +
+                       "WHERE eb.id_paciente = ? ORDER BY cm.fecha_emision DESC, cm.hora_emision DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {

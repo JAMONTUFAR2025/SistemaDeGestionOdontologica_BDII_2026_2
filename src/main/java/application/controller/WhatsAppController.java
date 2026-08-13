@@ -1,7 +1,7 @@
 package application.controller;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -56,7 +56,7 @@ public class WhatsAppController {
 
             // 1. Intentar apagar un servidor Node.js huérfano antes de iniciar uno nuevo
             try {
-                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL("http://localhost:3001/api/shutdown").openConnection();
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) java.net.URI.create("http://localhost:3001/api/shutdown").toURL().openConnection();
                 conn.setRequestMethod("POST");
                 conn.setConnectTimeout(1500);
                 conn.setReadTimeout(1500);
@@ -107,7 +107,7 @@ public class WhatsAppController {
         }
 
         try {
-            URL url = new URL("http://localhost:3001/api/send");
+            URL url = java.net.URI.create("http://localhost:3001/api/send").toURL();
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
@@ -158,7 +158,7 @@ public class WhatsAppController {
             return "{\"status\":\"error\", \"qr\":\"El servidor de WhatsApp no está iniciado\"}";
         }
         try {
-            URL url = new URL("http://localhost:3001/api/qr");
+            URL url = java.net.URI.create("http://localhost:3001/api/qr").toURL();
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 

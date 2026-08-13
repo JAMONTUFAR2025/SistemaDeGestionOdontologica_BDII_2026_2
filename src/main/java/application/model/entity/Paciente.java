@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Paciente {
-    // SchemaActual: PK = id_pacientes (INT AUTO_INCREMENT), borrado ENUM('Si','No')
     private int idPaciente;
     private String identidad;
     private String identidadOriginal;
@@ -15,8 +14,7 @@ public class Paciente {
     private String ocupacion;
     private String domicilio;
     private String telefono;
-    private String personaResponsable;
-    private String telefonoResponsable;
+    private Integer idResponsable;
     private LocalDateTime fechaRegistro;
     private String estado;
 
@@ -25,8 +23,7 @@ public class Paciente {
 
     public Paciente(int idPaciente, String identidad, String nombreCompleto, LocalDate fechaNacimiento,
                     String genero, String estadoCivil, String ocupacion, String domicilio,
-                    String telefono, String personaResponsable, String telefonoResponsable,
-                    LocalDateTime fechaRegistro) {
+                    String telefono, Integer idResponsable, LocalDateTime fechaRegistro) {
         this.idPaciente = idPaciente;
         this.identidad = identidad;
         this.nombreCompleto = nombreCompleto;
@@ -36,8 +33,7 @@ public class Paciente {
         this.ocupacion = ocupacion;
         this.domicilio = domicilio;
         this.telefono = telefono;
-        this.personaResponsable = personaResponsable;
-        this.telefonoResponsable = telefonoResponsable;
+        this.idResponsable = idResponsable;
         this.fechaRegistro = fechaRegistro;
     }
 
@@ -121,20 +117,12 @@ public class Paciente {
         this.telefono = telefono;
     }
 
-    public String getPersonaResponsable() {
-        return personaResponsable;
+    public Integer getIdResponsable() {
+        return idResponsable;
     }
 
-    public void setPersonaResponsable(String personaResponsable) {
-        this.personaResponsable = personaResponsable;
-    }
-
-    public String getTelefonoResponsable() {
-        return telefonoResponsable;
-    }
-
-    public void setTelefonoResponsable(String telefonoResponsable) {
-        this.telefonoResponsable = telefonoResponsable;
+    public void setIdResponsable(Integer idResponsable) {
+        this.idResponsable = idResponsable;
     }
 
     public LocalDateTime getFechaRegistro() {

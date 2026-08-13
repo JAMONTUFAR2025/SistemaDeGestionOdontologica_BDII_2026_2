@@ -12,7 +12,7 @@
 
         body {
             font-family: Arial, sans-serif;
-            background-image: url('fondo-clinica.jpg');
+            background-image: url('../../fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -182,7 +182,7 @@
 
     <div class="container">
         <div style="margin-bottom: 15px;">
-            <a href="menu.html" class="back-link">← Volver al Menú Principal</a>
+            <a href="menu.html" class="back-link"><i class="fas fa-arrow-left"></i> Volver al Menú Principal</a>
         </div>
 
         <h2>Gestión de Personal y Usuarios</h2>
@@ -201,6 +201,11 @@
             <form id="formUsuario">
                 <div class="form-grid">
                     <div class="section-title">Datos de Acceso al Sistema</div>
+
+                    <div class="form-group full-width">
+                        <label for="usu_nombre_usuario">Nombre de Usuario (Login opcional):*</label>
+                        <input type="text" id="usu_nombre_usuario" placeholder="Ej: jperez">
+                    </div>
 
                     <div class="form-group full-width">
                         <label for="usu_correo">Correo Electrónico (Login):*</label>
@@ -307,7 +312,7 @@
         }
 
         // ==========================================
-        // CARGA DE DATOS DINÁMICOS
+        // CARGA DE DATOS DIN�?MICOS
         // ==========================================
         function intentarCargarEspecialidades() {
             if ((window.personalController)) {
@@ -365,11 +370,16 @@
                 return;
             }
 
+            var nombreUsuario = document.getElementById('usu_nombre_usuario').value.trim();
             var correo = document.getElementById('usu_correo').value.trim();
             var contrasenia = document.getElementById('usu_contrasenia').value;
             var rolSistema = document.getElementById('usu_rol_sistema').value;
             var estado = document.getElementById('usu_estado').value;
 
+            if (!nombreUsuario) { 
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el nombre de usuario.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert("Por favor, ingresa el nombre de usuario."); 
+                return; 
+            }
             if (!correo) { 
                 if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el correo electrónico.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert("Por favor, ingresa el correo electrónico."); 
                 return; 
@@ -386,6 +396,7 @@
             }
 
             var data = {
+                nombre_usuario: nombreUsuario,
                 correo: correo,
                 contrasenia: contrasenia,
                 rol_sistema: rolSistema,
@@ -556,7 +567,7 @@
     </script>
     
     <!-- Librería local para mensajes emergentes HTML (SweetAlert2) -->
-    <script src="application/assets/js/sweetalert2.all.min.js"></script>
+    <script src="../assets/js/sweetalert2.all.min.js"></script>
 </body>
 
 </html>

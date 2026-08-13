@@ -18,7 +18,9 @@ public class CitaController extends BaseController {
             }
             cita.setFechaHora(dt);
 
-            cita.setIdPacientes(obj.get("id_pacientes").getAsInt());
+            int idPaciente = obj.has("id_paciente") ? obj.get("id_paciente").getAsInt() : 
+                             (obj.has("id_pacientes") ? obj.get("id_pacientes").getAsInt() : 0);
+            cita.setIdPaciente(idPaciente);
             cita.setIdPersonalMedico(obj.get("id_personal_medico").getAsInt());
 
             application.model.dao.CitaDAO citaDAO = new application.model.dao.CitaDAO();
@@ -67,8 +69,12 @@ public class CitaController extends BaseController {
         try {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonCita).getAsJsonObject();
             application.model.entity.Cita cita = new application.model.entity.Cita();
-            cita.setIdCitas(obj.get("id_citas").getAsInt());
-            cita.setIdPacientes(obj.get("id_pacientes").getAsInt());
+            int idCita = obj.has("id_cita") ? obj.get("id_cita").getAsInt() :
+                         (obj.has("id_citas") ? obj.get("id_citas").getAsInt() : 0);
+            cita.setIdCita(idCita);
+            int idPaciente = obj.has("id_paciente") ? obj.get("id_paciente").getAsInt() : 
+                             (obj.has("id_pacientes") ? obj.get("id_pacientes").getAsInt() : 0);
+            cita.setIdPaciente(idPaciente);
             if (obj.has("id_personal_medico") && !obj.get("id_personal_medico").isJsonNull()
                     && !obj.get("id_personal_medico").getAsString().isEmpty()) {
                 cita.setIdPersonalMedico(obj.get("id_personal_medico").getAsInt());

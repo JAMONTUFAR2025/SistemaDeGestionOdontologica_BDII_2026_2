@@ -41,8 +41,8 @@ public class CajaSesionDAO {
                        "c.estado, c.fecha_apertura, c.fecha_cierre, c.observaciones, " +
                        "u1.correo AS usuario_apertura, u2.correo AS usuario_cierre " +
                        "FROM Caja_Sesiones c " +
-                       "LEFT JOIN Usuarios_Login u1 ON c.id_usuario_apertura = u1.id_usuarios_login " +
-                       "LEFT JOIN Usuarios_Login u2 ON c.id_usuario_cierre = u2.id_usuarios_login " +
+                       "LEFT JOIN Usuarios_Login u1 ON c.id_usuario_apertura = u1.id_usuario_login " +
+                       "LEFT JOIN Usuarios_Login u2 ON c.id_usuario_cierre = u2.id_usuario_login " +
                        "WHERE c.id_caja_sesion = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -123,7 +123,7 @@ public class CajaSesionDAO {
             Connection conn = DBConnection.getInstance().getConnection();
             String qIngr = "SELECT COALESCE(SUM(total_neto_recibido), 0) AS total " +
                            "FROM Facturacion WHERE id_caja_sesion = ? " +
-                           "AND LOWER(metodo_pago) = 'efectivo' AND LOWER(anulado) = 'no'";
+                           "AND LOWER(metodo_pago) = 'efectivo' AND anulado = FALSE";
             try (PreparedStatement stmt = conn.prepareStatement(qIngr)) {
                 stmt.setInt(1, idCajaSesion);
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -140,7 +140,7 @@ public class CajaSesionDAO {
             Connection conn = DBConnection.getInstance().getConnection();
             String qEgr = "SELECT COALESCE(SUM(monto), 0) AS total " +
                           "FROM Egresos_Gastos WHERE id_caja_sesion = ? " +
-                          "AND LOWER(metodo_pago) = 'efectivo' AND LOWER(anulado) = 'no'";
+                          "AND LOWER(metodo_pago) = 'efectivo' AND anulado = FALSE";
             try (PreparedStatement stmt = conn.prepareStatement(qEgr)) {
                 stmt.setInt(1, idCajaSesion);
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -157,7 +157,7 @@ public class CajaSesionDAO {
             Connection conn = DBConnection.getInstance().getConnection();
             String qIngrT = "SELECT COALESCE(SUM(total_neto_recibido), 0) AS total " +
                             "FROM Facturacion WHERE id_caja_sesion = ? " +
-                            "AND LOWER(metodo_pago) = 'transferencia' AND LOWER(anulado) = 'no'";
+                            "AND LOWER(metodo_pago) = 'transferencia' AND anulado = FALSE";
             try (PreparedStatement stmt = conn.prepareStatement(qIngrT)) {
                 stmt.setInt(1, idCajaSesion);
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -174,7 +174,7 @@ public class CajaSesionDAO {
             Connection conn = DBConnection.getInstance().getConnection();
             String qIngrP = "SELECT COALESCE(SUM(total_neto_recibido), 0) AS total " +
                             "FROM Facturacion WHERE id_caja_sesion = ? " +
-                            "AND LOWER(metodo_pago) IN ('pos', 'tarjeta') AND LOWER(anulado) = 'no'";
+                            "AND LOWER(metodo_pago) IN ('pos', 'tarjeta') AND anulado = FALSE";
             try (PreparedStatement stmt = conn.prepareStatement(qIngrP)) {
                 stmt.setInt(1, idCajaSesion);
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -232,12 +232,12 @@ public class CajaSesionDAO {
 
         String query = "SELECT 'INGRESO' AS tipo, DATE_FORMAT(f.fecha_emision, '%Y-%m-%d') AS fecha, " +
                        "f.concepto, f.metodo_pago, f.total_neto_recibido AS monto " +
-                       "FROM Facturacion f INNER JOIN Pacientes p ON f.id_pacientes = p.id_pacientes " +
-                       "WHERE f.id_caja_sesion = ? AND LOWER(f.anulado) = 'no' " +
+                       "FROM Facturacion f INNER JOIN Pacientes p ON f.id_paciente = p.id_paciente " +
+                       "WHERE f.id_caja_sesion = ? AND f.anulado = FALSE " +
                        "UNION ALL " +
                        "SELECT 'EGRESO' AS tipo, DATE_FORMAT(fecha, '%Y-%m-%d') AS fecha, " +
                        "descripcion AS concepto, metodo_pago, monto " +
-                       "FROM Egresos_Gastos WHERE id_caja_sesion = ? AND LOWER(anulado) = 'no' " +
+                       "FROM Egresos_Gastos WHERE id_caja_sesion = ? AND anulado = FALSE " +
                        "ORDER BY fecha ASC";
 
         try {
@@ -274,8 +274,8 @@ public class CajaSesionDAO {
             "c.estado, c.fecha_apertura, c.fecha_cierre, " +
             "u1.correo AS usuario_apertura, u2.correo AS usuario_cierre " +
             "FROM Caja_Sesiones c " +
-            "LEFT JOIN Usuarios_Login u1 ON c.id_usuario_apertura = u1.id_usuarios_login " +
-            "LEFT JOIN Usuarios_Login u2 ON c.id_usuario_cierre = u2.id_usuarios_login " +
+            "LEFT JOIN Usuarios_Login u1 ON c.id_usuario_apertura = u1.id_usuario_login " +
+            "LEFT JOIN Usuarios_Login u2 ON c.id_usuario_cierre = u2.id_usuario_login " +
             "WHERE LOWER(c.estado) = 'cerrada'"
         );
 

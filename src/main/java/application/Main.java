@@ -17,6 +17,7 @@ public class Main extends Application {
     private application.controller.WhatsAppController whatsAppController = new application.controller.WhatsAppController();
     private application.controller.DocumentosController documentosController = new application.controller.DocumentosController();
     private application.controller.CatalogoController catalogoController = new application.controller.CatalogoController();
+    private application.controller.ResponsableController responsableController = new application.controller.ResponsableController();
 
     @Override
     public void start(Stage primaryStage) {
@@ -24,9 +25,9 @@ public class Main extends Application {
         WebView webView = new WebView();
 
         // 2. Cargar login.html desde la carpeta resources/
-        var resource = getClass().getResource("/login.html");
+        var resource = getClass().getResource("/application/view/login.html");
         if (resource == null) {
-            throw new RuntimeException("No se encontró el archivo '/login.html' en src/main/resources/");
+            throw new RuntimeException("No se encontró el archivo '/application/view/login.html' en src/main/java/application/view/");
         }
         String urlHtml = resource.toExternalForm();
 
@@ -44,6 +45,7 @@ public class Main extends Application {
                 window.setMember("whatsAppController", whatsAppController);
                 window.setMember("documentosController", documentosController);
                 window.setMember("catalogoController", catalogoController);
+                window.setMember("responsableController", responsableController);
                 // Helper de impresión con referencia al WebView
                 window.setMember("printHelper", new application.controller.PrintHelper(webView));
             }

@@ -79,22 +79,32 @@ public class PersonalController extends BaseController {
         }
     }
 
+    public String obtenerNombresUsuarioActivos() {
+        try {
+            java.util.List<String> usuarios = userDAO.obtenerNombresUsuarioActivos();
+            return gson.toJson(usuarios);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en obtenerNombresUsuarioActivos: " + t.getMessage());
+            return "[]";
+        }
+    }
+
     public String registrarUsuarioSolo(String jsonUsuario) {
         System.out.println("-> Peticion de registro de usuario en Java: " + jsonUsuario);
         System.out.flush();
         try {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonUsuario).getAsJsonObject();
+            String nombreUsuario = obj.has("nombre_usuario") ? obj.get("nombre_usuario").getAsString() : null;
             String correo = obj.get("correo").getAsString();
             String contrasenia = obj.get("contrasenia").getAsString();
             String rolSistema = obj.get("rol_sistema").getAsString();
-            String estado = obj.get("estado").getAsString();
 
             application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
-            boolean exito = pmDAO.registrarUsuarioSolo(correo, contrasenia, rolSistema, estado);
+            boolean exito = pmDAO.registrarUsuarioSolo(nombreUsuario, correo, contrasenia, rolSistema);
             if (exito) {
                 return "OK|Usuario registrado exitosamente.";
             } else {
-                return "ERR|No se pudo registrar. Es posible que el correo ya exista.";
+                return "ERR|No se pudo registrar. Es posible que el correo o nombre de usuario ya exista.";
             }
         } catch (Throwable t) {
             System.err.println("-> ERROR en registrarUsuarioSolo: " + t.getClass().getName() + " - " + t.getMessage());

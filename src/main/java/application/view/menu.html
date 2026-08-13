@@ -7,8 +7,8 @@
     <title>Menú Principal - SOE Odontología</title>
 
     <!-- Hojas de estilo locales e iconos FontAwesome Offline -->
-    <link href="application/assets/css/bootstrap.min.css" rel="stylesheet">
-    <link href="application/assets/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/css/all.min.css" rel="stylesheet">
 
 
     <style>
@@ -19,7 +19,7 @@
 
         body {
             font-family: Arial, sans-serif;
-            background-image: url('fondo-clinica.jpg');
+            background-image: url('../../fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -151,7 +151,7 @@
 
     <div class="header">
         <div class="text-center mb-3">
-            <img src="Logo.png" alt="Logo Clínica SOE" style="max-width: 90px; height: auto;">
+            <img src="../../Logo.png" alt="Logo Clínica SOE" style="max-width: 90px; height: auto;">
         </div>
         <h1>Clínica Odontológica SOE</h1>
         <p>Sistema de Gestión Médica y Administrativa</p>
@@ -185,7 +185,7 @@
         </table>
         <!-- REQ 4: Controles de paginación Citas Hoy -->
         <div id="paginacionHoy" class="paginacion-controls" style="display:none;">
-            <button id="btnAnteriorHoy" onclick="cambiarPaginaHoy(-1)">← Anterior</button>
+            <button id="btnAnteriorHoy" onclick="cambiarPaginaHoy(-1)">�? Anterior</button>
             <span id="infoPaginaHoy">Página 1 de 1</span>
             <button id="btnSiguienteHoy" onclick="cambiarPaginaHoy(1)">Siguiente →</button>
         </div>
@@ -216,7 +216,7 @@
         </table>
         <!-- REQ 4: Controles de paginación Próximas Citas -->
         <div id="paginacionProximas" class="paginacion-controls" style="display:none;">
-            <button id="btnAnteriorProximas" onclick="cambiarPaginaProximas(-1)">← Anterior</button>
+            <button id="btnAnteriorProximas" onclick="cambiarPaginaProximas(-1)">�? Anterior</button>
             <span id="infoPaginaProximas">Página 1 de 1</span>
             <button id="btnSiguienteProximas" onclick="cambiarPaginaProximas(1)">Siguiente →</button>
         </div>
@@ -270,8 +270,8 @@
     </div>
 
     <!-- Script original de Bootstrap -->
-    <script src="application/assets/js/bootstrap.bundle.min.js"></script>
-    <script src="application/assets/js/sweetalert2.all.min.js"></script>
+    <script src="../assets/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/sweetalert2.all.min.js"></script>
 
     <!-- NUEVO SCRIPT DE PERMISOS PARA OCULTAR MÓDULOS -->
     <script>

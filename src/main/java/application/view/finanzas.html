@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Módulo Financiero - SOE Odontología</title>
-    <link href="application/assets/css/bootstrap.min.css" rel="stylesheet">
-    <link href="application/assets/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="application/assets/css/flatpickr.min.css">
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/flatpickr.min.css">
     <style>
         :root {
             --verde: #007bf0;
@@ -22,7 +22,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('fondo-clinica.jpg');
+            background-image: url('../../fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -183,10 +183,10 @@
 </head>
 <body>
 
-<!-- ══════════ CONTENEDOR PRINCIPAL ══════════ -->
+<!-- �?�?�?�?�?�?�?�?�?�? CONTENEDOR PRINCIPAL �?�?�?�?�?�?�?�?�?�? -->
 <div class="container card-container">
     <a href="menu.html" class="text-decoration-none mb-3 d-inline-block fw-bold" style="color: #007bf0;">
-        ← Volver al Menú Principal
+        <i class="fas fa-arrow-left"></i> Volver al Menú Principal
     </a>
     <h3 class="fw-bold mb-4" style="color: #007bf0;">
         <i class="fas fa-cash-register"></i> Módulo Financiero
@@ -208,7 +208,7 @@
         </button>
     </div>
 
-    <!-- ════════════ TAB 1: DASHBOARD ════════════ -->
+    <!-- �?�?�?�?�?�?�?�?�?�?�?�? TAB 1: DASHBOARD �?�?�?�?�?�?�?�?�?�?�?�? -->
     <div class="tab-panel active" id="panel-dashboard">
 
         <!-- Banner Estado Caja -->
@@ -281,7 +281,7 @@
         <div id="paginacionMovimientos" style="margin-top: 15px; text-align: center;"></div>
     </div><!-- /panel-dashboard -->
 
-    <!-- ════════════ TAB 2: FACTURACIÓN ════════════ -->
+    <!-- �?�?�?�?�?�?�?�?�?�?�?�? TAB 2: FACTURACIÓN �?�?�?�?�?�?�?�?�?�?�?�? -->
     <div class="tab-panel" id="panel-facturacion">
 
         <!-- Banner caja en facturación -->
@@ -347,7 +347,7 @@
         <div id="paginacionFacturas" style="margin-top: 15px; text-align: center;"></div>
     </div><!-- /panel-facturacion -->
 
-    <!-- ════════════ TAB 3: EGRESOS ════════════ -->
+    <!-- �?�?�?�?�?�?�?�?�?�?�?�? TAB 3: EGRESOS �?�?�?�?�?�?�?�?�?�?�?�? -->
     <div class="tab-panel" id="panel-egresos">
 
         <!-- Banner caja en egresos -->
@@ -414,7 +414,7 @@
         <div id="paginacionEgresos" style="margin-top: 15px; text-align: center;"></div>
     </div><!-- /panel-egresos -->
 
-    <!-- ════════════ TAB 4: HISTORIAL DE CIERRES ════════════ -->
+    <!-- �?�?�?�?�?�?�?�?�?�?�?�? TAB 4: HISTORIAL DE CIERRES �?�?�?�?�?�?�?�?�?�?�?�? -->
     <div class="tab-panel" id="panel-historial">
         <!-- Barra de herramientas -->
         <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
@@ -468,7 +468,7 @@
 </div><!-- /page-card -->
 
 
-<!-- ══════════ MODAL: ABRIR CAJA ══════════ -->
+<!-- �?�?�?�?�?�?�?�?�?�? MODAL: ABRIR CAJA �?�?�?�?�?�?�?�?�?�? -->
 <div class="modal fade" id="modalAbrirCaja" tabindex="-1" data-bs-backdrop="false">
     <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
         <div class="modal-content">
@@ -493,7 +493,7 @@
     </div>
 </div>
 
-<!-- ══════════ MODAL: ARQUEO Y CIERRE ══════════ -->
+<!-- �?�?�?�?�?�?�?�?�?�? MODAL: ARQUEO Y CIERRE �?�?�?�?�?�?�?�?�?�? -->
 <div class="modal fade" id="modalArqueo" tabindex="-1" data-bs-backdrop="false">
     <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
         <div class="modal-content">
@@ -546,7 +546,7 @@
     </div>
 </div>
 
-<!-- ══════════ MODAL: NUEVA FACTURA ══════════ -->
+<!-- �?�?�?�?�?�?�?�?�?�? MODAL: NUEVA FACTURA �?�?�?�?�?�?�?�?�?�? -->
 <div class="modal fade" id="modalFactura" tabindex="-1" data-bs-backdrop="false">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -640,7 +640,7 @@
     </div>
 </div>
 
-<!-- ══════════ MODAL: VISTA PREVIA FACTURA ══════════ -->
+<!-- �?�?�?�?�?�?�?�?�?�? MODAL: VISTA PREVIA FACTURA �?�?�?�?�?�?�?�?�?�? -->
 <div id="modalVistaPreviaFactura" class="modal fade" tabindex="-1" data-bs-backdrop="false">
   <div class="modal-dialog modal-dialog-centered">
   <div class="modal-content" style="max-width: 420px;">
@@ -663,7 +663,7 @@
   </div>
 </div>
 
-<!-- ══════════ MODAL: ANULAR FACTURA ══════════ -->
+<!-- �?�?�?�?�?�?�?�?�?�? MODAL: ANULAR FACTURA �?�?�?�?�?�?�?�?�?�? -->
 <div class="modal fade" id="modalAnularFactura" data-bs-backdrop="false" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -684,7 +684,7 @@
     </div>
 </div>
 
-<!-- ══════════ MODAL: EGRESO ══════════ -->
+<!-- �?�?�?�?�?�?�?�?�?�? MODAL: EGRESO �?�?�?�?�?�?�?�?�?�? -->
 <div class="modal fade" id="modalEgreso" tabindex="-1" data-bs-backdrop="false">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -756,7 +756,7 @@
     </div>
 </div>
 
-<!-- ══════════ MODAL: ELIMINAR EGRESO ══════════ -->
+<!-- �?�?�?�?�?�?�?�?�?�? MODAL: ELIMINAR EGRESO �?�?�?�?�?�?�?�?�?�? -->
 <div class="modal fade" id="modalEliminarEgreso" data-bs-backdrop="false" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -777,14 +777,14 @@
     </div>
 </div>
 
-<!-- ══════════ SCRIPTS ══════════ -->
-<script src="application/assets/js/bootstrap.bundle.min.js"></script>
-<script src="application/assets/js/sweetalert2.all.min.js"></script>
+<!-- �?�?�?�?�?�?�?�?�?�? SCRIPTS �?�?�?�?�?�?�?�?�?�? -->
+<script src="../assets/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/sweetalert2.all.min.js"></script>
 
 <script>
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 // ESTADO GLOBAL
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 let cajaActiva = null;        // Objeto de caja o null
 let idFacturaAnular = null;
 let idEgresoEliminar = null;
@@ -850,9 +850,9 @@ function cambiarPaginaMovimientos(dir) { paginaMovimientos += dir; renderTablaMo
 function cambiarPaginaFacturas(dir) { paginaFacturas += dir; renderTablaFacturas(facturasLista); }
 function cambiarPaginaEgresos(dir) { paginaEgresos += dir; renderTablaEgresos(egresosLista); }
 function cambiarPaginaCierres(dir) { paginaCierres += dir; renderTablaCierres(); }
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 // INICIALIZACIÓN
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 document.addEventListener('DOMContentLoaded', () => {
     esperarControladorYIniciar();
 
@@ -891,9 +891,9 @@ function inicializar() {
     cargarPacientesSelector();
 }
 
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 // NAVEGACIÓN POR PESTAÑAS
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 function cambiarTab(nombre) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -908,9 +908,9 @@ function cambiarTab(nombre) {
     history.replaceState(null, '', url.toString());
 }
 
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 // ██ DASHBOARD — CAJA
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 function cargarEstadoCaja() {
     try {
         const json = window.finanzasController.obtenerCajaActiva();
@@ -1147,9 +1147,9 @@ function confirmarCerrarCaja() {
     }
 }
 
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 // ██ FACTURACIÓN
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 function cargarPacientesSelector() {
     if (!window.finanzasController) { setTimeout(cargarPacientesSelector, 150); return; }
     try {
@@ -1249,20 +1249,18 @@ function abrirModalFactura() {
     });
     document.getElementById('fac_id').value = '';
     
-    // Auto-generar número de factura como FAC-000-XXX
+    // Auto-generar n�mero de factura en formato SAR 000-001-01-########
     let maxNum = 0;
+    const prefijoSAR = '000-001-01-';
     if (facturasLista) {
         for (let f of facturasLista) {
-            if (f.numero_recibo && f.numero_recibo.startsWith('FAC-000-')) {
-                let num = parseInt(f.numero_recibo.replace('FAC-000-', ''), 10);
-                if (!isNaN(num) && num > maxNum) maxNum = num;
-            } else if (f.numero_recibo && f.numero_recibo.startsWith('REC-')) {
-                let num = parseInt(f.numero_recibo.replace('REC-', ''), 10);
+            if (f.numero_recibo && f.numero_recibo.startsWith(prefijoSAR)) {
+                let num = parseInt(f.numero_recibo.replace(prefijoSAR, ''), 10);
                 if (!isNaN(num) && num > maxNum) maxNum = num;
             }
         }
     }
-    document.getElementById('fac_numero_recibo').value = "FAC-000-" + String(maxNum + 1).padStart(3, '0');
+    document.getElementById('fac_numero_recibo').value = prefijoSAR + String(maxNum + 1).padStart(8, '0');
 
     document.getElementById('fac_fecha_emision').value = new Date().toISOString().split('T')[0];
     document.getElementById('tituloModalFactura').innerHTML = '<i class="fas fa-cash-register me-2"></i> Nueva Factura';
@@ -1324,7 +1322,7 @@ function verDetalleFactura(idFactura) {
             // Dibujar la plantilla del ticket con los datos del JSON
             contenedor.innerHTML = `
                 <div style="text-align: center; margin-bottom: 15px;">
-                    <h4 style="margin:0; font-weight: bold;">CLÍNICA ODONTOLÓGICA SOE</h4>
+                    <h4 style="margin:0; font-weight: bold;">CL�?NICA ODONTOLÓGICA SOE</h4>
                     <p style="margin:0; font-size: 12px;">Comprobante de Pago</p>
                     <hr style="border-top: 1px dashed #000; margin: 10px 0;">
                 </div>
@@ -1432,9 +1430,9 @@ function confirmarAnularFactura() {
     }
 }
 
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 // ██ EGRESOS
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 function cargarEgresos() {
     if (!window.finanzasController) { setTimeout(cargarEgresos, 150); return; }
     try {
@@ -1616,9 +1614,9 @@ function ejecutarAnulacionEgreso(idEgreso) {
     }
 }
 
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 // ██ HISTORIAL DE CIERRES
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 function cargarHistorial() {
     const fechaDesde = parseDateToISO(document.getElementById('fechaDesdeHistorial').value);
     const fechaHasta = parseDateToISO(document.getElementById('fechaHastaHistorial').value);
@@ -1696,9 +1694,9 @@ function limpiarFiltrosHistorial() {
 }
 
 
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 // UTILIDADES
-// ═══════════════════════════════════════════════════════════
+// �?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?
 function fmtLps(val) {
     return parseFloat(val || 0).toLocaleString('es-HN', { style: 'currency', currency: 'HNL' });
 }
@@ -1733,7 +1731,7 @@ function cerrarModal(id) {
     if (m) m.hide();
 }
 </script>
-<script src="application/assets/js/flatpickr.min.js"></script>
+<script src="../assets/js/flatpickr.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var dateInputs = document.querySelectorAll('input[type="date"]');

@@ -18,7 +18,7 @@ public class EgresoGastoDAO {
     public boolean registrarEgreso(Integer idCajaSesion, int idUsuario, String fecha, String descripcion,
                                    double monto, String metodoPago, String numeroComprobante) {
         String query = "INSERT INTO Egresos_Gastos " +
-                       "(id_caja_sesion, id_usuario, fecha, descripcion, monto, metodo_pago, numero_comprobante) " +
+                       "(id_caja_sesion, id_usuario_login, fecha, descripcion, monto, metodo_pago, numero_comprobante) " +
                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -42,9 +42,9 @@ public class EgresoGastoDAO {
     /** Devuelve TODOS los egresos (activos e inactivos) con campo "estado" = Activo / Inactivo */
     public List<Map<String, Object>> obtenerEgresos() {
         List<Map<String, Object>> lista = new ArrayList<>();
-        String query = "SELECT id_egresos_gastos, id_caja_sesion, id_usuario, fecha, " +
+        String query = "SELECT id_egreso_gasto, id_caja_sesion, id_usuario_login, fecha, " +
                        "descripcion, monto, metodo_pago, numero_comprobante, anulado " +
-                       "FROM Egresos_Gastos ORDER BY id_egresos_gastos DESC";
+                       "FROM Egresos_Gastos ORDER BY id_egreso_gasto DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
@@ -65,9 +65,9 @@ public class EgresoGastoDAO {
     public boolean actualizarEgreso(int id, Integer idCajaSesion, int idUsuario, String fecha,
                                     String descripcion, double monto, String metodoPago, String numeroComprobante) {
         String query = "UPDATE Egresos_Gastos " +
-                       "SET id_caja_sesion = ?, id_usuario = ?, fecha = ?, descripcion = ?, " +
+                       "SET id_caja_sesion = ?, id_usuario_login = ?, fecha = ?, descripcion = ?, " +
                        "monto = ?, metodo_pago = ?, numero_comprobante = ? " +
-                       "WHERE id_egresos_gastos = ?";
+                       "WHERE id_egreso_gasto = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -91,8 +91,8 @@ public class EgresoGastoDAO {
     public boolean inactivarEgreso(int id) {
         String query = "UPDATE Egresos_Gastos e " +
                        "LEFT JOIN Caja_Sesiones c ON e.id_caja_sesion = c.id_caja_sesion " +
-                       "SET e.anulado = 'Si', e.fecha_anulado = NOW() " +
-                       "WHERE e.id_egresos_gastos = ? AND (c.id_caja_sesion IS NULL OR LOWER(c.estado) = 'abierta')";
+                       "SET e.anulado = TRUE, e.fecha_anulado = NOW() " +
+                       "WHERE e.id_egreso_gasto = ? AND (c.id_caja_sesion IS NULL OR LOWER(c.estado) = 'abierta')";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -114,9 +114,9 @@ public class EgresoGastoDAO {
         boolean hayHasta   = fechaHasta != null && !fechaHasta.trim().isEmpty();
 
         StringBuilder sb = new StringBuilder(
-            "SELECT id_egresos_gastos, id_caja_sesion, id_usuario, fecha, " +
+            "SELECT id_egreso_gasto, id_caja_sesion, id_usuario_login, fecha, " +
             "descripcion, monto, metodo_pago, numero_comprobante, anulado " +
-            "FROM Egresos_Gastos WHERE anulado = 'No'"
+            "FROM Egresos_Gastos WHERE anulado = FALSE"
         );
 
         List<Object> params = new ArrayList<>();
@@ -127,15 +127,15 @@ public class EgresoGastoDAO {
             params.add(like);
             params.add(like);
         }
-        if (fechaDesde != null && !fechaDesde.trim().isEmpty()) {
+        if (hayDesde) {
             sb.append(" AND DATE(fecha) >= ?");
             params.add(fechaDesde.trim());
         }
-        if (fechaHasta != null && !fechaHasta.trim().isEmpty()) {
+        if (hayHasta) {
             sb.append(" AND DATE(fecha) <= ?");
             params.add(fechaHasta.trim());
         }
-        sb.append(" ORDER BY id_egresos_gastos DESC");
+        sb.append(" ORDER BY id_egreso_gasto DESC");
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -158,17 +158,17 @@ public class EgresoGastoDAO {
     /** Helper: mapea una fila del ResultSet a Map, con "estado" como Activo/Inactivo */
     private Map<String, Object> mapRow(ResultSet rs) throws SQLException {
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("id_egreso",          rs.getInt("id_egresos_gastos"));
+        map.put("id_egreso",          rs.getInt("id_egreso_gasto"));
         int cajaSesion = rs.getInt("id_caja_sesion");
         map.put("id_caja_sesion",     rs.wasNull() ? null : cajaSesion);
-        map.put("id_usuario",         rs.getInt("id_usuario"));
+        map.put("id_usuario",         rs.getInt("id_usuario_login")); // keep frontend compatible key
         map.put("fecha",              rs.getString("fecha"));
         map.put("descripcion",        rs.getString("descripcion"));
         map.put("monto",              rs.getDouble("monto"));
         map.put("metodo_pago",        rs.getString("metodo_pago"));
         map.put("numero_comprobante", rs.getString("numero_comprobante"));
-        String anulado = rs.getString("anulado");
-        map.put("estado",             "Si".equals(anulado) ? "Inactivo" : "Activo");
+        boolean anulado = rs.getBoolean("anulado");
+        map.put("estado",             anulado ? "Inactivo" : "Activo");
         return map;
     }
 }

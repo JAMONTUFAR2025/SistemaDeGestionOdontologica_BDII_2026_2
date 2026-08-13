@@ -18,7 +18,7 @@
         }
 
         body {
-            background-image: url('fondo-clinica.jpg');
+            background-image: url('../../fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -150,14 +150,14 @@
         <!-- SECCIÓN 1: INICIO DE SESIÓN -->
         <div id="login-section">
             <div class="text-center mb-3">
-                <img src="Logo.png" alt="Logo Clínica SOE" style="max-width: 90px; height: auto;">
+                <img src="../../Logo.png" alt="Logo Clínica SOE" style="max-width: 90px; height: auto;">
             </div>
             <h2>SOE Odontología</h2>
             <form onsubmit="intentarLogin(event)">
                 <div class="input-group">
-                    <label for="usuario">Correo Electrónico</label>
+                    <label for="usuario">Usuario o Correo</label>
                     <div class="autocomplete-wrapper">
-                        <input type="email" id="usuario" required placeholder="Ingrese su correo electrónico">
+                        <input type="text" id="usuario" required placeholder="Ingrese nombre de usuario o correo">
                     </div>
                 </div>
                 <div class="input-group">
@@ -175,13 +175,13 @@
         <div id="recovery-section" class="hidden">
             <h2>Recuperar Cuenta</h2>
             <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
-                Ingresa tu correo electrónico registrado para enviarte un código de seguridad.
+                Ingresa tu usuario o correo registrado para enviarte un código de seguridad.
             </p>
             <form onsubmit="intentarRecuperacion(event)">
                 <div class="input-group">
-                    <label for="recovery-input">Correo Electrónico</label>
+                    <label for="recovery-input">Usuario o Correo</label>
                     <div class="autocomplete-wrapper">
-                        <input type="email" id="recovery-input" required placeholder="ejemplo@correo.com">
+                        <input type="text" id="recovery-input" required placeholder="usuario o correo">
                     </div>
                 </div>
                 <button type="submit" class="btn" style="background-color: #007bf0;">Enviar Código</button>
@@ -235,7 +235,7 @@
     </div>
 
     <!-- Librería local SweetAlert2 v10 (Compatible con JavaFX) -->
-    <script src="application/assets/js/sweetalert2.all.min.js"></script>
+    <script src="../assets/js/sweetalert2.all.min.js"></script>
 
     <script>
         // Variables globales para guardar el estado del proceso
@@ -268,11 +268,11 @@
 
         function intentarLogin(event) {
             event.preventDefault();
-            var correo = document.getElementById('usuario').value;
+            var identificador = document.getElementById('usuario').value;
             var pass = document.getElementById('password').value;
 
             if ((window.personalController && window.authController)) {
-                var exito = window.authController.login(correo, pass);
+                var exito = window.authController.login(identificador, pass);
                 if (exito) {
                     Swal.fire({
                         title: '¡Bienvenido!',
@@ -304,14 +304,14 @@
 
         function intentarRecuperacion(event) {
             event.preventDefault();
-            var correo = document.getElementById('recovery-input').value;
+            var identificador = document.getElementById('recovery-input').value;
 
             if ((window.personalController && window.authController)) {
                 document.querySelector('#recovery-section button').innerText = "Enviando...";
                 document.querySelector('#recovery-section button').disabled = true;
 
                 setTimeout(function () {
-                    var respuesta = window.authController.enviarCodigoRecuperacion(correo);
+                    var respuesta = window.authController.enviarCodigoRecuperacion(identificador);
                     var partes = respuesta.split("|");
 
                     document.querySelector('#recovery-section button').innerText = "Enviar Código";
@@ -319,13 +319,13 @@
 
                     if (partes[0] === "OK") {
                         Swal.fire({
-                            title: 'Correo Enviado',
+                            title: 'Código Enviado',
                             text: partes[1],
                             icon: 'success',
                             confirmButtonText: 'Aceptar',
                             confirmButtonColor: '#28a745'
                         }).then(() => {
-                            correoUsuarioActual = correo;
+                            correoUsuarioActual = identificador;
                             ocultarTodasLasSecciones();
                             document.getElementById('code-section').classList.remove('hidden');
                         });
@@ -432,20 +432,20 @@
         // ==========================================
         // Lógica de Autocompletado (Sugerencias)
         // ==========================================
-        var correosGuardados = [];
+        var usuariosGuardados = [];
 
-        function cargarCorreosSiEsNecesario() {
-            if (correosGuardados.length === 0 && (window.personalController && window.authController)) {
-                var jsonCorreos = window.personalController.obtenerCorreosActivos();
-                if (jsonCorreos) {
-                    correosGuardados = JSON.parse(jsonCorreos);
+        function cargarUsuariosSiEsNecesario() {
+            if (usuariosGuardados.length === 0 && (window.personalController && window.authController)) {
+                var jsonUsuarios = window.personalController.obtenerNombresUsuarioActivos();
+                if (jsonUsuarios) {
+                    usuariosGuardados = JSON.parse(jsonUsuarios);
                 }
             }
         }
 
         function autocomplete(inp) {
             if (!inp) return;
-            inp.addEventListener("focus", cargarCorreosSiEsNecesario);
+            inp.addEventListener("focus", cargarUsuariosSiEsNecesario);
             inp.addEventListener("input", function (e) {
                 var a, b, i, val = this.value;
                 closeAllLists();
@@ -456,12 +456,12 @@
                 a.setAttribute("class", "autocomplete-items");
                 this.parentNode.appendChild(a);
 
-                for (i = 0; i < correosGuardados.length; i++) {
-                    if (correosGuardados[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+                for (i = 0; i < usuariosGuardados.length; i++) {
+                    if (usuariosGuardados[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
                         b = document.createElement("DIV");
-                        b.innerHTML = "<strong>" + correosGuardados[i].substr(0, val.length) + "</strong>";
-                        b.innerHTML += correosGuardados[i].substr(val.length);
-                        b.innerHTML += "<input type='hidden' value='" + correosGuardados[i] + "'>";
+                        b.innerHTML = "<strong>" + usuariosGuardados[i].substr(0, val.length) + "</strong>";
+                        b.innerHTML += usuariosGuardados[i].substr(val.length);
+                        b.innerHTML += "<input type='hidden' value='" + usuariosGuardados[i] + "'>";
                         b.addEventListener("click", function (e) {
                             inp.value = this.getElementsByTagName("input")[0].value;
                             closeAllLists();
@@ -508,7 +508,7 @@
     </script>
 
     <!-- Librería local SweetAlert2 v10 (Compatible con JavaFX) -->
-    <script src="application/assets/js/sweetalert2.all.min.js"></script>
+    <script src="../assets/js/sweetalert2.all.min.js"></script>
 
 </body>
 

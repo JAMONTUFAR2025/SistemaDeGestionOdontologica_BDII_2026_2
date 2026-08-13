@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 
 public class Cita {
 
-    private Integer idCitas;
-    private Integer idPacientes;
+    private Integer idCita;
+    private Integer idPaciente;
     private Integer idPersonalMedico;
     private LocalDateTime fechaHora;
     private String motivoCita;
@@ -14,29 +14,39 @@ public class Cita {
     public Cita() {
     }
 
-    public Cita(Integer idCitas, Integer idPacientes, Integer idPersonalMedico, LocalDateTime fechaHora, String motivoCita, String estado) {
-        this.idCitas = idCitas;
-        this.idPacientes = idPacientes;
+    public Cita(Integer idCita, Integer idPaciente, Integer idPersonalMedico, LocalDateTime fechaHora, String motivoCita, String estado) {
+        this.idCita = idCita;
+        this.idPaciente = idPaciente;
         this.idPersonalMedico = idPersonalMedico;
         this.fechaHora = fechaHora;
         this.motivoCita = motivoCita;
         this.estado = estado;
     }
 
-    public Integer getIdCitas() {
-        return idCitas;
+    public Integer getIdCita() {
+        return idCita;
     }
 
+    public void setIdCita(Integer idCita) {
+        this.idCita = idCita;
+    }
+
+    // Keep old setter for backward compatibility during migration
     public void setIdCitas(Integer idCitas) {
-        this.idCitas = idCitas;
+        this.idCita = idCitas;
     }
 
-    public Integer getIdPacientes() {
-        return idPacientes;
+    public Integer getIdPaciente() {
+        return idPaciente;
     }
 
+    public void setIdPaciente(Integer idPaciente) {
+        this.idPaciente = idPaciente;
+    }
+
+    // Keep old setter for backward compatibility during migration
     public void setIdPacientes(Integer idPacientes) {
-        this.idPacientes = idPacientes;
+        this.idPaciente = idPacientes;
     }
 
     public Integer getIdPersonalMedico() {
@@ -74,8 +84,8 @@ public class Cita {
     @Override
     public String toString() {
         return "Cita{" +
-                "idCitas=" + idCitas +
-                ", idPacientes=" + idPacientes +
+                "idCita=" + idCita +
+                ", idPaciente=" + idPaciente +
                 ", idPersonalMedico=" + idPersonalMedico +
                 ", fechaHora=" + fechaHora +
                 ", estado='" + estado + '\'' +

@@ -14,6 +14,7 @@ public abstract class BaseController {
     protected static Integer idUsuarioLoginActual = null;
     protected static String correoUsuarioActual = "";
     protected static String nombreMedicoActual = null;
+    protected static String nombreUsuarioActual = "";
 
     /** Limpia todos los datos de sesión (llamar al hacer logout) */
     public static void clearSession() {
@@ -22,6 +23,7 @@ public abstract class BaseController {
         idUsuarioLoginActual = null;
         correoUsuarioActual = "";
         nombreMedicoActual = null;
+        nombreUsuarioActual = "";
     }
 
     public BaseController() {
@@ -64,7 +66,7 @@ public abstract class BaseController {
                                         return LocalDate.parse(dateStr, fmtEn);
                                     } catch (Exception ex3) {
                                         java.time.format.DateTimeFormatter fmtEs = new java.time.format.DateTimeFormatterBuilder()
-                                                .parseCaseInsensitive().appendPattern("dd-MMM-yyyy").toFormatter(new java.util.Locale("es", "ES"));
+                                                .parseCaseInsensitive().appendPattern("dd-MMM-yyyy").toFormatter(java.util.Locale.forLanguageTag("es-ES"));
                                         return LocalDate.parse(dateStr, fmtEs);
                                     }
                                 }
@@ -115,8 +117,8 @@ public abstract class BaseController {
             java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"),
             new java.time.format.DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yyyy HH:mm:ss").toFormatter(java.util.Locale.ENGLISH),
             new java.time.format.DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yyyy hh:mm a").toFormatter(java.util.Locale.ENGLISH),
-            new java.time.format.DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yyyy HH:mm:ss").toFormatter(new java.util.Locale("es", "ES")),
-            new java.time.format.DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yyyy hh:mm a").toFormatter(new java.util.Locale("es", "ES")),
+            new java.time.format.DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yyyy HH:mm:ss").toFormatter(java.util.Locale.forLanguageTag("es-ES")),
+            new java.time.format.DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yyyy hh:mm a").toFormatter(java.util.Locale.forLanguageTag("es-ES")),
             new java.time.format.DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MM-yyyy HH:mm:ss").toFormatter(java.util.Locale.ENGLISH),
             new java.time.format.DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MM-yyyy hh:mm a").toFormatter(java.util.Locale.ENGLISH)
         };

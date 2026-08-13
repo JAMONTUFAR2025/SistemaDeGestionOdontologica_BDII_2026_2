@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal - SOE Odontología</title>
-    <link href="application/assets/css/bootstrap.min.css" rel="stylesheet">
-    <link href="application/assets/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/css/all.min.css" rel="stylesheet">
 
     <style>
         html {
@@ -15,7 +15,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('fondo-clinica.jpg');
+            background-image: url('../../fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -141,7 +141,7 @@
 <body>
     <div class="container card-container">
         <a href="menu.html" class="text-decoration-none mb-3 d-inline-block fw-bold" style="color: #007bf0;">
-            ← Volver al Menú Principal
+            <i class="fas fa-arrow-left"></i> Volver al Menú Principal
         </a>
 
         <h3 class="fw-bold mb-4" style="color: #007bf0;">
@@ -185,6 +185,7 @@
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Nombre de Usuario</th>
                             <th>Correo Electrónico</th>
                             <th>Rol en el Sistema</th>
                             <th>Fecha de Creación</th>
@@ -260,6 +261,13 @@
                     <input type="hidden" id="usu_id_editar">
 
                     <div class="section-title">Datos de Acceso al Sistema</div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="usu_nombre_usuario">Nombre de Usuario (Login Opcional):*</label>
+                            <input type="text" id="usu_nombre_usuario" class="form-control" placeholder="Ej: jperez">
+                        </div>
+                    </div>
 
                     <div class="row mb-3">
                         <div class="col-md-7">
@@ -411,8 +419,8 @@
 
 
 
-    <script src="application/assets/js/bootstrap.bundle.min.js"></script>
-    <script src="application/assets/js/sweetalert2.all.min.js"></script>
+    <script src="../assets/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/sweetalert2.all.min.js"></script>
     <script>
         // ==========================================
         // ESTADO GLOBAL
@@ -516,12 +524,13 @@
                 const rowClass = inactivo ? 'registro-inactivo' : '';
                 const acciones = inactivo 
                     ? `<button class="btn btn-sm btn-outline-secondary py-0" onclick="pedirPasswordReactivarUsuario(${u.id_usuario})"><i class="fas fa-recycle"></i> Reactivar</button>`
-                    : `<i class="fas fa-edit" title="Editar" onclick="abrirModalUsuario(true, ${u.id_usuario}, '${u.correo}', '${u.rol_sistema}')"></i>
+                    : `<i class="fas fa-edit" title="Editar" onclick="abrirModalUsuario(true, ${u.id_usuario}, '${u.nombre_usuario || ''}', '${u.correo}', '${u.rol_sistema}')"></i>
                        <i class="fas fa-trash" title="Inactivar" onclick="deleteUsuario(${u.id_usuario})"></i>`;
                 
                 return `
                 <tr class="${rowClass}" data-correo="${(u.correo||'').toLowerCase()}" data-rol="${(u.rol_sistema||'').toLowerCase()}">
                     <td>${u.id_usuario}</td>
+                    <td>${u.nombre_usuario || '-'}</td>
                     <td>${u.correo}</td>
                     <td><span class="badge-rol ${badgeClaseRol(u.rol_sistema)}">${u.rol_sistema}</span></td>
                     <td>${u.fecha_creacion ? u.fecha_creacion.substring(0,10) : '-'}</td>
@@ -673,9 +682,10 @@
         // ==========================================
         // MODAL USUARIO - ABRIR (crear o editar)
         // ==========================================
-        function abrirModalUsuario(esEdicion, idUsuario, correo, rol) {
+        function abrirModalUsuario(esEdicion, idUsuario, nombreUsuario, correo, rol) {
             modoEdicionUsuario = esEdicion;
             document.getElementById('usu_id_editar').value = idUsuario || '';
+            document.getElementById('usu_nombre_usuario').value = nombreUsuario || '';
             document.getElementById('usu_correo').value = correo || '';
             document.getElementById('usu_contrasenia').value = '';
             document.getElementById('usu_confirmar_pass').value = '';
@@ -750,12 +760,14 @@
         function guardarUsuario() {
             if ((!window.personalController)) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Puente Java no inicializado.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Error: Puente Java no inicializado.'); return; }
 
+            const nombreUsuario = document.getElementById('usu_nombre_usuario').value.trim();
             const correo = document.getElementById('usu_correo').value.trim();
             const contrasenia = document.getElementById('usu_contrasenia').value;
             const confirmar = document.getElementById('usu_confirmar_pass').value;
             const rolSistema = document.getElementById('usu_rol_sistema').value;
             const idUsuario = document.getElementById('usu_id_editar').value;
 
+            if (!nombreUsuario) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el nombre de usuario.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa el nombre de usuario.'); return; }
             if (!correo) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el correo electrónico.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa el correo electrónico.'); return; }
             
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -772,10 +784,10 @@
 
             let respuesta;
             if (modoEdicionUsuario) {
-                const data = { id_usuario: parseInt(idUsuario), correo, contrasenia, rol_sistema: rolSistema };
+                const data = { id_usuario: parseInt(idUsuario), nombre_usuario: nombreUsuario, correo, contrasenia, rol_sistema: rolSistema };
                 respuesta = window.personalController.actualizarUsuario(JSON.stringify(data));
             } else {
-                const data = { correo, contrasenia, rol_sistema: rolSistema, estado: 'Activo' };
+                const data = { nombre_usuario: nombreUsuario, correo, contrasenia, rol_sistema: rolSistema, estado: 'Activo' };
                 respuesta = window.personalController.registrarUsuarioSolo(JSON.stringify(data));
             }
 

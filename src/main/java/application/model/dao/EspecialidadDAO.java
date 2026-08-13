@@ -14,8 +14,8 @@ public class EspecialidadDAO {
 
     public List<Especialidad> obtenerEspecialidades() {
         List<Especialidad> lista = new ArrayList<>();
-        // SchemaActual: PK = id_especialidades
-        String query = "SELECT id_especialidades, nombre_especialidad FROM Especialidades ORDER BY id_especialidades DESC";
+        // SchemaActual: PK = id_especialidad
+        String query = "SELECT id_especialidad, nombre_especialidad FROM Especialidades ORDER BY id_especialidad DESC";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -23,7 +23,7 @@ public class EspecialidadDAO {
                     ResultSet rs = stmt.executeQuery()) {
 
                 while (rs.next()) {
-                    lista.add(new Especialidad(rs.getInt("id_especialidades"), rs.getString("nombre_especialidad")));
+                    lista.add(new Especialidad(rs.getInt("id_especialidad"), rs.getString("nombre_especialidad")));
                 }
             }
         } catch (SQLException e) {
@@ -50,8 +50,8 @@ public class EspecialidadDAO {
 
     // Actualizar nombre de especialidad
     public boolean actualizarEspecialidad(int id, String nombre) {
-        // SchemaActual: WHERE id_especialidades = ?
-        String q = "UPDATE Especialidades SET nombre_especialidad = ? WHERE id_especialidades = ?";
+        // SchemaActual: WHERE id_especialidad = ?
+        String q = "UPDATE Especialidades SET nombre_especialidad = ? WHERE id_especialidad = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(q)) {
@@ -67,8 +67,8 @@ public class EspecialidadDAO {
 
     // Eliminar especialidad (borrado físico)
     public boolean eliminarEspecialidad(int id) {
-        // SchemaActual: WHERE id_especialidades = ?
-        String q = "DELETE FROM Especialidades WHERE id_especialidades = ?";
+        // SchemaActual: WHERE id_especialidad = ?
+        String q = "DELETE FROM Especialidades WHERE id_especialidad = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(q)) {

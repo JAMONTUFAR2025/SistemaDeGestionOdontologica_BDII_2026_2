@@ -19,7 +19,7 @@ public class FacturacionDAO {
                                    double totalRetenido, double totalNetoRecibido,
                                    String metodoPago) {
         String query = "INSERT INTO Facturacion " +
-                "(numero_recibo, id_pacientes, id_caja_sesion, id_usuario, rtn_cliente, fecha_emision, concepto, " +
+                "(numero_recibo, id_paciente, id_caja_sesion, id_usuario_login, rtn_cliente, fecha_emision, concepto, " +
                 "suma_neta, total_honorarios, total_retenido, total_neto_recibido, metodo_pago) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
@@ -48,15 +48,15 @@ public class FacturacionDAO {
     /** Devuelve TODOS los recibos (activos e inactivos) con campo "estado" = Activo / Inactivo */
     public List<Map<String, Object>> obtenerRecibos() {
         List<Map<String, Object>> lista = new ArrayList<>();
-        String query = "SELECT fr.id_facturacion_recibos, fr.numero_recibo, fr.id_pacientes, " +
-                       "fr.id_caja_sesion, fr.id_usuario, " +
+        String query = "SELECT fr.id_facturacion_recibo, fr.numero_recibo, fr.id_paciente, " +
+                       "fr.id_caja_sesion, fr.id_usuario_login, " +
                        "p.nombre_completo AS nombre_paciente, p.identidad AS identidad_paciente, " +
                        "fr.rtn_cliente, fr.fecha_emision, fr.concepto, " +
                        "fr.suma_neta, fr.total_honorarios, fr.total_retenido, " +
                        "fr.total_neto_recibido, fr.metodo_pago, fr.anulado " +
                        "FROM Facturacion fr " +
-                       "INNER JOIN Pacientes p ON fr.id_pacientes = p.id_pacientes " +
-                       "ORDER BY fr.id_facturacion_recibos DESC";
+                       "INNER JOIN Pacientes p ON fr.id_paciente = p.id_paciente " +
+                       "ORDER BY fr.id_facturacion_recibo DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
@@ -72,15 +72,15 @@ public class FacturacionDAO {
     }
 
     public Map<String, Object> obtenerReciboPorId(int idFactura) {
-        String query = "SELECT fr.id_facturacion_recibos, fr.numero_recibo, fr.id_pacientes, " +
-                       "fr.id_caja_sesion, fr.id_usuario, " +
+        String query = "SELECT fr.id_facturacion_recibo, fr.numero_recibo, fr.id_paciente, " +
+                       "fr.id_caja_sesion, fr.id_usuario_login, " +
                        "p.nombre_completo AS nombre_paciente, p.identidad AS identidad_paciente, " +
                        "fr.rtn_cliente, fr.fecha_emision, fr.concepto, " +
                        "fr.suma_neta, fr.total_honorarios, fr.total_retenido, " +
                        "fr.total_neto_recibido, fr.metodo_pago, fr.anulado " +
                        "FROM Facturacion fr " +
-                       "INNER JOIN Pacientes p ON fr.id_pacientes = p.id_pacientes " +
-                       "WHERE fr.id_facturacion_recibos = ?";
+                       "INNER JOIN Pacientes p ON fr.id_paciente = p.id_paciente " +
+                       "WHERE fr.id_facturacion_recibo = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -101,7 +101,7 @@ public class FacturacionDAO {
         String query = "SELECT pm.nombre_completo " +
                        "FROM Citas c " +
                        "INNER JOIN Personal_Medico pm ON c.id_personal_medico = pm.id_personal_medico " +
-                       "WHERE c.id_pacientes = ? AND c.estado = 'Completada' " +
+                       "WHERE c.id_paciente = ? AND c.estado = 'Completada' " +
                        "ORDER BY c.fecha_hora DESC LIMIT 1";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -122,8 +122,8 @@ public class FacturacionDAO {
     public boolean anularRecibo(int id) {
         String query = "UPDATE Facturacion f " +
                        "LEFT JOIN Caja_Sesiones c ON f.id_caja_sesion = c.id_caja_sesion " +
-                       "SET f.anulado = 'Si', f.fecha_anulado = NOW() " +
-                       "WHERE f.id_facturacion_recibos = ? AND (c.id_caja_sesion IS NULL OR LOWER(c.estado) = 'abierta')";
+                       "SET f.anulado = TRUE, f.fecha_anulado = NOW() " +
+                       "WHERE f.id_facturacion_recibo = ? AND (c.id_caja_sesion IS NULL OR LOWER(c.estado) = 'abierta')";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -137,13 +137,13 @@ public class FacturacionDAO {
     }
 
     public int obtenerIdPacientePorIdentidad(String identidad) {
-        String query = "SELECT id_pacientes FROM Pacientes WHERE identidad = ? AND borrado = 'No'";
+        String query = "SELECT id_paciente FROM Pacientes WHERE identidad = ? AND borrado = FALSE";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setString(1, identidad);
                 try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) return rs.getInt("id_pacientes");
+                    if (rs.next()) return rs.getInt("id_paciente");
                 }
             }
         } catch (SQLException e) {
@@ -154,15 +154,15 @@ public class FacturacionDAO {
 
     public List<Map<String, Object>> obtenerPacientesActivos() {
         List<Map<String, Object>> lista = new ArrayList<>();
-        String query = "SELECT id_pacientes, identidad, nombre_completo FROM Pacientes " +
-                       "WHERE borrado = 'No' ORDER BY nombre_completo ASC";
+        String query = "SELECT id_paciente, identidad, nombre_completo FROM Pacientes " +
+                       "WHERE borrado = FALSE ORDER BY nombre_completo ASC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
                  ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> map = new LinkedHashMap<>();
-                    map.put("id_paciente", rs.getInt("id_pacientes"));
+                    map.put("id_paciente", rs.getInt("id_paciente"));
                     map.put("identidad", rs.getString("identidad"));
                     map.put("nombre_completo", rs.getString("nombre_completo"));
                     lista.add(map);
@@ -182,15 +182,15 @@ public class FacturacionDAO {
         boolean hayHasta     = fechaHasta != null && !fechaHasta.trim().isEmpty();
 
         StringBuilder sb = new StringBuilder(
-            "SELECT fr.id_facturacion_recibos, fr.numero_recibo, fr.id_pacientes, " +
-            "fr.id_caja_sesion, fr.id_usuario, " +
+            "SELECT fr.id_facturacion_recibo, fr.numero_recibo, fr.id_paciente, " +
+            "fr.id_caja_sesion, fr.id_usuario_login, " +
             "p.nombre_completo AS nombre_paciente, p.identidad AS identidad_paciente, " +
             "fr.rtn_cliente, fr.fecha_emision, fr.concepto, " +
             "fr.suma_neta, fr.total_honorarios, fr.total_retenido, " +
             "fr.total_neto_recibido, fr.metodo_pago, fr.anulado " +
             "FROM Facturacion fr " +
-            "INNER JOIN Pacientes p ON fr.id_pacientes = p.id_pacientes " +
-            "WHERE fr.anulado = 'No'"
+            "INNER JOIN Pacientes p ON fr.id_paciente = p.id_paciente " +
+            "WHERE fr.anulado = FALSE"
         );
 
         List<Object> params = new ArrayList<>();
@@ -202,16 +202,16 @@ public class FacturacionDAO {
             params.add(like);
             params.add(like);
         }
-        if (fechaDesde != null && !fechaDesde.trim().isEmpty()) {
+        if (hayDesde) {
             sb.append(" AND DATE(fr.fecha_emision) >= ?");
             params.add(fechaDesde.trim());
         }
-        if (fechaHasta != null && !fechaHasta.trim().isEmpty()) {
+        if (hayHasta) {
             sb.append(" AND DATE(fr.fecha_emision) <= ?");
             params.add(fechaHasta.trim());
         }
 
-        sb.append(" ORDER BY fr.id_facturacion_recibos DESC");
+        sb.append(" ORDER BY fr.id_facturacion_recibo DESC");
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -235,11 +235,11 @@ public class FacturacionDAO {
     /** Helper: mapea una fila del ResultSet a Map, con "estado" como Activo/Inactivo */
     private Map<String, Object> mapRow(ResultSet rs) throws SQLException {
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("id_factura",          rs.getInt("id_facturacion_recibos"));
+        map.put("id_factura",          rs.getInt("id_facturacion_recibo"));
         map.put("numero_recibo",       rs.getString("numero_recibo"));
-        map.put("id_paciente",         rs.getInt("id_pacientes"));
+        map.put("id_paciente",         rs.getInt("id_paciente"));
         map.put("id_caja_sesion",      rs.getInt("id_caja_sesion"));
-        map.put("id_usuario",          rs.getInt("id_usuario"));
+        map.put("id_usuario",          rs.getInt("id_usuario_login")); // Keep frontend compatible map key
         map.put("nombre_paciente",     rs.getString("nombre_paciente"));
         map.put("identidad_paciente",  rs.getString("identidad_paciente"));
         map.put("rtn_cliente",         rs.getString("rtn_cliente"));
@@ -250,8 +250,8 @@ public class FacturacionDAO {
         map.put("total_retenido",      rs.getDouble("total_retenido"));
         map.put("total_neto_recibido", rs.getDouble("total_neto_recibido"));
         map.put("metodo_pago",         rs.getString("metodo_pago"));
-        String anulado = rs.getString("anulado");
-        map.put("estado",              "Si".equals(anulado) ? "Inactivo" : "Activo");
+        boolean anulado = rs.getBoolean("anulado");
+        map.put("estado",              anulado ? "Inactivo" : "Activo");
         return map;
     }
 }

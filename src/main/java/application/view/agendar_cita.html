@@ -5,11 +5,13 @@
     <meta charset="UTF-8">
     <title>Agenda y Citas - SOE Odontología</title>
     <!-- jQuery y Select2 -->
-    <script src="application/assets/js/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="application/assets/css/jquery.timepicker.min.css">
-    <script src="application/assets/js/jquery.timepicker.min.js"></script>
-    <link href="application/assets/css/select2.min.css" rel="stylesheet" />
-    <script src="application/assets/js/select2.min.js"></script>
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/css/all.min.css" rel="stylesheet">
+    <script src="../assets/js/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="../assets/css/jquery.timepicker.min.css">
+    <script src="../assets/js/jquery.timepicker.min.js"></script>
+    <link href="../assets/css/select2.min.css" rel="stylesheet" />
+    <script src="../assets/js/select2.min.js"></script>
     <style>
         .swal2-container {
             z-index: 99999 !important;
@@ -21,7 +23,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('fondo-clinica.jpg');
+            background-image: url('../../fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -270,14 +272,13 @@
             font-weight: bold;
         }
     </style>
-<link rel="stylesheet" href="application/assets/css/flatpickr.min.css">
+<link rel="stylesheet" href="../assets/css/flatpickr.min.css">
     </head>
 
 <body>
     <div class="card-container">
         <div style="margin-bottom: 15px;">
-            <a href="menu.html" style="text-decoration: none; color: #007bf0; font-weight: bold; font-size: 14px;">←
-                Volver al Menú Principal</a>
+            <a href="menu.html" style="text-decoration: none; color: #007bf0; font-weight: bold; font-size: 14px;"><i class="fas fa-arrow-left"></i> Volver al Menú Principal</a>
         </div>
 
         <!-- TÍTULO DE LA PÁGINA -->
@@ -287,7 +288,7 @@
 
         <!-- REQ 3: Banner de advertencia en modo edición -->
         <div id="bannerEdicion">
-            ✏️ Modo Edición — Cita #<span id="numeroCitaEdicion"></span>. Modifica los datos y pulsa "Actualizar Cita".
+            <i class="fas fa-edit"></i> Modo Edición — Cita #<span id="numeroCitaEdicion"></span>. Modifica los datos y pulsa "Actualizar Cita".
         </div>
 
         <div class="nav-tabs-custom">
@@ -653,7 +654,7 @@
     </div>
 
     <!-- Librería local SweetAlert2 v10 (Compatible con JavaFX) -->
-    <script src="application/assets/js/sweetalert2.all.min.js"></script>
+    <script src="../assets/js/sweetalert2.all.min.js"></script>
 
     <script>
         // ============================================================
@@ -751,7 +752,7 @@
             let mensaje = `Hola ${nombre.trim()}, le saludamos de SOE Odontología. Le recordamos su cita agendada para el día ${fecha} a las ${horaFormateada}. Por favor confirmar su asistencia.`;
             
             if (window.whatsAppController) {
-                $('#btnWsDirecto').html('<span>⏳</span> Enviando...').css('pointer-events', 'none');
+                $('#btnWsDirecto').html('<span>�?�</span> Enviando...').css('pointer-events', 'none');
                 setTimeout(() => {
                     let res = window.whatsAppController.enviarMensaje(numLimpio, mensaje);
                     $('#btnWsDirecto').html('<span>💬</span> WhatsApp Individual').css('pointer-events', 'auto');
@@ -776,7 +777,7 @@
                 return;
             }
             
-            $('#btnWsVincular').html('<span>⏳</span> Cargando...').css('pointer-events', 'none');
+            $('#btnWsVincular').html('<span>�?�</span> Cargando...').css('pointer-events', 'none');
             setTimeout(() => {
                 try {
                     let resStr = window.whatsAppController.obtenerQR();
@@ -1093,7 +1094,7 @@
                 $('#id_cita_edicion').val(cita.id_citas);
 
                 // Actualizar título y botón
-                document.getElementById('tituloCita').textContent = '✏️ Gestionar Cita #' + cita.id_citas;
+                document.getElementById('tituloCita').textContent = '�?�? Gestionar Cita #' + cita.id_citas;
                 document.getElementById('btnGuardarCita').textContent = 'Actualizar Cita';
                 document.getElementById('bannerEdicion').style.display = 'block';
                 document.getElementById('numeroCitaEdicion').textContent = cita.id_citas;
@@ -1438,7 +1439,7 @@
             renderizarHistorial();
         }
     </script>
-<script src="application/assets/js/flatpickr.min.js"></script>
+<script src="../assets/js/flatpickr.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     var dateInputs = document.querySelectorAll('input[type="date"]');

@@ -8,17 +8,17 @@ import java.sql.SQLException;
 
 public class UserDAO {
 
-    public boolean autenticarUsuario(String correo, String contrasenia) {
-        // SchemaActual: borrado ENUM('Si','No'), id_usuarios_login
-        String query = "SELECT id_usuarios_login FROM Usuarios_Login WHERE correo = ? AND contrasenia = ? AND borrado = 'No'";
+    public boolean autenticarUsuario(String correoONombre, String contrasenia) {
+        String query = "SELECT id_usuario_login FROM Usuarios_Login WHERE (correo = ? OR nombre_usuario = ?) AND contrasenia = ? AND borrado = FALSE";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
 
                 String hashedPass = application.util.SecurityUtils.hashPassword(contrasenia);
-                stmt.setString(1, correo);
-                stmt.setString(2, hashedPass);
+                stmt.setString(1, correoONombre);
+                stmt.setString(2, correoONombre);
+                stmt.setString(3, hashedPass);
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     return rs.next();
@@ -31,18 +31,18 @@ public class UserDAO {
         }
     }
 
-    public boolean verificarCorreoExistente(String correoOTelefono) {
-        // SchemaActual: Usuarios_Login.id_personal_medico (INT FK), borrado='No'
-        String query = "SELECT u.id_usuarios_login FROM Usuarios_Login u " +
+    public boolean verificarCorreoExistente(String correoOTelefonoONombre) {
+        String query = "SELECT u.id_usuario_login FROM Usuarios_Login u " +
                 "LEFT JOIN Personal_Medico p ON u.id_personal_medico = p.id_personal_medico " +
-                "WHERE (u.correo = ? OR p.telefono = ?) AND u.borrado = 'No'";
+                "WHERE (u.correo = ? OR u.nombre_usuario = ? OR p.telefono = ?) AND u.borrado = FALSE";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
 
-                stmt.setString(1, correoOTelefono);
-                stmt.setString(2, correoOTelefono);
+                stmt.setString(1, correoOTelefonoONombre);
+                stmt.setString(2, correoOTelefonoONombre);
+                stmt.setString(3, correoOTelefonoONombre);
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     return rs.next();
@@ -55,12 +55,31 @@ public class UserDAO {
         }
     }
 
-    public boolean actualizarContrasenia(String correoOTelefono, String nuevaContrasenia) {
-        // SchemaActual: JOIN por id_personal_medico, borrado='No'
+    public String obtenerCorreoReal(String identificador) {
+        String query = "SELECT correo FROM Usuarios_Login " +
+                "WHERE (correo = ? OR nombre_usuario = ?) AND borrado = FALSE";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, identificador);
+                stmt.setString(2, identificador);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getString("correo");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener correo real: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public boolean actualizarContrasenia(String identificador, String nuevaContrasenia) {
         String query = "UPDATE Usuarios_Login u " +
                 "LEFT JOIN Personal_Medico p ON u.id_personal_medico = p.id_personal_medico " +
                 "SET u.contrasenia = ? " +
-                "WHERE (u.correo = ? OR p.telefono = ?) AND u.borrado = 'No'";
+                "WHERE (u.correo = ? OR u.nombre_usuario = ? OR p.telefono = ?) AND u.borrado = FALSE";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -68,8 +87,9 @@ public class UserDAO {
 
                 String hashedPass = application.util.SecurityUtils.hashPassword(nuevaContrasenia);
                 stmt.setString(1, hashedPass);
-                stmt.setString(2, correoOTelefono);
-                stmt.setString(3, correoOTelefono);
+                stmt.setString(2, identificador);
+                stmt.setString(3, identificador);
+                stmt.setString(4, identificador);
 
                 int filas = stmt.executeUpdate();
                 return filas > 0;
@@ -83,8 +103,7 @@ public class UserDAO {
 
     public java.util.List<String> obtenerCorreosActivos() {
         java.util.List<String> correos = new java.util.ArrayList<>();
-        // SchemaActual: borrado='No'
-        String query = "SELECT correo FROM Usuarios_Login WHERE borrado = 'No'";
+        String query = "SELECT correo FROM Usuarios_Login WHERE borrado = FALSE";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -103,18 +122,39 @@ public class UserDAO {
         return correos;
     }
 
+    public java.util.List<String> obtenerNombresUsuarioActivos() {
+        java.util.List<String> usuarios = new java.util.ArrayList<>();
+        String query = "SELECT nombre_usuario FROM Usuarios_Login WHERE borrado = FALSE";
+
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query);
+                    ResultSet rs = stmt.executeQuery()) {
+
+                while (rs.next()) {
+                    usuarios.add(rs.getString("nombre_usuario"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener nombres de usuario activos: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return usuarios;
+    }
+
     // =========================================================================
     // MÉTODO: Obtener el rol del usuario para los permisos del sistema
     // =========================================================================
-    public String obtenerRolPorCorreo(String correo) {
+    public String obtenerRolPorCorreo(String identificador) {
         String rol = "";
-        String query = "SELECT rol_sistema FROM Usuarios_Login WHERE correo = ?";
+        String query = "SELECT rol_sistema FROM Usuarios_Login WHERE correo = ? OR nombre_usuario = ?";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
 
-                stmt.setString(1, correo);
+                stmt.setString(1, identificador);
+                stmt.setString(2, identificador);
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
@@ -129,16 +169,17 @@ public class UserDAO {
         return rol;
     }
 
-    public Integer obtenerIdMedicoPorCorreo(String correo) {
+    public Integer obtenerIdMedicoPorCorreo(String identificador) {
         Integer idMedico = null;
-        String query = "SELECT id_personal_medico FROM Usuarios_Login WHERE correo = ? AND borrado = 'No'";
+        String query = "SELECT id_personal_medico FROM Usuarios_Login WHERE (correo = ? OR nombre_usuario = ?) AND borrado = FALSE";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return null;
 
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, correo);
+                stmt.setString(1, identificador);
+                stmt.setString(2, identificador);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         int id = rs.getInt("id_personal_medico");
@@ -155,17 +196,18 @@ public class UserDAO {
         return idMedico;
     }
 
-    public Integer obtenerIdLoginPorCorreo(String correo) {
+    public Integer obtenerIdLoginPorCorreo(String identificador) {
         Integer idLogin = null;
-        String query = "SELECT id_usuarios_login FROM Usuarios_Login WHERE correo = ? AND borrado = 'No'";
+        String query = "SELECT id_usuario_login FROM Usuarios_Login WHERE (correo = ? OR nombre_usuario = ?) AND borrado = FALSE";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return null;
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, correo);
+                stmt.setString(1, identificador);
+                stmt.setString(2, identificador);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        idLogin = rs.getInt("id_usuarios_login");
+                        idLogin = rs.getInt("id_usuario_login");
                     }
                 }
             }
@@ -175,16 +217,38 @@ public class UserDAO {
         return idLogin;
     }
 
-    public String obtenerNombreMedicoPorCorreo(String correo) {
-        String nombre = null;
-        String query = "SELECT pm.nombre_completo FROM Usuarios_Login ul " +
-                       "JOIN Personal_Medico pm ON ul.id_personal_medico = pm.id_personal_medico " +
-                       "WHERE ul.correo = ? AND ul.borrado = 'No' AND pm.borrado = 'No'";
+    public String obtenerNombreUsuario(String identificador) {
+        String nombreUsuario = null;
+        String query = "SELECT nombre_usuario FROM Usuarios_Login WHERE (correo = ? OR nombre_usuario = ?) AND borrado = FALSE";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return null;
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, correo);
+                stmt.setString(1, identificador);
+                stmt.setString(2, identificador);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        nombreUsuario = rs.getString("nombre_usuario");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener nombre_usuario: " + e.getMessage());
+        }
+        return nombreUsuario;
+    }
+
+    public String obtenerNombreMedicoPorCorreo(String identificador) {
+        String nombre = null;
+        String query = "SELECT pm.nombre_completo FROM Usuarios_Login ul " +
+                       "JOIN Personal_Medico pm ON ul.id_personal_medico = pm.id_personal_medico " +
+                       "WHERE (ul.correo = ? OR ul.nombre_usuario = ?) AND ul.borrado = FALSE AND pm.borrado = FALSE";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) return null;
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, identificador);
+                stmt.setString(2, identificador);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         nombre = rs.getString("nombre_completo");

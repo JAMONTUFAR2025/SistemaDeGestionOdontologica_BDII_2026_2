@@ -14,27 +14,27 @@ import java.util.Map;
 public class ExpedienteArchivoDAO {
 
     /** Retorna todos los archivos activos de un paciente. */
-    public List<Map<String, Object>> obtenerPorPaciente(int idPacientes) {
+    public List<Map<String, Object>> obtenerPorPaciente(int idPaciente) {
         List<Map<String, Object>> lista = new ArrayList<>();
-        String query = "SELECT id_expediente_archivos, tipo_archivo, nombre_archivo, " +
+        String query = "SELECT id_expediente_archivo, tipo_archivo, nombre_archivo, " +
                        "ruta_archivo, observaciones, fecha_subida, borrado " +
                        "FROM Expediente_Archivos " +
-                       "WHERE id_pacientes = ? " +
+                       "WHERE id_paciente = ? " +
                        "ORDER BY fecha_subida DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setInt(1, idPacientes);
+                stmt.setInt(1, idPaciente);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         Map<String, Object> map = new LinkedHashMap<>();
-                        map.put("id_expediente_archivos", rs.getInt("id_expediente_archivos"));
+                        map.put("id_expediente_archivos", rs.getInt("id_expediente_archivo")); // keep compat
                         map.put("tipo_archivo",  rs.getString("tipo_archivo"));
                         map.put("nombre_archivo", rs.getString("nombre_archivo"));
                         map.put("ruta_archivo",  rs.getString("ruta_archivo"));
                         map.put("observaciones", rs.getString("observaciones"));
                         map.put("fecha_subida",  rs.getString("fecha_subida"));
-                        map.put("estado", rs.getString("borrado").equals("No") ? "Activo" : "Inactivo");
+                        map.put("estado", rs.getBoolean("borrado") ? "Inactivo" : "Activo");
                         lista.add(map);
                     }
                 }
@@ -49,15 +49,15 @@ public class ExpedienteArchivoDAO {
      * Registra un nuevo archivo en el expediente del paciente.
      * @param tipoArchivo uno de: 'Radiografia', 'Fotografia', 'Laboratorio', 'Otro'
      */
-    public boolean registrar(int idPacientes, String tipoArchivo, String nombreArchivo,
+    public boolean registrar(int idPaciente, String tipoArchivo, String nombreArchivo,
                              String rutaArchivo, String observaciones) {
         String query = "INSERT INTO Expediente_Archivos " +
-                       "(id_pacientes, tipo_archivo, nombre_archivo, ruta_archivo, observaciones) " +
+                       "(id_paciente, tipo_archivo, nombre_archivo, ruta_archivo, observaciones) " +
                        "VALUES (?, ?, ?, ?, ?)";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setInt(1, idPacientes);
+                stmt.setInt(1, idPaciente);
                 stmt.setString(2, tipoArchivo);
                 stmt.setString(3, nombreArchivo);
                 stmt.setString(4, rutaArchivo);
@@ -72,8 +72,8 @@ public class ExpedienteArchivoDAO {
 
     /** Borrado lógico de un archivo del expediente. */
     public boolean eliminar(int idExpedienteArchivo) {
-        String query = "UPDATE Expediente_Archivos SET borrado = 'Si', fecha_borrado = NOW() " +
-                       "WHERE id_expediente_archivos = ?";
+        String query = "UPDATE Expediente_Archivos SET borrado = TRUE, fecha_borrado = NOW() " +
+                       "WHERE id_expediente_archivo = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -88,8 +88,8 @@ public class ExpedienteArchivoDAO {
 
     /** Reactivar un archivo del expediente. */
     public boolean reactivarArchivo(int idExpedienteArchivo) {
-        String query = "UPDATE Expediente_Archivos SET borrado = 'No', fecha_borrado = NULL " +
-                       "WHERE id_expediente_archivos = ?";
+        String query = "UPDATE Expediente_Archivos SET borrado = FALSE, fecha_borrado = NULL " +
+                       "WHERE id_expediente_archivo = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {

@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pacientes - SOE Odontología</title>
     <!-- Estilos locales -->
-    <link href="application/assets/css/bootstrap.min.css" rel="stylesheet">
-    <link href="application/assets/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/css/all.min.css" rel="stylesheet">
 
     <style>
         /* === ESTILOS GENERALES Y DE TABLA === */
@@ -17,7 +17,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('fondo-clinica.jpg');
+            background-image: url('../../fondo-clinica.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -110,25 +110,38 @@
             color: #6c757d !important;
         }
     </style>
-<link rel="stylesheet" href="application/assets/css/flatpickr.min.css">
+<link rel="stylesheet" href="../assets/css/flatpickr.min.css">
     </head>
 
 <body>
 
     <div class="container card-container">
         <a href="menu.html" class="text-decoration-none mb-3 d-inline-block fw-bold" style="color: #007bf0;">
-            ← Volver al Menú Principal
+            <i class="fas fa-arrow-left"></i> Volver al Menú Principal
         </a>
 
         <!-- ======================================================= -->
-        <!-- VISTA PRINCIPAL: TABLA DE PACIENTES                     -->
+        <!-- NAV TABS                                                -->
         <!-- ======================================================= -->
-        <div>
-            <h3 class="text-primary fw-bold text-start mb-4" style="color: #007bf0 !important;">
-                <i class="fas fa-users"></i> Pacientes
-            </h3>
+        <ul class="nav nav-tabs mb-4" id="pacientesTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold" id="pacientes-tab" data-bs-toggle="tab" data-bs-target="#pacientes-pane" type="button" role="tab" style="color: #007bf0;">
+                    <i class="fas fa-users"></i> Pacientes
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="responsables-tab" data-bs-toggle="tab" data-bs-target="#responsables-pane" type="button" role="tab" style="color: #007bf0;">
+                    <i class="fas fa-user-shield"></i> Responsables
+                </button>
+            </li>
+        </ul>
 
-            <!-- Buscador universal y botón Agregar -->
+        <div class="tab-content" id="pacientesTabsContent">
+            <!-- ======================================================= -->
+            <!-- PESTAÑA: PACIENTES                                      -->
+            <!-- ======================================================= -->
+            <div class="tab-pane fade show active" id="pacientes-pane" role="tabpanel">
+                <!-- Buscador universal y botón Agregar -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="d-flex align-items-center">
                     <label for="buscadorPacientes" class="me-2 fw-bold text-dark mb-0">Buscar:</label>
@@ -162,6 +175,44 @@
                     </tbody>
                 </table>
                 <div id="paginacionPacientes" style="margin-top: 15px; text-align: center;"></div>
+            </div>
+            </div>
+
+            <!-- ======================================================= -->
+            <!-- PESTAÑA: RESPONSABLES                                   -->
+            <!-- ======================================================= -->
+            <div class="tab-pane fade" id="responsables-pane" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="d-flex align-items-center">
+                        <label for="buscadorResponsables" class="me-2 fw-bold text-dark mb-0">Buscar:</label>
+                        <input type="text" id="buscadorResponsables" class="form-control me-3" style="width: 250px;" placeholder="Escriba para buscar...">
+                        <div class="form-check form-switch ms-2">
+                            <input class="form-check-input" type="checkbox" id="chkMostrarInactivosResp" onchange="cargarResponsables()">
+                            <label class="form-check-label fw-bold text-secondary" for="chkMostrarInactivosResp">Mostrar Inactivos</label>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarResponsable" onclick="openAddRespModal()">
+                            <i class="fas fa-plus"></i> Agregar Responsable
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table-custom text-center">
+                        <thead>
+                            <tr>
+                                <th>Nombre Completo</th>
+                                <th>Teléfono</th>
+                                <th>Correo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoTablaResponsables">
+                        </tbody>
+                    </table>
+                    <div id="paginacionResponsables" style="margin-top: 15px; text-align: center;"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -256,15 +307,17 @@
                         <div class="section-title">- En caso de emergencia o menor de edad</div>
                         <!-- Fila 6 -->
                         <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label for="persona_responsable">Personas Responsable:</label>
-                                <input type="text" id="persona_responsable" name="personaResponsable"
-                                    class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="telefono_responsable">Teléfono:</label>
-                                <input type="text" id="telefono_responsable" name="telefonoResponsable"
-                                    class="form-control" placeholder="####-####" minlength="9" maxlength="9">
+                            <div class="col-md-12">
+                                <label for="id_responsable">Responsable (Opcional):</label>
+                                <div class="d-flex">
+                                    <select id="id_responsable" name="idResponsable" class="form-select me-2">
+                                        <option value="">-- Ninguno --</option>
+                                        <!-- Options llenadas por JS -->
+                                    </select>
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarResponsable" onclick="openAddRespModal()" style="white-space: nowrap;">
+                                        <i class="fas fa-plus"></i> Nuevo
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -298,11 +351,85 @@
                     <h5 class="mb-3">¿Está seguro de que desea borrar a este paciente?</h5>
                     <p class="text-muted small">El paciente será marcado como inactivo y ya no aparecerá en la tabla.
                     </p>
+                    <div class="modal-footer justify-content-center border-0 pb-4">
+                        <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">No</button>
+                        <button type="button" class="btn btn-danger px-4 fw-bold" onclick="confirmarEliminacion()">Sí,
+                            borrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- VENTANA FLOTANTE: FORMULARIO RESPONSABLES               -->
+    <!-- ======================================================= -->
+    <div class="modal fade" id="modalAgregarResponsable" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header text-white" style="background-color: #007bf0;">
+                    <h5 class="modal-title fw-bold" id="modalTitleResp"><i class="fas fa-user-shield"></i> Nuevo Responsable</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="registroResponsableForm" onsubmit="registrarResponsable(event)">
+                        <input type="hidden" id="id_responsable_form" name="idResponsable">
+                        <div class="mb-3">
+                            <label for="identidad_responsable">Identidad:</label>
+                            <input type="text" id="identidad_responsable" name="identidad" class="form-control" placeholder="####-####-#####" minlength="15" maxlength="15" oninput="this.value = formatearIdentidad(this.value);" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nombre_responsable">Nombre Completo:</label>
+                            <input type="text" id="nombre_responsable" name="nombreCompleto" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="telefono_responsable">Teléfono:</label>
+                            <input type="text" id="telefono_responsable" name="telefono" class="form-control" placeholder="####-####" minlength="9" maxlength="9">
+                        </div>
+                        <div class="mb-3">
+                            <label for="correo_responsable">Correo (Opcional):</label>
+                            <input type="email" id="correo_responsable" name="correo" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="parentesco_responsable">Parentesco:</label>
+                            <select id="parentesco_responsable" name="parentesco" class="form-select" required>
+                                <option value="" disabled selected>Seleccione un parentesco</option>
+                                <option value="Padre">Padre</option>
+                                <option value="Madre">Madre</option>
+                                <option value="Conyuge">Cónyuge</option>
+                                <option value="Tutor Legal">Tutor Legal</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-secondary w-100 py-2" data-bs-dismiss="modal">Cancelar</button>
+                            </div>
+                            <div class="col-6">
+                                <button type="submit" class="btn btn-guardar rounded">Guardar</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Borrado Responsable -->
+    <div class="modal fade" id="modalEliminarResponsable" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header text-white bg-danger">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <h5 class="mb-3">¿Está seguro de que desea borrar a este responsable?</h5>
+                    <p class="text-muted small">Será marcado como inactivo.</p>
                 </div>
                 <div class="modal-footer justify-content-center border-0 pb-4">
                     <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">No</button>
-                    <button type="button" class="btn btn-danger px-4 fw-bold" onclick="confirmarEliminacion()">Sí,
-                        borrar</button>
+                    <button type="button" class="btn btn-danger px-4 fw-bold" onclick="confirmarEliminacionResp()">Sí, borrar</button>
                 </div>
             </div>
         </div>
@@ -464,8 +591,16 @@
             document.getElementById('ocupacion').value = p.ocupacion || '';
             document.getElementById('telefono').value = p.telefono || '';
             document.getElementById('domicilio').value = p.domicilio || '';
-            document.getElementById('persona_responsable').value = p.personaResponsable || '';
-            document.getElementById('telefono_responsable').value = p.telefonoResponsable || '';
+            
+            // Setear dropdown de responsable
+            const selectResp = document.getElementById('id_responsable');
+            if (selectResp) {
+                if (p.idResponsable) {
+                    selectResp.value = p.idResponsable;
+                } else {
+                    selectResp.value = '';
+                }
+            }
 
             const titulo = document.querySelector('.modal-title');
             if (titulo) titulo.innerHTML = '<i class="fas fa-user-edit"></i> Editar Paciente';
@@ -784,7 +919,7 @@
 
             const inputIdentidad = document.getElementById('identidad');
             const inputTelefono = document.getElementById('telefono');
-            const inputTelefonoResp = document.getElementById('telefono_responsable');
+            const inputTelefonoRespForm = document.getElementById('telefono_responsable');
             const inputFechaNacimiento = document.getElementById('fecha_nacimiento');
 
             if (inputIdentidad) {
@@ -795,24 +930,284 @@
                 inputTelefono.addEventListener('input', formatTelefono);
                 inputTelefono.maxLength = 9;
             }
-            if (inputTelefonoResp) {
-                inputTelefonoResp.addEventListener('input', formatTelefono);
-                inputTelefonoResp.maxLength = 9;
+            if (inputTelefonoRespForm) {
+                inputTelefonoRespForm.addEventListener('input', formatTelefono);
+                inputTelefonoRespForm.maxLength = 9;
             }
             if (inputFechaNacimiento) {
                 inputFechaNacimiento.addEventListener('input', (e) => calcularEdad(e.target.value));
                 inputFechaNacimiento.addEventListener('change', (e) => calcularEdad(e.target.value));
             }
         });
+
+        // =========================================================================
+        // SCRIPTS PARA RESPONSABLES
+        // =========================================================================
+        let listaResponsables = [];
+        let responsablesFiltrados = [];
+        let paginaRespActual = 1;
+
+        function cargarResponsables() {
+            if (!window.responsableController) return;
+            try {
+                const jsonStr = window.responsableController.obtenerResponsables();
+                listaResponsables = JSON.parse(jsonStr || '[]');
+                
+                const mostrarInactivos = document.getElementById('chkMostrarInactivosResp').checked;
+                responsablesFiltrados = listaResponsables.filter(r => mostrarInactivos || r.borrado === false);
+                
+                paginaRespActual = 1;
+                renderizarTablaResp();
+                actualizarSelectResponsables();
+            } catch (e) {
+                console.error("Error al cargar responsables:", e);
+            }
+        }
+
+        function actualizarSelectResponsables() {
+            const select = document.getElementById('id_responsable');
+            if (!select) return;
+            
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">-- Ninguno --</option>';
+            
+            listaResponsables.filter(r => r.borrado === false).forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.idResponsable;
+                opt.textContent = `${r.nombreCompleto} ${r.telefono ? ' - ' + r.telefono : ''}`;
+                select.appendChild(opt);
+            });
+            
+            if (currentVal) select.value = currentVal;
+        }
+
+        function renderizarTablaResp() {
+            const tbody = document.getElementById('cuerpoTablaResponsables');
+            const paginacion = document.getElementById('paginacionResponsables');
+            tbody.innerHTML = '';
+
+            if (responsablesFiltrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-muted py-3">No hay responsables registrados.</td></tr>`;
+                paginacion.innerHTML = '';
+                return;
+            }
+
+            let inicio = (paginaRespActual - 1) * REGISTROS_POR_PAGINA;
+            let fin = inicio + REGISTROS_POR_PAGINA;
+            let paginaDatos = responsablesFiltrados.slice(inicio, fin);
+
+            paginaDatos.forEach(r => {
+                const inactivo = r.borrado === true;
+                const rowClass = inactivo ? 'registro-inactivo' : '';
+                const acciones = inactivo
+                    ? `<button class="btn btn-sm btn-outline-secondary py-0" onclick="pedirPasswordReactivarResp(${r.idResponsable})"><i class="fas fa-recycle"></i> Reactivar</button>`
+                    : `<i class="fas fa-edit" title="Editar" onclick="openEditRespModal(${r.idResponsable})"></i>
+                       <i class="fas fa-trash text-danger" title="Eliminar" onclick="deleteResp(${r.idResponsable})"></i>`;
+                
+                const tr = document.createElement('tr');
+                tr.className = rowClass;
+                tr.innerHTML = `
+                    <td>${r.nombreCompleto || ''}</td>
+                    <td>${r.telefono || ''}</td>
+                    <td>${r.correo || ''}</td>
+                    <td class="action-icons">${acciones}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            let totalPaginas = Math.ceil(responsablesFiltrados.length / REGISTROS_POR_PAGINA);
+            let btnHtml = '';
+            
+            if (totalPaginas > 1) {
+                let btnBaseStyle = "margin: 0 5px; padding: 6px 14px; border: none; border-radius: 4px; font-weight: 500; transition: background 0.2s; color: white;";
+                let btnActiveStyle = btnBaseStyle + " background: #007bf0; cursor: pointer;";
+                let btnDisabledStyle = btnBaseStyle + " background: #99c9f8; cursor: not-allowed;";
+
+                btnHtml += `<button onclick="cambiarPaginaResp(-1)" ${paginaRespActual === 1 ? 'disabled' : ''} style="${paginaRespActual === 1 ? btnDisabledStyle : btnActiveStyle}">Anterior</button>`;
+                btnHtml += `<span style="margin: 0 15px; font-weight: bold; color: #333;">Página ${paginaRespActual} de ${totalPaginas}</span>`;
+                btnHtml += `<button onclick="cambiarPaginaResp(1)" ${paginaRespActual === totalPaginas ? 'disabled' : ''} style="${paginaRespActual === totalPaginas ? btnDisabledStyle : btnActiveStyle}">Siguiente</button>`;
+            }
+            paginacion.innerHTML = btnHtml;
+        }
+
+        function cambiarPaginaResp(direccion) {
+            paginaRespActual += direccion;
+            renderizarTablaResp();
+        }
+
+        function openAddRespModal() {
+            const form = document.getElementById('registroResponsableForm');
+            if (form) form.reset();
+            document.getElementById('id_responsable_form').value = '0';
+            document.getElementById('modalTitleResp').innerHTML = '<i class="fas fa-user-shield"></i> Nuevo Responsable';
+        }
+
+        function openEditRespModal(id) {
+            const r = listaResponsables.find(item => item.idResponsable === id);
+            if (!r) return;
+            document.getElementById('id_responsable_form').value = r.idResponsable;
+            document.getElementById('nombre_responsable').value = r.nombreCompleto || '';
+            document.getElementById('telefono_responsable').value = r.telefono || '';
+            document.getElementById('correo_responsable').value = r.correo || '';
+
+            document.getElementById('modalTitleResp').innerHTML = '<i class="fas fa-user-edit"></i> Editar Responsable';
+            let modalEl = document.getElementById('modalAgregarResponsable');
+            let modalInst = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modalInst.show();
+        }
+
+        function registrarResponsable(event) {
+            event.preventDefault();
+            const form = document.getElementById('registroResponsableForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            if (!data.nombreCompleto || data.nombreCompleto.trim() === '') {
+                Swal.fire('Atención', 'El nombre es obligatorio.', 'warning');
+                return;
+            }
+
+            if (data.telefono && data.telefono.length > 0 && data.telefono.length < 9) {
+                Swal.fire('Atención', 'El teléfono debe tener mínimo 8 dígitos.', 'warning');
+                return;
+            }
+
+            // Convertir a int
+            data.idResponsable = parseInt(data.idResponsable) || 0;
+
+            const jsonStr = JSON.stringify(data);
+            if (window.responsableController) {
+                const isUpdate = data.idResponsable > 0;
+                const respuesta = isUpdate ? window.responsableController.actualizarResponsable(jsonStr) 
+                                           : window.responsableController.registrarResponsable(jsonStr);
+                const partes = String(respuesta).split('|');
+                if (partes[0] === 'OK') {
+                    Swal.fire('Éxito', partes[1], 'success').then(() => {
+                        let modalEl = document.getElementById('modalAgregarResponsable');
+                        let modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                        cargarResponsables();
+                    });
+                } else {
+                    Swal.fire('Error', partes[1], 'error');
+                }
+            }
+        }
+
+        let idRespAEliminar = 0;
+        function deleteResp(id) {
+            idRespAEliminar = id;
+            let modalEl = document.getElementById('modalEliminarResponsable');
+            let modalInst = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modalInst.show();
+        }
+
+        function confirmarEliminacionResp() {
+            if (window.responsableController) {
+                const respuesta = String(window.responsableController.eliminarResponsable(idRespAEliminar));
+                const partes = respuesta.split('|');
+                if (partes[0] === 'OK') {
+                    Swal.fire('Eliminado', partes[1], 'success').then(() => {
+                        let modalEl = document.getElementById('modalEliminarResponsable');
+                        let modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                        cargarResponsables();
+                    });
+                } else {
+                    Swal.fire('Error', partes[1], 'error');
+                }
+            }
+        }
+
+        function pedirPasswordReactivarResp(id) {
+            Swal.fire({
+                title: 'Reactivar Responsable',
+                html: `
+                    <p class="mb-3 text-muted text-sm">Ingrese credenciales de Administrador para confirmar</p>
+                    <input type="email" id="adminEmailResp" class="swal2-input" placeholder="Correo de Administrador">
+                    <input type="password" id="adminPassResp" class="swal2-input" placeholder="Contraseña">
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Reactivar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#28a745',
+                preConfirm: () => {
+                    const email = document.getElementById('adminEmailResp').value;
+                    const pass = document.getElementById('adminPassResp').value;
+                    if (!email || !pass) {
+                        Swal.showValidationMessage('Debe ingresar correo y contraseña');
+                        return false;
+                    }
+                    return { email: email, pass: pass };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (window.responsableController) {
+                        const respuesta = window.responsableController.reactivarResponsable(result.value.email, result.value.pass, id);
+                        const partes = respuesta.split('|');
+                        if (partes[0] === 'OK') {
+                            Swal.fire('Reactivado', partes[1], 'success');
+                            cargarResponsables();
+                        } else {
+                            Swal.fire('Error', partes[1], 'error');
+                        }
+                    }
+                }
+            });
+        }
+
+        // Búsqueda Responsables
+        document.addEventListener('DOMContentLoaded', () => {
+            const buscadorResp = document.getElementById('buscadorResponsables');
+            if (buscadorResp) {
+                buscadorResp.addEventListener('keyup', function() {
+                    const input = this.value.toLowerCase();
+                    const mostrarInactivos = document.getElementById('chkMostrarInactivosResp').checked;
+                    let baseFiltrada = listaResponsables.filter(r => mostrarInactivos || r.borrado === false);
+                    
+                    if (input.trim() === '') {
+                        responsablesFiltrados = baseFiltrada;
+                    } else {
+                        responsablesFiltrados = baseFiltrada.filter(r =>
+                            (r.nombreCompleto && r.nombreCompleto.toLowerCase().includes(input)) ||
+                            (r.telefono && r.telefono.toLowerCase().includes(input)) ||
+                            (r.correo && r.correo.toLowerCase().includes(input))
+                        );
+                    }
+                    paginaRespActual = 1;
+                    renderizarTablaResp();
+                });
+            }
+            
+            // Cargar inicial
+            setTimeout(cargarResponsables, 500); // Dar tiempo a WebView a inyectar el controller
+        });
+
+        // ============================================================
+        // FORMATO AUTOMÁTICO IDENTIDAD (####-####-#####)
+        // ============================================================
+        function formatearIdentidad(valor) {
+            let soloDigitos = valor.replace(/\D/g, '').substring(0, 13);
+            let resultado = '';
+            if (soloDigitos.length <= 4) {
+                resultado = soloDigitos;
+            } else if (soloDigitos.length <= 8) {
+                resultado = soloDigitos.substring(0, 4) + '-' + soloDigitos.substring(4);
+            } else {
+                resultado = soloDigitos.substring(0, 4) + '-' + soloDigitos.substring(4, 8) + '-' + soloDigitos.substring(8);
+            }
+            return resultado;
+        }
     </script>
 
     <!-- Librería local para mensajes emergentes HTML (SweetAlert2) -->
-    <script src="application/assets/js/sweetalert2.all.min.js"></script>
+    <script src="../assets/js/sweetalert2.all.min.js"></script>
 
     <!-- Tu script actual de Bootstrap -->
-    <script src="application/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/bootstrap.bundle.min.js"></script>
 
-<script src="application/assets/js/flatpickr.min.js"></script>
+<script src="../assets/js/flatpickr.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     var dateInputs = document.querySelectorAll('input[type="date"]');

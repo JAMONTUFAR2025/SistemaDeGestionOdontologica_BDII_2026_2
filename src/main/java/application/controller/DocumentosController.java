@@ -9,13 +9,13 @@ package application.controller;
  *     - buscarPacienteParaDocumentos(identidad)         → JSON con datos básicos del paciente
  *
  *   Archivos del Expediente:
- *     - obtenerArchivos(idPacientes)                    → JSON array
+ *     - obtenerArchivos(idPaciente)                    → JSON array
  *     - registrarArchivo(jsonData)                      → "OK|..." / "ERR|..."
  *     - eliminarArchivo(id)                             → "OK|..." / "ERR|..."
  *
  *   Alergias del Paciente:
- *     - obtenerAlergiasDelPaciente(idPacientes)         → JSON array
- *     - agregarAlergiaPaciente(idPacientes, idAlergia)  → "OK|..." / "ERR|..."
+ *     - obtenerAlergiasDelPaciente(idPaciente)         → JSON array
+ *     - agregarAlergiaPaciente(idPaciente, idAlergia)  → "OK|..." / "ERR|..."
  *     - eliminarAlergiaPaciente(idPacienteAlergia)      → "OK|..." / "ERR|..."
  *
  *   Consentimientos Informados:
@@ -24,12 +24,12 @@ package application.controller;
  *     - eliminarConsentimiento(id)                      → "OK|..." / "ERR|..."
  *
  *   Constancias Médicas:
- *     - obtenerConstancias(idPacientes)                 → JSON array de todas las constancias del paciente
+ *     - obtenerConstancias(idPaciente)                 → JSON array de todas las constancias del paciente
  *     - registrarConstancia(jsonData)                   → "OK|..." / "ERR|..."
  *     - eliminarConstancia(id)                          → "OK|..." / "ERR|..."
  *
  *   Evoluciones (para selección):
- *     - obtenerEvolucionesDelPaciente(idPacientes)      → JSON array simplificado de evoluciones
+ *     - obtenerEvolucionesDelPaciente(idPaciente)      → JSON array simplificado de evoluciones
  */
 public class DocumentosController extends BaseController {
 
@@ -46,15 +46,15 @@ public class DocumentosController extends BaseController {
             if (identidad == null || identidad.trim().isEmpty())
                 return "ERR|Ingrese un número de identidad para buscar.";
 
-            String query = "SELECT id_pacientes, identidad, nombre_completo, telefono " +
-                           "FROM Pacientes WHERE identidad = ? AND borrado = 'No'";
+            String query = "SELECT id_paciente, identidad, nombre_completo, telefono " +
+                           "FROM Pacientes WHERE identidad = ? AND borrado = FALSE";
             java.sql.Connection conn = application.model.connection.DBConnection.getInstance().getConnection();
             try (java.sql.PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setString(1, identidad.trim());
                 try (java.sql.ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
-                        map.put("id_pacientes",    rs.getInt("id_pacientes"));
+                        map.put("id_pacientes",    rs.getInt("id_paciente")); // frontend compat
                         map.put("identidad",       rs.getString("identidad"));
                         map.put("nombre_completo", rs.getString("nombre_completo"));
                         map.put("telefono",        rs.getString("telefono"));
@@ -73,10 +73,10 @@ public class DocumentosController extends BaseController {
     // ARCHIVOS DEL EXPEDIENTE
     // =====================================================
 
-    public String obtenerArchivos(int idPacientes) {
+    public String obtenerArchivos(int idPaciente) {
         try {
             application.model.dao.ExpedienteArchivoDAO dao = new application.model.dao.ExpedienteArchivoDAO();
-            return gson.toJson(dao.obtenerPorPaciente(idPacientes));
+            return gson.toJson(dao.obtenerPorPaciente(idPaciente));
         } catch (Throwable t) {
             System.err.println("-> ERROR en obtenerArchivos: " + t.getMessage());
             return "[]";
@@ -115,8 +115,9 @@ public class DocumentosController extends BaseController {
     public String registrarArchivo(String jsonData) {
         try {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonData).getAsJsonObject();
-            int idPacientes = obj.has("id_pacientes") ? obj.get("id_pacientes").getAsInt() : 0;
-            if (idPacientes <= 0) return "ERR|El ID del paciente es obligatorio.";
+            int idPaciente = obj.has("id_paciente") ? obj.get("id_paciente").getAsInt() : 
+                             (obj.has("id_pacientes") ? obj.get("id_pacientes").getAsInt() : 0);
+            if (idPaciente <= 0) return "ERR|El ID del paciente es obligatorio.";
 
             String tipoArchivo   = str(obj, "tipo_archivo");
             String nombreArchivoOriginal = str(obj, "nombre_archivo");
@@ -133,7 +134,7 @@ public class DocumentosController extends BaseController {
 
             // Crear carpeta del paciente
             String userHome = System.getProperty("user.home");
-            java.nio.file.Path targetDir = java.nio.file.Paths.get(userHome, "SOE_Archivos", "Pacientes", String.valueOf(idPacientes));
+            java.nio.file.Path targetDir = java.nio.file.Paths.get(userHome, "SOE_Archivos", "Pacientes", String.valueOf(idPaciente));
             if (!java.nio.file.Files.exists(targetDir)) {
                 java.nio.file.Files.createDirectories(targetDir);
             }
@@ -153,7 +154,7 @@ public class DocumentosController extends BaseController {
             String nombreFinal = nombreArchivoOriginal.isEmpty() ? newFileName : nombreArchivoOriginal;
 
             application.model.dao.ExpedienteArchivoDAO dao = new application.model.dao.ExpedienteArchivoDAO();
-            boolean ok = dao.registrar(idPacientes, tipoArchivo, nombreFinal, rutaFinal, observaciones);
+            boolean ok = dao.registrar(idPaciente, tipoArchivo, nombreFinal, rutaFinal, observaciones);
             return ok ? "OK|Archivo registrado exitosamente." : "ERR|No se pudo registrar el archivo en la base de datos.";
         } catch (Throwable t) {
             System.err.println("-> ERROR en registrarArchivo: " + t.getMessage());
@@ -176,20 +177,20 @@ public class DocumentosController extends BaseController {
     // ALERGIAS DEL PACIENTE
     // =====================================================
 
-    public String obtenerAlergiasDelPaciente(int idPacientes) {
+    public String obtenerAlergiasDelPaciente(int idPaciente) {
         try {
             application.model.dao.PacienteAlergiaDAO dao = new application.model.dao.PacienteAlergiaDAO();
-            return gson.toJson(dao.obtenerPorPaciente(idPacientes));
+            return gson.toJson(dao.obtenerPorPaciente(idPaciente));
         } catch (Throwable t) {
             System.err.println("-> ERROR en obtenerAlergiasDelPaciente: " + t.getMessage());
             return "[]";
         }
     }
 
-    public String agregarAlergiaPaciente(int idPacientes, int idCatalogoAlergia) {
+    public String agregarAlergiaPaciente(int idPaciente, int idCatalogoAlergia) {
         try {
             application.model.dao.PacienteAlergiaDAO dao = new application.model.dao.PacienteAlergiaDAO();
-            boolean ok = dao.agregar(idPacientes, idCatalogoAlergia);
+            boolean ok = dao.agregar(idPaciente, idCatalogoAlergia);
             return ok ? "OK|Alergia asignada correctamente." : "ERR|La alergia ya estaba registrada.";
         } catch (Throwable t) {
             System.err.println("-> ERROR en agregarAlergiaPaciente: " + t.getMessage());
@@ -261,10 +262,10 @@ public class DocumentosController extends BaseController {
     // CONSTANCIAS MÉDICAS
     // =====================================================
 
-    public String obtenerConstancias(int idPacientes) {
+    public String obtenerConstancias(int idPaciente) {
         try {
             application.model.dao.ConstanciaMedicaDAO dao = new application.model.dao.ConstanciaMedicaDAO();
-            return gson.toJson(dao.obtenerPorPaciente(idPacientes));
+            return gson.toJson(dao.obtenerPorPaciente(idPaciente));
         } catch (Throwable t) {
             System.err.println("-> ERROR en obtenerConstancias: " + t.getMessage());
             return "[]";
@@ -309,17 +310,18 @@ public class DocumentosController extends BaseController {
     // EVOLUCIONES DEL PACIENTE (para selector)
     // =====================================================
 
-    public String obtenerEvolucionesDelPaciente(int idPacientes) {
+    public String obtenerEvolucionesDelPaciente(int idPaciente) {
         try {
-            String query = "SELECT ec.id_evolucion_clinica, ec.numero_cita, ec.fecha_consulta, " +
+            String query = "SELECT ec.id_evolucion_clinica, ec.numero_cita, c.fecha_hora AS fecha_consulta, " +
                            "pm.nombre_completo AS nombre_medico " +
                            "FROM Evolucion_Clinica ec " +
+                           "INNER JOIN Citas c ON ec.id_cita = c.id_cita " +
                            "LEFT JOIN Personal_Medico pm ON ec.id_personal_medico = pm.id_personal_medico " +
-                           "WHERE ec.id_pacientes = ? ORDER BY ec.fecha_consulta DESC";
+                           "WHERE c.id_paciente = ? ORDER BY c.fecha_hora DESC";
             java.util.List<java.util.Map<String, Object>> lista = new java.util.ArrayList<>();
             java.sql.Connection conn = application.model.connection.DBConnection.getInstance().getConnection();
             try (java.sql.PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setInt(1, idPacientes);
+                stmt.setInt(1, idPaciente);
                 try (java.sql.ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();

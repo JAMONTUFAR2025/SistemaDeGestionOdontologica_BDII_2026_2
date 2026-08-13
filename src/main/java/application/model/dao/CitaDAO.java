@@ -16,13 +16,13 @@ import java.util.Map;
 public class CitaDAO {
 
     public boolean agendarCita(Cita cita) {
-        String query = "INSERT INTO Citas (id_pacientes, id_personal_medico, fecha_hora, motivo_cita, estado) " +
+        String query = "INSERT INTO Citas (id_paciente, id_personal_medico, fecha_hora, motivo_cita, estado) " +
                        "VALUES (?, ?, ?, ?, ?)";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return false;
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setInt(1, cita.getIdPacientes());
+                stmt.setInt(1, cita.getIdPaciente());
                 if (cita.getIdPersonalMedico() != null) {
                     stmt.setInt(2, cita.getIdPersonalMedico());
                 } else {
@@ -44,9 +44,9 @@ public class CitaDAO {
     public List<Map<String, String>> obtenerCitasHoy(Integer idPersonalMedico, String rol) {
         List<Map<String, String>> citas = new ArrayList<>();
         StringBuilder queryBuilder = new StringBuilder(
-            "SELECT c.id_citas, c.fecha_hora, p.nombre_completo AS paciente, p.telefono, c.motivo_cita " +
+            "SELECT c.id_cita, c.fecha_hora, p.nombre_completo AS paciente, p.telefono, c.motivo_cita " +
             "FROM Citas c " +
-            "JOIN Pacientes p ON c.id_pacientes = p.id_pacientes " +
+            "JOIN Pacientes p ON c.id_paciente = p.id_paciente " +
             "WHERE DATE(c.fecha_hora) = CURDATE() " +
             "AND c.estado != 'Cancelada' AND c.estado != 'Ausente' AND c.estado != 'Completada'"
         );
@@ -68,7 +68,7 @@ public class CitaDAO {
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         Map<String, String> map = new HashMap<>();
-                        map.put("id_citas", String.valueOf(rs.getInt("id_citas")));
+                        map.put("id_citas", String.valueOf(rs.getInt("id_cita")));
                         // Formatear hora (HH:mm a) de forma simple en Java (Timestamp a String)
                         Timestamp ts = rs.getTimestamp("fecha_hora");
                         String hora = new java.text.SimpleDateFormat("hh:mm a").format(ts);
@@ -90,9 +90,9 @@ public class CitaDAO {
     public List<Map<String, String>> obtenerProximasCitas(Integer idPersonalMedico, String rol) {
         List<Map<String, String>> citas = new ArrayList<>();
         StringBuilder queryBuilder = new StringBuilder(
-            "SELECT c.id_citas, c.fecha_hora, p.nombre_completo AS paciente, p.telefono, c.motivo_cita, c.estado " +
+            "SELECT c.id_cita, c.fecha_hora, p.nombre_completo AS paciente, p.telefono, c.motivo_cita, c.estado " +
             "FROM Citas c " +
-            "JOIN Pacientes p ON c.id_pacientes = p.id_pacientes " +
+            "JOIN Pacientes p ON c.id_paciente = p.id_paciente " +
             "WHERE DATE(c.fecha_hora) > CURDATE() " +
             "AND c.estado != 'Cancelada' AND c.estado != 'Ausente' AND c.estado != 'Completada'"
         );
@@ -114,7 +114,7 @@ public class CitaDAO {
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         Map<String, String> map = new HashMap<>();
-                        map.put("id_citas", String.valueOf(rs.getInt("id_citas")));
+                        map.put("id_citas", String.valueOf(rs.getInt("id_cita")));
                         Timestamp ts = rs.getTimestamp("fecha_hora");
                         String fecha = new java.text.SimpleDateFormat("dd/MM/yyyy").format(ts);
                         String hora = new java.text.SimpleDateFormat("hh:mm a").format(ts);
@@ -138,9 +138,9 @@ public class CitaDAO {
     public List<Map<String, String>> obtenerHistorialCitas(Integer idPersonalMedico, String rol) {
         List<Map<String, String>> citas = new ArrayList<>();
         StringBuilder queryBuilder = new StringBuilder(
-            "SELECT c.id_citas, c.fecha_hora, p.nombre_completo AS paciente, p.telefono, c.motivo_cita, c.estado " +
+            "SELECT c.id_cita, c.fecha_hora, p.nombre_completo AS paciente, p.telefono, c.motivo_cita, c.estado " +
             "FROM Citas c " +
-            "JOIN Pacientes p ON c.id_pacientes = p.id_pacientes " +
+            "JOIN Pacientes p ON c.id_paciente = p.id_paciente " +
             "WHERE 1=1 "
         );
 
@@ -161,7 +161,7 @@ public class CitaDAO {
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         Map<String, String> map = new HashMap<>();
-                        map.put("id_citas", String.valueOf(rs.getInt("id_citas")));
+                        map.put("id_citas", String.valueOf(rs.getInt("id_cita")));
                         Timestamp ts = rs.getTimestamp("fecha_hora");
                         String fecha = new java.text.SimpleDateFormat("dd/MM/yyyy").format(ts);
                         String hora = new java.text.SimpleDateFormat("hh:mm a").format(ts);
@@ -185,14 +185,14 @@ public class CitaDAO {
     public Map<String, String> obtenerCitaPorId(int idCita) {
         Map<String, String> map = new HashMap<>();
         String query =
-            "SELECT c.id_citas, c.id_pacientes, c.id_personal_medico, c.fecha_hora, " +
+            "SELECT c.id_cita, c.id_paciente, c.id_personal_medico, c.fecha_hora, " +
             "c.motivo_cita, c.estado, " +
             "p.nombre_completo AS paciente, p.telefono, " +
             "pm.nombre_completo AS medico " +
             "FROM Citas c " +
-            "JOIN Pacientes p ON c.id_pacientes = p.id_pacientes " +
+            "JOIN Pacientes p ON c.id_paciente = p.id_paciente " +
             "LEFT JOIN Personal_Medico pm ON c.id_personal_medico = pm.id_personal_medico " +
-            "WHERE c.id_citas = ?";
+            "WHERE c.id_cita = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return map;
@@ -200,8 +200,8 @@ public class CitaDAO {
                 stmt.setInt(1, idCita);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        map.put("id_citas", String.valueOf(rs.getInt("id_citas")));
-                        map.put("id_pacientes", String.valueOf(rs.getInt("id_pacientes")));
+                        map.put("id_citas", String.valueOf(rs.getInt("id_cita")));
+                        map.put("id_pacientes", String.valueOf(rs.getInt("id_paciente")));
                         Object idMedico = rs.getObject("id_personal_medico");
                         map.put("id_personal_medico", idMedico != null ? idMedico.toString() : "");
                         Timestamp ts = rs.getTimestamp("fecha_hora");
@@ -225,12 +225,12 @@ public class CitaDAO {
     }
 
     public boolean actualizarCita(Cita cita) {
-        String query = "UPDATE Citas SET id_pacientes = ?, id_personal_medico = ?, fecha_hora = ?, motivo_cita = ?, estado = ? WHERE id_citas = ?";
+        String query = "UPDATE Citas SET id_paciente = ?, id_personal_medico = ?, fecha_hora = ?, motivo_cita = ?, estado = ? WHERE id_cita = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return false;
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setInt(1, cita.getIdPacientes());
+                stmt.setInt(1, cita.getIdPaciente());
                 if (cita.getIdPersonalMedico() != null) {
                     stmt.setInt(2, cita.getIdPersonalMedico());
                 } else {
@@ -239,7 +239,7 @@ public class CitaDAO {
                 stmt.setTimestamp(3, Timestamp.valueOf(cita.getFechaHora()));
                 stmt.setString(4, cita.getMotivoCita());
                 stmt.setString(5, cita.getEstado() != null ? cita.getEstado() : "Programada");
-                stmt.setInt(6, cita.getIdCitas());
+                stmt.setInt(6, cita.getIdCita());
                 return stmt.executeUpdate() > 0;
             }
         } catch (SQLException e) {

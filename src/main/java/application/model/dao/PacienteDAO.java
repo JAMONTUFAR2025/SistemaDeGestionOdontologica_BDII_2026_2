@@ -15,7 +15,7 @@ public class PacienteDAO {
 
     // Verifica si un paciente existe por identidad
     public boolean existe(String identidad) {
-        String query = "SELECT COUNT(*) FROM Pacientes WHERE identidad = ?";
+        String query = "SELECT COUNT(*) FROM Pacientes WHERE identidad = ? AND borrado = FALSE";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return false;
@@ -34,11 +34,10 @@ public class PacienteDAO {
     }
 
     public String registrar(Paciente p) {
-        // SchemaActual: columnas id_pacientes (PK auto), identidad (UNIQUE), borrado ENUM('Si','No') DEFAULT 'No'
         String query = "INSERT INTO Pacientes " +
                 "(identidad, nombre_completo, fecha_nacimiento, genero, estado_civil, ocupacion, " +
-                "domicilio, telefono, persona_responsable, telefono_responsable) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "domicilio, telefono, id_responsable) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -60,8 +59,11 @@ public class PacienteDAO {
                 stmt.setString(6, p.getOcupacion());
                 stmt.setString(7, p.getDomicilio());
                 stmt.setString(8, p.getTelefono());
-                stmt.setString(9, p.getPersonaResponsable());
-                stmt.setString(10, p.getTelefonoResponsable());
+                if (p.getIdResponsable() != null) {
+                    stmt.setInt(9, p.getIdResponsable());
+                } else {
+                    stmt.setNull(9, java.sql.Types.INTEGER);
+                }
 
                 int filasAfectadas = stmt.executeUpdate();
                 if (filasAfectadas > 0) {
@@ -78,9 +80,8 @@ public class PacienteDAO {
     }
 
     public String actualizar(Paciente p) {
-        // SchemaActual: no toca borrado al actualizar datos personales
         String query = "UPDATE Pacientes SET identidad=?, nombre_completo=?, fecha_nacimiento=?, genero=?, estado_civil=?, " +
-                "ocupacion=?, domicilio=?, telefono=?, persona_responsable=?, telefono_responsable=? " +
+                "ocupacion=?, domicilio=?, telefono=?, id_responsable=? " +
                 "WHERE identidad=?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -100,12 +101,15 @@ public class PacienteDAO {
                 stmt.setString(6, p.getOcupacion());
                 stmt.setString(7, p.getDomicilio());
                 stmt.setString(8, p.getTelefono());
-                stmt.setString(9, p.getPersonaResponsable());
-                stmt.setString(10, p.getTelefonoResponsable());
+                if (p.getIdResponsable() != null) {
+                    stmt.setInt(9, p.getIdResponsable());
+                } else {
+                    stmt.setNull(9, java.sql.Types.INTEGER);
+                }
                 
                 String idOriginal = (p.getIdentidadOriginal() != null && !p.getIdentidadOriginal().isEmpty()) 
                                     ? p.getIdentidadOriginal() : p.getIdentidad();
-                stmt.setString(11, idOriginal);
+                stmt.setString(10, idOriginal);
 
                 int filasAfectadas = stmt.executeUpdate();
                 if (filasAfectadas > 0) {
@@ -123,8 +127,10 @@ public class PacienteDAO {
 
     public List<Paciente> obtenerPacientes() {
         List<Paciente> lista = new ArrayList<>();
-        // SchemaActual: PK = id_pacientes, borrado ENUM('Si','No') DEFAULT 'No'
-        String query = "SELECT * FROM Pacientes ORDER BY nombre_completo ASC";
+        String query = "SELECT p.*, r.nombre_completo AS persona_responsable, r.telefono AS telefono_responsable " +
+                       "FROM Pacientes p " +
+                       "LEFT JOIN Responsables r ON p.id_responsable = r.id_responsable " +
+                       "ORDER BY p.nombre_completo ASC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return lista;
@@ -132,7 +138,7 @@ public class PacienteDAO {
                  ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Paciente p = new Paciente();
-                    try { p.setIdPaciente(rs.getInt("id_pacientes")); } catch (Exception ignored) {}
+                    try { p.setIdPaciente(rs.getInt("id_paciente")); } catch (Exception ignored) {}
                     p.setIdentidad(rs.getString("identidad"));
                     p.setNombreCompleto(rs.getString("nombre_completo"));
 
@@ -146,9 +152,14 @@ public class PacienteDAO {
                     p.setOcupacion(rs.getString("ocupacion"));
                     p.setDomicilio(rs.getString("domicilio"));
                     p.setTelefono(rs.getString("telefono"));
-                    p.setPersonaResponsable(rs.getString("persona_responsable"));
-                    p.setTelefonoResponsable(rs.getString("telefono_responsable"));
-                    p.setEstado(rs.getString("borrado").equals("No") ? "Activo" : "Inactivo");
+                    Object idResponsable = rs.getObject("id_responsable");
+                    if (idResponsable != null) {
+                        p.setIdResponsable((Integer) idResponsable);
+                        // These will be used by the frontend using string access
+                        // I will add them as dynamic properties or just let JS use id_responsable
+                    }
+                    
+                    p.setEstado(rs.getBoolean("borrado") ? "Inactivo" : "Activo");
 
                     lista.add(p);
                 }
@@ -160,9 +171,9 @@ public class PacienteDAO {
         return lista;
     }
 
-    // Borrado lógico de un paciente — SchemaActual usa borrado='Si', fecha_borrado
+    // Borrado lógico de un paciente
     public boolean eliminarPaciente(String identidad) {
-        String query = "UPDATE Pacientes SET borrado = 'Si', fecha_borrado = CURRENT_TIMESTAMP WHERE identidad = ?";
+        String query = "UPDATE Pacientes SET borrado = TRUE, fecha_borrado = CURRENT_TIMESTAMP WHERE identidad = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return false;
@@ -179,7 +190,7 @@ public class PacienteDAO {
 
     // Reactivar un paciente inactivo
     public boolean reactivarPaciente(String identidad) {
-        String query = "UPDATE Pacientes SET borrado = 'No', fecha_borrado = NULL WHERE identidad = ?";
+        String query = "UPDATE Pacientes SET borrado = FALSE, fecha_borrado = NULL WHERE identidad = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return false;
