@@ -11,6 +11,10 @@
     <link href="application/assets/css/select2.min.css" rel="stylesheet" />
     <script src="application/assets/js/select2.min.js"></script>
     <style>
+        .swal2-container {
+            z-index: 99999 !important;
+        }
+
         html {
             height: 100%;
         }
@@ -440,17 +444,12 @@
                 
                 <div class="modal-section-title">1. Datos Generales del Paciente</div>
 
-                <!-- Fila 1: Nombre y Edad -->
+                <!-- Fila 1: Nombre -->
                 <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <div style="flex: 3;">
+                    <div style="flex: 1;">
                         <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Nombre:</label>
                         <input type="text" id="nombre_completo" name="nombreCompleto" required
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Edad:</label>
-                        <input type="text" id="edad" readonly
-                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; background-color: #e9ecef;">
                     </div>
                 </div>
 
@@ -460,8 +459,8 @@
                         <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Genero:</label>
                         <select id="genero" name="genero"
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                            <option value="M">M</option>
-                            <option value="F">F</option>
+                            <option value="M">Masculino</option>
+                            <option value="F">Femenino</option>
                         </select>
                     </div>
                     <div style="flex: 2;">
@@ -491,14 +490,17 @@
                     </div>
                 </div>
 
-                <!-- Fila 4: Fecha de Nacimiento -->
+                <!-- Fila 4: Fecha de Nacimiento y Edad -->
                 <div style="display: flex; gap: 15px; margin-bottom: 15px;">
                     <div style="flex: 1;">
                         <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Fecha de nacimiento:</label>
                         <input type="date" id="fecha_nacimiento" name="fechaNacimiento" required
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                     </div>
-                    <div style="flex: 2;">
+                    <div style="flex: 0 0 100px;">
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Edad:</label>
+                        <input type="text" id="edad" readonly
+                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; background-color: #e9ecef; text-align: center;">
                     </div>
                 </div>
 
@@ -506,12 +508,12 @@
                 <div style="display: flex; gap: 15px; margin-bottom: 25px;">
                     <div style="flex: 1;">
                         <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Teléfono:</label>
-                        <input type="text" id="telefono" name="telefono" required placeholder="####-####"
+                        <input type="text" id="telefono" name="telefono" required placeholder="####-####" minlength="9" maxlength="9"
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                     </div>
                     <div style="flex: 1;">
                         <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Identidad:</label>
-                        <input type="text" id="identidad" name="identidad" required placeholder="####-####-#####"
+                        <input type="text" id="identidad" name="identidad" required placeholder="####-####-#####" minlength="15" maxlength="15"
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                     </div>
                 </div>
@@ -526,8 +528,8 @@
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                     </div>
                     <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Teléfono:</label>
-                        <input type="text" id="telefono_responsable" name="telefonoResponsable" placeholder="####-####"
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Teléfono Responsable:</label>
+                        <input type="text" id="telefono_responsable" name="telefonoResponsable" placeholder="####-####" minlength="9" maxlength="9"
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                     </div>
                 </div>
@@ -948,6 +950,24 @@
 
                 if (!data.identidad || !data.nombreCompleto || !data.telefono) {
                     Swal.fire({ title: 'Faltan Datos', text: 'DNI, Nombre y Teléfono son requeridos.', icon: 'warning', confirmButtonText: 'Aceptar', confirmButtonColor: '#ffc107' });
+                    $('#btnGuardarModal').prop('disabled', false).text('Guardar Paciente');
+                    return;
+                }
+
+                if (data.telefono.length < 9) {
+                    Swal.fire({ title: 'Atención', text: 'El teléfono debe tener 8 dígitos mínimos.', icon: 'warning', confirmButtonText: 'Aceptar', confirmButtonColor: '#ffc107' });
+                    $('#btnGuardarModal').prop('disabled', false).text('Guardar Paciente');
+                    return;
+                }
+
+                if (data.identidad.length < 15) {
+                    Swal.fire({ title: 'Atención', text: 'La identidad debe tener 13 dígitos.', icon: 'warning', confirmButtonText: 'Aceptar', confirmButtonColor: '#ffc107' });
+                    $('#btnGuardarModal').prop('disabled', false).text('Guardar Paciente');
+                    return;
+                }
+
+                if (data.telefonoResponsable && data.telefonoResponsable.length > 0 && data.telefonoResponsable.length < 9) {
+                    Swal.fire({ title: 'Atención', text: 'El teléfono del responsable debe tener 8 dígitos mínimos.', icon: 'warning', confirmButtonText: 'Aceptar', confirmButtonColor: '#ffc107' });
                     $('#btnGuardarModal').prop('disabled', false).text('Guardar Paciente');
                     return;
                 }

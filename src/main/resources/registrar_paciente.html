@@ -172,14 +172,10 @@
 
                         <!-- Fila 1 -->
                         <div class="row mb-3">
-                            <div class="col-md-9">
+                            <div class="col-md-12">
                                 <label for="nombre_completo">Nombre:</label>
                                 <input type="text" id="nombre_completo" name="nombreCompleto" class="form-control"
                                     required>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="edad">Edad:</label>
-                                <input type="text" id="edad" class="form-control" readonly>
                             </div>
                         </div>
 
@@ -188,8 +184,8 @@
                             <div class="col-md-4">
                                 <label for="genero">Genero:</label>
                                 <select id="genero" name="genero" class="form-select">
-                                    <option value="M">M</option>
-                                    <option value="F">F</option>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Femenino</option>
                                 </select>
                             </div>
                             <div class="col-md-8">
@@ -223,6 +219,10 @@
                                 <input type="date" id="fecha_nacimiento" name="fechaNacimiento" class="form-control"
                                     required>
                             </div>
+                            <div class="col-md-2">
+                                <label for="edad">Edad:</label>
+                                <input type="text" id="edad" class="form-control text-center" readonly style="background-color: #e9ecef;">
+                            </div>
                         </div>
 
                         <!-- Fila 5 -->
@@ -230,12 +230,12 @@
                             <div class="col-md-6">
                                 <label for="telefono">Teléfono:</label>
                                 <input type="text" id="telefono" name="telefono" class="form-control"
-                                    placeholder="####-####" required>
+                                    placeholder="####-####" minlength="9" maxlength="9" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="identidad">Identidad:</label>
                                 <input type="text" id="identidad" name="identidad" class="form-control"
-                                    placeholder="####-####-#####" required>
+                                    placeholder="####-####-#####" minlength="15" maxlength="15" required>
                             </div>
                         </div>
 
@@ -250,7 +250,7 @@
                             <div class="col-md-6">
                                 <label for="telefono_responsable">Teléfono:</label>
                                 <input type="text" id="telefono_responsable" name="telefonoResponsable"
-                                    class="form-control" placeholder="####-####">
+                                    class="form-control" placeholder="####-####" minlength="9" maxlength="9">
                             </div>
                         </div>
 
@@ -532,6 +532,24 @@
             const form = document.getElementById('registroPacienteForm');
             const formData = new FormData(form);
             const paciente = Object.fromEntries(formData.entries());
+
+            if (paciente.telefono && paciente.telefono.length < 9) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'El teléfono debe tener 8 dígitos mínimos.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                else alert('El teléfono debe tener 8 dígitos mínimos.');
+                return;
+            }
+
+            if (paciente.identidad && paciente.identidad.length < 15) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'La identidad debe tener 13 dígitos.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                else alert('La identidad debe tener 13 dígitos.');
+                return;
+            }
+
+            if (paciente.telefonoResponsable && paciente.telefonoResponsable.length > 0 && paciente.telefonoResponsable.length < 9) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'El teléfono del responsable debe tener 8 dígitos mínimos.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                else alert('El teléfono del responsable debe tener 8 dígitos mínimos.');
+                return;
+            }
 
             const jsonStr = JSON.stringify(paciente);
 
