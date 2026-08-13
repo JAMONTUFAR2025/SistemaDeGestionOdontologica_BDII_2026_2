@@ -199,10 +199,10 @@ public class CajaSesionDAO {
     // ------------------------------------------------------------------
     // Cerrar caja: guarda monto_cierre_real, calcula diferencia, cambia estado
     // ------------------------------------------------------------------
-    public boolean cerrarCaja(int idCajaSesion, int idUsuarioCierre, double montoCierreReal, String observaciones) {
+    public boolean cerrarCaja(int idCajaSesion, int idUsuarioCierre, Double montoCierreReal, String observaciones) {
         Map<String, Object> arqueo = calcularArqueoCaja(idCajaSesion);
         double efectivoEsperado = (double) arqueo.get("efectivo_esperado");
-        double diferencia = montoCierreReal - efectivoEsperado;
+        Double diferencia = (montoCierreReal != null) ? montoCierreReal - efectivoEsperado : null;
 
         String query = "UPDATE Caja_Sesiones SET " +
                        "id_usuario_cierre = ?, monto_cierre_real = ?, diferencia = ?, " +
@@ -212,8 +212,16 @@ public class CajaSesionDAO {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setInt(1, idUsuarioCierre);
-                stmt.setDouble(2, montoCierreReal);
-                stmt.setDouble(3, diferencia);
+                if (montoCierreReal != null) {
+                    stmt.setDouble(2, montoCierreReal);
+                } else {
+                    stmt.setNull(2, java.sql.Types.DECIMAL);
+                }
+                if (diferencia != null) {
+                    stmt.setDouble(3, diferencia);
+                } else {
+                    stmt.setNull(3, java.sql.Types.DECIMAL);
+                }
                 stmt.setString(4, observaciones != null ? observaciones : "");
                 stmt.setInt(5, idCajaSesion);
                 return stmt.executeUpdate() > 0;

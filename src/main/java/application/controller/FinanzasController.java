@@ -76,9 +76,12 @@ public class FinanzasController extends BaseController {
     public String cerrarCaja(String jsonCierre) {
         try {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonCierre).getAsJsonObject();
-            int idCajaSesion    = obj.has("id_caja_sesion")    ? obj.get("id_caja_sesion").getAsInt()      : 0;
-            double montoCierre  = obj.has("monto_cierre_real") ? obj.get("monto_cierre_real").getAsDouble(): 0.0;
-            String observaciones= obj.has("observaciones")     ? obj.get("observaciones").getAsString()    : "";
+            int idCajaSesion = obj.has("id_caja_sesion") ? obj.get("id_caja_sesion").getAsInt() : 0;
+            Double montoCierre = null;
+            if (obj.has("monto_cierre_real") && !obj.get("monto_cierre_real").isJsonNull()) {
+                montoCierre = obj.get("monto_cierre_real").getAsDouble();
+            }
+            String observaciones = obj.has("observaciones") && !obj.get("observaciones").isJsonNull() ? obj.get("observaciones").getAsString() : "";
 
             if (idUsuarioLoginActual == null || idUsuarioLoginActual <= 0) {
                 return "ERR|No hay un usuario en sesión. Inicia sesión nuevamente.";
