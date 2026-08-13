@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <title>Agenda y Citas - SOE Odontología</title>
     <!-- jQuery y Select2 -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="application/assets/js/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="application/assets/css/jquery.timepicker.min.css">
+    <script src="application/assets/js/jquery.timepicker.min.js"></script>
+    <link href="application/assets/css/select2.min.css" rel="stylesheet" />
+    <script src="application/assets/js/select2.min.js"></script>
     <style>
         html {
             height: 100%;
@@ -266,7 +266,7 @@
             font-weight: bold;
         }
     </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="application/assets/css/flatpickr.min.css">
     </head>
 
 <body>
@@ -800,6 +800,8 @@
                         });
                     } else if (res.status === 'loading') {
                         Swal.fire('Generando código...', 'Por favor espera unos segundos a que inicie el servidor y vuelve a presionar el botón.', 'info');
+                    } else if (res.status === 'no_internet') {
+                        Swal.fire('Sin conexión a Internet', 'No hay conexión a internet disponible. Conéctate a una red para poder inicializar y vincular WhatsApp.', 'warning');
                     } else {
                         Swal.fire('Error de vinculación', res.qr || 'No se pudo obtener el QR.', 'error');
                     }
@@ -1058,8 +1060,18 @@
                 document.getElementById('numeroCitaEdicion').textContent = cita.id_citas;
 
                 // Pre-cargar campos
-                if (cita.fecha) document.getElementById('fecha_cita').value = cita.fecha;
-                if (cita.hora)  document.getElementById('hora_cita').value  = cita.hora;
+                if (cita.fecha) {
+                    let fechaInput = document.getElementById('fecha_cita');
+                    fechaInput.value = cita.fecha;
+                    if (fechaInput._flatpickr) fechaInput._flatpickr.setDate(cita.fecha);
+                }
+                if (cita.hora) {
+                    let horaInput = document.getElementById('hora_cita');
+                    horaInput.value = cita.hora;
+                    if (typeof $ !== 'undefined' && $(horaInput).data('TimePicker')) {
+                        $(horaInput).timepicker('setTime', cita.hora);
+                    }
+                }
                 actualizarFechaHoraOculta();
 
                 // Estado
@@ -1385,7 +1397,7 @@
             renderizarHistorial();
         }
     </script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="application/assets/js/flatpickr.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     var dateInputs = document.querySelectorAll('input[type="date"]');

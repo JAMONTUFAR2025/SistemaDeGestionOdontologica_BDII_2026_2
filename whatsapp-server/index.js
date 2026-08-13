@@ -48,6 +48,7 @@ const client = new Client({
 
 let clientReady = false;
 let currentQR = "";
+let internetConnected = false;
 
 client.on('qr', (qr) => {
     currentQR = qr;
@@ -72,7 +73,28 @@ client.on('disconnected', (reason) => {
     clientReady = false;
 });
 
-client.initialize();
+let initialized = false;
+function tryInitialize() {
+    if (initialized) return;
+    require('dns').lookup('web.whatsapp.com', (err) => {
+        if (err && (err.code === "ENOTFOUND" || err.code === "EAI_AGAIN")) {
+            internetConnected = false;
+            console.log("Sin conexión a Internet. WhatsApp no se puede inicializar todavía. Reintentando en 10 segundos...");
+            setTimeout(tryInitialize, 10000);
+        } else {
+            internetConnected = true;
+            console.log("Conexión detectada. Inicializando cliente de WhatsApp...");
+            initialized = true;
+            client.initialize().catch(e => {
+                console.error("Fallo al inicializar WhatsApp. Reintentando...", e.message);
+                initialized = false;
+                setTimeout(tryInitialize, 10000);
+            });
+        }
+    });
+}
+
+tryInitialize();
 
 // API Endpoint para que Java mande mensajes
 app.post('/api/send', async (req, res) => {
@@ -83,8 +105,12 @@ app.post('/api/send', async (req, res) => {
             return res.status(400).json({ error: 'Faltan parámetros: telefono, mensaje' });
         }
 
+        if (!internetConnected) {
+            return res.status(503).json({ error: 'NO_INTERNET' });
+        }
+
         if (!clientReady) {
-            return res.status(503).json({ error: 'WhatsApp Bot no está listo todavía.' });
+            return res.status(503).json({ error: 'NOT_READY' });
         }
 
         // Formato del número en WhatsApp (Honduras +504)
@@ -109,10 +135,13 @@ app.post('/api/send', async (req, res) => {
 });
 
 app.get('/api/status', (req, res) => {
-    res.json({ ready: clientReady });
+    res.json({ ready: clientReady, internet: internetConnected });
 });
 
 app.get('/api/qr', (req, res) => {
+    if (!internetConnected) {
+        return res.json({ qr: "", status: "no_internet" });
+    }
     if (clientReady) {
         return res.json({ qr: "", status: "connected" });
     }

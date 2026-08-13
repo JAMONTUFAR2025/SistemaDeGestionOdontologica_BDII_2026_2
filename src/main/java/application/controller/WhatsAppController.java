@@ -127,6 +127,13 @@ public class WhatsAppController {
             if (responseCode == 200) {
                 return "OK|Mensaje enviado a " + telefono;
             } else if (responseCode == 503) {
+                Scanner s = new Scanner(conn.getErrorStream() != null ? conn.getErrorStream() : conn.getInputStream());
+                s.useDelimiter("\\A");
+                String responseBody = s.hasNext() ? s.next() : "";
+                s.close();
+                if (responseBody.contains("NO_INTERNET")) {
+                    return "ERR|No tienes conexión a internet para enviar mensajes de WhatsApp en este momento.";
+                }
                 return "ERR|El sistema de WhatsApp aún no está listo. Revisa la consola y escanea el código QR.";
             } else {
                 Scanner s = new Scanner(conn.getErrorStream() != null ? conn.getErrorStream() : conn.getInputStream());
