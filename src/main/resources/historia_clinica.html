@@ -2536,8 +2536,12 @@
             const evoluciones = JSON.parse(resp);
             const opts = '<option value="">-- Seleccione Consulta --</option>' +
                 evoluciones.map(e => `<option value="${e.id_evolucion_clinica}">Cita #${e.numero_cita} — ${e.fecha_consulta ? e.fecha_consulta.substring(0,10) : '?'} — ${e.nombre_medico || 'Sin médico'}</option>`).join('');
-            document.getElementById('coSelectEvolucionDoc').innerHTML = opts;
-            document.getElementById('cnSelectEvolucionDoc').innerHTML = opts;
+            
+            const coSel = document.getElementById('coSelectEvolucionDoc');
+            if (coSel) coSel.innerHTML = opts;
+            
+            const cnSel = document.getElementById('cnSelectEvolucionDoc');
+            if (cnSel) cnSel.innerHTML = opts;
         }
 
         // --- CONSENTIMIENTOS ---
@@ -2545,6 +2549,7 @@
             const resp = window.documentosController.obtenerConsentimientos(idEvolucion);
             const lista = JSON.parse(resp);
             const tbody = document.getElementById('tablaConsentimientosDoc');
+            if (!tbody) return;
             if (lista.length === 0) { tbody.innerHTML = '<tr class="vacia"><td colspan="5">No hay consentimientos para esta consulta.</td></tr>'; return; }
             tbody.innerHTML = lista.map(c => `
                 <tr>
@@ -2606,6 +2611,7 @@
             const resp = window.documentosController.obtenerConstancias(pacienteActualDoc.id_pacientes);
             const lista = JSON.parse(resp);
             const tbody = document.getElementById('tablaConstanciasDoc');
+            if (!tbody) return;
             if (lista.length === 0) { tbody.innerHTML = '<tr class="vacia"><td colspan="5">No hay constancias médicas para este paciente.</td></tr>'; return; }
             tbody.innerHTML = lista.map(c => `
                 <tr>
