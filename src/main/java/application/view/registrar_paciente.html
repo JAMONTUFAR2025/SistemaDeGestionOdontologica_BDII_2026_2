@@ -192,8 +192,8 @@
                         </div>
                     </div>
                     <div>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarResponsable" onclick="openAddRespModal()">
-                            <i class="fas fa-plus"></i> Agregar Responsable
+                        <button type="button" class="btn btn-primary" onclick="openAddRespModal()">
+                            <i class="fas fa-plus"></i> Nuevo Responsable
                         </button>
                     </div>
                 </div>
@@ -247,8 +247,8 @@
                         <!-- Fila 2 -->
                         <div class="row mb-3">
                             <div class="col-md-4">
-                                <label for="genero">Genero:</label>
-                                <select id="genero" name="genero" class="form-select">
+                                <label for="genero">Genero: <span class="text-danger">*</span></label>
+                                <select id="genero" name="genero" class="form-select" required>
                                     <option value="Masculino">Masculino</option>
                                     <option value="Femenino">Femenino</option>
                                 </select>
@@ -262,8 +262,8 @@
                         <!-- Fila 3 -->
                         <div class="row mb-3">
                             <div class="col-md-4">
-                                <label for="estado_civil">Estado Civil:</label>
-                                <select id="estado_civil" name="estadoCivil" class="form-select">
+                                <label for="estado_civil">Estado Civil: <span class="text-danger">*</span></label>
+                                <select id="estado_civil" name="estadoCivil" class="form-select" required>
                                     <option value="Soltero(a)">Soltero(a)</option>
                                     <option value="Casado(a)">Casado(a)</option>
                                     <option value="Divorciado(a)">Divorciado(a)</option>
@@ -293,14 +293,14 @@
                         <!-- Fila 5 -->
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="telefono">Teléfono: <span class="text-danger">*</span></label>
+                                <label for="telefono">Teléfono:</label>
                                 <input type="text" id="telefono" name="telefono" class="form-control"
-                                    placeholder="####-####" minlength="9" maxlength="9" required>
+                                    placeholder="####-####" minlength="9" maxlength="9">
                             </div>
                             <div class="col-md-6">
-                                <label for="identidad">Identidad: <span class="text-danger">*</span></label>
+                                <label for="identidad">Identidad:</label>
                                 <input type="text" id="identidad" name="identidad" class="form-control"
-                                    placeholder="####-####-#####" minlength="15" maxlength="15" required>
+                                    placeholder="####-####-#####" minlength="15" maxlength="15">
                             </div>
                         </div>
 
@@ -314,7 +314,7 @@
                                         <option value="" disabled selected>-- Seleccione Responsable --</option>
                                         <!-- Options llenadas por JS -->
                                     </select>
-                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarResponsable" onclick="openAddRespModal()" style="white-space: nowrap;">
+                                    <button type="button" class="btn btn-outline-primary" onclick="openAddRespModal()" style="white-space: nowrap;">
                                         <i class="fas fa-plus"></i> Nuevo
                                     </button>
                                 </div>
@@ -364,7 +364,7 @@
     <!-- ======================================================= -->
     <!-- VENTANA FLOTANTE: FORMULARIO RESPONSABLES               -->
     <!-- ======================================================= -->
-    <div class="modal fade" id="modalAgregarResponsable" data-bs-backdrop="false" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="modalAgregarResponsable" data-bs-backdrop="false" tabindex="-1" aria-hidden="true" style="z-index: 1070; background-color: rgba(0, 0, 0, 0.45);">
         <div class="modal-dialog">
             <div class="modal-content shadow-lg">
                 <div class="modal-header text-white" style="background-color: #007bf0;">
@@ -375,8 +375,8 @@
                     <form id="registroResponsableForm" onsubmit="registrarResponsable(event)">
                         <input type="hidden" id="id_responsable_form" name="idResponsable">
                         <div class="mb-3">
-                            <label for="identidad_responsable">Identidad: <span class="text-danger">*</span></label>
-                            <input type="text" id="identidad_responsable" name="identidad" class="form-control" placeholder="####-####-#####" minlength="15" maxlength="15" oninput="this.value = formatearIdentidad(this.value);" required>
+                            <label for="identidad_responsable">Identidad:</label>
+                            <input type="text" id="identidad_responsable" name="identidad" class="form-control" placeholder="####-####-#####" minlength="15" maxlength="15" oninput="this.value = formatearIdentidad(this.value);">
                         </div>
                         <div class="mb-3">
                             <label for="nombre_responsable">Nombre Completo: <span class="text-danger">*</span></label>
@@ -696,11 +696,6 @@
                 return;
             }
 
-            if (!paciente.identidad || paciente.identidad.trim() === '') {
-                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Faltan Datos', text: 'La identidad del paciente es obligatoria.', icon: 'warning', confirmButtonColor: '#ffc107' });
-                else alert('La identidad del paciente es obligatoria.');
-                return;
-            }
 
             if (!paciente.fechaNacimiento || paciente.fechaNacimiento.trim() === '') {
                 if (typeof Swal !== 'undefined') Swal.fire({ title: 'Faltan Datos', text: 'La fecha de nacimiento es obligatoria.', icon: 'warning', confirmButtonColor: '#ffc107' });
@@ -717,12 +712,6 @@
             if (paciente.telefono && paciente.telefono.length < 9) {
                 if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'El teléfono debe tener 8 dígitos mínimos.', icon: 'warning', confirmButtonColor: '#ffc107' });
                 else alert('El teléfono debe tener 8 dígitos mínimos.');
-                return;
-            }
-
-            if (paciente.identidad && paciente.identidad.length < 15) {
-                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'La identidad debe tener 13 dígitos.', icon: 'warning', confirmButtonColor: '#ffc107' });
-                else alert('La identidad debe tener 13 dígitos.');
                 return;
             }
 
@@ -1054,10 +1043,14 @@
         }
 
         function openAddRespModal() {
-            const form = document.getElementById('registroResponsableForm');
-            if (form) form.reset();
-            document.getElementById('id_responsable_form').value = '0';
-            document.getElementById('modalTitleResp').innerHTML = '<i class="fas fa-user-shield"></i> Nuevo Responsable';
+            document.getElementById('registroResponsableForm').reset();
+            document.getElementById('id_responsable_form').value = '0'; // Indica modo Nuevo
+            let modalEl = document.getElementById('modalAgregarResponsable');
+            let modal = bootstrap.Modal.getInstance(modalEl);
+            if (!modal) {
+                modal = new bootstrap.Modal(modalEl);
+            }
+            modal.show();
         }
 
         function openEditRespModal(id) {

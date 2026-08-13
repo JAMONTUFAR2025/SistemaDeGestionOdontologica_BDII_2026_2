@@ -45,7 +45,11 @@ public class PacienteDAO {
                 return "ERR|No se pudo establecer conexión con la base de datos.";
             }
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, p.getIdentidad());
+                if (p.getIdentidad() != null && !p.getIdentidad().trim().isEmpty()) {
+                    stmt.setString(1, p.getIdentidad());
+                } else {
+                    stmt.setNull(1, java.sql.Types.VARCHAR);
+                }
                 stmt.setString(2, p.getNombreCompleto());
 
                 if (p.getFechaNacimiento() != null) {
@@ -58,7 +62,11 @@ public class PacienteDAO {
                 stmt.setString(5, p.getEstadoCivil());
                 stmt.setString(6, p.getOcupacion());
                 stmt.setString(7, p.getDomicilio());
-                stmt.setString(8, p.getTelefono());
+                if (p.getTelefono() != null && !p.getTelefono().trim().isEmpty()) {
+                    stmt.setString(8, p.getTelefono());
+                } else {
+                    stmt.setNull(8, java.sql.Types.VARCHAR);
+                }
                 if (p.getIdResponsable() != null) {
                     stmt.setInt(9, p.getIdResponsable());
                 } else {
@@ -89,7 +97,11 @@ public class PacienteDAO {
                 return "ERR|No se pudo establecer conexión con la base de datos.";
             }
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, p.getIdentidad());
+                if (p.getIdentidad() != null && !p.getIdentidad().trim().isEmpty()) {
+                    stmt.setString(1, p.getIdentidad());
+                } else {
+                    stmt.setNull(1, java.sql.Types.VARCHAR);
+                }
                 stmt.setString(2, p.getNombreCompleto());
                 if (p.getFechaNacimiento() != null) {
                     stmt.setDate(3, Date.valueOf(p.getFechaNacimiento()));
@@ -100,7 +112,11 @@ public class PacienteDAO {
                 stmt.setString(5, p.getEstadoCivil());
                 stmt.setString(6, p.getOcupacion());
                 stmt.setString(7, p.getDomicilio());
-                stmt.setString(8, p.getTelefono());
+                if (p.getTelefono() != null && !p.getTelefono().trim().isEmpty()) {
+                    stmt.setString(8, p.getTelefono());
+                } else {
+                    stmt.setNull(8, java.sql.Types.VARCHAR);
+                }
                 if (p.getIdResponsable() != null) {
                     stmt.setInt(9, p.getIdResponsable());
                 } else {
@@ -152,11 +168,10 @@ public class PacienteDAO {
                     p.setOcupacion(rs.getString("ocupacion"));
                     p.setDomicilio(rs.getString("domicilio"));
                     p.setTelefono(rs.getString("telefono"));
+                    p.setTelefonoResponsable(rs.getString("telefono_responsable"));
                     Object idResponsable = rs.getObject("id_responsable");
                     if (idResponsable != null) {
                         p.setIdResponsable((Integer) idResponsable);
-                        // These will be used by the frontend using string access
-                        // I will add them as dynamic properties or just let JS use id_responsable
                     }
                     
                     p.setEstado(rs.getBoolean("borrado") ? "Inactivo" : "Activo");

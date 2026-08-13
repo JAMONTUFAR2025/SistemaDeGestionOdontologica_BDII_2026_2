@@ -16,8 +16,8 @@ public class PacienteController extends BaseController {
         System.out.println("-> Petición de registro/actualización de paciente recibida en Java: " + jsonPaciente);
         try {
             Paciente paciente = gson.fromJson(jsonPaciente, Paciente.class);
-            if (paciente == null || paciente.getIdentidad() == null || paciente.getIdentidad().trim().isEmpty()) {
-                return "ERR|La identidad (DNI) del paciente es requerida.";
+            if (paciente == null) {
+                return "ERR|Datos de paciente nulos.";
             }
             System.out.println("-> Gson deserializó correctamente a: " + paciente.getNombreCompleto());
 
@@ -29,7 +29,7 @@ public class PacienteController extends BaseController {
                 }
                 return pacienteDAO.actualizar(paciente);
             } else {
-                if (pacienteDAO.existe(paciente.getIdentidad())) {
+                if (paciente.getIdentidad() != null && !paciente.getIdentidad().trim().isEmpty() && pacienteDAO.existe(paciente.getIdentidad())) {
                     return "ERR|El paciente con esa identidad ya existe.";
                 }
                 return pacienteDAO.registrar(paciente);

@@ -504,9 +504,9 @@
                                 <div class="form-text">El paciente debe estar registrado en el sistema.</div>
                             </div>
                             <div class="col-md-7">
-                                <label class="form-label fw-bold">Remitido Por:</label>
+                                <label class="form-label fw-bold">Remitido Por: <span class="text-danger">*</span></label>
                                 <input type="text" id="hc_remitido_por" name="remitido_por" class="form-control"
-                                    placeholder="Nombre del Dr. o Clínica que remite">
+                                    placeholder="Nombre del Dr. o Clínica que remite" required>
                             </div>
                         </div>
                         <div class="text-end mt-4 pt-3 border-top">
@@ -521,54 +521,54 @@
                     <div id="paso-antecedentes" class="subpanel-paso">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Antecedentes Patológicos:</label>
+                                <label class="form-label fw-bold">Antecedentes Patológicos: <span class="text-danger">*</span></label>
                                 <textarea id="hc_ant_patologicos" name="antecedentes_patologicos" class="form-control"
-                                    rows="2" placeholder="Diabetes, Hipertensión, etc."></textarea>
+                                    rows="2" placeholder="Diabetes, Hipertensión, etc." required></textarea>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Antecedentes Odontológicos:</label>
+                                <label class="form-label fw-bold">Antecedentes Odontológicos: <span class="text-danger">*</span></label>
                                 <textarea id="hc_ant_odontologicos" name="antecedentes_odontologicos"
                                     class="form-control" rows="2"
-                                    placeholder="Tratamientos previos, experiencias negativas..."></textarea>
+                                    placeholder="Tratamientos previos, experiencias negativas..." required></textarea>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Hábitos Tóxicos:</label>
+                                <label class="form-label fw-bold">Hábitos Tóxicos: <span class="text-danger">*</span></label>
                                 <input type="text" id="hc_habitos_toxicos" name="habitos_toxicos" class="form-control"
-                                    placeholder="Tabaquismo, Alcohol, etc.">
+                                    placeholder="Tabaquismo, Alcohol, etc." required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Fármacos de Uso Habitual:</label>
+                                <label class="form-label fw-bold">Fármacos de Uso Habitual: <span class="text-danger">*</span></label>
                                 <input type="text" id="hc_farmacos" name="farmacos_uso_habitual" class="form-control"
-                                    placeholder="Medicamentos que consume actualmente...">
+                                    placeholder="Medicamentos que consume actualmente..." required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Antecedentes Gineco-Obstétricos:</label>
+                                <label class="form-label fw-bold">Antecedentes Gineco-Obstétricos: <span class="text-danger">*</span></label>
                                 <input type="text" id="hc_gineco" name="antecedentes_ginecobstetros"
-                                    class="form-control" placeholder="Solo si aplica (embarazo, semanas...)">
+                                    class="form-control" placeholder="Solo si aplica (embarazo, semanas...)" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Antecedentes Quirúrgicos / Hospitalarios:</label>
+                                <label class="form-label fw-bold">Antecedentes Quirúrgicos / Hospitalarios: <span class="text-danger">*</span></label>
                                 <input type="text" id="hc_ant_quirurgicos" name="antecedentes_quirurgicos"
-                                    class="form-control" placeholder="Cirugías previas, hospitalizaciones...">
+                                    class="form-control" placeholder="Cirugías previas, hospitalizaciones..." required>
                             </div>
                             <div class="col-md-12">
-                                <label class="form-label fw-bold">Complicaciones en Tratamientos Previos:</label>
+                                <label class="form-label fw-bold">Complicaciones en Tratamientos Previos: <span class="text-danger">*</span></label>
                                 <textarea id="hc_complicaciones" name="complicaciones_tratamientos_previos"
-                                    class="form-control" rows="2"></textarea>
+                                    class="form-control" rows="2" required></textarea>
                             </div>
                             <div class="col-12 p-3 bg-warning bg-opacity-10 rounded border border-warning mt-2">
                                 <div class="row g-3">
                                     <div class="col-md-4">
-                                        <label class="form-label fw-bold">¿Reacción a Anestésicos?</label>
-                                        <select id="hc_reaccion_anest" name="reaccion_anestesicos" class="form-select">
+                                        <label class="form-label fw-bold">¿Reacción a Anestésicos? <span class="text-danger">*</span></label>
+                                        <select id="hc_reaccion_anest" name="reaccion_anestesicos" class="form-select" required>
                                             <option value="No">No</option>
                                             <option value="Si">Sí</option>
                                         </select>
                                     </div>
                                     <div class="col-md-8">
-                                        <label class="form-label fw-bold">Especifique Reacción:</label>
+                                        <label class="form-label fw-bold">Especifique Reacción: <span class="text-danger">*</span></label>
                                         <input type="text" id="hc_especifica_anest" name="especifique_anestesia"
-                                            class="form-control" placeholder="Detalle si presentó alergia o choque...">
+                                            class="form-control" placeholder="Detalle si presentó alergia o choque..." required>
                                     </div>
                                 </div>
                             </div>
@@ -589,18 +589,18 @@
                     <div id="paso-examen" class="subpanel-paso">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Hábitos Bucales:</label>
+                                <label class="form-label fw-bold">Hábitos Bucales: <span class="text-danger">*</span></label>
                                 <input type="text" id="hc_habitos_bucales" name="habitos_bucales" class="form-control"
-                                    placeholder="Bruxismo, onicofagia, respirador bucal...">
+                                    placeholder="Bruxismo, onicofagia, respirador bucal..." required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Frecuencia de Cepillado:</label>
+                                <label class="form-label fw-bold">Frecuencia de Cepillado: <span class="text-danger">*</span></label>
                                 <input type="text" id="hc_frec_cepillado" name="frecuencia_cepillado"
-                                    class="form-control" placeholder="Ej: 3 veces al día">
+                                    class="form-control" placeholder="Ej: 3 veces al día" required>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-bold">Tipo de Cerdas del Cepillo:</label>
-                                <select id="hc_tipo_cerdas" name="tipo_cepillo_cerdas" class="form-select">
+                                <label class="form-label fw-bold">Tipo de Cerdas del Cepillo: <span class="text-danger">*</span></label>
+                                <select id="hc_tipo_cerdas" name="tipo_cepillo_cerdas" class="form-select" required>
                                     <option value="">-- Seleccionar --</option>
                                     <option value="Suaves">Suaves</option>
                                     <option value="Moderadas">Moderadas</option>
@@ -608,8 +608,8 @@
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-bold">Uso de Hilo Dental:</label>
-                                <select id="hc_hilo_dental" name="uso_hilo_dental" class="form-select">
+                                <label class="form-label fw-bold">Uso de Hilo Dental: <span class="text-danger">*</span></label>
+                                <select id="hc_hilo_dental" name="uso_hilo_dental" class="form-select" required>
                                     <option value="">-- Seleccionar --</option>
                                     <option value="Si">Sí</option>
                                     <option value="A veces">A veces</option>
@@ -617,8 +617,8 @@
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-bold">Tipo de Mordida:</label>
-                                <select id="hc_tipo_mordida" name="tipo_mordida" class="form-select">
+                                <label class="form-label fw-bold">Tipo de Mordida: <span class="text-danger">*</span></label>
+                                <select id="hc_tipo_mordida" name="tipo_mordida" class="form-select" required>
                                     <option value="">-- Seleccionar --</option>
                                     <option value="Clase I">Clase I (Normoclusión)</option>
                                     <option value="Clase II">Clase II (Distoclusión)</option>
@@ -856,8 +856,8 @@
                                 </h5>
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label class="form-label fw-bold">Cita Asociada:</label>
-                                        <select id="ev_id_cita" class="form-select">
+                                        <label class="form-label fw-bold">Cita Asociada: <span class="text-danger">*</span></label>
+                                        <select id="ev_id_cita" class="form-select" required>
                                             <option value="">-- Sin cita (Espontánea) --</option>
                                         </select>
                                     </div>
@@ -872,8 +872,12 @@
                                         <textarea id="ev_motivo" class="form-control" rows="2" required placeholder="Razón de la visita de hoy..."></textarea>
                                     </div>
                                     <div class="col-12">
-                                        <label class="form-label fw-bold">Síntoma Principal:</label>
-                                        <textarea id="ev_sintoma" class="form-control" rows="2" placeholder="Detalles del dolor o problema..."></textarea>
+                                        <label class="form-label fw-bold">Síntoma Principal: <span class="text-danger">*</span></label>
+                                        <textarea id="ev_sintoma" class="form-control" rows="2" placeholder="Detalles del dolor o problema..." required></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Historia de Enfermedad Actual: <span class="text-danger">*</span></label>
+                                        <textarea id="ev_historia_enfermedad" class="form-control" rows="2" placeholder="Evolución de los síntomas..." required></textarea>
                                     </div>
 
                                 </div>
@@ -892,16 +896,16 @@
                                 </h5>
                                 <div class="row g-3">
                                     <div class="col-md-4">
-                                        <label class="form-label fw-bold">Presión Arterial:</label>
-                                        <input type="text" id="ev_presion" class="form-control" placeholder="120/80 mmHg">
+                                        <label class="form-label fw-bold">Presión Arterial: <span class="text-danger">*</span></label>
+                                        <input type="text" id="ev_presion" class="form-control" placeholder="120/80 mmHg" required>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label fw-bold">Pulso Cardíaco:</label>
-                                        <input type="text" id="ev_pulso" class="form-control" placeholder="75 bpm">
+                                        <label class="form-label fw-bold">Pulso Cardíaco: <span class="text-danger">*</span></label>
+                                        <input type="text" id="ev_pulso" class="form-control" placeholder="75 bpm" required>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label fw-bold">Temperatura:</label>
-                                        <input type="text" id="ev_temperatura" class="form-control" placeholder="36.5 °C">
+                                        <label class="form-label fw-bold">Temperatura: <span class="text-danger">*</span></label>
+                                        <input type="text" id="ev_temperatura" class="form-control" placeholder="36.5 °C" required>
                                     </div>
                                 </div>
                             </div>
@@ -922,12 +926,12 @@
                                 </h5>
                                 <div class="row g-3">
                                     <div class="col-12">
-                                        <label class="form-label fw-bold">Tejidos Blandos:</label>
-                                        <textarea id="ev_tejidos" class="form-control" rows="2" placeholder="Observaciones de encías, mucosa..."></textarea>
+                                        <label class="form-label fw-bold">Tejidos Blandos: <span class="text-danger">*</span></label>
+                                        <textarea id="ev_tejidos" class="form-control" rows="2" placeholder="Observaciones de encías, mucosa..." required></textarea>
                                     </div>
                                     <div class="col-12">
-                                        <label class="form-label fw-bold">Diagnóstico:</label>
-                                        <textarea id="ev_diagnostico" class="form-control" rows="2"></textarea>
+                                        <label class="form-label fw-bold">Diagnóstico: <span class="text-danger">*</span></label>
+                                        <textarea id="ev_diagnostico" class="form-control" rows="2" required></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -966,12 +970,12 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6 mt-3">
-                                        <label class="form-label fw-bold">Observaciones / Recomendaciones:</label>
-                                        <textarea id="ev_observaciones" class="form-control" rows="2"></textarea>
+                                        <label class="form-label fw-bold">Observaciones / Recomendaciones: <span class="text-danger">*</span></label>
+                                        <textarea id="ev_observaciones" class="form-control" rows="2" required></textarea>
                                     </div>
                                     <div class="col-md-6 mt-3">
-                                        <label class="form-label fw-bold">Procedimiento Realizado:</label>
-                                        <select id="ev_id_catalogo_procedimientos" class="form-select">
+                                        <label class="form-label fw-bold">Procedimiento Realizado: <span class="text-danger">*</span></label>
+                                        <select id="ev_id_catalogo_procedimientos" class="form-select" required>
                                             <option value="">-- Ninguno / Sin especificar --</option>
                                         </select>
                                         <small class="text-muted">Seleccione el procedimiento odontológico realizado.</small>

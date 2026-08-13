@@ -17,8 +17,17 @@ public class Paciente {
     private Integer idResponsable;
     private LocalDateTime fechaRegistro;
     private String estado;
+    private String telefonoResponsable;
 
     public Paciente() {
+    }
+
+    public String getTelefonoResponsable() {
+        return telefonoResponsable;
+    }
+
+    public void setTelefonoResponsable(String telefonoResponsable) {
+        this.telefonoResponsable = telefonoResponsable;
     }
 
     public Paciente(int idPaciente, String identidad, String nombreCompleto, LocalDate fechaNacimiento,

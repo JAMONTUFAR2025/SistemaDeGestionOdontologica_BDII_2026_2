@@ -602,16 +602,16 @@
                     <div class="section-title"><i class="fa-solid fa-calculator me-1"></i> Detalle de Montos (Lps.)</div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Suma Neta:</label>
-                            <input type="number" step="0.01" min="0" id="fac_suma_neta" class="form-control" placeholder="0.00" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1'); calcularNetoFactura()">
+                            <label class="form-label fw-bold">Suma Neta: <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0" id="fac_suma_neta" class="form-control" placeholder="0.00" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1'); calcularNetoFactura()" required>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Total Honorarios:</label>
-                            <input type="number" step="0.01" min="0" id="fac_total_honorarios" class="form-control" placeholder="0.00" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1'); calcularNetoFactura()">
+                            <label class="form-label fw-bold">Total Honorarios: <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0" id="fac_total_honorarios" class="form-control" placeholder="0.00" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1'); calcularNetoFactura()" required>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Total Retenido:</label>
-                            <input type="number" step="0.01" min="0" id="fac_total_retenido" class="form-control" placeholder="0.00" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1'); calcularNetoFactura()">
+                            <label class="form-label fw-bold">Total Retenido: <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0" id="fac_total_retenido" class="form-control" placeholder="0.00" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1'); calcularNetoFactura()" required>
                         </div>
                     </div>
                     <div class="col-md-6 mb-3">

@@ -443,8 +443,8 @@
                         <!-- Fila 2 -->
                         <div class="row mb-3">
                             <div class="col-md-4">
-                                <label for="modal_genero">Genero:</label>
-                                <select id="modal_genero" name="genero" class="form-select">
+                                <label for="modal_genero">Genero: <span class="text-danger">*</span></label>
+                                <select id="modal_genero" name="genero" class="form-select" required>
                                     <option value="Masculino">Masculino</option>
                                     <option value="Femenino">Femenino</option>
                                 </select>
@@ -458,8 +458,8 @@
                         <!-- Fila 3 -->
                         <div class="row mb-3">
                             <div class="col-md-4">
-                                <label for="modal_estado_civil">Estado Civil:</label>
-                                <select id="modal_estado_civil" name="estadoCivil" class="form-select">
+                                <label for="modal_estado_civil">Estado Civil: <span class="text-danger">*</span></label>
+                                <select id="modal_estado_civil" name="estadoCivil" class="form-select" required>
                                     <option value="Soltero(a)">Soltero(a)</option>
                                     <option value="Casado(a)">Casado(a)</option>
                                     <option value="Divorciado(a)">Divorciado(a)</option>
@@ -488,14 +488,14 @@
                         <!-- Fila 5 -->
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="modal_telefono">Teléfono: <span class="text-danger">*</span></label>
+                                <label for="modal_telefono">Teléfono:</label>
                                 <input type="text" id="modal_telefono" name="telefono" class="form-control"
-                                    placeholder="####-####" minlength="9" maxlength="9" required>
+                                    placeholder="####-####" minlength="9" maxlength="9">
                             </div>
                             <div class="col-md-6">
-                                <label for="modal_identidad">Identidad: <span class="text-danger">*</span></label>
+                                <label for="modal_identidad">Identidad:</label>
                                 <input type="text" id="modal_identidad" name="identidad" class="form-control"
-                                    placeholder="####-####-#####" minlength="15" maxlength="15" required>
+                                    placeholder="####-####-#####" minlength="15" maxlength="15">
                             </div>
                         </div>
 
@@ -544,8 +544,8 @@
                     <form id="registroResponsableForm" onsubmit="registrarResponsableDesdeCita(event)">
                         <input type="hidden" id="id_responsable_form" name="idResponsable" value="0">
                         <div class="mb-3">
-                            <label for="identidad_responsable">Identidad: <span class="text-danger">*</span></label>
-                            <input type="text" id="identidad_responsable" name="identidad" class="form-control" placeholder="####-####-#####" minlength="15" maxlength="15" required>
+                            <label for="identidad_responsable">Identidad:</label>
+                            <input type="text" id="identidad_responsable" name="identidad" class="form-control" placeholder="####-####-#####" minlength="15" maxlength="15">
                         </div>
                         <div class="mb-3">
                             <label for="nombre_responsable">Nombre Completo: <span class="text-danger">*</span></label>
@@ -867,8 +867,8 @@
                         let pacientes = JSON.parse(pacientesJson).filter(p => p.estado !== 'Inactivo');
                         let selPaciente = document.getElementById("identidad_paciente");
                         pacientes.forEach(p => {
-                            let opt = new Option(p.nombreCompleto + " (" + p.identidad + ")", p.idPaciente);
-                            opt.setAttribute("data-telefono", p.telefono || "");
+                            let opt = new Option(p.nombreCompleto + " (" + (p.identidad || 'Sin ID') + ")", p.idPaciente);
+                            opt.setAttribute("data-telefono", p.telefono || p.telefonoResponsable || "");
                             selPaciente.appendChild(opt);
                         });
                         $('#identidad_paciente').trigger('change');
@@ -1250,10 +1250,6 @@
                 return;
             }
 
-            if (!paciente.identidad || paciente.identidad.trim() === '') {
-                Swal.fire({ title: 'Faltan Datos', text: 'La identidad del paciente es obligatoria.', icon: 'warning', confirmButtonColor: '#ffc107' });
-                return;
-            }
 
             if (!paciente.fechaNacimiento || paciente.fechaNacimiento.trim() === '') {
                 Swal.fire({ title: 'Faltan Datos', text: 'La fecha de nacimiento es obligatoria.', icon: 'warning', confirmButtonColor: '#ffc107' });
