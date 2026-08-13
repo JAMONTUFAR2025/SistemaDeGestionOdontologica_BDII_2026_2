@@ -8,6 +8,7 @@
     <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="../assets/css/all.min.css" rel="stylesheet">
     <script src="../assets/js/jquery-3.6.0.min.js"></script>
+    <script src="../assets/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="../assets/css/jquery.timepicker.min.css">
     <script src="../assets/js/jquery.timepicker.min.js"></script>
     <link href="../assets/css/select2.min.css" rel="stylesheet" />
@@ -15,6 +16,22 @@
     <style>
         .swal2-container {
             z-index: 99999 !important;
+        }
+
+        .section-title {
+            background: #e9ecef;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .modal-body label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 4px;
         }
 
         html {
@@ -105,27 +122,7 @@
             border: 1px solid #e0e0e0;
         }
 
-        .quick-days {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
 
-        .quick-days button {
-            background: #f0f0f0;
-            border: 1px solid #ccc;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .quick-days button:hover {
-            background: #007bf0;
-            color: white;
-            border-color: #007bf0;
-        }
 
         .grid-2 {
             display: grid;
@@ -145,6 +142,10 @@
             font-weight: bold;
             margin-bottom: 5px;
             color: #444;
+        }
+
+        .text-danger {
+            color: #dc3545;
         }
 
         input,
@@ -313,17 +314,6 @@
             <div class="form-panel">
                 <h2 id="tituloCita" style="margin-top:0; color:#007bf0; font-size:20px;">📅 Agendar Nueva Cita</h2>
 
-                <div class="quick-days">
-                    <span style="font-size:12px; align-self:center; font-weight:bold; margin-right:5px;">Sumar
-                        días:</span>
-                    <button type="button" onclick="sumarDias(0)">Hoy</button>
-                    <button type="button" onclick="sumarDias(1)">+1 día</button>
-                    <button type="button" onclick="sumarDias(2)">+2 días</button>
-                    <button type="button" onclick="sumarDias(3)">+3 días</button>
-                    <button type="button" onclick="sumarDias(5)">+5 días</button>
-                    <button type="button" onclick="sumarDias(7)">+7 días</button>
-                </div>
-
                 <form id="agendarCitaForm">
                     <!-- Campo oculto para id de cita en modo edición -->
                     <input type="hidden" id="id_cita_edicion" value="">
@@ -332,7 +322,7 @@
                         <div class="form-group">
                             <div
                                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                                <label style="margin-bottom: 0;">Identidad del Paciente:*</label>
+                                <label style="margin-bottom: 0;">Identidad del Paciente: <span class="text-danger">*</span></label>
                                 <button type="button" onclick="abrirModalPaciente();"
                                     style="color: #007bf0; background: #e8f0ff; border: 1px solid #007bf0; font-size: 12px; font-weight: bold; padding: 3px 10px; border-radius: 4px; cursor: pointer;">
                                     + Nuevo Paciente
@@ -345,7 +335,7 @@
 
                         <!-- Select Doctor -->
                         <div class="form-group">
-                            <label style="margin-bottom: 5px;">Doctor / Especialista:*</label>
+                            <label style="margin-bottom: 5px;">Doctor / Especialista: <span class="text-danger">*</span></label>
                             <select id="id_medico" name="id_medico" required style="width: 100%;">
                                 <option value="">-- Seleccionar Doctor --</option>
                             </select>
@@ -354,7 +344,7 @@
 
                     <div class="grid-2">
                         <div class="form-group">
-                            <label>Fecha y Hora de la Cita:*</label>
+                            <label>Fecha y Hora de la Cita: <span class="text-danger">*</span></label>
 
                             <!-- Separación visual de fecha y hora -->
                             <div style="display: flex; gap: 10px;">
@@ -367,7 +357,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Estado de la Cita:*</label>
+                            <label>Estado de la Cita: <span class="text-danger">*</span></label>
                             <select id="estado" name="estado" required>
                                 <option value="Programada" selected>Programada</option>
                                 <option value="Confirmada">Confirmada</option>
@@ -378,7 +368,7 @@
                     </div>
 
                     <div class="form-group" style="margin-bottom: 25px;">
-                        <label>Motivo de Consulta:*</label>
+                        <label>Motivo de Consulta: <span class="text-danger">*</span></label>
                         <input type="text" id="motivo_cita" name="motivo_cita"
                             placeholder="Ej: Limpieza, Ortodoncia, Extracción" required>
                     </div>
@@ -426,124 +416,170 @@
     </div>
 
     <!-- ================================================
-         MODAL: REGISTRAR NUEVO PACIENTE (con BD)
+         MODAL: REGISTRAR NUEVO PACIENTE (Reutilizado idéntico a Pacientes)
     ================================================ -->
-    <div id="modalPaciente" class="modal-overlay">
-        <div class="modal-box" style="padding: 0; overflow-y: auto; overflow-x: hidden;">
-            <div style="background-color: #007bf0; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-top-left-radius: 8px; border-top-right-radius: 8px;">
-                <h5 style="margin: 0; font-size: 1.25rem; font-weight: bold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><i class="fas fa-user-plus"></i> Registro de Nuevo Paciente</h5>
-                <button type="button" onclick="cerrarModalPaciente();" style="background: transparent; border: none; font-size: 24px; color: white; cursor: pointer; line-height: 1;">&times;</button>
+    <div class="modal fade" id="modalAgregarPaciente" data-bs-backdrop="false" tabindex="-1" aria-hidden="true" style="background-color: rgba(0,0,0,0.45);">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header text-white" style="background-color: #007bf0;">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-user-plus"></i> Registro de Nuevo Paciente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <form id="registroPacienteModalForm" onsubmit="guardarPacienteModal(event)">
+
+                        <div class="section-title mt-0">1. Datos Generales del Paciente</div>
+                        <input type="hidden" id="modal_identidad_original" name="identidadOriginal">
+
+                        <!-- Fila 1 -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="modal_nombre_completo">Nombre: <span class="text-danger">*</span></label>
+                                <input type="text" id="modal_nombre_completo" name="nombreCompleto" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <!-- Fila 2 -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="modal_genero">Genero:</label>
+                                <select id="modal_genero" name="genero" class="form-select">
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Femenino">Femenino</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label for="modal_domicilio">Domicilio:</label>
+                                <input type="text" id="modal_domicilio" name="domicilio" class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- Fila 3 -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="modal_estado_civil">Estado Civil:</label>
+                                <select id="modal_estado_civil" name="estadoCivil" class="form-select">
+                                    <option value="Soltero(a)">Soltero(a)</option>
+                                    <option value="Casado(a)">Casado(a)</option>
+                                    <option value="Divorciado(a)">Divorciado(a)</option>
+                                    <option value="Viudo(a)">Viudo(a)</option>
+                                    <option value="Union Libre">Unión Libre</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label for="modal_ocupacion">Ocupación:</label>
+                                <input type="text" id="modal_ocupacion" name="ocupacion" class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- Fila 4 -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="modal_fecha_nacimiento">Fecha de nacimiento: <span class="text-danger">*</span></label>
+                                <input type="date" id="modal_fecha_nacimiento" name="fechaNacimiento" class="form-control" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="modal_edad">Edad:</label>
+                                <input type="text" id="modal_edad" class="form-control text-center" readonly style="background-color: #e9ecef;">
+                            </div>
+                        </div>
+
+                        <!-- Fila 5 -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="modal_telefono">Teléfono: <span class="text-danger">*</span></label>
+                                <input type="text" id="modal_telefono" name="telefono" class="form-control"
+                                    placeholder="####-####" minlength="9" maxlength="9" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="modal_identidad">Identidad: <span class="text-danger">*</span></label>
+                                <input type="text" id="modal_identidad" name="identidad" class="form-control"
+                                    placeholder="####-####-#####" minlength="15" maxlength="15" required>
+                            </div>
+                        </div>
+
+                        <div class="section-title">- En caso de emergencia o menor de edad</div>
+                        <!-- Fila 6 -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <label for="modal_id_responsable">Responsable: <span class="text-danger">*</span></label>
+                                <div class="d-flex">
+                                    <select id="modal_id_responsable" name="idResponsable" class="form-select me-2" required>
+                                        <option value="" disabled selected>-- Seleccione Responsable --</option>
+                                    </select>
+                                    <button type="button" class="btn btn-outline-primary" onclick="openAddRespModal()" style="white-space: nowrap;">
+                                        <i class="fas fa-plus"></i> Nuevo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <button type="button" class="btn btn-secondary w-100 py-2" data-bs-dismiss="modal">Cancelar</button>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" id="btnGuardarModalPaciente" class="btn btn-primary w-100 py-2 fw-bold" style="background-color: #007bf0;">Guardar Paciente</button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
             </div>
-            
-            <div style="padding: 20px 30px;">
-                <div id="msgModalPaciente" style="display: none; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 13px;"></div>
+        </div>
+    </div>
 
-            <form id="formNuevoPacienteModal">
-                <input type="hidden" id="identidad_original" name="identidadOriginal">
-                
-                <div class="modal-section-title">1. Datos Generales del Paciente</div>
-
-                <!-- Fila 1: Nombre -->
-                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Nombre:</label>
-                        <input type="text" id="nombre_completo" name="nombreCompleto" required
-                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                    </div>
+    <!-- ======================================================= -->
+    <!-- VENTANA FLOTANTE: FORMULARIO RESPONSABLES (sobre modal paciente) -->
+    <!-- ======================================================= -->
+    <div class="modal fade" id="modalAgregarResponsable" data-bs-backdrop="false" tabindex="-1" aria-hidden="true" style="z-index: 1070; background-color: rgba(0, 0, 0, 0.45);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header text-white" style="background-color: #007bf0;">
+                    <h5 class="modal-title fw-bold" id="modalTitleResp"><i class="fas fa-user-shield"></i> Nuevo Responsable</h5>
+                    <button type="button" class="btn-close btn-close-white" onclick="cerrarAddRespModal()" aria-label="Cerrar"></button>
                 </div>
-
-                <!-- Fila 2: Genero y Domicilio -->
-                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Genero:</label>
-                        <select id="genero" name="genero"
-                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                            <option value="Masculino">Masculino</option>
-                            <option value="Femenino">Femenino</option>
-                        </select>
-                    </div>
-                    <div style="flex: 2;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Domicilio:</label>
-                        <input type="text" id="domicilio" name="domicilio"
-                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                    </div>
+                <div class="modal-body p-4">
+                    <form id="registroResponsableForm" onsubmit="registrarResponsableDesdeCita(event)">
+                        <input type="hidden" id="id_responsable_form" name="idResponsable" value="0">
+                        <div class="mb-3">
+                            <label for="identidad_responsable">Identidad: <span class="text-danger">*</span></label>
+                            <input type="text" id="identidad_responsable" name="identidad" class="form-control" placeholder="####-####-#####" minlength="15" maxlength="15" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nombre_responsable">Nombre Completo: <span class="text-danger">*</span></label>
+                            <input type="text" id="nombre_responsable" name="nombreCompleto" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="telefono_responsable_modal">Teléfono: <span class="text-danger">*</span></label>
+                            <input type="text" id="telefono_responsable_modal" name="telefono" class="form-control" placeholder="####-####" minlength="9" maxlength="9" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="correo_responsable">Correo:</label>
+                            <input type="email" id="correo_responsable" name="correo" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="parentesco_responsable">Parentesco: <span class="text-danger">*</span></label>
+                            <select id="parentesco_responsable" name="parentesco" class="form-select" required>
+                                <option value="" disabled selected>Seleccione un parentesco</option>
+                                <option value="Padre">Padre</option>
+                                <option value="Madre">Madre</option>
+                                <option value="Conyuge">Cónyuge</option>
+                                <option value="Tutor Legal">Tutor Legal</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-secondary w-100 py-2" onclick="cerrarAddRespModal()">Cancelar</button>
+                            </div>
+                            <div class="col-6">
+                                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" style="background-color: #007bf0;">Guardar</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-
-                <!-- Fila 3: Estado Civil y Ocupación -->
-                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Estado Civil:</label>
-                        <select id="estado_civil" name="estadoCivil"
-                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                            <option value="Soltero(a)">Soltero(a)</option>
-                            <option value="Casado(a)">Casado(a)</option>
-                            <option value="Divorciado(a)">Divorciado(a)</option>
-                            <option value="Viudo(a)">Viudo(a)</option>
-                            <option value="Union Libre">Unión Libre</option>
-                        </select>
-                    </div>
-                    <div style="flex: 2;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Ocupación:</label>
-                        <input type="text" id="ocupacion" name="ocupacion"
-                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                    </div>
-                </div>
-
-                <!-- Fila 4: Fecha de Nacimiento y Edad -->
-                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Fecha de nacimiento:</label>
-                        <input type="date" id="fecha_nacimiento" name="fechaNacimiento" required
-                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                    </div>
-                    <div style="flex: 0 0 100px;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Edad:</label>
-                        <input type="text" id="edad" readonly
-                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; background-color: #e9ecef; text-align: center;">
-                    </div>
-                </div>
-
-                <!-- Fila 5: Teléfono y Identidad -->
-                <div style="display: flex; gap: 15px; margin-bottom: 25px;">
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Teléfono:</label>
-                        <input type="text" id="telefono" name="telefono" required placeholder="####-####" minlength="9" maxlength="9"
-                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Identidad:</label>
-                        <input type="text" id="identidad" name="identidad" required placeholder="####-####-#####" minlength="15" maxlength="15"
-                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                    </div>
-                </div>
-
-                <div class="modal-section-title">- En caso de emergencia o menor de edad</div>
-
-                <!-- Fila 6: Responsable -->
-                <div style="display: flex; gap: 15px; margin-bottom: 25px;">
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Personas Responsable:</label>
-                        <input type="text" id="persona_responsable" name="personaResponsable"
-                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Teléfono Responsable:</label>
-                        <input type="text" id="telefono_responsable" name="telefonoResponsable" placeholder="####-####" minlength="9" maxlength="9"
-                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 15px;">
-                    <button type="button" onclick="cerrarModalPaciente()"
-                        style="flex: 1; background-color: #6c757d; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold;">
-                        Cancelar
-                    </button>
-                    <button type="submit" id="btnGuardarModal"
-                        style="flex: 1; background-color: #007bf0; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: background 0.3s;">
-                        Guardar Paciente
-                    </button>
-                </div>
-            </form>
             </div>
         </div>
     </div>
@@ -574,18 +610,18 @@
                     <div class="modal-section-title">Datos de Acceso al Sistema</div>
 
                     <div style="margin-bottom: 15px;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Correo Electrónico (Login):*</label>
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Correo Electrónico (Login): <span class="text-danger">*</span></label>
                         <input type="email" id="mu_correo" placeholder="ejemplo@clinica.com"
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                     </div>
                     <div style="display: flex; gap: 15px; margin-bottom: 15px;">
                         <div style="flex: 1;">
-                            <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Contraseña:*</label>
+                            <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Contraseña: <span class="text-danger">*</span></label>
                             <input type="password" id="mu_contrasenia" placeholder="••••••••"
                                 style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                         </div>
                         <div style="flex: 1;">
-                            <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Rol del Sistema:*</label>
+                            <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Rol del Sistema: <span class="text-danger">*</span></label>
                             <select id="mu_rol"
                                 style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                                 <option value="Medico">Médico</option>
@@ -610,7 +646,7 @@
                 <form id="formModalMedico">
                     <div class="modal-section-title blue">Vincular con usuario existente</div>
                     <div style="margin-bottom: 15px;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Usuario (sin médico asignado):*</label>
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Usuario (sin médico asignado): <span class="text-danger">*</span></label>
                         <select id="mu_id_usuario"
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                             <option value="">Cargando...</option>
@@ -620,24 +656,24 @@
                     <div class="modal-section-title blue">Datos del Personal</div>
 
                     <div style="margin-bottom: 15px;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Nombre Completo:*</label>
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Nombre Completo: <span class="text-danger">*</span></label>
                         <input type="text" id="mu_nombre" placeholder="Ej: Dr. Carlos Mendoza"
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                     </div>
                     <div style="display: flex; gap: 15px; margin-bottom: 15px;">
                         <div style="flex: 1;">
-                            <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Identidad (DNI):*</label>
+                            <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Identidad (DNI): <span class="text-danger">*</span></label>
                             <input type="text" id="mu_identidad" placeholder="0801-1995-12345"
                                 style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                         </div>
                         <div style="flex: 1;">
-                            <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Teléfono:*</label>
+                            <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Teléfono: <span class="text-danger">*</span></label>
                             <input type="text" id="mu_telefono" placeholder="9999-9999"
                                 style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                         </div>
                     </div>
                     <div style="margin-bottom: 20px;">
-                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Especialidad:*</label>
+                        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; color: #333;">Especialidad: <span class="text-danger">*</span></label>
                         <select id="mu_especialidad"
                             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;">
                             <option value="">Cargando especialidades...</option>
@@ -687,17 +723,12 @@
         document.getElementById('fecha_cita').addEventListener('change', actualizarFechaHoraOculta);
         document.getElementById('hora_cita').addEventListener('change', actualizarFechaHoraOculta);
 
-        function formatearFechaEspecial(date) {
-            const meses = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            let d = date.getDate().toString().padStart(2, '0');
-            let m = meses[date.getMonth()];
-            let y = date.getFullYear();
-            return `${d}-${m}-${y}`;
-        }
-
         function setFechaHoraActual() {
             let now = new Date();
-            document.getElementById('fecha_cita').value = formatearFechaEspecial(now);
+            let y = now.getFullYear();
+            let m = String(now.getMonth() + 1).padStart(2, '0');
+            let d = String(now.getDate()).padStart(2, '0');
+            document.getElementById('fecha_cita').value = `${y}-${m}-${d}`;
             
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             let isoStr = now.toISOString();
@@ -705,13 +736,6 @@
             actualizarFechaHoraOculta();
         }
         setFechaHoraActual();
-
-        function sumarDias(dias) {
-            let fecha = new Date();
-            fecha.setDate(fecha.getDate() + dias);
-            document.getElementById('fecha_cita').value = formatearFechaEspecial(fecha);
-            actualizarFechaHoraOculta();
-        }
 
         // ============================================================
         // WhatsApp
@@ -928,83 +952,16 @@
                     let respuesta = window.citaController.agendarCita(JSON.stringify(data));
                     let partes = respuesta.split("|");
                     if (partes[0] === "OK") {
-                        Swal.fire({ title: '¡Cita Agendada!', text: partes[1], icon: 'success', confirmButtonText: 'Aceptar', confirmButtonColor: '#28a745' })
-                            .then(() => {
-                                this.reset();
-                                $('#identidad_paciente').val(null).trigger('change');
-                                setFechaHoraActual();
-                            });
+                        Swal.fire({ title: '¡Cita Agendada!', text: partes[1], icon: 'success', confirmButtonText: 'Volver al Menú', confirmButtonColor: '#28a745' })
+                            .then(() => { window.location.href = 'menu.html'; });
                     } else {
                         Swal.fire({ title: 'Error al agendar', text: partes[1], icon: 'error', confirmButtonText: 'Revisar', confirmButtonColor: '#dc3545' });
                     }
                 }
             });
 
-            // ============================================================
-            // Submit modal Nuevo Paciente → guardar en BD
-            // ============================================================
-            $('#formNuevoPacienteModal').on('submit', function (e) {
-                e.preventDefault();
-                $('#btnGuardarModal').prop('disabled', true).text('Guardando...');
-
-                const formData = new FormData(this);
-                const data = Object.fromEntries(formData.entries());
-
-                if (!data.identidad || !data.nombreCompleto || !data.telefono) {
-                    Swal.fire({ title: 'Faltan Datos', text: 'DNI, Nombre y Teléfono son requeridos.', icon: 'warning', confirmButtonText: 'Aceptar', confirmButtonColor: '#ffc107' });
-                    $('#btnGuardarModal').prop('disabled', false).text('Guardar Paciente');
-                    return;
-                }
-
-                if (data.telefono.length < 9) {
-                    Swal.fire({ title: 'Atención', text: 'El teléfono debe tener 8 dígitos mínimos.', icon: 'warning', confirmButtonText: 'Aceptar', confirmButtonColor: '#ffc107' });
-                    $('#btnGuardarModal').prop('disabled', false).text('Guardar Paciente');
-                    return;
-                }
-
-                if (data.identidad.length < 15) {
-                    Swal.fire({ title: 'Atención', text: 'La identidad debe tener 13 dígitos.', icon: 'warning', confirmButtonText: 'Aceptar', confirmButtonColor: '#ffc107' });
-                    $('#btnGuardarModal').prop('disabled', false).text('Guardar Paciente');
-                    return;
-                }
-
-                if (data.telefonoResponsable && data.telefonoResponsable.length > 0 && data.telefonoResponsable.length < 9) {
-                    Swal.fire({ title: 'Atención', text: 'El teléfono del responsable debe tener 8 dígitos mínimos.', icon: 'warning', confirmButtonText: 'Aceptar', confirmButtonColor: '#ffc107' });
-                    $('#btnGuardarModal').prop('disabled', false).text('Guardar Paciente');
-                    return;
-                }
-
-                let respuesta = window.pacienteController.registrarPaciente(JSON.stringify(data));
-                let partes = respuesta.split("|");
-
-                if (partes[0] === "OK") {
-                    // Recargar el combo de pacientes
-                    let pacientesJson = window.pacienteController.obtenerPacientes();
-                    let pacientes = JSON.parse(pacientesJson);
-                    let selPaciente = document.getElementById("identidad_paciente");
-                    // Limpiar y recargar
-                    while (selPaciente.options.length > 1) selPaciente.remove(1);
-                    let idNuevo = null;
-                    pacientes.forEach(p => {
-                        let opt = new Option(p.nombreCompleto + " (" + p.identidad + ")", p.idPaciente);
-                        opt.setAttribute("data-telefono", p.telefono || "");
-                        selPaciente.appendChild(opt);
-                        if (p.identidad === data.identidad) idNuevo = p.idPaciente;
-                    });
-                    if (idNuevo) $('#identidad_paciente').val(idNuevo).trigger('change');
-
-                    $('#formNuevoPacienteModal')[0].reset();
-                    cerrarModalPaciente();
-                    Swal.fire({ title: '¡Paciente Registrado!', text: partes[1], icon: 'success', confirmButtonText: 'Aceptar', confirmButtonColor: '#28a745' });
-                } else {
-                    Swal.fire({ title: 'Error', text: partes[1], icon: 'error', confirmButtonText: 'Revisar', confirmButtonColor: '#dc3545' });
-                }
-
-                $('#btnGuardarModal').prop('disabled', false).text('Guardar Paciente');
-            });
-
             // Formato de Teléfono
-            $('#telefono, #telefono_responsable').on('input', function(e) {
+            $('#modal_telefono, #telefono_responsable_modal').on('input', function(e) {
                 let val = e.target.value.replace(/\D/g, '');
                 let newVal = '';
                 if (val.length > 0) {
@@ -1017,7 +974,7 @@
             });
 
             // Formato de Identidad
-            $('#identidad').on('input', function(e) {
+            $('#modal_identidad, #identidad_responsable').on('input', function(e) {
                 let val = e.target.value.replace(/\D/g, '');
                 let newVal = '';
                 if (val.length > 0) {
@@ -1033,10 +990,10 @@
             });
 
             // Calcular Edad
-            $('#fecha_nacimiento').on('change', function(e) {
+            $('#modal_fecha_nacimiento').on('change', function(e) {
                 const fechaStr = e.target.value;
                 if (!fechaStr) {
-                    $('#edad').val('');
+                    $('#modal_edad').val('');
                     return;
                 }
                 const partes = fechaStr.split('-');
@@ -1052,7 +1009,7 @@
                         if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) {
                             edadCalc--;
                         }
-                        $('#edad').val(edadCalc);
+                        $('#modal_edad').val(edadCalc);
                     }
                 }
             });
@@ -1176,14 +1133,178 @@
         }
 
         // ============================================================
-        // Modal Paciente
+        // MODAL PACIENTE Y RESPONSABLE (Reutilizado idéntico a Pacientes)
         // ============================================================
-        function abrirModalPaciente() {
-            $('#msgModalPaciente').hide();
-            $('#modalPaciente').css('display', 'flex');
+        function cargarResponsablesParaModal(idParaSeleccionar) {
+            if (!window.responsableController) return;
+            try {
+                const jsonStr = window.responsableController.obtenerResponsables();
+                const lista = JSON.parse(jsonStr || '[]');
+                const select = document.getElementById('modal_id_responsable');
+                if (!select) return;
+
+                select.innerHTML = '<option value="" disabled selected>-- Seleccione Responsable --</option>';
+                lista.filter(r => r.estado !== 'Inactivo').forEach(r => {
+                    const opt = document.createElement('option');
+                    opt.value = r.id_responsable;
+                    opt.textContent = `${r.nombre_completo}${r.telefono ? ' - ' + r.telefono : ''}`;
+                    if (idParaSeleccionar && (parseInt(idParaSeleccionar) === parseInt(r.id_responsable) || r.nombre_completo === idParaSeleccionar)) {
+                        opt.selected = true;
+                    }
+                    select.appendChild(opt);
+                });
+            } catch(e) {
+                console.error("Error al cargar responsables:", e);
+            }
         }
+
+        function abrirModalPaciente() {
+            const form = document.getElementById('registroPacienteModalForm');
+            if (form) form.reset();
+            document.getElementById('modal_edad').value = '';
+            document.getElementById('modal_identidad_original').value = '';
+            cargarResponsablesParaModal();
+
+            const modalEl = document.getElementById('modalAgregarPaciente');
+            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+
         function cerrarModalPaciente() {
-            $('#modalPaciente').hide();
+            const modalEl = document.getElementById('modalAgregarPaciente');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+
+        function openAddRespModal() {
+            const form = document.getElementById('registroResponsableForm');
+            if (form) form.reset();
+            document.getElementById('id_responsable_form').value = '0';
+            const modalEl = document.getElementById('modalAgregarResponsable');
+            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+
+        function cerrarAddRespModal() {
+            const modalEl = document.getElementById('modalAgregarResponsable');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+
+        function registrarResponsableDesdeCita(event) {
+            event.preventDefault();
+            const form = document.getElementById('registroResponsableForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            if (!data.nombreCompleto || data.nombreCompleto.trim() === '') {
+                Swal.fire('Atención', 'El nombre es obligatorio.', 'warning');
+                return;
+            }
+
+            if (!data.identidad || data.identidad.trim() === '') {
+                Swal.fire('Atención', 'La identidad es obligatoria.', 'warning');
+                return;
+            }
+
+            if (data.identidad && data.identidad.length < 15) {
+                Swal.fire('Atención', 'La identidad debe tener 13 dígitos.', 'warning');
+                return;
+            }
+
+            if (data.telefono && data.telefono.length > 0 && data.telefono.length < 9) {
+                Swal.fire('Atención', 'El teléfono debe tener mínimo 8 dígitos.', 'warning');
+                return;
+            }
+
+            data.idResponsable = parseInt(data.idResponsable) || 0;
+
+            const jsonStr = JSON.stringify(data);
+            if (window.responsableController) {
+                const respuesta = window.responsableController.registrarResponsable(jsonStr);
+                const partes = String(respuesta).split('|');
+                if (partes[0] === 'OK') {
+                    cerrarAddRespModal();
+                    cargarResponsablesParaModal(data.nombreCompleto);
+                    Swal.fire({
+                        title: '¡Responsable Creado!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    });
+                } else {
+                    Swal.fire('Error', partes[1], 'error');
+                }
+            }
+        }
+
+        function guardarPacienteModal(event) {
+            event.preventDefault();
+            const form = document.getElementById('registroPacienteModalForm');
+            const formData = new FormData(form);
+            const paciente = Object.fromEntries(formData.entries());
+
+            if (!paciente.nombreCompleto || paciente.nombreCompleto.trim() === '') {
+                Swal.fire({ title: 'Faltan Datos', text: 'El nombre completo es obligatorio.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                return;
+            }
+
+            if (!paciente.identidad || paciente.identidad.trim() === '') {
+                Swal.fire({ title: 'Faltan Datos', text: 'La identidad del paciente es obligatoria.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                return;
+            }
+
+            if (!paciente.fechaNacimiento || paciente.fechaNacimiento.trim() === '') {
+                Swal.fire({ title: 'Faltan Datos', text: 'La fecha de nacimiento es obligatoria.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                return;
+            }
+
+            if (!paciente.telefono || paciente.telefono.trim() === '') {
+                Swal.fire({ title: 'Faltan Datos', text: 'El número de teléfono es obligatorio.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                return;
+            }
+
+            if (paciente.telefono && paciente.telefono.length < 9) {
+                Swal.fire({ title: 'Atención', text: 'El teléfono debe tener 8 dígitos mínimos.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                return;
+            }
+
+            if (paciente.identidad && paciente.identidad.length < 15) {
+                Swal.fire({ title: 'Atención', text: 'La identidad debe tener 13 dígitos.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                return;
+            }
+
+            if (!paciente.idResponsable || paciente.idResponsable.trim() === '') {
+                Swal.fire({ title: 'Faltan Datos', text: 'El responsable es obligatorio.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                return;
+            }
+
+            if (window.pacienteController) {
+                const respuesta = String(window.pacienteController.registrarPaciente(JSON.stringify(paciente)));
+                const partes = respuesta.split("|");
+
+                if (partes[0] === "OK") {
+                    // Recargar combo de pacientes en la cita
+                    let pacientesJson = window.pacienteController.obtenerPacientes();
+                    let pacientes = JSON.parse(pacientesJson);
+                    let selPaciente = document.getElementById("identidad_paciente");
+                    while (selPaciente.options.length > 1) selPaciente.remove(1);
+                    let idNuevo = null;
+                    pacientes.filter(p => p.estado !== 'Inactivo').forEach(p => {
+                        let opt = new Option(p.nombreCompleto + " (" + p.identidad + ")", p.idPaciente);
+                        opt.setAttribute("data-telefono", p.telefono || "");
+                        selPaciente.appendChild(opt);
+                        if (p.identidad === paciente.identidad) idNuevo = p.idPaciente;
+                    });
+                    if (idNuevo) $('#identidad_paciente').val(idNuevo).trigger('change');
+
+                    cerrarModalPaciente();
+                    Swal.fire({ title: '¡Paciente Registrado!', text: partes[1], icon: 'success', confirmButtonText: 'Aceptar', confirmButtonColor: '#28a745' });
+                } else {
+                    Swal.fire({ title: 'Error', text: partes[1], icon: 'error', confirmButtonText: 'Revisar', confirmButtonColor: '#dc3545' });
+                }
+            }
         }
 
         // ============================================================

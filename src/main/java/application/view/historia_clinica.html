@@ -491,8 +491,6 @@
                             onclick="cambiarSubPaso('paso-antecedentes', this)">2. Antecedentes</button>
                         <button type="button" class="btn-subtab" id="tab-paso-examen"
                             onclick="cambiarSubPaso('paso-examen', this)">3. Examen Oral</button>
-                        <button type="button" class="btn-subtab" id="tab-paso-signos"
-                            onclick="cambiarSubPaso('paso-signos', this)">4. Diagnóstico</button>
                     </div>
 
                     <!-- PASO 1 -->
@@ -509,16 +507,6 @@
                                 <label class="form-label fw-bold">Remitido Por:</label>
                                 <input type="text" id="hc_remitido_por" name="remitido_por" class="form-control"
                                     placeholder="Nombre del Dr. o Clínica que remite">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Motivo de Consulta:</label>
-                                <textarea id="hc_motivo" name="motivo_consulta" class="form-control" rows="3"
-                                    placeholder="Razón principal por la que acude..."></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Síntoma Principal:</label>
-                                <textarea id="hc_sintoma" name="sintoma_principal" class="form-control" rows="3"
-                                    placeholder="Descripción detallada del síntoma..."></textarea>
                             </div>
                         </div>
                         <div class="text-end mt-4 pt-3 border-top">
@@ -637,43 +625,10 @@
                                     <option value="Clase III">Clase III (Mesioclusión)</option>
                                 </select>
                             </div>
-                            <div class="col-12">
-                                <label class="form-label fw-bold">Observación de Tejidos Blandos:</label>
-                                <textarea id="hc_tejidos_blandos" name="tejidos_blandos_observacion"
-                                    class="form-control" rows="3"
-                                    placeholder="Estado de encías, lengua, paladar, mucosa..."></textarea>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
-                            <button type="button" class="btn btn-secondary px-4 fw-bold"
-                                onclick="cambiarSubPaso('paso-antecedentes', document.getElementById('tab-paso-antecedentes'))">
-                                ⬅ Anterior
-                            </button>
-                            <button type="button" class="btn btn-primary px-4 fw-bold"
-                                onclick="cambiarSubPaso('paso-signos', document.getElementById('tab-paso-signos'))">
-                                Siguiente ➔
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- PASO 4 -->
-                    <div id="paso-signos" class="subpanel-paso">
-                        <div class="row g-3">
-                            <!-- Odontograma del expediente base (Eliminado por estar duplicado y no pertenecer al modelo) -->
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Diagnóstico Presuntivo:</label>
-                                <textarea id="hc_diagnostico" name="diagnostico_presuntivo" class="form-control"
-                                    rows="3" placeholder="Diagnóstico inicial del paciente..."></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Observaciones Generales:</label>
-                                <textarea id="hc_observaciones_gen" name="observaciones_generales" class="form-control"
-                                    rows="3" placeholder="Notas adicionales del expediente..."></textarea>
-                            </div>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
                             <button type="button" class="btn btn-secondary px-4 fw-bold"
-                                onclick="cambiarSubPaso('paso-examen', document.getElementById('tab-paso-examen'))">
+                                onclick="cambiarSubPaso('paso-antecedentes', document.getElementById('tab-paso-antecedentes'))">
                                 ⬅ Anterior
                             </button>
                             <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm fw-bold">
@@ -681,6 +636,8 @@
                             </button>
                         </div>
                     </div>
+
+
 
                 </form>
             </div>
@@ -742,7 +699,7 @@
                         <h5><i class="fas fa-plus-circle"></i> Registrar Nuevo Archivo</h5>
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <label class="form-label fw-semibold" style="font-size:13px;">Tipo de Archivo *</label>
+                                <label class="form-label fw-semibold" style="font-size:13px;">Tipo de Archivo <span class="text-danger">*</span></label>
                                 <select id="arTipoDoc" class="form-select">
                                     <option value="">-- Seleccione --</option>
                                     <option value="Radiografia">Radiografía</option>
@@ -752,11 +709,11 @@
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-semibold" style="font-size:13px;">Nombre del Archivo *</label>
+                                <label class="form-label fw-semibold" style="font-size:13px;">Nombre del Archivo <span class="text-danger">*</span></label>
                                 <input type="text" id="arNombreDoc" class="form-control" placeholder="Rx_Panoramica_Paciente.png">
                             </div>
                             <div class="col-md-5">
-                                <label class="form-label fw-semibold" style="font-size:13px;">Archivo Clínico *</label>
+                                <label class="form-label fw-semibold" style="font-size:13px;">Archivo Clínico <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <input type="text" id="arRutaDoc" class="form-control" readonly placeholder="Seleccione un archivo...">
                                     <button class="btn btn-secondary" type="button" onclick="seleccionarArchivoFisico()"><i class="fas fa-folder-open"></i> Examinar...</button>
@@ -793,7 +750,7 @@
                         <h5><i class="fas fa-plus-circle"></i> Agregar Alergia al Paciente</h5>
                         <div class="row g-3 align-items-end">
                             <div class="col-md-8">
-                                <label class="form-label fw-semibold" style="font-size:13px;">Seleccionar Alergia del Catálogo *</label>
+                                <label class="form-label fw-semibold" style="font-size:13px;">Seleccionar Alergia del Catálogo <span class="text-danger">*</span></label>
                                 <select id="alSelectAlergiaDoc" class="form-select">
                                     <option value="">-- Cargando alergias... --</option>
                                 </select>
@@ -830,21 +787,21 @@
                         <h5><i class="fas fa-plus-circle"></i> Emitir Nueva Constancia Médica</h5>
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="form-label fw-semibold" style="font-size:13px;">Evolución Clínica *</label>
+                                <label class="form-label fw-semibold" style="font-size:13px;">Evolución Clínica <span class="text-danger">*</span></label>
                                 <select id="cnSelectEvolucionDoc" class="form-select">
                                     <option value="">-- Seleccione Consulta --</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-semibold" style="font-size:13px;">Fecha de Emisión *</label>
+                                <label class="form-label fw-semibold" style="font-size:13px;">Fecha de Emisión <span class="text-danger">*</span></label>
                                 <input type="date" id="cnFechaDoc" class="form-control">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-semibold" style="font-size:13px;">Hora de Emisión *</label>
+                                <label class="form-label fw-semibold" style="font-size:13px;">Hora de Emisión <span class="text-danger">*</span></label>
                                 <input type="time" id="cnHoraDoc" class="form-control">
                             </div>
                             <div class="col-md-12">
-                                <label class="form-label fw-semibold" style="font-size:13px;">Tratamiento Realizado *</label>
+                                <label class="form-label fw-semibold" style="font-size:13px;">Tratamiento Realizado <span class="text-danger">*</span></label>
                                 <textarea id="cnTratamientoDoc" class="form-control" rows="3"
                                           placeholder="Describa el tratamiento realizado..."></textarea>
                             </div>
@@ -899,7 +856,7 @@
                                 </h5>
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label class="form-label fw-bold">Cita Asociada (Opcional):</label>
+                                        <label class="form-label fw-bold">Cita Asociada:</label>
                                         <select id="ev_id_cita" class="form-select">
                                             <option value="">-- Sin cita (Espontánea) --</option>
                                         </select>
@@ -1017,7 +974,7 @@
                                         <select id="ev_id_catalogo_procedimientos" class="form-select">
                                             <option value="">-- Ninguno / Sin especificar --</option>
                                         </select>
-                                        <small class="text-muted">Opcional. Seleccione el procedimiento odontológico realizado.</small>
+                                        <small class="text-muted">Seleccione el procedimiento odontológico realizado.</small>
                                     </div>
                                     <div class="d-none">
                                         <textarea id="ev_odontograma" name="ev_odontograma" class="form-control font-monospace bg-light" rows="2" readonly></textarea>
@@ -1467,33 +1424,16 @@
                         <div class="info-value">${exp.tipo_cepillo_cerdas || 'N/A'} / ${exp.uso_hilo_dental || 'N/A'}</div></div>
                     <div class="col-md-6"><span class="info-label">Tipo de Mordida</span>
                         <div class="info-value">${exp.tipo_mordida || 'N/A'}</div></div>
-                    <div class="col-md-6"><span class="info-label">Observación Tejidos Blandos</span>
-                        <div class="info-value">${exp.tejidos_blandos_observacion || exp['tejidos_blandos_observacion'] || 'N/A'}</div></div>
                 </div>
             </div>
         </div>
 
-        <!-- Bloque 4: Diagnóstico -->
-        <div class="col-12">
-            <div class="seccion-bloque shadow-sm">
-                <h5 class="fw-bold text-primary border-bottom pb-2 mb-3">
-                    <i class="fa-solid fa-stethoscope me-2"></i>4. Diagnóstico y Observaciones
-                </h5>
-                <div class="row g-3">
-                    <div class="col-md-6"><span class="info-label">Diagnóstico Presuntivo</span>
-                        <div class="info-value fw-bold text-dark">${exp.diagnostico_presuntivo || 'N/A'}</div></div>
-                    <div class="col-md-6"><span class="info-label">Observaciones Generales</span>
-                        <div class="info-value">${exp.observaciones_generales || 'N/A'}</div></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bloque 5: Historial de Evoluciones -->
+        <!-- Bloque 4: Historial de Evoluciones -->
         <div class="col-12 mt-2">
             <div class="seccion-bloque shadow-sm border-primary">
                 <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
                     <h5 class="fw-bold text-primary m-0">
-                        <i class="fa-solid fa-timeline me-2"></i>5. Historial de Evolución Clínica
+                        <i class="fa-solid fa-timeline me-2"></i>4. Historial de Evolución Clínica
                         <span class="badge bg-primary ms-2">${evoluciones.length} consulta(s)</span>
                     </h5>
                     <button class="btn btn-sm btn-primary fw-bold"

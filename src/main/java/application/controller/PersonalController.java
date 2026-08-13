@@ -176,6 +176,10 @@ public class PersonalController extends BaseController {
         }
     }
 
+    public String obtenerIdUsuarioActual() {
+        return idUsuarioLoginActual != null ? String.valueOf(idUsuarioLoginActual) : "0";
+    }
+
     public String actualizarUsuario(String jsonUsuario) {
         try {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonUsuario).getAsJsonObject();
@@ -184,6 +188,16 @@ public class PersonalController extends BaseController {
             String nombreUsuario = obj.has("nombre_usuario") ? obj.get("nombre_usuario").getAsString() : null;
             String correo = obj.has("correo") ? obj.get("correo").getAsString() : null;
             String contrasenia = obj.has("contrasenia") ? obj.get("contrasenia").getAsString() : "";
+
+            // Validación de Administrador sobre sí mismo: No puede cambiar su propio rol
+            if (idUsuarioLoginActual != null && idUsuarioLoginActual == idUsuario) {
+                application.model.dao.UserDAO uDao = new application.model.dao.UserDAO();
+                String rolActual = uDao.obtenerRolPorId(idUsuario);
+                if (!rolSistema.equalsIgnoreCase(rolActual)) {
+                    return "ERR|Un administrador no puede cambiar su propio rol en el sistema.";
+                }
+            }
+
             application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
             boolean exito = pmDAO.actualizarUsuario(idUsuario, nombreUsuario, correo, rolSistema, contrasenia);
             return exito ? "OK|Usuario actualizado exitosamente." : "ERR|No se pudo actualizar el usuario.";
@@ -195,6 +209,11 @@ public class PersonalController extends BaseController {
     public String inactivarUsuario(String idUsuarioStr) {
         try {
             int idUsuario = Integer.parseInt(idUsuarioStr.trim());
+            // Validación de Administrador sobre sí mismo: No puede desactivarse a sí mismo
+            if (idUsuarioLoginActual != null && idUsuarioLoginActual == idUsuario) {
+                return "ERR|Un administrador no puede desactivarse a sí mismo.";
+            }
+
             application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
             boolean exito = pmDAO.inactivarUsuario(idUsuario);
             return exito ? "OK|Usuario inactivado correctamente." : "ERR|No se pudo inactivar el usuario.";
@@ -203,17 +222,42 @@ public class PersonalController extends BaseController {
         }
     }
 
+    public String obtenerUsuariosParaMedico(String idPersonalMedicoStr) {
+        try {
+            int idPersonalMedico = 0;
+            if (idPersonalMedicoStr != null && !idPersonalMedicoStr.trim().isEmpty()) {
+                idPersonalMedico = Integer.parseInt(idPersonalMedicoStr.trim());
+            }
+            application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
+            java.util.List<java.util.Map<String, String>> lista = pmDAO.obtenerUsuariosParaMedico(idPersonalMedico);
+            return gson.toJson(lista);
+        } catch (Throwable t) {
+            System.err.println("-> ERROR en obtenerUsuariosParaMedico: " + t.getMessage());
+            return "[]";
+        }
+    }
+
     public String actualizarPersonalMedico(String jsonMedico) {
         try {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonMedico).getAsJsonObject();
-            String identidad = obj.get("identidad").getAsString();
+            String identidadOriginal = obj.has("identidad_original") && !obj.get("identidad_original").isJsonNull()
+                    ? obj.get("identidad_original").getAsString()
+                    : obj.get("identidad").getAsString();
+            String nuevaIdentidad = obj.get("identidad").getAsString();
             String nombreCompleto = obj.get("nombre_completo").getAsString();
             String telefono = obj.get("telefono").getAsString();
             int idEspecialidades = obj.has("id_especialidades")
                     ? obj.get("id_especialidades").getAsInt()
                     : (obj.has("id_especialidad") ? obj.get("id_especialidad").getAsInt() : 0);
+            Integer idUsuario = obj.has("id_usuario") && !obj.get("id_usuario").isJsonNull()
+                    ? obj.get("id_usuario").getAsInt()
+                    : null;
+            String correo = obj.has("correo") && !obj.get("correo").isJsonNull()
+                    ? obj.get("correo").getAsString()
+                    : null;
+
             application.model.dao.PersonalMedicoDAO pmDAO = new application.model.dao.PersonalMedicoDAO();
-            boolean exito = pmDAO.actualizarPersonalMedico(identidad, nombreCompleto, telefono, idEspecialidades);
+            boolean exito = pmDAO.actualizarPersonalMedico(identidadOriginal, nuevaIdentidad, nombreCompleto, telefono, idEspecialidades, idUsuario, correo);
             return exito ? "OK|Médico actualizado exitosamente." : "ERR|No se pudo actualizar el médico.";
         } catch (Throwable t) {
             return "ERR|Error: " + t.getMessage();

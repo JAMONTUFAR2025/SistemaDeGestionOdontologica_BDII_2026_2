@@ -34,27 +34,44 @@ public class PersonalMedicoDAO {
         }
     }
 
-    // Obtener usuarios que NO tienen un médico vinculado (id_personal_medico IS NULL)
+    // Obtener usuarios que NO tienen un médico vinculado (id_personal_medico IS NULL) y cuyo rol es 'Medico'
     public java.util.List<java.util.Map<String, String>> obtenerUsuariosSinMedico() {
+        return obtenerUsuariosParaMedico(0);
+    }
+
+    // Obtener usuarios con rol 'Medico' sin médico asignado o asignados al médico específico
+    public java.util.List<java.util.Map<String, String>> obtenerUsuariosParaMedico(int idPersonalMedico) {
         java.util.List<java.util.Map<String, String>> usuarios = new java.util.ArrayList<>();
-        String query = "SELECT id_usuario_login, nombre_usuario, correo, rol_sistema FROM Usuarios_Login " +
-                "WHERE id_personal_medico IS NULL AND borrado = FALSE ORDER BY id_usuario_login DESC";
+        String query;
+        if (idPersonalMedico > 0) {
+            query = "SELECT id_usuario_login, nombre_usuario, correo, rol_sistema FROM Usuarios_Login " +
+                    "WHERE (id_personal_medico IS NULL OR id_personal_medico = ?) AND borrado = FALSE AND rol_sistema = 'Medico' " +
+                    "ORDER BY id_usuario_login DESC";
+        } else {
+            query = "SELECT id_usuario_login, nombre_usuario, correo, rol_sistema FROM Usuarios_Login " +
+                    "WHERE id_personal_medico IS NULL AND borrado = FALSE AND rol_sistema = 'Medico' " +
+                    "ORDER BY id_usuario_login DESC";
+        }
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
-            try (PreparedStatement stmt = conn.prepareStatement(query);
-                    ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    java.util.Map<String, String> map = new java.util.HashMap<>();
-                    map.put("id_usuario", String.valueOf(rs.getInt("id_usuario_login")));
-                    map.put("nombre_usuario", rs.getString("nombre_usuario"));
-                    map.put("correo", rs.getString("correo"));
-                    map.put("rol_sistema", rs.getString("rol_sistema"));
-                    usuarios.add(map);
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                if (idPersonalMedico > 0) {
+                    stmt.setInt(1, idPersonalMedico);
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        java.util.Map<String, String> map = new java.util.HashMap<>();
+                        map.put("id_usuario", String.valueOf(rs.getInt("id_usuario_login")));
+                        map.put("nombre_usuario", rs.getString("nombre_usuario"));
+                        map.put("correo", rs.getString("correo"));
+                        map.put("rol_sistema", rs.getString("rol_sistema"));
+                        usuarios.add(map);
+                    }
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al obtener usuarios sin médico: " + e.getMessage());
+            System.err.println("Error al obtener usuarios para médico: " + e.getMessage());
         }
         return usuarios;
     }
@@ -237,9 +254,11 @@ public class PersonalMedicoDAO {
     public java.util.List<java.util.Map<String, Object>> obtenerPersonalMedico() {
         java.util.List<java.util.Map<String, Object>> lista = new java.util.ArrayList<>();
         String query = "SELECT pm.id_personal_medico, pm.identidad, pm.nombre_completo, pm.telefono, pm.correo, pm.borrado, "
-                + "e.nombre_especialidad FROM Personal_Medico pm " +
-                "LEFT JOIN Especialidades e ON pm.id_especialidad = e.id_especialidad " +
-                "ORDER BY pm.id_personal_medico DESC";
+                + "e.id_especialidad, e.nombre_especialidad, u.id_usuario_login, u.nombre_usuario "
+                + "FROM Personal_Medico pm "
+                + "LEFT JOIN Especialidades e ON pm.id_especialidad = e.id_especialidad "
+                + "LEFT JOIN Usuarios_Login u ON u.id_personal_medico = pm.id_personal_medico AND u.borrado = FALSE "
+                + "ORDER BY pm.id_personal_medico DESC";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query);
@@ -252,7 +271,10 @@ public class PersonalMedicoDAO {
                     map.put("telefono", rs.getString("telefono"));
                     map.put("correo", rs.getString("correo"));
                     map.put("estado", rs.getBoolean("borrado") ? "Inactivo" : "Activo");
+                    map.put("idEspecialidad", rs.getInt("id_especialidad"));
                     map.put("especialidadNombre", rs.getString("nombre_especialidad"));
+                    map.put("idUsuario", rs.getObject("id_usuario_login") != null ? rs.getInt("id_usuario_login") : null);
+                    map.put("nombreUsuario", rs.getString("nombre_usuario"));
                     lista.add(map);
                 }
             }
@@ -343,22 +365,83 @@ public class PersonalMedicoDAO {
     }
 
 
-    // Actualizar datos de personal médico
-    public boolean actualizarPersonalMedico(String identidad, String nombreCompleto, String telefono,
-            int idEspecialidad) {
-        String q = "UPDATE Personal_Medico SET nombre_completo = ?, telefono = ?, id_especialidad = ? WHERE identidad = ?";
+    // Actualizar datos de personal médico y vincular nuevo usuario
+    public boolean actualizarPersonalMedico(String identidadOriginal, String nuevaIdentidad, String nombreCompleto, String telefono,
+            int idEspecialidad, Integer nuevoIdUsuario, String nuevoCorreo) {
+        String getIdPersonal = "SELECT id_personal_medico FROM Personal_Medico WHERE identidad = ?";
+        String updatePersonal = "UPDATE Personal_Medico SET identidad = ?, nombre_completo = ?, telefono = ?, id_especialidad = ?" 
+                + (nuevoCorreo != null && !nuevoCorreo.isEmpty() ? ", correo = ?" : "") 
+                + " WHERE id_personal_medico = ?";
+        String desvincularAntiguos = "UPDATE Usuarios_Login SET id_personal_medico = NULL WHERE id_personal_medico = ? AND id_usuario_login != ?";
+        String vincularNuevo = "UPDATE Usuarios_Login SET id_personal_medico = ? WHERE id_usuario_login = ?";
+
+        Connection conn = DBConnection.getInstance().getConnection();
         try {
-            Connection conn = DBConnection.getInstance().getConnection();
-            try (PreparedStatement stmt = conn.prepareStatement(q)) {
-                stmt.setString(1, nombreCompleto);
-                stmt.setString(2, telefono);
-                stmt.setInt(3, idEspecialidad);
-                stmt.setString(4, identidad);
-                return stmt.executeUpdate() > 0;
+            conn.setAutoCommit(false);
+
+            // 1. Obtener id_personal_medico usando la identidad original
+            int idPersonalMedico = -1;
+            try (PreparedStatement stmtGet = conn.prepareStatement(getIdPersonal)) {
+                stmtGet.setString(1, (identidadOriginal != null && !identidadOriginal.isEmpty()) ? identidadOriginal : nuevaIdentidad);
+                try (ResultSet rs = stmtGet.executeQuery()) {
+                    if (rs.next()) {
+                        idPersonalMedico = rs.getInt("id_personal_medico");
+                    }
+                }
             }
+
+            if (idPersonalMedico <= 0) {
+                conn.rollback();
+                return false;
+            }
+
+            // 2. Actualizar Personal_Medico con nuevaIdentidad
+            try (PreparedStatement stmtP = conn.prepareStatement(updatePersonal)) {
+                stmtP.setString(1, nuevaIdentidad);
+                stmtP.setString(2, nombreCompleto);
+                stmtP.setString(3, telefono);
+                stmtP.setInt(4, idEspecialidad);
+                if (nuevoCorreo != null && !nuevoCorreo.isEmpty()) {
+                    stmtP.setString(5, nuevoCorreo);
+                    stmtP.setInt(6, idPersonalMedico);
+                } else {
+                    stmtP.setInt(5, idPersonalMedico);
+                }
+                stmtP.executeUpdate();
+            }
+
+            // 3. Si se especificó un nuevo usuario, reasignar vinculación
+            if (nuevoIdUsuario != null && nuevoIdUsuario > 0) {
+                // Desvincular cualquier otro usuario que estuviera ligado a este médico
+                try (PreparedStatement stmtDesv = conn.prepareStatement(desvincularAntiguos)) {
+                    stmtDesv.setInt(1, idPersonalMedico);
+                    stmtDesv.setInt(2, nuevoIdUsuario);
+                    stmtDesv.executeUpdate();
+                }
+                // Vincular el nuevo usuario seleccionado
+                try (PreparedStatement stmtVinc = conn.prepareStatement(vincularNuevo)) {
+                    stmtVinc.setInt(1, idPersonalMedico);
+                    stmtVinc.setInt(2, nuevoIdUsuario);
+                    stmtVinc.executeUpdate();
+                }
+            }
+
+            conn.commit();
+            return true;
         } catch (SQLException e) {
-            System.err.println("Error al actualizar personal médico: " + e.getMessage());
+            System.err.println("Error en transacción al actualizar médico: " + e.getMessage());
+            try {
+                if (conn != null) conn.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             return false;
+        } finally {
+            try {
+                if (conn != null) conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 

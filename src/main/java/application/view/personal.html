@@ -264,32 +264,33 @@
 
                     <div class="row mb-3">
                         <div class="col-md-12">
-                            <label for="usu_nombre_usuario">Nombre de Usuario (Login Opcional):*</label>
+                            <label for="usu_nombre_usuario">Nombre de Usuario: <span class="text-danger">*</span></label>
                             <input type="text" id="usu_nombre_usuario" class="form-control" placeholder="Ej: jperez">
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-7">
-                            <label for="usu_correo">Correo Electrónico:*</label>
+                            <label for="usu_correo">Correo Electrónico: <span class="text-danger">*</span></label>
                             <input type="email" id="usu_correo" class="form-control" placeholder="ejemplo@clinica.com">
                         </div>
                         <div class="col-md-5">
-                            <label for="usu_rol_sistema">Rol en el Sistema:*</label>
+                            <label for="usu_rol_sistema">Rol en el Sistema: <span class="text-danger">*</span></label>
                             <select id="usu_rol_sistema" class="form-select">
                                 <option value="Medico">Médico</option>
                                 <option value="Recepcionista">Recepcionista</option>
                                 <option value="Administrador">Administrador</option>
                             </select>
+                            <small id="usu_rol_hint" class="fw-bold mt-1" style="display:none; font-size:11px; color:#d97706;"></small>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="usu_contrasenia">Contraseña:*</label>
+                            <label for="usu_contrasenia">Contraseña: <span class="text-danger">*</span></label>
                             <input type="password" id="usu_contrasenia" class="form-control" placeholder="••••••••">
                         </div>
                         <div class="col-md-6">
-                            <label for="usu_confirmar_pass">Confirmar Contraseña:*</label>
+                            <label for="usu_confirmar_pass">Confirmar Contraseña: <span class="text-danger">*</span></label>
                             <input type="password" id="usu_confirmar_pass" class="form-control" placeholder="••••••••">
                         </div>
                     </div>
@@ -324,11 +325,11 @@
                 <div class="modal-body p-4">
                     <input type="hidden" id="med_identidad_original">
 
-                    <!-- Sección vinculación usuario (solo al crear, no al editar) -->
+                    <!-- Sección vinculación usuario -->
                     <div id="seccionVincularUsuario">
-                        <div class="section-title-blue">Vincular con Usuario Existente</div>
+                        <div class="section-title-blue" id="tituloSeccionUsuario">Vincular con Usuario</div>
                         <div class="mb-3">
-                            <label for="med_id_usuario">Usuario (sin médico asignado):*</label>
+                            <label for="med_id_usuario" id="labelSeccionUsuario">Usuario Asignado (Rol Médico): <span class="text-danger">*</span></label>
                             <select id="med_id_usuario" class="form-select">
                                 <option value="">Cargando usuarios...</option>
                             </select>
@@ -337,23 +338,23 @@
 
                     <div class="section-title-blue">Datos del Personal de la Clínica</div>
                     <div class="mb-3">
-                        <label for="med_nombre">Nombre Completo:*</label>
+                        <label for="med_nombre">Nombre Completo: <span class="text-danger">*</span></label>
                         <input type="text" id="med_nombre" class="form-control" placeholder="Ej: Dr. Carlos Mendoza">
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="med_identidad">Identidad (DNI):*</label>
+                            <label for="med_identidad">Identidad (DNI): <span class="text-danger">*</span></label>
                             <input type="text" id="med_identidad" class="form-control" placeholder="0801-1990-12345" maxlength="15">
                         </div>
                         <div class="col-md-6">
-                            <label for="med_telefono">Teléfono:*</label>
+                            <label for="med_telefono">Teléfono: <span class="text-danger">*</span></label>
                             <input type="text" id="med_telefono" class="form-control" placeholder="9999-9999" maxlength="9">
                         </div>
                     </div>
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <label for="med_especialidad" class="mb-0">Especialidad Médica:*</label>
+                                <label for="med_especialidad" class="mb-0">Especialidad Médica: <span class="text-danger">*</span></label>
                                 <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 fw-bold" onclick="abrirModalEspecialidad(null)" title="Agregar nueva especialidad">
                                     <i class="fas fa-plus"></i> Nueva
                                 </button>
@@ -372,6 +373,36 @@
                             <button type="button" class="btn btn-guardar rounded" style="background:#007bf0;" onclick="guardarMedico()">Guardar Médico</button>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- MODAL: AGREGAR NUEVA ESPECIALIDAD (sobre modal médico)   -->
+    <!-- ======================================================= -->
+    <div class="modal fade" id="modalAgregarEspecialidad" data-bs-backdrop="false" tabindex="-1" aria-hidden="true" style="z-index: 1070; background-color: rgba(0, 0, 0, 0.45);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header text-white" style="background-color: #007bf0;">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-plus-circle"></i> Nueva Especialidad Médica</h5>
+                    <button type="button" class="btn-close btn-close-white" onclick="cerrarModalEspecialidad()" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="formNuevaEspecialidad" onsubmit="guardarNuevaEspecialidad(event)">
+                        <div class="mb-3">
+                            <label for="esp_nombre_nuevo" class="form-label fw-bold">Nombre de la Especialidad: <span class="text-danger">*</span></label>
+                            <input type="text" id="esp_nombre_nuevo" class="form-control" placeholder="Ej: Odontopediatría, Cirugía Bucal" required>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6 mb-2">
+                                <button type="button" class="btn btn-secondary w-100 py-2" onclick="cerrarModalEspecialidad()">Cancelar</button>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" style="background-color: #007bf0;">Guardar</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -519,13 +550,28 @@
             let fin = inicio + REGISTROS_POR_PAGINA;
             let paginaDatos = usuariosFiltrados.slice(inicio, fin);
 
+            let idUsuarioActual = 0;
+            if (window.personalController && window.personalController.obtenerIdUsuarioActual) {
+                try {
+                    idUsuarioActual = parseInt(window.personalController.obtenerIdUsuarioActual()) || 0;
+                } catch(e) {}
+            }
+
             tbody.innerHTML = paginaDatos.map(u => {
                 const inactivo = u.estado === 'Inactivo';
+                const esUsuarioActual = (idUsuarioActual > 0 && u.id_usuario === idUsuarioActual);
                 const rowClass = inactivo ? 'registro-inactivo' : '';
-                const acciones = inactivo 
-                    ? `<button class="btn btn-sm btn-outline-secondary py-0" onclick="pedirPasswordReactivarUsuario(${u.id_usuario})"><i class="fas fa-recycle"></i> Reactivar</button>`
-                    : `<i class="fas fa-edit" title="Editar" onclick="abrirModalUsuario(true, ${u.id_usuario}, '${u.nombre_usuario || ''}', '${u.correo}', '${u.rol_sistema}')"></i>
-                       <i class="fas fa-trash" title="Inactivar" onclick="deleteUsuario(${u.id_usuario})"></i>`;
+                let acciones = '';
+                if (inactivo) {
+                    acciones = `<button class="btn btn-sm btn-outline-secondary py-0" onclick="pedirPasswordReactivarUsuario(${u.id_usuario})"><i class="fas fa-recycle"></i> Reactivar</button>`;
+                } else {
+                    acciones = `<i class="fas fa-edit" title="Editar" onclick="abrirModalUsuario(true, ${u.id_usuario}, '${u.nombre_usuario || ''}', '${u.correo}', '${u.rol_sistema}')"></i>`;
+                    if (esUsuarioActual) {
+                        acciones += ` <i class="fas fa-trash text-muted" style="cursor: not-allowed; opacity: 0.35;" title="No puedes desactivar tu propia cuenta" onclick="Swal.fire({ title: 'Acción no permitida', text: 'Un administrador no puede desactivarse a sí mismo.', icon: 'warning', confirmButtonColor: '#ffc107' })"></i>`;
+                    } else {
+                        acciones += ` <i class="fas fa-trash text-danger" title="Inactivar" onclick="deleteUsuario(${u.id_usuario})"></i>`;
+                    }
+                }
                 
                 return `
                 <tr class="${rowClass}" data-correo="${(u.correo||'').toLowerCase()}" data-rol="${(u.rol_sistema||'').toLowerCase()}">
@@ -636,47 +682,119 @@
         }
 
         // ==========================================
-        // CARGAR USUARIOS SIN MÉDICO (para select modal médico)
+        // CARGAR USUARIOS PARA MÉDICO (rol 'Medico')
         // ==========================================
-        function cargarUsuariosSinMedico() {
-            if ((!window.personalController)) { setTimeout(cargarUsuariosSinMedico, 150); return; }
+        function cargarUsuariosParaMedico(idPersonalMedico, idUsuarioSeleccionado) {
+            if ((!window.personalController)) { setTimeout(() => cargarUsuariosParaMedico(idPersonalMedico, idUsuarioSeleccionado), 150); return; }
             try {
-                const json = window.personalController.obtenerUsuariosSinMedico();
+                const json = window.personalController.obtenerUsuariosParaMedico(String(idPersonalMedico || 0));
                 const usuarios = JSON.parse(json || '[]');
                 const select = document.getElementById('med_id_usuario');
-                select.innerHTML = '<option value="">-- Seleccionar usuario --</option>';
+                select.innerHTML = '<option value="">-- Seleccionar usuario con rol Médico --</option>';
                 if (usuarios.length === 0) {
-                    select.innerHTML = '<option value="">No hay usuarios sin médico disponibles.</option>';
+                    select.innerHTML = '<option value="">No hay usuarios con rol Médico disponibles.</option>';
                 } else {
                     usuarios.forEach(u => {
                         const opt = document.createElement('option');
                         opt.value = u.id_usuario;
-                        opt.text = u.correo + ' (' + u.rol_sistema + ')';
+                        const esActual = (idUsuarioSeleccionado && parseInt(idUsuarioSeleccionado) === parseInt(u.id_usuario));
+                        opt.text = (u.nombre_usuario ? u.nombre_usuario + ' (' + u.correo + ')' : u.correo) + (esActual ? ' [Actual]' : '');
+                        if (esActual) opt.selected = true;
                         select.appendChild(opt);
                     });
                 }
-            } catch(e) { console.error('Error al cargar usuarios sin médico:', e); }
+            } catch(e) { console.error('Error al cargar usuarios para médico:', e); }
         }
 
         // ==========================================
         // CARGAR ESPECIALIDADES
         // ==========================================
-        function intentarCargarEspecialidades() {
-            if ((!window.personalController)) { setTimeout(intentarCargarEspecialidades, 150); return; }
+        function intentarCargarEspecialidades(nombreParaSeleccionar) {
+            if ((!window.personalController)) { setTimeout(() => intentarCargarEspecialidades(nombreParaSeleccionar), 150); return; }
             try {
                 const json = window.personalController.obtenerEspecialidades();
                 const especialidades = JSON.parse(json || '[]');
                 const select = document.getElementById('med_especialidad');
                 const valorActual = select.value;
                 select.innerHTML = '<option value="">Seleccione una especialidad</option>';
+                let matchId = null;
                 especialidades.forEach(esp => {
                     const opt = document.createElement('option');
                     opt.value = esp.idEspecialidades;
                     opt.text = esp.nombreEspecialidad;
+                    if (nombreParaSeleccionar && esp.nombreEspecialidad.toLowerCase() === nombreParaSeleccionar.toLowerCase()) {
+                        matchId = esp.idEspecialidades;
+                    }
                     select.appendChild(opt);
                 });
-                if (valorActual) select.value = valorActual;
+                if (matchId) {
+                    select.value = matchId;
+                } else if (valorActual) {
+                    select.value = valorActual;
+                }
             } catch(e) { console.error('Error al cargar especialidades:', e); }
+        }
+
+        // ==========================================
+        // MODAL NUEVA ESPECIALIDAD
+        // ==========================================
+        function abrirModalEspecialidad() {
+            document.getElementById('esp_nombre_nuevo').value = '';
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalAgregarEspecialidad'))
+                       || new bootstrap.Modal(document.getElementById('modalAgregarEspecialidad'));
+            modal.show();
+            setTimeout(() => document.getElementById('esp_nombre_nuevo').focus(), 300);
+        }
+
+        function cerrarModalEspecialidad() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalAgregarEspecialidad'));
+            if (modal) modal.hide();
+        }
+
+        function guardarNuevaEspecialidad(event) {
+            if (event) event.preventDefault();
+            const nombre = document.getElementById('esp_nombre_nuevo').value.trim();
+            if (!nombre) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingrese el nombre de la especialidad.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                else alert('Por favor, ingrese el nombre de la especialidad.');
+                return;
+            }
+
+            if (!window.personalController) {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Puente Java no disponible.', icon: 'error', confirmButtonColor: '#dc3545' });
+                else alert('Puente Java no disponible.');
+                return;
+            }
+
+            const respuesta = window.personalController.agregarEspecialidad(nombre);
+            const partes = respuesta.split('|');
+            if (partes[0] === 'OK') {
+                cerrarModalEspecialidad();
+                intentarCargarEspecialidades(nombre);
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '¡Especialidad Creada!',
+                        text: partes[1],
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    });
+                } else {
+                    alert(partes[1]);
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: partes[1],
+                        icon: 'error',
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert("Error: " + partes[1]);
+                }
+            }
         }
 
         // ==========================================
@@ -693,10 +811,36 @@
 
             const titulo = document.getElementById('tituloModalUsuario');
             const passHint = document.getElementById('usu_pass_hint');
+            const selectRol = document.getElementById('usu_rol_sistema');
+            const rolHint = document.getElementById('usu_rol_hint');
+
+            // Siempre reiniciar estado del rol
+            selectRol.disabled = false;
+            if (rolHint) {
+                rolHint.style.display = 'none';
+                rolHint.innerText = '';
+            }
+
+            let idUsuarioActual = 0;
+            if (window.personalController && window.personalController.obtenerIdUsuarioActual) {
+                try {
+                    idUsuarioActual = parseInt(window.personalController.obtenerIdUsuarioActual()) || 0;
+                } catch(e) {}
+            }
+            const idTarget = parseInt(idUsuario) || 0;
+            const esMismoUsuario = (esEdicion && idUsuarioActual > 0 && idTarget > 0 && idTarget === idUsuarioActual);
+
             if (esEdicion) {
                 titulo.innerHTML = '<i class="fas fa-user-edit"></i> Editar Usuario';
                 passHint.style.display = 'block';
                 document.getElementById('usu_correo').readOnly = false;
+                if (esMismoUsuario) {
+                    selectRol.disabled = true;
+                    if (rolHint) {
+                        rolHint.style.display = 'block';
+                        rolHint.innerText = '🔒 No puedes cambiar tu propio rol.';
+                    }
+                }
             } else {
                 titulo.innerHTML = '<i class="fas fa-user-plus"></i> Nuevo Usuario del Sistema';
                 passHint.style.display = 'none';
@@ -715,27 +859,30 @@
             modoEdicionMedico = (medico !== null);
             const seccionVincular = document.getElementById('seccionVincularUsuario');
             const titulo = document.getElementById('tituloModalMedico');
+            const tituloVinc = document.getElementById('tituloSeccionUsuario');
 
             document.getElementById('med_identidad_original').value = '';
             document.getElementById('med_nombre').value = '';
             document.getElementById('med_identidad').value = '';
             document.getElementById('med_telefono').value = '';
 
+            seccionVincular.style.display = 'block';
+
             if (modoEdicionMedico) {
                 titulo.innerHTML = '<i class="fas fa-user-edit"></i> Editar Personal Médico';
-                seccionVincular.style.display = 'none';
+                if (tituloVinc) tituloVinc.innerText = 'Usuario Asignado (Rol Médico)';
                 document.getElementById('med_identidad_original').value = medico.identidad || '';
                 document.getElementById('med_nombre').value = medico.nombreCompleto || '';
                 document.getElementById('med_identidad').value = medico.identidad || '';
-                document.getElementById('med_identidad').readOnly = true;
+                document.getElementById('med_identidad').readOnly = false;
                 document.getElementById('med_telefono').value = medico.telefono || '';
-                // Esperar a que especialidades carguen antes de asignar valor
+                
+                cargarUsuariosParaMedico(medico.idPersonalMedico, medico.idUsuario);
                 intentarCargarEspecialidades();
                 setTimeout(() => {
-                    // Buscamos la especialidad por nombre
                     const select = document.getElementById('med_especialidad');
                     for (let i = 0; i < select.options.length; i++) {
-                        if (select.options[i].text === medico.especialidadNombre) {
+                        if (select.options[i].text === medico.especialidadNombre || (medico.idEspecialidad && parseInt(select.options[i].value) === parseInt(medico.idEspecialidad))) {
                             select.selectedIndex = i;
                             break;
                         }
@@ -743,9 +890,9 @@
                 }, 300);
             } else {
                 titulo.innerHTML = '<i class="fas fa-user-md"></i> Registrar Personal Médico';
-                seccionVincular.style.display = 'block';
+                if (tituloVinc) tituloVinc.innerText = 'Vincular con Usuario Existente';
                 document.getElementById('med_identidad').readOnly = false;
-                cargarUsuariosSinMedico();
+                cargarUsuariosParaMedico(0, null);
                 intentarCargarEspecialidades();
             }
 
@@ -830,11 +977,13 @@
         function guardarMedico() {
             if ((!window.personalController)) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Puente Java no inicializado.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Error: Puente Java no inicializado.'); return; }
 
+            const idUsuario = document.getElementById('med_id_usuario').value;
             const nombre = document.getElementById('med_nombre').value.trim();
             const identidad = document.getElementById('med_identidad').value.trim();
             const telefono = document.getElementById('med_telefono').value.trim();
             const especialidad = document.getElementById('med_especialidad').value;
 
+            if (!idUsuario) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, selecciona un usuario con rol Médico para vincular.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, selecciona un usuario con rol Médico para vincular.'); return; }
             if (!nombre) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa el nombre completo.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa el nombre completo.'); return; }
             if (!identidad) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, ingresa la identidad (DNI).', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, ingresa la identidad (DNI).'); return; }
             if (identidad.length < 15) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'La identidad (DNI) debe tener 15 caracteres (incluyendo guiones).', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('La identidad (DNI) debe tener 15 caracteres (incluyendo guiones).'); return; }
@@ -842,16 +991,29 @@
             if (telefono.length < 9) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'El teléfono debe tener 9 caracteres (incluyendo el guion).', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('El teléfono debe tener 9 caracteres (incluyendo el guion).'); return; }
             if (!especialidad) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, selecciona la especialidad.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, selecciona la especialidad.'); return; }
 
+            const selectUsuario = document.getElementById('med_id_usuario');
+            const textoSeleccionado = selectUsuario.options[selectUsuario.selectedIndex].text;
+            let correoUsuario = '';
+            if (textoSeleccionado.includes('(') && textoSeleccionado.includes(')')) {
+                correoUsuario = textoSeleccionado.substring(textoSeleccionado.indexOf('(') + 1, textoSeleccionado.indexOf(')')).trim();
+            } else {
+                correoUsuario = textoSeleccionado.replace('[Actual]', '').trim();
+            }
+
             let respuesta;
             if (modoEdicionMedico) {
                 const identidadOriginal = document.getElementById('med_identidad_original').value;
-                const data = { identidad: identidadOriginal, nombre_completo: nombre, telefono, id_especialidad: parseInt(especialidad) };
+                const data = {
+                    identidad_original: identidadOriginal,
+                    identidad: identidad,
+                    nombre_completo: nombre,
+                    telefono,
+                    id_especialidad: parseInt(especialidad),
+                    id_usuario: parseInt(idUsuario),
+                    correo: correoUsuario
+                };
                 respuesta = window.personalController.actualizarPersonalMedico(JSON.stringify(data));
             } else {
-                const idUsuario = document.getElementById('med_id_usuario').value;
-                if (!idUsuario) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Por favor, selecciona un usuario para vincular.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Por favor, selecciona un usuario para vincular.'); return; }
-                const selectUsuario = document.getElementById('med_id_usuario');
-                const correoUsuario = selectUsuario.options[selectUsuario.selectedIndex].text.split(' (')[0];
                 const data = {
                     id_usuario: parseInt(idUsuario),
                     nombre_completo: nombre,
@@ -900,6 +1062,25 @@
         // ELIMINAR / INACTIVAR
         // ==========================================
         function deleteUsuario(idUsuario) {
+            let idUsuarioActual = 0;
+            if (window.personalController && window.personalController.obtenerIdUsuarioActual) {
+                try {
+                    idUsuarioActual = parseInt(window.personalController.obtenerIdUsuarioActual()) || 0;
+                } catch(e) {}
+            }
+            if (idUsuarioActual > 0 && idUsuario === idUsuarioActual) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Acción no permitida',
+                        text: 'Un administrador no puede desactivarse a sí mismo.',
+                        icon: 'warning',
+                        confirmButtonColor: '#ffc107'
+                    });
+                } else {
+                    alert('Un administrador no puede desactivarse a sí mismo.');
+                }
+                return;
+            }
             idUsuarioAEliminar = idUsuario;
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminarUsuario'))
                        || new bootstrap.Modal(document.getElementById('modalEliminarUsuario'));

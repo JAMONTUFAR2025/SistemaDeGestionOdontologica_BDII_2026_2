@@ -238,7 +238,7 @@
                         <!-- Fila 1 -->
                         <div class="row mb-3">
                             <div class="col-md-12">
-                                <label for="nombre_completo">Nombre:</label>
+                                <label for="nombre_completo">Nombre: <span class="text-danger">*</span></label>
                                 <input type="text" id="nombre_completo" name="nombreCompleto" class="form-control"
                                     required>
                             </div>
@@ -280,7 +280,7 @@
                         <!-- Fila 4 -->
                         <div class="row mb-3">
                             <div class="col-md-4">
-                                <label for="fecha_nacimiento">Fecha de nacimiento:</label>
+                                <label for="fecha_nacimiento">Fecha de nacimiento: <span class="text-danger">*</span></label>
                                 <input type="date" id="fecha_nacimiento" name="fechaNacimiento" class="form-control"
                                     required>
                             </div>
@@ -293,12 +293,12 @@
                         <!-- Fila 5 -->
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="telefono">Teléfono:</label>
+                                <label for="telefono">Teléfono: <span class="text-danger">*</span></label>
                                 <input type="text" id="telefono" name="telefono" class="form-control"
                                     placeholder="####-####" minlength="9" maxlength="9" required>
                             </div>
                             <div class="col-md-6">
-                                <label for="identidad">Identidad:</label>
+                                <label for="identidad">Identidad: <span class="text-danger">*</span></label>
                                 <input type="text" id="identidad" name="identidad" class="form-control"
                                     placeholder="####-####-#####" minlength="15" maxlength="15" required>
                             </div>
@@ -308,10 +308,10 @@
                         <!-- Fila 6 -->
                         <div class="row mb-4">
                             <div class="col-md-12">
-                                <label for="id_responsable">Responsable (Opcional):</label>
+                                <label for="id_responsable">Responsable: <span class="text-danger">*</span></label>
                                 <div class="d-flex">
-                                    <select id="id_responsable" name="idResponsable" class="form-select me-2">
-                                        <option value="">-- Ninguno --</option>
+                                    <select id="id_responsable" name="idResponsable" class="form-select me-2" required>
+                                        <option value="" disabled selected>-- Seleccione Responsable --</option>
                                         <!-- Options llenadas por JS -->
                                     </select>
                                     <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarResponsable" onclick="openAddRespModal()" style="white-space: nowrap;">
@@ -375,23 +375,23 @@
                     <form id="registroResponsableForm" onsubmit="registrarResponsable(event)">
                         <input type="hidden" id="id_responsable_form" name="idResponsable">
                         <div class="mb-3">
-                            <label for="identidad_responsable">Identidad:</label>
+                            <label for="identidad_responsable">Identidad: <span class="text-danger">*</span></label>
                             <input type="text" id="identidad_responsable" name="identidad" class="form-control" placeholder="####-####-#####" minlength="15" maxlength="15" oninput="this.value = formatearIdentidad(this.value);" required>
                         </div>
                         <div class="mb-3">
-                            <label for="nombre_responsable">Nombre Completo:</label>
+                            <label for="nombre_responsable">Nombre Completo: <span class="text-danger">*</span></label>
                             <input type="text" id="nombre_responsable" name="nombreCompleto" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label for="telefono_responsable">Teléfono:</label>
-                            <input type="text" id="telefono_responsable" name="telefono" class="form-control" placeholder="####-####" minlength="9" maxlength="9">
+                            <label for="telefono_responsable">Teléfono: <span class="text-danger">*</span></label>
+                            <input type="text" id="telefono_responsable" name="telefono" class="form-control" placeholder="####-####" minlength="9" maxlength="9" required>
                         </div>
                         <div class="mb-3">
-                            <label for="correo_responsable">Correo (Opcional):</label>
+                            <label for="correo_responsable">Correo:</label>
                             <input type="email" id="correo_responsable" name="correo" class="form-control">
                         </div>
                         <div class="mb-3">
-                            <label for="parentesco_responsable">Parentesco:</label>
+                            <label for="parentesco_responsable">Parentesco: <span class="text-danger">*</span></label>
                             <select id="parentesco_responsable" name="parentesco" class="form-select" required>
                                 <option value="" disabled selected>Seleccione un parentesco</option>
                                 <option value="Padre">Padre</option>
@@ -732,8 +732,10 @@
                 return;
             }
 
-            if (paciente.idResponsable === '') {
-                delete paciente.idResponsable;
+            if (!paciente.idResponsable || paciente.idResponsable.trim() === '') {
+                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Faltan Datos', text: 'El responsable es obligatorio.', icon: 'warning', confirmButtonColor: '#ffc107' });
+                else alert('El responsable es obligatorio.');
+                return;
             }
 
             const jsonStr = JSON.stringify(paciente);
@@ -1062,9 +1064,11 @@
             const r = listaResponsables.find(item => item.id_responsable === id);
             if (!r) return;
             document.getElementById('id_responsable_form').value = r.id_responsable;
+            document.getElementById('identidad_responsable').value = r.identidad || '';
             document.getElementById('nombre_responsable').value = r.nombre_completo || '';
             document.getElementById('telefono_responsable').value = r.telefono || '';
             document.getElementById('correo_responsable').value = r.correo || '';
+            document.getElementById('parentesco_responsable').value = r.parentesco || '';
 
             document.getElementById('modalTitleResp').innerHTML = '<i class="fas fa-user-edit"></i> Editar Responsable';
             let modalEl = document.getElementById('modalAgregarResponsable');
@@ -1103,9 +1107,7 @@
 
             const jsonStr = JSON.stringify(data);
             if (window.responsableController) {
-                const isUpdate = data.idResponsable > 0;
-                const respuesta = isUpdate ? window.responsableController.actualizarResponsable(jsonStr) 
-                                           : window.responsableController.registrarResponsable(jsonStr);
+                const respuesta = window.responsableController.registrarResponsable(jsonStr);
                 const partes = String(respuesta).split('|');
                 if (partes[0] === 'OK') {
                     Swal.fire('Éxito', partes[1], 'success').then(() => {

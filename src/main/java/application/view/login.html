@@ -58,6 +58,10 @@
             font-weight: 600;
         }
 
+        .text-danger {
+            color: #dc3545;
+        }
+
         .input-group input {
             width: 100%;
             padding: 10px 12px;
@@ -109,38 +113,6 @@
         .hidden {
             display: none;
         }
-
-        /* Autocomplete customizado */
-        .autocomplete-wrapper {
-            position: relative;
-            width: 100%;
-        }
-
-        .autocomplete-items {
-            position: absolute;
-            border: 1px solid #cbd5e1;
-            border-bottom: none;
-            border-top: none;
-            z-index: 99;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background-color: #fff;
-            border-radius: 0 0 6px 6px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .autocomplete-items div {
-            padding: 10px;
-            cursor: pointer;
-            background-color: #fff;
-            border-bottom: 1px solid #cbd5e1;
-            font-size: 13px;
-        }
-
-        .autocomplete-items div:hover {
-            background-color: #e9e9e9;
-        }
     </style>
 </head>
 
@@ -153,16 +125,14 @@
                 <img src="../../Logo.png" alt="Logo Clínica SOE" style="max-width: 90px; height: auto;">
             </div>
             <h2>SOE Odontología</h2>
-            <form onsubmit="intentarLogin(event)">
+            <form onsubmit="intentarLogin(event)" autocomplete="off">
                 <div class="input-group">
-                    <label for="usuario">Usuario o Correo</label>
-                    <div class="autocomplete-wrapper">
-                        <input type="text" id="usuario" required placeholder="Ingrese nombre de usuario o correo">
-                    </div>
+                    <label for="usuario">Usuario o Correo: <span class="text-danger">*</span></label>
+                    <input type="text" id="usuario" required placeholder="Ingrese nombre de usuario o correo" autocomplete="off">
                 </div>
                 <div class="input-group">
-                    <label for="password">Contraseña</label>
-                    <input type="password" id="password" required placeholder="Ingrese su contraseña">
+                    <label for="password">Contraseña: <span class="text-danger">*</span></label>
+                    <input type="password" id="password" required placeholder="Ingrese su contraseña" autocomplete="current-password">
                 </div>
                 <button type="submit" class="btn">Ingresar</button>
             </form>
@@ -175,14 +145,12 @@
         <div id="recovery-section" class="hidden">
             <h2>Recuperar Cuenta</h2>
             <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
-                Ingresa tu usuario o correo registrado para enviarte un código de seguridad.
+                Ingresa tu correo electrónico registrado para enviarte un código de seguridad.
             </p>
-            <form onsubmit="intentarRecuperacion(event)">
+            <form onsubmit="intentarRecuperacion(event)" autocomplete="off">
                 <div class="input-group">
-                    <label for="recovery-input">Usuario o Correo</label>
-                    <div class="autocomplete-wrapper">
-                        <input type="text" id="recovery-input" required placeholder="usuario o correo">
-                    </div>
+                    <label for="recovery-input">Correo Electrónico: <span class="text-danger">*</span></label>
+                    <input type="email" id="recovery-input" required placeholder="ejemplo@clinica.com" autocomplete="off">
                 </div>
                 <button type="submit" class="btn" style="background-color: #007bf0;">Enviar Código</button>
             </form>
@@ -198,11 +166,11 @@
             <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
                 Hemos enviado un código de 6 dígitos a tu correo. Ingrésalo a continuación.
             </p>
-            <form onsubmit="intentarVerificarCodigo(event)">
+            <form onsubmit="intentarVerificarCodigo(event)" autocomplete="off">
                 <div class="input-group">
-                    <label for="code-input">Código de Seguridad</label>
+                    <label for="code-input">Código de Seguridad: <span class="text-danger">*</span></label>
                     <input type="text" id="code-input" required placeholder="Ej: 123456" maxlength="6"
-                        style="text-align: center; font-size: 18px; letter-spacing: 5px;">
+                        style="text-align: center; font-size: 18px; letter-spacing: 5px;" autocomplete="off">
                 </div>
                 <button type="submit" class="btn" style="background-color: #007bf0;">Verificar Código</button>
             </form>
@@ -217,14 +185,14 @@
             <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
                 Ingresa tu nueva contraseña para acceder al sistema.
             </p>
-            <form onsubmit="intentarCambiarContrasenia(event)">
+            <form onsubmit="intentarCambiarContrasenia(event)" autocomplete="off">
                 <div class="input-group">
-                    <label for="new-password">Nueva Contraseña</label>
-                    <input type="password" id="new-password" required placeholder="Mínimo 6 caracteres" minlength="6">
+                    <label for="new-password">Nueva Contraseña: <span class="text-danger">*</span></label>
+                    <input type="password" id="new-password" required placeholder="Mínimo 6 caracteres" minlength="6" autocomplete="new-password">
                 </div>
                 <div class="input-group">
-                    <label for="confirm-password">Confirmar Contraseña</label>
-                    <input type="password" id="confirm-password" required placeholder="Repite la contraseña">
+                    <label for="confirm-password">Confirmar Contraseña: <span class="text-danger">*</span></label>
+                    <input type="password" id="confirm-password" required placeholder="Repite la contraseña" autocomplete="new-password">
                 </div>
                 <button type="submit" class="btn" style="background-color: #007bf0;">Guardar Contraseña</button>
             </form>
@@ -423,87 +391,6 @@
                     this.value = this.value.replace(/\D/g, '');
                 });
             }
-
-            // Iniciar Autocomplete
-            autocomplete(document.getElementById("usuario"));
-            autocomplete(document.getElementById("recovery-input"));
-        });
-
-        // ==========================================
-        // Lógica de Autocompletado (Sugerencias)
-        // ==========================================
-        var usuariosGuardados = [];
-
-        function cargarUsuariosSiEsNecesario() {
-            if (usuariosGuardados.length === 0 && (window.personalController && window.authController)) {
-                var jsonUsuarios = window.personalController.obtenerNombresUsuarioActivos();
-                if (jsonUsuarios) {
-                    usuariosGuardados = JSON.parse(jsonUsuarios);
-                }
-            }
-        }
-
-        function autocomplete(inp) {
-            if (!inp) return;
-            inp.addEventListener("focus", cargarUsuariosSiEsNecesario);
-            inp.addEventListener("input", function (e) {
-                var a, b, i, val = this.value;
-                closeAllLists();
-                if (!val) { return false; }
-
-                a = document.createElement("DIV");
-                a.setAttribute("id", this.id + "autocomplete-list");
-                a.setAttribute("class", "autocomplete-items");
-                this.parentNode.appendChild(a);
-
-                for (i = 0; i < usuariosGuardados.length; i++) {
-                    if (usuariosGuardados[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
-                        b = document.createElement("DIV");
-                        b.innerHTML = "<strong>" + usuariosGuardados[i].substr(0, val.length) + "</strong>";
-                        b.innerHTML += usuariosGuardados[i].substr(val.length);
-                        b.innerHTML += "<input type='hidden' value='" + usuariosGuardados[i] + "'>";
-                        b.addEventListener("click", function (e) {
-                            inp.value = this.getElementsByTagName("input")[0].value;
-                            closeAllLists();
-                        });
-                        a.appendChild(b);
-                    }
-                }
-            });
-
-            inp.addEventListener("click", function (e) {
-                cargarCorreosSiEsNecesario();
-                if (this.value == "") {
-                    closeAllLists();
-                    var a = document.createElement("DIV");
-                    a.setAttribute("id", this.id + "autocomplete-list");
-                    a.setAttribute("class", "autocomplete-items");
-                    this.parentNode.appendChild(a);
-                    for (var i = 0; i < correosGuardados.length; i++) {
-                        var b = document.createElement("DIV");
-                        b.innerHTML = correosGuardados[i];
-                        b.innerHTML += "<input type='hidden' value='" + correosGuardados[i] + "'>";
-                        b.addEventListener("click", function (e) {
-                            inp.value = this.getElementsByTagName("input")[0].value;
-                            closeAllLists();
-                        });
-                        a.appendChild(b);
-                    }
-                }
-            });
-        }
-
-        function closeAllLists(elmnt) {
-            var x = document.getElementsByClassName("autocomplete-items");
-            for (var i = 0; i < x.length; i++) {
-                if (elmnt != x[i] && elmnt != document.getElementById("usuario") && elmnt != document.getElementById("recovery-input")) {
-                    x[i].parentNode.removeChild(x[i]);
-                }
-            }
-        }
-
-        document.addEventListener("click", function (e) {
-            closeAllLists(e.target);
         });
     </script>
 

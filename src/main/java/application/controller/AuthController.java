@@ -53,13 +53,13 @@ public class AuthController extends BaseController {
         return idUsuarioLoginActual != null ? String.valueOf(idUsuarioLoginActual) : "0";
     }
 
-    public String enviarCodigoRecuperacion(String identificador) {
-        System.out.println("Solicitud de codigo para: " + identificador);
+    public String enviarCodigoRecuperacion(String correo) {
+        System.out.println("Solicitud de codigo para correo: " + correo);
 
-        String correoReal = userDAO.obtenerCorreoReal(identificador);
+        String correoReal = userDAO.obtenerCorreoReal(correo);
         if (correoReal != null && !correoReal.isEmpty()) {
             String codigoSeguridad = String.format("%06d", (int) (Math.random() * 1000000));
-            codigosRecuperacion.put(identificador, codigoSeguridad);
+            codigosRecuperacion.put(correo, codigoSeguridad);
 
             System.out.println("-> Enviando correo a " + correoReal + "...");
             boolean enviado = application.model.connection.EmailService.enviarCorreoNuevaContrasenia(correoReal,
@@ -70,7 +70,7 @@ public class AuthController extends BaseController {
                 return "ERR|El código se generó, pero hubo un error al enviar el correo.";
             }
         } else {
-            return "ERR|No se encontro ningun usuario activo con ese nombre de usuario o correo.";
+            return "ERR|No se encontró ningún usuario activo con ese correo electrónico.";
         }
     }
 

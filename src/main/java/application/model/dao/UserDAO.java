@@ -55,14 +55,13 @@ public class UserDAO {
         }
     }
 
-    public String obtenerCorreoReal(String identificador) {
+    public String obtenerCorreoReal(String correo) {
         String query = "SELECT correo FROM Usuarios_Login " +
-                "WHERE (correo = ? OR nombre_usuario = ?) AND borrado = FALSE";
+                "WHERE correo = ? AND borrado = FALSE";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, identificador);
-                stmt.setString(2, identificador);
+                stmt.setString(1, correo);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         return rs.getString("correo");
@@ -75,11 +74,8 @@ public class UserDAO {
         return null;
     }
 
-    public boolean actualizarContrasenia(String identificador, String nuevaContrasenia) {
-        String query = "UPDATE Usuarios_Login u " +
-                "LEFT JOIN Personal_Medico p ON u.id_personal_medico = p.id_personal_medico " +
-                "SET u.contrasenia = ? " +
-                "WHERE (u.correo = ? OR u.nombre_usuario = ? OR p.telefono = ?) AND u.borrado = FALSE";
+    public boolean actualizarContrasenia(String correo, String nuevaContrasenia) {
+        String query = "UPDATE Usuarios_Login SET contrasenia = ? WHERE correo = ? AND borrado = FALSE";
 
         try {
             Connection conn = DBConnection.getInstance().getConnection();
@@ -87,9 +83,7 @@ public class UserDAO {
 
                 String hashedPass = application.util.SecurityUtils.hashPassword(nuevaContrasenia);
                 stmt.setString(1, hashedPass);
-                stmt.setString(2, identificador);
-                stmt.setString(3, identificador);
-                stmt.setString(4, identificador);
+                stmt.setString(2, correo);
 
                 int filas = stmt.executeUpdate();
                 return filas > 0;
@@ -164,6 +158,26 @@ public class UserDAO {
             }
         } catch (SQLException e) {
             System.err.println("Error al obtener rol: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return rol;
+    }
+
+    public String obtenerRolPorId(int idUsuario) {
+        String rol = "";
+        String query = "SELECT rol_sistema FROM Usuarios_Login WHERE id_usuario_login = ?";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, idUsuario);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        rol = rs.getString("rol_sistema");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener rol por id: " + e.getMessage());
             e.printStackTrace();
         }
         return rol;

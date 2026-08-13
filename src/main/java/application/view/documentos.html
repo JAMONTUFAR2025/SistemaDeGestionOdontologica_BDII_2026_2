@@ -316,7 +316,7 @@
                 <h5><i class="fas fa-plus-circle"></i> Registrar Nuevo Archivo</h5>
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <label>Tipo de Archivo *</label>
+                        <label>Tipo de Archivo: <span class="text-danger">*</span></label>
                         <select id="arTipo" class="form-select">
                             <option value="">-- Seleccione --</option>
                             <option value="Radiografia">Radiografía</option>
@@ -326,11 +326,11 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label>Nombre del Archivo *</label>
+                        <label>Nombre del Archivo: <span class="text-danger">*</span></label>
                         <input type="text" id="arNombre" class="form-control" placeholder="Rx_Panoramica_Paciente.png">
                     </div>
                     <div class="col-md-5">
-                        <label>Ruta / Referencia *</label>
+                        <label>Ruta / Referencia: <span class="text-danger">*</span></label>
                         <input type="text" id="arRuta" class="form-control" placeholder="/uploads/pacientes/1/rx.png">
                     </div>
                     <div class="col-md-12">
@@ -369,7 +369,7 @@
                 <h5><i class="fas fa-plus-circle"></i> Agregar Alergia al Paciente</h5>
                 <div class="row g-3 align-items-end">
                     <div class="col-md-8">
-                        <label>Seleccionar Alergia del Catálogo *</label>
+                        <label>Seleccionar Alergia del Catálogo: <span class="text-danger">*</span></label>
                         <select id="alSelectAlergia" class="form-select">
                             <option value="">-- Cargando alergias... --</option>
                         </select>
@@ -401,13 +401,13 @@
                 <h5><i class="fas fa-plus-circle"></i> Registrar Consentimiento Informado</h5>
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label>Evolución Clínica *</label>
+                        <label>Evolución Clínica: <span class="text-danger">*</span></label>
                         <select id="coSelectEvolucion" class="form-select">
                             <option value="">-- Seleccione Consulta --</option>
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label>Tipo de Procedimiento *</label>
+                        <label>Tipo de Procedimiento: <span class="text-danger">*</span></label>
                         <select id="coTipo" class="form-select">
                             <option value="">-- Seleccione --</option>
                             <option value="Cirugia Bucal">Cirugía Bucal</option>
@@ -416,16 +416,16 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label>Fecha de Firma *</label>
+                        <label>Fecha de Firma: <span class="text-danger">*</span></label>
                         <input type="date" id="coFechaFirma" class="form-control">
                     </div>
                     <div class="col-md-6">
-                        <label>Representante Legal (si aplica)</label>
+                        <label>Representante Legal:</label>
                         <input type="text" id="coRepresentante" class="form-control"
                             placeholder="Nombre del tutor/representante...">
                     </div>
                     <div class="col-md-6">
-                        <label>Identidad del Representante</label>
+                        <label>Identidad del Representante:</label>
                         <input type="text" id="coIdentidadRep" class="form-control"
                             placeholder="Número de identidad...">
                     </div>
@@ -462,21 +462,21 @@
                 <h5><i class="fas fa-plus-circle"></i> Emitir Nueva Constancia Médica</h5>
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label>Evolución Clínica *</label>
+                        <label>Evolución Clínica: <span class="text-danger">*</span></label>
                         <select id="cnSelectEvolucion" class="form-select">
                             <option value="">-- Seleccione Consulta --</option>
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label>Fecha de Emisión *</label>
+                        <label>Fecha de Emisión: <span class="text-danger">*</span></label>
                         <input type="date" id="cnFecha" class="form-control">
                     </div>
                     <div class="col-md-4">
-                        <label>Hora de Emisión *</label>
+                        <label>Hora de Emisión: <span class="text-danger">*</span></label>
                         <input type="time" id="cnHora" class="form-control">
                     </div>
                     <div class="col-md-12">
-                        <label>Tratamiento Realizado *</label>
+                        <label>Tratamiento Realizado: <span class="text-danger">*</span></label>
                         <textarea id="cnTratamiento" class="form-control" rows="3"
                             placeholder="Describa el tratamiento realizado..."></textarea>
                     </div>

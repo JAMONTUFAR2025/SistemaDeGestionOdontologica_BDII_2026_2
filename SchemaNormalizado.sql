@@ -100,7 +100,7 @@ CREATE TABLE Pacientes (
     ocupacion VARCHAR(100),
     domicilio VARCHAR(255),
     telefono VARCHAR(20),
-    id_responsable INT NULL,
+    id_responsable INT NOT NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     borrado BOOLEAN DEFAULT FALSE,
     fecha_borrado DATETIME NULL,
@@ -337,7 +337,7 @@ INSERT INTO Pacientes (identidad, nombre_completo, fecha_nacimiento, genero, ocu
 ('0501-2010-23456', 'Sofía Martínez', '2010-05-20', 'Femenino', 'Estudiante', 'Col. Trejo, 3ra calle', '3344-2222', 2, 'Soltero', FALSE),
 ('1601-2012-34567', 'Diego Fernández', '2012-08-08', 'Masculino', 'Estudiante', 'Bo. El Centro', '3344-3333', 3, 'Soltero', FALSE),
 ('0801-1995-45678', 'María Castro', '1995-02-14', 'Femenino', 'Contadora', 'Res. Plaza', '3344-4444', 4, 'Casado', FALSE),
-('0501-2000-56789', 'Carlos Valle', '2000-11-30', 'Masculino', 'Ingeniero', 'Col. Los Andes', '3344-5555', NULL, 'Soltero', FALSE);
+('0501-2000-56789', 'Carlos Valle', '2000-11-30', 'Masculino', 'Ingeniero', 'Col. Los Andes', '3344-5555', 5, 'Soltero', FALSE);
 
 -- ==========================================
 -- 3. INSERTS DE TABLAS RELACIONALES

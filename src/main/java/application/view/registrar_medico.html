@@ -66,6 +66,10 @@
             color: #333;
         }
 
+        .text-danger {
+            color: #dc3545;
+        }
+
         input,
         select {
             padding: 10px;
@@ -203,22 +207,22 @@
                     <div class="section-title">Datos de Acceso al Sistema</div>
 
                     <div class="form-group full-width">
-                        <label for="usu_nombre_usuario">Nombre de Usuario (Login opcional):*</label>
+                        <label for="usu_nombre_usuario">Nombre de Usuario: <span class="text-danger">*</span></label>
                         <input type="text" id="usu_nombre_usuario" placeholder="Ej: jperez">
                     </div>
 
                     <div class="form-group full-width">
-                        <label for="usu_correo">Correo Electrónico (Login):*</label>
+                        <label for="usu_correo">Correo Electrónico (Login): <span class="text-danger">*</span></label>
                         <input type="email" id="usu_correo" placeholder="ejemplo@clinica.com">
                     </div>
 
                     <div class="form-group">
-                        <label for="usu_contrasenia">Contraseña:*</label>
+                        <label for="usu_contrasenia">Contraseña: <span class="text-danger">*</span></label>
                         <input type="password" id="usu_contrasenia" placeholder="••••••••">
                     </div>
 
                     <div class="form-group">
-                        <label for="usu_rol_sistema">Permisos del Sistema:*</label>
+                        <label for="usu_rol_sistema">Permisos del Sistema: <span class="text-danger">*</span></label>
                         <select id="usu_rol_sistema">
                             <option value="Medico">Médico</option>
                             <option value="Recepcionista">Recepcionista</option>
@@ -227,7 +231,7 @@
                     </div>
 
                     <div class="form-group full-width">
-                        <label for="usu_estado">Estado:*</label>
+                        <label for="usu_estado">Estado: <span class="text-danger">*</span></label>
                         <select id="usu_estado">
                             <option value="Activo">Activo</option>
                             <option value="Inactivo">Inactivo</option>
@@ -253,7 +257,7 @@
                     <div class="section-title-blue">Vincular con un Usuario Existente</div>
 
                     <div class="form-group full-width">
-                        <label for="med_id_usuario">Seleccionar Usuario (sin médico asignado):*</label>
+                        <label for="med_id_usuario">Seleccionar Usuario (sin médico asignado): <span class="text-danger">*</span></label>
                         <select id="med_id_usuario">
                             <option value="">Cargando usuarios...</option>
                         </select>
@@ -262,22 +266,22 @@
                     <div class="section-title-blue">Datos del Personal de la Clínica</div>
 
                     <div class="form-group full-width">
-                        <label for="med_nombre">Nombre Completo:*</label>
+                        <label for="med_nombre">Nombre Completo: <span class="text-danger">*</span></label>
                         <input type="text" id="med_nombre" placeholder="Ej: Dr. Carlos Mendoza">
                     </div>
 
                     <div class="form-group">
-                        <label for="med_identidad">Identidad (DNI):*</label>
+                        <label for="med_identidad">Identidad (DNI): <span class="text-danger">*</span></label>
                         <input type="text" id="med_identidad" placeholder="0801-1995-12345">
                     </div>
 
                     <div class="form-group">
-                        <label for="med_telefono">Teléfono:*</label>
+                        <label for="med_telefono">Teléfono: <span class="text-danger">*</span></label>
                         <input type="text" id="med_telefono" placeholder="9999-9999">
                     </div>
 
                     <div class="form-group">
-                        <label for="med_especialidad">Especialidad Médica:*</label>
+                        <label for="med_especialidad">Especialidad Médica: <span class="text-danger">*</span></label>
                         <select id="med_especialidad">
                             <option value="">Cargando especialidades...</option>
                         </select>
