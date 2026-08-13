@@ -1094,6 +1094,7 @@
         // ============================================================
         let tempPacienteNombre = '';
         let tempPacienteIdentidad = '';
+        let tempPacienteEdad = '______';
         let ultimoBusquedaIdentidad = '';
 
         const estadosDiente = [null, 'sano', 'caries', 'resina', 'corona', 'ausente'];
@@ -1342,6 +1343,20 @@
 
             tempPacienteNombre = p.nombre_completo || '—';
             tempPacienteIdentidad = p.identidad || ultimoBusquedaIdentidad;
+            
+            // Calcular edad
+            if (p.fecha_nacimiento) {
+                const nac = new Date(p.fecha_nacimiento);
+                const hoy = new Date();
+                let edad = hoy.getFullYear() - nac.getFullYear();
+                const mes = hoy.getMonth() - nac.getMonth();
+                if (mes < 0 || (mes === 0 && hoy.getDate() < nac.getDate())) {
+                    edad--;
+                }
+                tempPacienteEdad = edad;
+            } else {
+                tempPacienteEdad = '______';
+            }
 
             // Cabecera
             document.getElementById('lblNombrePaciente').innerText = tempPacienteNombre;
@@ -1908,6 +1923,14 @@
         function actualizarVistaPrevia() {
             const plantilla = document.getElementById('selectTipoPlantilla').value;
             const contenido = document.getElementById('contenido_vista_previa');
+            
+            // Calcular fecha y hora actual para los documentos
+            const hoyObj = new Date();
+            const dia = String(hoyObj.getDate()).padStart(2, '0');
+            const mes = String(hoyObj.getMonth() + 1).padStart(2, '0');
+            const anio = hoyObj.getFullYear();
+            const hora = String(hoyObj.getHours()).padStart(2, '0') + ':' + String(hoyObj.getMinutes()).padStart(2, '0');
+            const fechaFmt = `${dia} / ${mes} / ${anio}`;
 
             if (plantilla === 'constancia') {
                 contenido.innerHTML = `
@@ -1927,7 +1950,7 @@
                 </div>
 
                 <div class="d-flex justify-content-between my-4 fs-6">
-                    <div><strong>Fecha:</strong> _____ / _____ / ________</div>
+                    <div><strong>Fecha:</strong> ${fechaFmt}</div>
                     <div><strong>Santa Barbara, S.B.</strong></div>
                 </div>
 
@@ -1937,7 +1960,7 @@
 
                 <div style="font-size: 15px; line-height: 2.1; text-align: justify;" class="my-4">
                     Servicios odontológicos Enamorado por medio de la presente, hace constar que el
-                    paciente <strong style="text-decoration: underline; padding: 0 5px;">${tempPacienteNombre || '________________________________________'}</strong> de <strong style="text-decoration: underline; padding: 0 5px;">______</strong> años, con #
+                    paciente <strong style="text-decoration: underline; padding: 0 5px;">${tempPacienteNombre || '________________________________________'}</strong> de <strong style="text-decoration: underline; padding: 0 5px;">${tempPacienteEdad}</strong> años, con #
                     de ID <strong style="text-decoration: underline; padding: 0 5px;">${tempPacienteIdentidad || '____________________'}</strong>, se presentó a consulta odontológica por
                     ______________________________________________________________________________________.
                     <br><br>
@@ -1947,8 +1970,8 @@
                     <br>
                     ___________________________________________________________________________________.
                     <br><br>
-                    Para constancia se firma en la ciudad de Santa Barbara a las <strong>_________</strong> horas
-                    el día <strong>___ / ___ / _______</strong>.
+                    Para constancia se firma en la ciudad de Santa Barbara a las <strong>${hora}</strong> horas
+                    el día <strong>${fechaFmt}</strong>.
                 </div>
 
                 <div class="mt-5 pt-3">
@@ -1981,7 +2004,7 @@
                 </div>
 
                 <div style="font-size: 14px; text-align: justify; line-height: 1.8;" class="mb-3">
-                    Yo, <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteNombre || '________________________________________'}</strong> de <strong style="text-decoration: underline; padding: 0 4px;">______</strong> (representante legal o tutor/a de ________________________________ que me identifico con el documento de identidad <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteIdentidad || '____________________'}</strong> y que resido en el domicilio de ________________________________________________ por medio del presente documento hago constar lo siguiente.
+                    Yo, <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteNombre || '________________________________________'}</strong> de <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteEdad}</strong> (representante legal o tutor/a de ________________________________ que me identifico con el documento de identidad <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteIdentidad || '____________________'}</strong> y que resido en el domicilio de ________________________________________________ por medio del presente documento hago constar lo siguiente.
                 </div>
 
                 <ul style="list-style-type: disc; padding-left: 20px; font-size: 13.5px; line-height: 1.8;" class="mb-3">
@@ -2025,7 +2048,7 @@
 
                 <div class="text-center mt-4 pt-2 mb-4">
                     <div style="border-top: 1px solid #000; width: 40%; margin: 0 auto; padding-top: 5px;">
-                        <strong>Fecha</strong>
+                        <strong>Fecha: ${fechaFmt}</strong>
                     </div>
                 </div>
 
@@ -2050,7 +2073,7 @@
                 </div>
 
                 <div style="font-size: 14px; text-align: justify; line-height: 1.8;" class="mb-3">
-                    Yo, <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteNombre || '________________________________________'}</strong> de <strong style="text-decoration: underline; padding: 0 4px;">______</strong> años que me identifico con el documento de identidad <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteIdentidad || '____________________'}</strong> y que resido en el domicilio de ________________________________________________ por medio del presente documento hago constar lo siguiente.
+                    Yo, <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteNombre || '________________________________________'}</strong> de <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteEdad}</strong> años que me identifico con el documento de identidad <strong style="text-decoration: underline; padding: 0 4px;">${tempPacienteIdentidad || '____________________'}</strong> y que resido en el domicilio de ________________________________________________ por medio del presente documento hago constar lo siguiente.
                 </div>
 
                 <ul style="list-style-type: disc; padding-left: 20px; font-size: 13.5px; line-height: 1.8;" class="mb-3">
@@ -2097,7 +2120,7 @@
 
                 <div class="text-center mt-4 pt-2 mb-4">
                     <div style="border-top: 1px solid #000; width: 40%; margin: 0 auto; padding-top: 5px;">
-                        <strong>Fecha</strong>
+                        <strong>Fecha: ${fechaFmt}</strong>
                     </div>
                 </div>
 
@@ -2127,11 +2150,12 @@
             const htmlContenido = document.getElementById('seccion-imprimir').innerHTML;
             const nombrePaciente = tempPacienteNombre || '';
             const identidadPaciente = tempPacienteIdentidad || '';
+            const edadPaciente = String(tempPacienteEdad || '');
 
             // Llamar al backend Java para generar el PDF y abrirlo
             if (window.historiaClinicaController && typeof window.historiaClinicaController.generarPdfDocumentoMedico === 'function') {
                 window.historiaClinicaController.generarPdfDocumentoMedico(
-                    htmlContenido, tipoPlantilla, nombrePaciente, identidadPaciente
+                    htmlContenido, tipoPlantilla, nombrePaciente, identidadPaciente, edadPaciente
                 );
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({ title: '¡PDF Generado!', text: 'El documento se abrirá en su visor de PDF.', icon: 'success', timer: 2000, showConfirmButton: false });
