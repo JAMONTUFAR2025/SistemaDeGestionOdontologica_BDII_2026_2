@@ -44,9 +44,11 @@ public class CitaDAO {
     public List<Map<String, String>> obtenerCitasHoy(Integer idPersonalMedico, String rol) {
         List<Map<String, String>> citas = new ArrayList<>();
         StringBuilder queryBuilder = new StringBuilder(
-            "SELECT c.id_cita, c.fecha_hora, p.nombre_completo AS paciente, p.telefono, c.motivo_cita " +
+            "SELECT c.id_cita, c.fecha_hora, p.nombre_completo AS paciente, " +
+            "COALESCE(p.telefono, r.telefono, '') AS telefono, c.motivo_cita " +
             "FROM Citas c " +
             "JOIN Pacientes p ON c.id_paciente = p.id_paciente " +
+            "LEFT JOIN Responsables r ON p.id_responsable = r.id_responsable " +
             "WHERE DATE(c.fecha_hora) = CURDATE() AND p.borrado = FALSE " +
             "AND c.estado != 'Cancelada' AND c.estado != 'Ausente' AND c.estado != 'Completada'"
         );
@@ -90,9 +92,11 @@ public class CitaDAO {
     public List<Map<String, String>> obtenerProximasCitas(Integer idPersonalMedico, String rol) {
         List<Map<String, String>> citas = new ArrayList<>();
         StringBuilder queryBuilder = new StringBuilder(
-            "SELECT c.id_cita, c.fecha_hora, p.nombre_completo AS paciente, p.telefono, c.motivo_cita, c.estado " +
+            "SELECT c.id_cita, c.fecha_hora, p.nombre_completo AS paciente, " +
+            "COALESCE(p.telefono, r.telefono, '') AS telefono, c.motivo_cita, c.estado " +
             "FROM Citas c " +
             "JOIN Pacientes p ON c.id_paciente = p.id_paciente " +
+            "LEFT JOIN Responsables r ON p.id_responsable = r.id_responsable " +
             "WHERE DATE(c.fecha_hora) > CURDATE() AND p.borrado = FALSE " +
             "AND c.estado != 'Cancelada' AND c.estado != 'Ausente' AND c.estado != 'Completada'"
         );
@@ -138,9 +142,11 @@ public class CitaDAO {
     public List<Map<String, String>> obtenerHistorialCitas(Integer idPersonalMedico, String rol) {
         List<Map<String, String>> citas = new ArrayList<>();
         StringBuilder queryBuilder = new StringBuilder(
-            "SELECT c.id_cita, c.fecha_hora, p.nombre_completo AS paciente, p.telefono, c.motivo_cita, c.estado " +
+            "SELECT c.id_cita, c.fecha_hora, p.nombre_completo AS paciente, " +
+            "COALESCE(p.telefono, r.telefono, '') AS telefono, c.motivo_cita, c.estado " +
             "FROM Citas c " +
             "JOIN Pacientes p ON c.id_paciente = p.id_paciente " +
+            "LEFT JOIN Responsables r ON p.id_responsable = r.id_responsable " +
             "WHERE 1=1 "
         );
 
@@ -187,10 +193,11 @@ public class CitaDAO {
         String query =
             "SELECT c.id_cita, c.id_paciente, c.id_personal_medico, c.fecha_hora, " +
             "c.motivo_cita, c.estado, " +
-            "p.nombre_completo AS paciente, p.telefono, " +
+            "p.nombre_completo AS paciente, COALESCE(p.telefono, r.telefono, '') AS telefono, " +
             "pm.nombre_completo AS medico " +
             "FROM Citas c " +
             "JOIN Pacientes p ON c.id_paciente = p.id_paciente " +
+            "LEFT JOIN Responsables r ON p.id_responsable = r.id_responsable " +
             "LEFT JOIN Personal_Medico pm ON c.id_personal_medico = pm.id_personal_medico " +
             "WHERE c.id_cita = ?";
         try {

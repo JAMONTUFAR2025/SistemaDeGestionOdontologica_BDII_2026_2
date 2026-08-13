@@ -234,6 +234,7 @@
 
                         <div class="section-title mt-0">1. Datos Generales del Paciente</div>
                         <input type="hidden" id="identidad_original" name="identidadOriginal">
+                        <input type="hidden" id="id_paciente_hidden" name="idPaciente">
 
                         <!-- Fila 1 -->
                         <div class="row mb-3">
@@ -494,17 +495,17 @@
                 const inactivo = p.estado === 'Inactivo';
                 const rowClass = inactivo ? 'registro-inactivo' : '';
                 const acciones = inactivo
-                    ? `<button class="btn btn-sm btn-outline-secondary py-0" onclick="pedirPasswordReactivarPaciente('${p.identidad}')"><i class="fas fa-recycle"></i> Reactivar</button>`
-                    : `<i class="fas fa-edit" title="Editar" onclick="openEditModal('${p.identidad}')"></i>
-                       <i class="fas fa-trash text-danger" title="Eliminar" onclick="deletePatient('${p.identidad}')"></i>`;
+                    ? `<button class="btn btn-sm btn-outline-secondary py-0" onclick="pedirPasswordReactivarPaciente(${p.idPaciente})"><i class="fas fa-recycle"></i> Reactivar</button>`
+                    : `<i class="fas fa-edit" title="Editar" onclick="openEditModal(${p.idPaciente})"></i>
+                       <i class="fas fa-trash text-danger" title="Eliminar" onclick="deletePatient(${p.idPaciente})"></i>`;
                 
                 const tr = document.createElement('tr');
                 tr.className = rowClass;
-                tr.setAttribute('data-id', p.identidad || '');
+                tr.setAttribute('data-id', p.idPaciente);
                 tr.innerHTML = `
-                    <td>${p.identidad || ''}</td>
+                    <td>${p.identidad || '<em style="color:#aaa;">Sin DNI</em>'}</td>
                     <td>${p.nombreCompleto || ''}</td>
-                    <td>${p.telefono || ''}</td>
+                    <td>${p.telefono || p.telefonoResponsable || ''}</td>
                     <td class="action-icons">${acciones}</td>
                 `;
                 tbody.appendChild(tr);
@@ -548,12 +549,13 @@
             const inputIdentidad = document.getElementById('identidad');
             if (inputIdentidad) inputIdentidad.readOnly = false;
             document.getElementById('identidad_original').value = '';
+            document.getElementById('id_paciente_hidden').value = '';
             const titulo = document.querySelector('.modal-title');
             if (titulo) titulo.innerHTML = '<i class="fas fa-user-plus"></i> Registro de Nuevo Paciente';
         }
 
-        function openEditModal(identidad) {
-            const p = listaPacientes.find(item => item.identidad === identidad);
+        function openEditModal(idPaciente) {
+            const p = listaPacientes.find(item => item.idPaciente === idPaciente);
             if (!p) return;
 
             const inputIdentidad = document.getElementById('identidad');
@@ -562,6 +564,7 @@
                 inputIdentidad.readOnly = false;
             }
             document.getElementById('identidad_original').value = p.identidad || '';
+            document.getElementById('id_paciente_hidden').value = p.idPaciente || '';
             document.getElementById('nombre_completo').value = p.nombreCompleto || '';
 
             let fechaStr = '';
@@ -611,20 +614,20 @@
         }
 
         // === 3. ELIMINAR PACIENTE ===
-        let identidadAEliminar = '';
+        let idPacienteAEliminar = 0;
 
-        function deletePatient(identidad) {
-            identidadAEliminar = identidad;
+        function deletePatient(idPaciente) {
+            idPacienteAEliminar = idPaciente;
             let modalEl = document.getElementById('modalEliminarPaciente');
             let modalInst = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
             modalInst.show();
         }
 
         function confirmarEliminacion() {
-            if (!identidadAEliminar) return;
+            if (!idPacienteAEliminar) return;
 
             if (window.pacienteController) {
-                const respuesta = String(window.pacienteController.eliminarPaciente(identidadAEliminar));
+                const respuesta = String(window.pacienteController.eliminarPaciente(String(idPacienteAEliminar)));
                 const partes = respuesta.split("|");
 
                 if (partes[0] === 'OK') {
@@ -703,13 +706,8 @@
                 return;
             }
 
-            if (!paciente.telefono || paciente.telefono.trim() === '') {
-                if (typeof Swal !== 'undefined') Swal.fire({ title: 'Faltan Datos', text: 'El número de teléfono es obligatorio.', icon: 'warning', confirmButtonColor: '#ffc107' });
-                else alert('El número de teléfono es obligatorio.');
-                return;
-            }
 
-            if (paciente.telefono && paciente.telefono.length < 9) {
+            if (paciente.telefono && paciente.telefono.trim().length > 0 && paciente.telefono.trim().length < 9) {
                 if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'El teléfono debe tener 8 dígitos mínimos.', icon: 'warning', confirmButtonColor: '#ffc107' });
                 else alert('El teléfono debe tener 8 dígitos mínimos.');
                 return;
@@ -862,7 +860,7 @@
         }
 
         // === REACTIVAR PACIENTE ===
-        function pedirPasswordReactivarPaciente(identidad) {
+        function pedirPasswordReactivarPaciente(idPaciente) {
             Swal.fire({
                 title: 'Reactivar Paciente',
                 html: `
@@ -887,7 +885,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     if (window.pacienteController) {
-                        const respuesta = window.pacienteController.reactivarPaciente(result.value.email, result.value.pass, identidad);
+                        const respuesta = window.pacienteController.reactivarPaciente(result.value.email, result.value.pass, String(idPaciente));
                         const partes = respuesta.split('|');
                         if (partes[0] === 'OK') {
                             Swal.fire('Reactivado', partes[1], 'success');

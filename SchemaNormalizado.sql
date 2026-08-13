@@ -119,13 +119,13 @@ CREATE TABLE Pacientes (
 CREATE TABLE Caja_Sesiones (
     id_caja_sesion INT AUTO_INCREMENT,
     id_usuario_apertura INT NOT NULL,
-    id_usuario_cierre INT NOT NULL,
+    id_usuario_cierre INT NULL,
     monto_apertura DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    monto_cierre_real DECIMAL(10,2) NOT NULL,
-    diferencia DECIMAL(10,2) NOT NULL,
+    monto_cierre_real DECIMAL(10,2) NULL,
+    diferencia DECIMAL(10,2) NULL,
     estado ENUM('Abierta', 'Cerrada') NOT NULL DEFAULT 'Abierta',
     fecha_apertura DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    fecha_cierre DATETIME NOT NULL,
+    fecha_cierre DATETIME NULL,
     observaciones TEXT NULL,
 
     -- Restricciones
@@ -266,7 +266,7 @@ CREATE TABLE Evolucion_Clinica (
     diagnostico TEXT NOT NULL,
     estado_odontograma JSON NOT NULL,
     observaciones TEXT NOT NULL,
-    id_catalogo_procedimiento INT NOT NULL,
+    id_catalogo_procedimiento INT NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     -- Restricciones

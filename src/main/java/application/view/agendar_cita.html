@@ -867,7 +867,8 @@
                         let pacientes = JSON.parse(pacientesJson).filter(p => p.estado !== 'Inactivo');
                         let selPaciente = document.getElementById("identidad_paciente");
                         pacientes.forEach(p => {
-                            let opt = new Option(p.nombreCompleto + " (" + (p.identidad || 'Sin ID') + ")", p.idPaciente);
+                            let label = p.nombreCompleto + (p.identidad ? ' (' + p.identidad + ')' : '');
+                            let opt = new Option(label, p.idPaciente);
                             opt.setAttribute("data-telefono", p.telefono || p.telefonoResponsable || "");
                             selPaciente.appendChild(opt);
                         });
@@ -1256,12 +1257,8 @@
                 return;
             }
 
-            if (!paciente.telefono || paciente.telefono.trim() === '') {
-                Swal.fire({ title: 'Faltan Datos', text: 'El número de teléfono es obligatorio.', icon: 'warning', confirmButtonColor: '#ffc107' });
-                return;
-            }
 
-            if (paciente.telefono && paciente.telefono.length < 9) {
+            if (paciente.telefono && paciente.telefono.trim().length > 0 && paciente.telefono.trim().length < 9) {
                 Swal.fire({ title: 'Atención', text: 'El teléfono debe tener 8 dígitos mínimos.', icon: 'warning', confirmButtonColor: '#ffc107' });
                 return;
             }
@@ -1281,6 +1278,7 @@
                 const partes = respuesta.split("|");
 
                 if (partes[0] === "OK") {
+                    const idNuevoPaciente = partes[2] ? parseInt(partes[2]) : null;
                     // Recargar combo de pacientes en la cita
                     let pacientesJson = window.pacienteController.obtenerPacientes();
                     let pacientes = JSON.parse(pacientesJson);
@@ -1288,10 +1286,11 @@
                     while (selPaciente.options.length > 1) selPaciente.remove(1);
                     let idNuevo = null;
                     pacientes.filter(p => p.estado !== 'Inactivo').forEach(p => {
-                        let opt = new Option(p.nombreCompleto + " (" + p.identidad + ")", p.idPaciente);
-                        opt.setAttribute("data-telefono", p.telefono || "");
+                        let label = p.nombreCompleto + (p.identidad ? ' (' + p.identidad + ')' : '');
+                        let opt = new Option(label, p.idPaciente);
+                        opt.setAttribute("data-telefono", p.telefono || p.telefonoResponsable || "");
                         selPaciente.appendChild(opt);
-                        if (p.identidad === paciente.identidad) idNuevo = p.idPaciente;
+                        if (idNuevoPaciente && p.idPaciente === idNuevoPaciente) idNuevo = p.idPaciente;
                     });
                     if (idNuevo) $('#identidad_paciente').val(idNuevo).trigger('change');
 

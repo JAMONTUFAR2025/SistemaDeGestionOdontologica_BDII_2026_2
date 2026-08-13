@@ -44,7 +44,7 @@ public class PacienteDAO {
             if (conn == null) {
                 return "ERR|No se pudo establecer conexión con la base de datos.";
             }
-            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            try (PreparedStatement stmt = conn.prepareStatement(query, java.sql.Statement.RETURN_GENERATED_KEYS)) {
                 if (p.getIdentidad() != null && !p.getIdentidad().trim().isEmpty()) {
                     stmt.setString(1, p.getIdentidad());
                 } else {
@@ -75,6 +75,12 @@ public class PacienteDAO {
 
                 int filasAfectadas = stmt.executeUpdate();
                 if (filasAfectadas > 0) {
+                    try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            int newId = generatedKeys.getInt(1);
+                            return "OK|Paciente registrado exitosamente.|" + newId;
+                        }
+                    }
                     return "OK|Paciente registrado exitosamente.";
                 } else {
                     return "ERR|No se pudo registrar el paciente en la base de datos.";
@@ -90,7 +96,7 @@ public class PacienteDAO {
     public String actualizar(Paciente p) {
         String query = "UPDATE Pacientes SET identidad=?, nombre_completo=?, fecha_nacimiento=?, genero=?, estado_civil=?, " +
                 "ocupacion=?, domicilio=?, telefono=?, id_responsable=? " +
-                "WHERE identidad=?";
+                "WHERE id_paciente=?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) {
@@ -123,9 +129,7 @@ public class PacienteDAO {
                     stmt.setNull(9, java.sql.Types.INTEGER);
                 }
                 
-                String idOriginal = (p.getIdentidadOriginal() != null && !p.getIdentidadOriginal().isEmpty()) 
-                                    ? p.getIdentidadOriginal() : p.getIdentidad();
-                stmt.setString(10, idOriginal);
+                stmt.setInt(10, p.getIdPaciente());
 
                 int filasAfectadas = stmt.executeUpdate();
                 if (filasAfectadas > 0) {
@@ -186,37 +190,68 @@ public class PacienteDAO {
         return lista;
     }
 
-    // Borrado lógico de un paciente
-    public boolean eliminarPaciente(String identidad) {
+    // Borrado lógico por id_paciente (o identidad como fallback)
+    public boolean eliminarPaciente(String idOrIdentidad) {
+        // Intentar primero por id numérico
+        try {
+            int id = Integer.parseInt(idOrIdentidad.trim());
+            String query = "UPDATE Pacientes SET borrado = TRUE, fecha_borrado = CURRENT_TIMESTAMP WHERE id_paciente = ?";
+            Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) return false;
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, id);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (NumberFormatException e) {
+            // No era un ID numérico, buscar por identidad
+        } catch (SQLException e) {
+            System.err.println("Error al realizar borrado lógico de paciente por id: " + e.getMessage());
+            e.printStackTrace();
+        }
         String query = "UPDATE Pacientes SET borrado = TRUE, fecha_borrado = CURRENT_TIMESTAMP WHERE identidad = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return false;
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, identidad);
+                stmt.setString(1, idOrIdentidad);
                 return stmt.executeUpdate() > 0;
             }
         } catch (SQLException e) {
-            System.err.println("Error al realizar borrado lógico de paciente: " + e.getMessage());
+            System.err.println("Error al realizar borrado lógico de paciente por identidad: " + e.getMessage());
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
 
-    // Reactivar un paciente inactivo
-    public boolean reactivarPaciente(String identidad) {
+    // Reactivar por id_paciente (o identidad como fallback)
+    public boolean reactivarPaciente(String idOrIdentidad) {
+        try {
+            int id = Integer.parseInt(idOrIdentidad.trim());
+            String query = "UPDATE Pacientes SET borrado = FALSE, fecha_borrado = NULL WHERE id_paciente = ?";
+            Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) return false;
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, id);
+                return stmt.executeUpdate() > 0;
+            }
+        } catch (NumberFormatException e) {
+            // No era un ID numérico, buscar por identidad
+        } catch (SQLException e) {
+            System.err.println("Error al reactivar paciente por id: " + e.getMessage());
+            e.printStackTrace();
+        }
         String query = "UPDATE Pacientes SET borrado = FALSE, fecha_borrado = NULL WHERE identidad = ?";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
             if (conn == null) return false;
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, identidad);
+                stmt.setString(1, idOrIdentidad);
                 return stmt.executeUpdate() > 0;
             }
         } catch (SQLException e) {
-            System.err.println("Error al reactivar paciente: " + e.getMessage());
+            System.err.println("Error al reactivar paciente por identidad: " + e.getMessage());
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
 }

@@ -21,11 +21,14 @@ public class PacienteController extends BaseController {
             }
             System.out.println("-> Gson deserializó correctamente a: " + paciente.getNombreCompleto());
 
-            boolean esActualizacion = paciente.getIdentidadOriginal() != null && !paciente.getIdentidadOriginal().trim().isEmpty();
+            boolean esActualizacion = (paciente.getIdPaciente() > 0) ||
+                                      (paciente.getIdentidadOriginal() != null && !paciente.getIdentidadOriginal().trim().isEmpty());
 
             if (esActualizacion) {
-                if (!paciente.getIdentidad().equals(paciente.getIdentidadOriginal()) && pacienteDAO.existe(paciente.getIdentidad())) {
-                    return "ERR|La nueva identidad ya está registrada para otro paciente.";
+                if (paciente.getIdentidad() != null && !paciente.getIdentidad().trim().isEmpty()) {
+                    if (!paciente.getIdentidad().equals(paciente.getIdentidadOriginal()) && pacienteDAO.existe(paciente.getIdentidad())) {
+                        return "ERR|La nueva identidad ya está registrada para otro paciente.";
+                    }
                 }
                 return pacienteDAO.actualizar(paciente);
             } else {
