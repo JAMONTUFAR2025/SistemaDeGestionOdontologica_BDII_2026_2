@@ -308,6 +308,9 @@
                 <a href="#" onclick="vincularWhatsApp()" class="btn-canal" style="background-color:#128C7E; color:white; font-weight:bold; margin-top:15px;" id="btnWsVincular">
                     <span>🔗</span> Vincular Sesión
                 </a>
+                <a href="#" onclick="cerrarSesionWhatsApp()" class="btn-canal" style="background-color:#dc3545; color:white; font-weight:bold; margin-top:15px; display:none;" id="btnWsCerrarSesion">
+                    <span>🚪</span> Cerrar Sesión
+                </a>
             </div>
 
             <!-- Panel Derecho: Formulario de Cita -->
@@ -811,15 +814,17 @@
                 return;
             }
             
-            $('#btnWsVincular').html('<span>�?�</span> Cargando...').css('pointer-events', 'none');
+            $('#btnWsVincular').html('<span>⏳</span> Cargando...').css('pointer-events', 'none');
             setTimeout(() => {
                 try {
                     let resStr = window.whatsAppController.obtenerQR();
                     let res = JSON.parse(resStr);
-                    
+
                     $('#btnWsVincular').html('<span>🔗</span> Vincular Sesión').css('pointer-events', 'auto');
 
                     if (res.status === 'connected') {
+                        document.getElementById('btnWsVincular').style.display = 'none';
+                        document.getElementById('btnWsCerrarSesion').style.display = 'block';
                         Swal.fire('¡Sesión Activa!', 'El bot de WhatsApp ya está conectado y listo para usarse.', 'success');
                     } else if (res.status === 'pending' && res.qr) {
                         let qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(res.qr);
@@ -845,6 +850,35 @@
                     Swal.fire('Error interno', 'Falló la comunicación con el bot de WhatsApp.', 'error');
                 }
             }, 100);
+        }
+
+        function cerrarSesionWhatsApp() {
+            if (!window.whatsAppController) return;
+            Swal.fire({
+                title: '¿Cerrar sesión de WhatsApp?',
+                text: "Se desvinculará tu dispositivo actual.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, cerrar sesión',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: 'Cerrando sesión...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    setTimeout(() => {
+                        let res = window.whatsAppController.cerrarSesion();
+                        if (res && res.startsWith("OK")) {
+                            document.getElementById('btnWsVincular').style.display = 'block';
+                            document.getElementById('btnWsCerrarSesion').style.display = 'none';
+                            Swal.fire('Sesión cerrada', 'La sesión de WhatsApp ha sido desvinculada exitosamente.', 'success');
+                        } else {
+                            let errorMsg = res ? res.split("|")[1] : "Error desconocido";
+                            Swal.fire('Error', 'No se pudo cerrar la sesión: ' + errorMsg, 'error');
+                        }
+                    }, 500);
+                }
+            });
         }
 
         // ============================================================

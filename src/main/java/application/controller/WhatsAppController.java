@@ -178,4 +178,26 @@ public class WhatsAppController {
             return "{\"status\":\"error\", \"qr\":\"Error de conexión: " + e.getMessage() + "\"}";
         }
     }
+
+    public String cerrarSesion() {
+        if (!nodeInstalado || !servidorIniciado) {
+            return "ERR|El servidor de WhatsApp no está iniciado.";
+        }
+        try {
+            URL url = java.net.URI.create("http://localhost:3001/api/logout").toURL();
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.getOutputStream().close(); // Send empty POST body
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                return "OK|Sesión cerrada correctamente.";
+            } else {
+                return "ERR|Error al cerrar sesión. Código: " + responseCode;
+            }
+        } catch (Exception e) {
+            return "ERR|Error de conexión al cerrar sesión: " + e.getMessage();
+        }
+    }
 }

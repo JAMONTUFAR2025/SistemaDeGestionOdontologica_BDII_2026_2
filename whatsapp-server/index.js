@@ -160,6 +160,25 @@ app.post('/api/shutdown', async (req, res) => {
     process.exit(0);
 });
 
+app.post('/api/logout', async (req, res) => {
+    console.log("Señal de cierre de sesión recibida. Desvinculando WhatsApp...");
+    try {
+        await client.logout();
+        clientReady = false;
+        currentQR = "";
+        res.json({ success: true, message: "Sesión cerrada correctamente" });
+        // The client will emit 'disconnected' and might need to be re-initialized 
+        // to show a new QR. For simplicity, we can restart the client manually here.
+        setTimeout(() => {
+            console.log("Reinicializando cliente después del logout...");
+            client.initialize().catch(e => console.error("Error al reinicializar", e));
+        }, 2000);
+    } catch (e) {
+        console.error("Error al cerrar sesión:", e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 const PORT = 3001;
 app.listen(PORT, () => {
     console.log(`Servidor puente de WhatsApp escuchando en http://localhost:${PORT}`);
