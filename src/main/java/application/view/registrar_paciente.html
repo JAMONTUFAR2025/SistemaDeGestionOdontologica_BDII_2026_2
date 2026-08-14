@@ -728,7 +728,10 @@
                 else alert('El responsable es obligatorio.');
                 return;
             }
-
+            if (paciente.idPaciente === '') {
+                delete paciente.idPaciente;
+            }
+            
             const jsonStr = JSON.stringify(paciente);
 
             if (window.pacienteController) {
