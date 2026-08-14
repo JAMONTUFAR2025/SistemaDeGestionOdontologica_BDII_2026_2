@@ -255,4 +255,38 @@ public class CitaDAO {
             return false;
         }
     }
+
+    public List<Map<String, String>> obtenerCitasPorIdentidad(String identidad) {
+        List<Map<String, String>> citas = new ArrayList<>();
+        String query =
+            "SELECT c.id_cita, c.fecha_hora, c.motivo_cita, c.estado " +
+            "FROM Citas c " +
+            "JOIN Pacientes p ON c.id_paciente = p.id_paciente " +
+            "WHERE p.identidad = ? AND p.borrado = FALSE " +
+            "ORDER BY c.fecha_hora DESC";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            if (conn == null) return citas;
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, identidad);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        Map<String, String> map = new HashMap<>();
+                        map.put("id_cita", String.valueOf(rs.getInt("id_cita")));
+                        Timestamp ts = rs.getTimestamp("fecha_hora");
+                        if (ts != null) {
+                            map.put("fecha", new java.text.SimpleDateFormat("yyyy-MM-dd").format(ts));
+                            map.put("hora", new java.text.SimpleDateFormat("HH:mm").format(ts));
+                        }
+                        map.put("motivo_cita", rs.getString("motivo_cita") != null ? rs.getString("motivo_cita") : "");
+                        map.put("estado", rs.getString("estado") != null ? rs.getString("estado") : "");
+                        citas.add(map);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error en obtenerCitasPorIdentidad: " + e.getMessage());
+        }
+        return citas;
+    }
 }

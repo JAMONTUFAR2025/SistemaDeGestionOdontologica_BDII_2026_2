@@ -52,6 +52,18 @@ public class CitaController extends BaseController {
         return gson.toJson(citas);
     }
 
+    public String obtenerCitasPorPaciente(String identidad) {
+        try {
+            if (identidad == null || identidad.trim().isEmpty()) return "[]";
+            application.model.dao.CitaDAO citaDAO = new application.model.dao.CitaDAO();
+            java.util.List<java.util.Map<String, String>> citas = citaDAO.obtenerCitasPorIdentidad(identidad.trim());
+            return gson.toJson(citas);
+        } catch (Exception e) {
+            System.err.println("Error en obtenerCitasPorPaciente: " + e.getMessage());
+            return "[]";
+        }
+    }
+
     public String obtenerCitaPorId(String idStr) {
         try {
             int id = Integer.parseInt(idStr.trim());

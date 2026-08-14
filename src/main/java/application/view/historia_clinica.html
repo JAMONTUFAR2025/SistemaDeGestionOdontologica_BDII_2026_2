@@ -497,11 +497,13 @@
                     <div id="paso-anamnesis" class="subpanel-paso active">
                         <div class="row g-3">
                             <div class="col-md-5">
-                                <label class="form-label fw-bold">DNI del Paciente: <span
+                                <label class="form-label fw-bold">Paciente: <span
                                         class="text-danger">*</span></label>
-                                <input type="text" id="hc_identidad" name="identidad_paciente" class="form-control"
-                                    placeholder="Ej: 1601-2010-00271" >
-                                <div class="form-text">El paciente debe estar registrado en el sistema.</div>
+                                <select id="hc_identidad" name="identidad_paciente" class="form-select">
+                                    <option value="">-- Seleccione un paciente sin historial --</option>
+                                </select>
+                                <input type="hidden" id="hc_identidad_val" name="identidad_paciente_hidden">
+                                <div class="form-text">Solo se listan pacientes sin Historia Clínica registrada.</div>
                             </div>
                             <div class="col-md-7">
                                 <label class="form-label fw-bold">Remitido Por: <span class="text-danger">*</span></label>
@@ -896,16 +898,25 @@
                                 </h5>
                                 <div class="row g-3">
                                     <div class="col-md-4">
-                                        <label class="form-label fw-bold">Presión Arterial: <span class="text-danger">*</span></label>
-                                        <input type="text" id="ev_presion" class="form-control" placeholder="120/80 mmHg" >
+                                        <label class="form-label fw-bold">Presión Arterial <span class="text-muted fw-normal small">(mmHg)</span> <span class="text-danger">*</span></label>
+                                        <div class="form-text text-muted mb-1" style="margin-top:-4px;font-size:0.75rem;">
+                                            <i class="fa-solid fa-circle-info text-primary"></i> Normal: 90/60 – 120/80
+                                        </div>
+                                        <input type="text" id="ev_presion" class="form-control" placeholder="120/80" >
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label fw-bold">Pulso Cardíaco: <span class="text-danger">*</span></label>
-                                        <input type="text" id="ev_pulso" class="form-control" placeholder="75 bpm" >
+                                        <label class="form-label fw-bold">Pulso Cardíaco <span class="text-muted fw-normal small">(bpm)</span> <span class="text-danger">*</span></label>
+                                        <div class="form-text text-muted mb-1" style="margin-top:-4px;font-size:0.75rem;">
+                                            <i class="fa-solid fa-circle-info text-primary"></i> Normal: 60 – 100 bpm
+                                        </div>
+                                        <input type="text" id="ev_pulso" class="form-control" placeholder="75" >
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label fw-bold">Temperatura: <span class="text-danger">*</span></label>
-                                        <input type="text" id="ev_temperatura" class="form-control" placeholder="36.5 °C" >
+                                        <label class="form-label fw-bold">Temperatura <span class="text-muted fw-normal small">(°C)</span> <span class="text-danger">*</span></label>
+                                        <div class="form-text text-muted mb-1" style="margin-top:-4px;font-size:0.75rem;">
+                                            <i class="fa-solid fa-circle-info text-primary"></i> Normal: 36.1 – 37.2 °C
+                                        </div>
+                                        <input type="text" id="ev_temperatura" class="form-control" placeholder="36.5" >
                                     </div>
                                 </div>
                             </div>
@@ -1101,10 +1112,38 @@
             // Input buscar es ahora Select2, no requiere listeners de teclado nativos.
 
             const hcIdentidad = document.getElementById('hc_identidad');
-            if (hcIdentidad) {
+            if (hcIdentidad && hcIdentidad.tagName === 'INPUT') {
                 hcIdentidad.addEventListener('input', () => aplicarFormatoDNI(hcIdentidad));
             }
+
+            // Cargar pacientes sin expediente cuando se activa la pestaña de registro
+            document.getElementById('btnTab2').addEventListener('click', () => {
+                cargarPacientesSinExpediente();
+            });
         });
+
+        function cargarPacientesSinExpediente() {
+            const sel = document.getElementById('hc_identidad');
+            if (!sel || sel.tagName !== 'SELECT') return;
+            if (!window.historiaClinicaController) return;
+            try {
+                const json = window.historiaClinicaController.obtenerPacientesSinExpediente();
+                const lista = JSON.parse(json || '[]');
+                sel.innerHTML = '<option value="">-- Seleccione un paciente sin historial --</option>';
+                if (lista.length === 0) {
+                    sel.innerHTML += '<option value="" disabled>✅ Todos los pacientes tienen Historia Clínica</option>';
+                } else {
+                    lista.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.identidad;
+                        opt.text = `${p.nombre} — ${p.identidad}`;
+                        sel.appendChild(opt);
+                    });
+                }
+            } catch(e) {
+                console.error('Error cargando pacientes sin expediente:', e);
+            }
+        }
 
 
 
@@ -1589,14 +1628,15 @@
             if (!window.citaController) return;
             
             try {
-                const json = window.citaController.obtenerCitas();
+                const json = window.citaController.obtenerCitasPorPaciente(identidad);
                 const citas = JSON.parse(json || '[]');
-                const citasPaciente = citas.filter(c => c.identidad_paciente === identidad && c.estado === 'Programada');
                 
-                citasPaciente.forEach(c => {
+                citas.forEach(c => {
                     const opt = document.createElement('option');
                     opt.value = c.id_cita;
-                    opt.text = `Cita #${c.numero_cita || c.id_cita} - ${c.fecha_cita.substring(0,10)} ${c.hora_cita}`;
+                    const fechaHora = (c.fecha || '') + ' ' + (c.hora || '');
+                    const motivo = c.motivo_cita ? ` - ${c.motivo_cita.substring(0, 30)}` : '';
+                    opt.text = `Cita #${c.id_cita} | ${fechaHora.trim()}${motivo} [${c.estado || ''}]`;
                     selectCita.appendChild(opt);
                 });
             } catch (e) {
@@ -1715,7 +1755,20 @@
             // Llenar el formulario
             const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
             
-            setVal('hc_identidad', tempPacienteIdentidad);
+            // hc_identidad es un <select> que filtra pacientes sin historial
+            // En modo edición, forzamos la opción del paciente actual
+            const selIdent = document.getElementById('hc_identidad');
+            if (selIdent && selIdent.tagName === 'SELECT') {
+                // Agregar la opción si no existe
+                let found = Array.from(selIdent.options).some(o => o.value === tempPacienteIdentidad);
+                if (!found) {
+                    const opt = document.createElement('option');
+                    opt.value = tempPacienteIdentidad;
+                    opt.text = `${exp.paciente || tempPacienteIdentidad} — ${tempPacienteIdentidad} (en edición)`;
+                    selIdent.insertBefore(opt, selIdent.firstChild);
+                }
+                selIdent.value = tempPacienteIdentidad;
+            }
             setVal('hc_remitido_por', exp.remitido_por || '');
             setVal('hc_motivo', '');
             setVal('hc_sintoma', '');
