@@ -45,11 +45,11 @@ public class PersonalMedicoDAO {
         String query;
         if (idPersonalMedico > 0) {
             query = "SELECT id_usuario_login, nombre_usuario, correo, rol_sistema FROM Usuarios_Login " +
-                    "WHERE (id_personal_medico IS NULL OR id_personal_medico = ?) AND borrado = FALSE AND rol_sistema = 'Medico' " +
+                    "WHERE (id_personal_medico IS NULL OR id_personal_medico = ?) AND borrado = FALSE AND rol_sistema IN ('Medico', 'Administrador') " +
                     "ORDER BY id_usuario_login DESC";
         } else {
             query = "SELECT id_usuario_login, nombre_usuario, correo, rol_sistema FROM Usuarios_Login " +
-                    "WHERE id_personal_medico IS NULL AND borrado = FALSE AND rol_sistema = 'Medico' " +
+                    "WHERE id_personal_medico IS NULL AND borrado = FALSE AND rol_sistema IN ('Medico', 'Administrador') " +
                     "ORDER BY id_usuario_login DESC";
         }
 

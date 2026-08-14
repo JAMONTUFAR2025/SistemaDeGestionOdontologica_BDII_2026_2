@@ -329,7 +329,7 @@
                     <div id="seccionVincularUsuario">
                         <div class="section-title-blue" id="tituloSeccionUsuario">Vincular con Usuario</div>
                         <div class="mb-3">
-                            <label for="med_id_usuario" id="labelSeccionUsuario">Usuario Asignado (Rol Médico): <span class="text-danger">*</span></label>
+                            <label for="med_id_usuario" id="labelSeccionUsuario">Usuario Asignado (Médico/Admin): <span class="text-danger">*</span></label>
                             <select id="med_id_usuario" class="form-select">
                                 <option value="">Cargando usuarios...</option>
                             </select>
@@ -690,9 +690,9 @@
                 const json = window.personalController.obtenerUsuariosParaMedico(String(idPersonalMedico || 0));
                 const usuarios = JSON.parse(json || '[]');
                 const select = document.getElementById('med_id_usuario');
-                select.innerHTML = '<option value="">-- Seleccionar usuario con rol Médico --</option>';
+                select.innerHTML = '<option value="">-- Seleccionar usuario Médico o Admin --</option>';
                 if (usuarios.length === 0) {
-                    select.innerHTML = '<option value="">No hay usuarios con rol Médico disponibles.</option>';
+                    select.innerHTML = '<option value="">No hay usuarios con rol Médico o Admin disponibles.</option>';
                 } else {
                     usuarios.forEach(u => {
                         const opt = document.createElement('option');
