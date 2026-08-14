@@ -41,6 +41,37 @@ public class HistoriaClinicaController extends BaseController {
         }
     }
 
+    public String obtenerPacientesSinExpediente() {
+        try {
+            String query =
+                "SELECT p.identidad, p.nombre_completo " +
+                "FROM Pacientes p " +
+                "WHERE p.borrado = FALSE " +
+                "AND NOT EXISTS (SELECT 1 FROM Expediente_Base eb WHERE eb.id_paciente = p.id_paciente) " +
+                "ORDER BY p.nombre_completo ASC";
+            java.util.List<java.util.Map<String, String>> lista = new java.util.ArrayList<>();
+            try {
+                java.sql.Connection conn = application.model.connection.DBConnection.getInstance().getConnection();
+                if (conn != null) {
+                    try (java.sql.PreparedStatement stmt = conn.prepareStatement(query);
+                         java.sql.ResultSet rs = stmt.executeQuery()) {
+                        while (rs.next()) {
+                            java.util.Map<String, String> m = new java.util.HashMap<>();
+                            m.put("identidad", rs.getString("identidad") != null ? rs.getString("identidad") : "");
+                            m.put("nombre", rs.getString("nombre_completo") != null ? rs.getString("nombre_completo") : "");
+                            lista.add(m);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error en obtenerPacientesSinExpediente: " + e.getMessage());
+            }
+            return gson.toJson(lista);
+        } catch (Throwable t) {
+            return "[]";
+        }
+    }
+
     // ------------------------------------------------------------------
     // REGISTRAR EXPEDIENTE BASE (Historia Clínica inicial)
     // ------------------------------------------------------------------
@@ -159,10 +190,14 @@ public class HistoriaClinicaController extends BaseController {
                 try { temp = Double.parseDouble(temperatura.replaceAll("[^0-9.]", "")); } catch (Exception ignored) {}
             }
 
+            String historiaEnfermedad = str(obj, "historia_enfermedad_actual");
+            // Si viene vacío, usar un espacio para evitar NOT NULL violation
+            if (historiaEnfermedad == null || historiaEnfermedad.trim().isEmpty()) historiaEnfermedad = "";
+
             application.model.dao.HistoriaClinicaDAO dao = new application.model.dao.HistoriaClinicaDAO();
             return dao.registrarEvolucion(idExpediente, idMedico,
                     idCitas, idCatalogoProcedimientos,
-                    motivoConsulta, sintomaPrincipal, null, // historiaEnfermedadActual
+                    motivoConsulta, sintomaPrincipal, historiaEnfermedad,
                     ps, pd, pulso, temp,
                     tejidosBlandos, diagnostico, odontograma, observaciones);
 
@@ -277,9 +312,12 @@ public class HistoriaClinicaController extends BaseController {
                 try { temp = Double.parseDouble(temperatura.replaceAll("[^0-9.]", "")); } catch (Exception ignored) {}
             }
 
+            String historiaEnfermedad = str(obj, "historia_enfermedad_actual");
+            if (historiaEnfermedad == null || historiaEnfermedad.trim().isEmpty()) historiaEnfermedad = "";
+
             application.model.dao.HistoriaClinicaDAO dao = new application.model.dao.HistoriaClinicaDAO();
             return dao.actualizarEvolucion(idEvolucion, idMedico, idCatalogoProcedimientos,
-                    motivoConsulta, sintomaPrincipal, null, // historiaEnfermedadActual
+                    motivoConsulta, sintomaPrincipal, historiaEnfermedad,
                     ps, pd, pulso, temp,
                     tejidosBlandos, diagnostico, odontograma, observaciones);
 
