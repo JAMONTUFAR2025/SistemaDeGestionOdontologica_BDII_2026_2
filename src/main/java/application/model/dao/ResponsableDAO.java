@@ -89,10 +89,22 @@ public class ResponsableDAO {
         return lista;
     }
 
-    public boolean eliminar(int idResponsable) {
-        String query = "UPDATE Responsables SET borrado = TRUE, fecha_borrado = NOW() WHERE id_responsable = ?";
+    public boolean eliminar(int idResponsable) throws Exception {
+        String checkQuery = "SELECT COUNT(*) FROM Pacientes WHERE id_responsable = ? AND borrado = FALSE";
         try {
             Connection conn = DBConnection.getInstance().getConnection();
+            
+            // Verificar dependencias
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
+                checkStmt.setInt(1, idResponsable);
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        throw new Exception("No se puede eliminar: está vinculado a uno o más pacientes activos.");
+                    }
+                }
+            }
+
+            String query = "UPDATE Responsables SET borrado = TRUE, fecha_borrado = NOW() WHERE id_responsable = ?";
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setInt(1, idResponsable);
                 return stmt.executeUpdate() > 0;
