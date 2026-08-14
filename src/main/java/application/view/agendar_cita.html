@@ -743,6 +743,40 @@
         // ============================================================
         // WhatsApp
         // ============================================================
+        function enviarWhatsAppSilencioso(idCita) {
+            let selectPaciente = document.getElementById('identidad_paciente');
+            if (!selectPaciente.value) return;
+            let option = selectPaciente.options[selectPaciente.selectedIndex];
+            let telefono = option.getAttribute('data-telefono');
+            if (!telefono) return; // No tiene teléfono, no enviamos
+            
+            let numLimpio = telefono.replace(/[^0-9]/g, '');
+            if (numLimpio.length === 8) numLimpio = '504' + numLimpio;
+
+            let nombre = option.text;
+            let fecha = document.getElementById('fecha_cita').value;
+            let hora = document.getElementById('hora_cita').value;
+            let horaFormateada = hora;
+            if (hora) {
+                let [h, m] = hora.split(':');
+                let ampm = h >= 12 ? 'PM' : 'AM';
+                h = h % 12; h = h ? h : 12;
+                horaFormateada = h + ':' + m + ' ' + ampm;
+            }
+
+            let estadoCita = document.getElementById('estado') ? document.getElementById('estado').value : '';
+            if (estadoCita !== 'Cancelada') return; // Solo enviamos silenciosamente al cancelar
+
+            let mensaje = `Hola ${nombre.trim()}, le saludamos de SOE Odontología. Le informamos que su cita agendada para el día ${fecha} a las ${horaFormateada} ha sido cancelada. Si desea reprogramar, por favor contáctenos.`;
+            
+            if (window.whatsAppController) {
+                // Ejecutamos silenciosamente en un pequeño timeout
+                setTimeout(() => {
+                    window.whatsAppController.enviarMensaje(numLimpio, mensaje);
+                }, 100);
+            }
+        }
+
         function enviarWhatsApp() {
             let idCitaEdicion = document.getElementById('id_cita_edicion').value;
             if (!idCitaEdicion) {
@@ -980,6 +1014,9 @@
                     let respuesta = window.citaController.actualizarCita(JSON.stringify(data));
                     let partes = respuesta.split("|");
                     if (partes[0] === "OK") {
+                        if (estado === 'Cancelada') {
+                            enviarWhatsAppSilencioso(idCita);
+                        }
                         Swal.fire({ title: '¡Cita Actualizada!', text: partes[1], icon: 'success', confirmButtonText: 'Volver al Menú', confirmButtonColor: '#28a745' })
                             .then(() => { window.location.href = 'menu.html'; });
                     } else {
