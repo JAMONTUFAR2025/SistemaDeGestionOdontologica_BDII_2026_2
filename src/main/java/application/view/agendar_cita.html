@@ -773,7 +773,17 @@
                 horaFormateada = h + ':' + m + ' ' + ampm;
             }
 
-            let mensaje = `Hola ${nombre.trim()}, le saludamos de SOE Odontología. Le recordamos su cita agendada para el día ${fecha} a las ${horaFormateada}. Por favor confirmar su asistencia.`;
+            let estadoCita = document.getElementById('estado') ? document.getElementById('estado').value : '';
+            
+            let mensaje = '';
+            if (estadoCita === 'Confirmada') {
+                mensaje = `Hola ${nombre.trim()}, le saludamos de SOE Odontología. Le escribimos para confirmar que su cita para el día ${fecha} a las ${horaFormateada} sigue en pie. ¡Le esperamos!`;
+            } else if (estadoCita === 'Cancelada') {
+                mensaje = `Hola ${nombre.trim()}, le saludamos de SOE Odontología. Le informamos que su cita agendada para el día ${fecha} a las ${horaFormateada} ha sido cancelada. Si desea reprogramar, por favor contáctenos.`;
+            } else {
+                // Programada u otros
+                mensaje = `Hola ${nombre.trim()}, le saludamos de SOE Odontología. Le recordamos su cita agendada para el día ${fecha} a las ${horaFormateada}. Por favor confirmar su asistencia.`;
+            }
             
             if (window.whatsAppController) {
                 $('#btnWsDirecto').html('<span>�?�</span> Enviando...').css('pointer-events', 'none');
