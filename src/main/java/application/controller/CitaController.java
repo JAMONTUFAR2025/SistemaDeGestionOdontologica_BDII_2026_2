@@ -64,6 +64,19 @@ public class CitaController extends BaseController {
         }
     }
 
+    /** Obtiene citas de un paciente usando su id_paciente (sin necesitar identidad/DNI) */
+    public String obtenerCitasPorIdPaciente(int idPaciente) {
+        try {
+            if (idPaciente <= 0) return "[]";
+            application.model.dao.CitaDAO citaDAO = new application.model.dao.CitaDAO();
+            java.util.List<java.util.Map<String, String>> citas = citaDAO.obtenerCitasPorIdPaciente(idPaciente);
+            return gson.toJson(citas);
+        } catch (Exception e) {
+            System.err.println("Error en obtenerCitasPorIdPaciente: " + e.getMessage());
+            return "[]";
+        }
+    }
+
     public String obtenerCitaPorId(String idStr) {
         try {
             int id = Integer.parseInt(idStr.trim());

@@ -840,7 +840,7 @@
                 </div>
                 <form id="formNuevaConsulta">
                     <div class="modal-body p-4 bg-light">
-                        <input type="hidden" id="ev_identidad">
+                        <input type="hidden" id="ev_id_paciente">
 
                         <!-- Navegación de sub-pestañas Evolucion -->
                         <div class="d-flex flex-wrap gap-2 mb-4 border-bottom pb-3">
@@ -1066,6 +1066,7 @@
         // ============================================================
         let tempPacienteNombre = '';
         let tempPacienteIdentidad = '';
+        let tempPacienteIdPaciente = 0;  // ID numérico del paciente actual
         let tempPacienteEdad = '______';
         let tempPacienteDomicilio = '';
         let tempResponsableNombre = '';
@@ -1131,12 +1132,13 @@
                 const lista = JSON.parse(json || '[]');
                 sel.innerHTML = '<option value="">-- Seleccione un paciente sin historial --</option>';
                 if (lista.length === 0) {
-                    sel.innerHTML += '<option value="" disabled>✅ Todos los pacientes tienen Historia Clínica</option>';
+                    sel.innerHTML += '<option value="" disabled>&#10003; Todos los pacientes tienen Historia Clínica</option>';
                 } else {
                     lista.forEach(p => {
                         const opt = document.createElement('option');
-                        opt.value = p.identidad;
-                        opt.text = `${p.nombre} — ${p.identidad}`;
+                        opt.value = p.id_paciente;  // Usar ID numérico, no identidad
+                        const dni = p.identidad ? p.identidad : 'Sin ID';
+                        opt.text = `${p.nombre} — ${dni}`;
                         sel.appendChild(opt);
                     });
                 }
@@ -1346,6 +1348,7 @@
 
             tempPacienteNombre = p.nombre_completo || '—';
             tempPacienteIdentidad = p.identidad || ultimoBusquedaIdentidad;
+            tempPacienteIdPaciente = p.id_paciente || 0;  // Guardar ID numérico
             
             // Calcular edad
             if (p.fecha_nacimiento) {
@@ -1487,7 +1490,7 @@
                         <span class="badge bg-primary ms-2">${evoluciones.length} consulta(s)</span>
                     </h5>
                     <button class="btn btn-sm btn-primary fw-bold"
-                        onclick="abrirModalEvolucion('${escHtml(p.identidad || ultimoBusquedaIdentidad)}')">
+                        onclick="abrirModalEvolucion(${p.id_paciente || tempPacienteIdPaciente})">
                         <i class="fa-solid fa-plus me-1"></i> Añadir Evolución
                     </button>
                 </div>
@@ -1542,12 +1545,12 @@
             e.preventDefault();
             if (!window.historiaClinicaController) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Conector Java no disponible.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Conector Java no disponible.'); return; }
 
-            const identidad = document.getElementById('hc_identidad').value.trim();
-            if (!identidad) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'El DNI del paciente es obligatorio.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('El DNI del paciente es obligatorio.'); return; }
+            const idPaciente = parseInt(document.getElementById('hc_identidad').value);
+            if (!idPaciente || idPaciente <= 0) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Seleccione un paciente.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Seleccione un paciente.'); return; }
 
             const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
             const data = {
-                identidad_paciente: identidad,
+                id_paciente: idPaciente,  // Identificamos por ID, no por DNI
                 remitido_por: getVal('hc_remitido_por'),
                 motivo_consulta: getVal('hc_motivo'),
                 sintoma_principal: getVal('hc_sintoma'),
@@ -1592,8 +1595,11 @@
                         cambiarSubPaso('paso-anamnesis', document.getElementById('tab-paso-anamnesis'));
                         // Ir al buscador para verificar
                         cambiarPestana('panel-expedientes', document.getElementById('btnTab1'));
-                        document.getElementById('inputBuscar').value = identidad;
-                        buscarExpediente();
+                        // Recargar usando identidad si la tenemos, sino solo limpiar
+                        if (ultimoBusquedaIdentidad) {
+                            document.getElementById('inputBuscar').value = ultimoBusquedaIdentidad;
+                            buscarExpediente();
+                        }
                     });
                 } else {
                     alert(partes[1]);
@@ -1601,8 +1607,10 @@
                     cambiarSubPaso('paso-anamnesis', document.getElementById('tab-paso-anamnesis'));
                     // Ir al buscador para verificar
                     cambiarPestana('panel-expedientes', document.getElementById('btnTab1'));
-                    document.getElementById('inputBuscar').value = identidad;
-                    buscarExpediente();
+                    if (ultimoBusquedaIdentidad) {
+                        document.getElementById('inputBuscar').value = ultimoBusquedaIdentidad;
+                        buscarExpediente();
+                    }
                 }
             } else {
                 if (typeof Swal !== 'undefined') {
@@ -1622,13 +1630,13 @@
         // ============================================================
         // MODAL EVOLUCIÓN
         // ============================================================
-        function cargarCitasPacienteEv(identidad) {
+        function cargarCitasPacienteEv(idPaciente) {
             const selectCita = document.getElementById('ev_id_cita');
             selectCita.innerHTML = '<option value="">-- Sin cita (Espontánea) --</option>';
             if (!window.citaController) return;
             
             try {
-                const json = window.citaController.obtenerCitasPorPaciente(identidad);
+                const json = window.citaController.obtenerCitasPorIdPaciente(idPaciente);
                 const citas = JSON.parse(json || '[]');
                 
                 citas.forEach(c => {
@@ -1644,10 +1652,10 @@
             }
         }
 
-        function abrirModalEvolucion(identidad) {
+        function abrirModalEvolucion(idPaciente) {
             window.id_evolucion_editando = null;
             document.getElementById('formNuevaConsulta').reset();
-            document.getElementById('ev_identidad').value = identidad;
+            document.getElementById('ev_id_paciente').value = idPaciente;
             document.getElementById('modalTitleEvolucion').innerHTML = '<i class="fa-solid fa-notes-medical me-2"></i>Registrar Evolución Clínica';
             
             // Reiniciar a la primera pestaña de evolución
@@ -1656,7 +1664,7 @@
             // Limpiar odontograma
             resetearOdontogramaEv();
             // Cargar citas del paciente para vincular
-            cargarCitasPacienteEv(identidad);
+            cargarCitasPacienteEv(idPaciente);
 
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevaConsulta'))
                 || new bootstrap.Modal(document.getElementById('modalNuevaConsulta'));
@@ -1666,17 +1674,17 @@
         function guardarEvolucion() {
             if (!window.historiaClinicaController) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Error', text: 'Conector Java no disponible.', icon: 'error', confirmButtonColor: '#dc3545' }); else alert('Conector Java no disponible.'); return; }
 
-            const identidad = document.getElementById('ev_identidad').value.trim();
+            const idPaciente = parseInt(document.getElementById('ev_id_paciente').value);
             const idMedico = document.getElementById('ev_id_medico').value;
             const idCita = document.getElementById('ev_id_cita').value;
             const motivo = document.getElementById('ev_motivo').value.trim();
 
-            if (!identidad) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Identidad del paciente faltante.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Identidad del paciente faltante.'); return; }
+            if (!idPaciente || idPaciente <= 0) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'ID del paciente faltante.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('ID del paciente faltante.'); return; }
             if (!idMedico) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'Seleccione un médico tratante.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('Seleccione un médico tratante.'); return; }
             if (!motivo) { if (typeof Swal !== 'undefined') Swal.fire({ title: 'Atención', text: 'El motivo de consulta es obligatorio.', icon: 'warning', confirmButtonColor: '#ffc107' }); else alert('El motivo de consulta es obligatorio.'); return; }
 
             const data = {
-                identidad_paciente: identidad,
+                id_paciente: idPaciente,  // Identificamos por ID, no por DNI
                 id_medico: parseInt(idMedico),
                 id_cita: idCita ? parseInt(idCita) : null,
                 id_catalogo_procedimientos: document.getElementById('ev_id_catalogo_procedimientos').value
@@ -1718,17 +1726,21 @@
                     }).then(() => {
                         bootstrap.Modal.getInstance(document.getElementById('modalNuevaConsulta')).hide();
                         document.getElementById('formNuevaConsulta').reset();
-                        // Recargar expediente
-                        document.getElementById('inputBuscar').value = identidad;
-                        buscarExpediente();
+                        // Recargar expediente si tenemos identidad
+                        if (ultimoBusquedaIdentidad) {
+                            document.getElementById('inputBuscar').value = ultimoBusquedaIdentidad;
+                            buscarExpediente();
+                        }
                     });
                 } else {
                     alert(partes[1]);
                     bootstrap.Modal.getInstance(document.getElementById('modalNuevaConsulta')).hide();
                     document.getElementById('formNuevaConsulta').reset();
-                    // Recargar expediente
-                    document.getElementById('inputBuscar').value = identidad;
-                    buscarExpediente();
+                    // Recargar expediente si tenemos identidad
+                    if (ultimoBusquedaIdentidad) {
+                        document.getElementById('inputBuscar').value = ultimoBusquedaIdentidad;
+                        buscarExpediente();
+                    }
                 }
             } else {
                 if (typeof Swal !== 'undefined') {
@@ -1759,15 +1771,16 @@
             // En modo edición, forzamos la opción del paciente actual
             const selIdent = document.getElementById('hc_identidad');
             if (selIdent && selIdent.tagName === 'SELECT') {
-                // Agregar la opción si no existe
-                let found = Array.from(selIdent.options).some(o => o.value === tempPacienteIdentidad);
+                // Agregar la opción si no existe (usando id_paciente como value)
+                let found = Array.from(selIdent.options).some(o => o.value === String(tempPacienteIdPaciente));
                 if (!found) {
                     const opt = document.createElement('option');
-                    opt.value = tempPacienteIdentidad;
-                    opt.text = `${exp.paciente || tempPacienteIdentidad} — ${tempPacienteIdentidad} (en edición)`;
+                    opt.value = tempPacienteIdPaciente;
+                    const dniLabel = tempPacienteIdentidad ? tempPacienteIdentidad : 'Sin ID';
+                    opt.text = `${exp.paciente || tempPacienteNombre} — ${dniLabel} (en edición)`;
                     selIdent.insertBefore(opt, selIdent.firstChild);
                 }
-                selIdent.value = tempPacienteIdentidad;
+                selIdent.value = tempPacienteIdPaciente;
             }
             setVal('hc_remitido_por', exp.remitido_por || '');
             setVal('hc_motivo', '');
@@ -1826,7 +1839,8 @@
 
         function ejecutarEliminarExpediente() {
             if (!window.historiaClinicaController) return;
-            const respuesta = window.historiaClinicaController.eliminarExpediente(tempPacienteIdentidad);
+            // Pasar id_paciente como entero directamente
+            const respuesta = window.historiaClinicaController.eliminarExpediente(tempPacienteIdPaciente);
             const partes = respuesta.split('|');
             if (partes[0] === 'OK') {
                 if (typeof Swal !== 'undefined') Swal.fire('Eliminado', partes[1], 'success');
@@ -1849,12 +1863,12 @@
 
             document.getElementById('formNuevaConsulta').reset();
             document.getElementById('modalTitleEvolucion').innerHTML = '<i class="fa-solid fa-notes-medical me-2"></i>Editar Evolución Clínica';
-            document.getElementById('ev_identidad').value = tempPacienteIdentidad;
+            document.getElementById('ev_id_paciente').value = tempPacienteIdPaciente;
             document.getElementById('ev_id_medico').value = ev.id_medico || '';
             document.getElementById('ev_id_catalogo_procedimientos').value = ev.id_catalogo_procedimientos || '';
             
             // Cargar citas del paciente para vincular antes de setear el valor
-            cargarCitasPacienteEv(tempPacienteIdentidad);
+            cargarCitasPacienteEv(tempPacienteIdPaciente);
             setTimeout(() => {
                 document.getElementById('ev_id_cita').value = ev.id_cita || '';
             }, 50);

@@ -7,8 +7,10 @@ package application.controller;
  * Métodos disponibles desde JavaScript:
  *   - buscarExpediente(identidad)       → JSON con paciente + expediente + evoluciones
  *   - registrarExpediente(jsonData)     → "OK|..." / "ERR|..."
+ *     JSON esperado: { id_paciente (int), remitido_por, antecedentes_patologicos, ... }
  *   - agregarEvolucion(jsonData)        → "OK|..." / "ERR|..."
  *   - obtenerMedicos()                  → JSON array de médicos activos
+ *   - obtenerPacientesSinExpediente()   → JSON array de { id_paciente, nombre }
  */
 public class HistoriaClinicaController extends BaseController {
 
@@ -43,8 +45,9 @@ public class HistoriaClinicaController extends BaseController {
 
     public String obtenerPacientesSinExpediente() {
         try {
+            // Devuelve id_paciente (no identidad) para poder registrar pacientes sin DNI
             String query =
-                "SELECT p.identidad, p.nombre_completo " +
+                "SELECT p.id_paciente, p.nombre_completo, p.identidad " +
                 "FROM Pacientes p " +
                 "WHERE p.borrado = FALSE " +
                 "AND NOT EXISTS (SELECT 1 FROM Expediente_Base eb WHERE eb.id_paciente = p.id_paciente) " +
@@ -57,8 +60,9 @@ public class HistoriaClinicaController extends BaseController {
                          java.sql.ResultSet rs = stmt.executeQuery()) {
                         while (rs.next()) {
                             java.util.Map<String, String> m = new java.util.HashMap<>();
-                            m.put("identidad", rs.getString("identidad") != null ? rs.getString("identidad") : "");
+                            m.put("id_paciente", String.valueOf(rs.getInt("id_paciente")));
                             m.put("nombre", rs.getString("nombre_completo") != null ? rs.getString("nombre_completo") : "");
+                            m.put("identidad", rs.getString("identidad") != null ? rs.getString("identidad") : "");
                             lista.add(m);
                         }
                     }
@@ -78,7 +82,7 @@ public class HistoriaClinicaController extends BaseController {
 
     /**
      * Crea un nuevo Expediente_Base para un paciente.
-     * JSON esperado: { identidad_paciente, remitido_por, antecedentes_patologicos,
+     * JSON esperado: { id_paciente (int), remitido_por, antecedentes_patologicos,
      *   antecedentes_odontologicos, antecedentes_quirurgicos, antecedentes_ginecobstetros,
      *   habitos_toxicos, farmacos_uso_habitual, reaccion_anestesicos, especifique_anestesia,
      *   complicaciones_tratamientos_previos, habitos_bucales, frecuencia_cepillado,
@@ -89,16 +93,9 @@ public class HistoriaClinicaController extends BaseController {
         try {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonData).getAsJsonObject();
 
-            // Resolver id_pacientes desde identidad
-            String identidad = obj.has("identidad_paciente") ? obj.get("identidad_paciente").getAsString() : "";
-            if (identidad.trim().isEmpty()) return "ERR|La identidad del paciente es obligatoria.";
-
-            // Buscar id_paciente por identidad
-            int idPaciente = resolverIdPaciente(identidad.trim());
-            if (idPaciente <= 0) {
-                return "ERR|No se encontró ningún paciente con identidad: " + identidad +
-                       ". Debe registrar al paciente primero.";
-            }
+            // Usar id_paciente directamente (no depende de que el paciente tenga identidad/DNI)
+            int idPaciente = obj.has("id_paciente") ? obj.get("id_paciente").getAsInt() : 0;
+            if (idPaciente <= 0) return "ERR|El ID del paciente es obligatorio.";
 
             String remitidoPor       = str(obj, "remitido_por");
             String antPatologicos    = str(obj, "antecedentes_patologicos");
@@ -142,11 +139,9 @@ public class HistoriaClinicaController extends BaseController {
         try {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonData).getAsJsonObject();
 
-            String identidad = obj.has("identidad_paciente") ? obj.get("identidad_paciente").getAsString() : "";
-            if (identidad.trim().isEmpty()) return "ERR|La identidad del paciente es obligatoria.";
-
-            int idPaciente = resolverIdPaciente(identidad.trim());
-            if (idPaciente <= 0) return "ERR|Paciente no encontrado con identidad: " + identidad;
+            // Usar id_paciente directamente (no depende de que el paciente tenga identidad/DNI)
+            int idPaciente = obj.has("id_paciente") ? obj.get("id_paciente").getAsInt() : 0;
+            if (idPaciente <= 0) return "ERR|El ID del paciente es obligatorio.";
 
             // Obtener el id_expediente_base del paciente
             int idExpediente = resolverIdExpediente(idPaciente);
@@ -215,13 +210,9 @@ public class HistoriaClinicaController extends BaseController {
         try {
             com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(jsonData).getAsJsonObject();
 
-            String identidad = obj.has("identidad_paciente") ? obj.get("identidad_paciente").getAsString() : "";
-            if (identidad.trim().isEmpty()) return "ERR|La identidad del paciente es obligatoria.";
-
-            int idPaciente = resolverIdPaciente(identidad.trim());
-            if (idPaciente <= 0) {
-                return "ERR|No se encontró ningún paciente con identidad: " + identidad;
-            }
+            // Usar id_paciente directamente
+            int idPaciente = obj.has("id_paciente") ? obj.get("id_paciente").getAsInt() : 0;
+            if (idPaciente <= 0) return "ERR|El ID del paciente es obligatorio.";
 
             String remitidoPor       = str(obj, "remitido_por");
             String antPatologicos    = str(obj, "antecedentes_patologicos");
@@ -250,16 +241,11 @@ public class HistoriaClinicaController extends BaseController {
         }
     }
 
-    public String eliminarExpediente(String identidad) {
+    public String eliminarExpediente(int idPaciente) {
         try {
-            if (identidad == null || identidad.trim().isEmpty()) {
-                return "ERR|La identidad del paciente es obligatoria.";
-            }
-            int idPaciente = resolverIdPaciente(identidad.trim());
             if (idPaciente <= 0) {
-                return "ERR|No se encontró ningún paciente con identidad: " + identidad;
+                return "ERR|El ID del paciente es obligatorio.";
             }
-
             application.model.dao.HistoriaClinicaDAO dao = new application.model.dao.HistoriaClinicaDAO();
             return dao.eliminarExpedienteBase(idPaciente);
         } catch (Throwable t) {
